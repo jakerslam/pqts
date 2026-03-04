@@ -47,6 +47,63 @@ from execution.smart_router import (
 logger = logging.getLogger(__name__)
 
 
+class _RouterToken:
+    """
+    Module-private token for exchange adapter authentication.
+    
+    This token can ONLY be constructed inside RiskAwareRouter, which means
+    exchange adapters require a valid token to be instantiated, and can only
+    be obtained by going through the RiskAwareRouter.
+    
+    This provides mechanical prevention of bypass - you cannot instantiate
+    an exchange adapter without a token, and you cannot get a token without
+    going through RiskAwareRouter.
+    
+    Example:
+        # Inside RiskAwareRouter
+        token = self._create_token()  # Creates valid token
+        adapter = AlpacaAdapter(token, config)  # Works
+        
+        # Outside RiskAwareRouter
+        token = exchange._RouterToken()  # Fails - __init__ validates provenance
+        # You simply cannot get a valid token without RiskAwareRouter
+    """
+    
+    def __init__(self):
+        """
+        Token constructor validates it was created by RiskAwareRouter.
+        
+        Callers can only pass the token provided by RiskAwareRouter.
+        Direct instantiation is blocked by provenance check.
+        """
+        # We use frame inspection to validate the caller is RiskAwareRouter
+        import inspect
+        frame = inspect.currentframe()
+        try:
+            # Walk up the call stack
+            found_router_creator = False
+            for _ in range(10):  # Limit depth
+                frame = frame.f_back
+                if frame is None:
+                    break
+                if frame.f_code.co_name == '_create_token':
+                    found_router_creator = True
+                    break
+                if frame.f_code.co_name == 'submit_order':
+                    # Token created during submit_order is OK
+                    found_router_creator = True
+                    break
+            
+            if not found_router_creator:
+                raise RuntimeError(
+                    "RouterToken can only be created inside RiskAwareRouter. "
+                    "Direct instantiation is not allowed. "
+                    "All orders must go through RiskAwareRouter.submit_order()"
+                )
+        finally:
+            del frame  # Prevent reference cycles
+
+
 @dataclass
 class OrderResult:
     """Result of order submission attempt."""

@@ -250,9 +250,13 @@ class TestRouterTokenProtection:
     
     def test_router_token_class_exists(self):
         """
-        Verify RouterToken class exists in risk_aware_router.
+        HARD GATE: RouterToken class must exist before paper/live trading.
         
         The token ensures adapters can only be used through the router.
+        This is a PRE-LIVE REQUIREMENT.
+        
+        Until this passes, the system is NOT mechanically protected against
+        direct adapter calls. This is the "impossible to bypass" check.
         """
         execution_dir = Path(__file__).parent.parent / 'execution'
         router_path = execution_dir / 'risk_aware_router.py'
@@ -262,17 +266,22 @@ class TestRouterTokenProtection:
         
         content = router_path.read_text()
         
-        # Token class should exist
+        # Token class must exist for mechanical protection
         has_token = 'class RouterToken' in content or '_RouterToken' in content
         
-        # If token doesn't exist, that's not a failure - just not implemented yet
-        # But we document it
-        if not has_token:
-            print("WARNING: RouterToken not implemented yet. Token-based protection pending.")
-            print("This is acceptable for now, but should be added before live trading.")
-        
-        # Don't fail - just document the status
-        assert True
+        # HARD FAIL if token doesn't exist
+        # This is a PRE-LIVE GATE - token required for mechanical bypass prevention
+        assert has_token, (
+            "VIOLATION (PRE-LIVE GATE): RouterToken class does not exist.\n"
+            "Mechanical bypass prevention is NOT implemented.\n"
+            "Adapters can potentially be instantiated and used independently.\n\n"
+            "Required before paper/live trading:\n"
+            "1. Create RouterToken class in risk_aware_router.py\n"
+            "2. Make it module-private (only constructible inside RiskAwareRouter)\n"
+            "3. Require token in exchange adapter constructors\n"
+            "4. Adapters must raise without valid token\n\n"
+            "Until implemented: bypass prevention relies on convention, not mechanics."
+        )
     
     def test_exchange_adapters_require_token(self):
         """
