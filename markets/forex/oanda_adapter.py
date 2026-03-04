@@ -12,7 +12,15 @@ class OandaAdapter:
     OANDA adapter for forex trading.
     """
     
-    def __init__(self, api_key: str, account_id: str, practice: bool = True):
+    def __init__(
+        self,
+        api_key: str,
+        account_id: str,
+        router_token=None,
+        practice: bool = True,
+    ):
+        self._require_router_token(router_token)
+        self._router_token = router_token
         self.api_key = api_key
         self.account_id = account_id
         self.practice = practice
@@ -26,6 +34,21 @@ class OandaAdapter:
         self.session: Optional[aiohttp.ClientSession] = None
         
         logger.info(f"OandaAdapter initialized: practice={practice}")
+
+    @staticmethod
+    def _require_router_token(router_token) -> None:
+        from execution.risk_aware_router import _RouterToken
+
+        if type(router_token) is not _RouterToken:
+            raise RuntimeError(
+                "OandaAdapter requires a valid _RouterToken issued by RiskAwareRouter."
+            )
+
+    def _assert_router_token(self, router_token=None) -> None:
+        token = self._router_token if router_token is None else router_token
+        self._require_router_token(token)
+        if token is not self._router_token:
+            raise RuntimeError("RouterToken mismatch for OandaAdapter order path.")
     
     async def connect(self):
         """Establish connection"""
@@ -96,12 +119,19 @@ class OandaAdapter:
             f'/v3/accounts/{self.account_id}/pricing', params=params)
         return response.get('prices', [])
     
-    async def place_order(self, instrument: str, units: float,
-                         order_type: str = 'MARKET',
-                         price: float = None,
-                         stop_loss: float = None,
-                         take_profit: float = None) -> dict:
+    async def place_order(
+        self,
+        instrument: str,
+        units: float,
+        order_type: str = 'MARKET',
+        price: float = None,
+        stop_loss: float = None,
+        take_profit: float = None,
+        router_token=None,
+    ) -> dict:
         """Place an order"""
+        self._assert_router_token(router_token)
+
         order_data = {
             'order': {
                 'type': order_type.upper(),

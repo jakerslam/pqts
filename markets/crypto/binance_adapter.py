@@ -16,7 +16,15 @@ class BinanceAdapter:
     Supports both spot and futures markets.
     """
     
-    def __init__(self, api_key: str, api_secret: str, testnet: bool = True):
+    def __init__(
+        self,
+        api_key: str,
+        api_secret: str,
+        router_token=None,
+        testnet: bool = True,
+    ):
+        self._require_router_token(router_token)
+        self._router_token = router_token
         self.api_key = api_key
         self.api_secret = api_secret
         self.testnet = testnet
@@ -32,6 +40,21 @@ class BinanceAdapter:
         self.session: Optional[aiohttp.ClientSession] = None
         
         logger.info(f"BinanceAdapter initialized: testnet={testnet}")
+
+    @staticmethod
+    def _require_router_token(router_token) -> None:
+        from execution.risk_aware_router import _RouterToken
+
+        if type(router_token) is not _RouterToken:
+            raise RuntimeError(
+                "BinanceAdapter requires a valid _RouterToken issued by RiskAwareRouter."
+            )
+
+    def _assert_router_token(self, router_token=None) -> None:
+        token = self._router_token if router_token is None else router_token
+        self._require_router_token(token)
+        if token is not self._router_token:
+            raise RuntimeError("RouterToken mismatch for BinanceAdapter order path.")
     
     async def connect(self):
         """Establish connection"""
@@ -112,9 +135,18 @@ class BinanceAdapter:
         }
         return await self._request('GET', '/api/v3/klines', params)
     
-    async def place_order(self, symbol: str, side: str, order_type: str, 
-                         quantity: float, price: Optional[float] = None) -> dict:
+    async def place_order(
+        self,
+        symbol: str,
+        side: str,
+        order_type: str,
+        quantity: float,
+        price: Optional[float] = None,
+        router_token=None,
+    ) -> dict:
         """Place order"""
+        self._assert_router_token(router_token)
+
         params = {
             'symbol': symbol,
             'side': side.upper(),

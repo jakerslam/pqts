@@ -186,14 +186,14 @@ class TradingEngine:
             market=MarketType(signal['market'])
         )
         
-        # Submit order
-        await self._submit_order(order)
+        # Enqueue order for router submission
+        await self._enqueue_order(order)
     
-    async def _submit_order(self, order: Order):
-        """Submit order to market"""
+    async def _enqueue_order(self, order: Order):
+        """Queue order for risk-aware routing."""
         logger.info(f"Submitting order: {order}")
         self.orders[order.id] = order
-        # Submit to appropriate market adapter
+        # TODO: Route through execution.RiskAwareRouter.submit_order
     
     async def _check_risk_limits(self):
         """Check and enforce risk limits"""

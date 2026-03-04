@@ -15,8 +15,16 @@ class CoinbaseAdapter:
     Coinbase Pro / Advanced Trade adapter for crypto trading.
     """
     
-    def __init__(self, api_key: str, api_secret: str, passphrase: str,
-                 sandbox: bool = True):
+    def __init__(
+        self,
+        api_key: str,
+        api_secret: str,
+        passphrase: str,
+        router_token=None,
+        sandbox: bool = True,
+    ):
+        self._require_router_token(router_token)
+        self._router_token = router_token
         self.api_key = api_key
         self.api_secret = api_secret
         self.passphrase = passphrase
@@ -31,6 +39,21 @@ class CoinbaseAdapter:
         self.session: Optional[aiohttp.ClientSession] = None
         
         logger.info(f"CoinbaseAdapter initialized: sandbox={sandbox}")
+
+    @staticmethod
+    def _require_router_token(router_token) -> None:
+        from execution.risk_aware_router import _RouterToken
+
+        if type(router_token) is not _RouterToken:
+            raise RuntimeError(
+                "CoinbaseAdapter requires a valid _RouterToken issued by RiskAwareRouter."
+            )
+
+    def _assert_router_token(self, router_token=None) -> None:
+        token = self._router_token if router_token is None else router_token
+        self._require_router_token(token)
+        if token is not self._router_token:
+            raise RuntimeError("RouterToken mismatch for CoinbaseAdapter order path.")
     
     async def connect(self):
         """Establish connection"""
@@ -120,11 +143,19 @@ class CoinbaseAdapter:
         return await self._request('GET', f'/products/{product_id}/candles',
                                   params=params)
     
-    async def place_order(self, product_id: str, side: str, 
-                         order_type: str = 'limit',
-                         size: float = None, price: float = None,
-                         funds: float = None) -> dict:
+    async def place_order(
+        self,
+        product_id: str,
+        side: str,
+        order_type: str = 'limit',
+        size: float = None,
+        price: float = None,
+        funds: float = None,
+        router_token=None,
+    ) -> dict:
         """Place an order"""
+        self._assert_router_token(router_token)
+
         order_data = {
             'product_id': product_id,
             'side': side.lower(),

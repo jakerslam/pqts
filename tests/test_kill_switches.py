@@ -11,9 +11,6 @@ from datetime import datetime
 from pathlib import Path
 import sys
 
-# Deterministic testing - fixed seed for all random draws
-np.random.seed(42)
-
 # Add parent to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
@@ -74,11 +71,17 @@ PORTFOLIO_CRASH = PortfolioState(
     pending_cancels=[]
 )
 
-# Strategy returns - deterministic (fixed seed already set)
+# Deterministic arrays for repeatable tests
+FIXED_RETURNS = np.linspace(-0.02, 0.02, 30)
+FIXED_RETURNS_SHIFTED = np.roll(FIXED_RETURNS, 5) * 0.7
+FIXED_RETURNS_WAVE = np.sin(np.linspace(0.0, 3.0 * np.pi, 30)) * 0.012
+FIXED_PORTFOLIO_CHANGES = np.linspace(-1000.0, 1000.0, 30)
+
+# Strategy returns - deterministic fixed arrays
 STRATEGY_RETURNS = {
-    'strat1': np.random.randn(30) * 0.02,
-    'strat2': np.random.randn(30) * 0.01,
-    'strat3': np.random.randn(30) * 0.015
+    'strat1': FIXED_RETURNS,
+    'strat2': FIXED_RETURNS_SHIFTED,
+    'strat3': FIXED_RETURNS_WAVE
 }
 
 
@@ -171,7 +174,7 @@ class TestKillSwitchMonitor:
         state = monitor.evaluate_all(
             PORTFOLIO_NORMAL,
             STRATEGY_RETURNS,
-            np.random.randn(30) * 1000
+            FIXED_PORTFOLIO_CHANGES
         )
         assert state.decision == RiskDecision.ALLOW
         assert state.reason == "All clear"
@@ -264,8 +267,8 @@ class TestTradingEngine:
         decision, state = engine.pre_trade_check(
             {'notional': 1000},
             self.portfolio(),
-            {'s1': np.random.randn(30)},
-            np.random.randn(30) * 100
+            {'s1': FIXED_RETURNS},
+            FIXED_PORTFOLIO_CHANGES * 0.1
         )
         assert decision == RiskDecision.ALLOW
     
@@ -276,7 +279,7 @@ class TestTradingEngine:
         state = engine.manual_kill('test')
         
         # Try to place order
-        result = engine.place_order({'notional': 1000}, state)
+        result = engine.approve_order({'notional': 1000}, state)
         assert not result
     
     def test_manual_flatten(self):
@@ -354,7 +357,7 @@ class TestIntegration:
         assert decision == RiskDecision.ALLOW
         
         # Place order
-        result = engine.place_order({'notional': 5000}, state)
+        result = engine.approve_order({'notional': 5000}, state)
         assert result
         assert engine.order_count == 1
     
@@ -393,7 +396,7 @@ class TestIntegration:
         decision, state = engine.pre_trade_check(
             {'notional': 1000},
             portfolio,
-            {'s1': np.random.randn(30) * 0.05},  # High vol
+            {'s1': FIXED_RETURNS * 2.5},  # High vol
             [-5000] * 30  # Large negative changes
         )
         
@@ -402,7 +405,7 @@ class TestIntegration:
         assert engine.is_flattening
         
         # Verify orders cannot be placed
-        result = engine.place_order({'notional': 100}, state)
+        result = engine.approve_order({'notional': 100}, state)
         assert not result
     
     def test_deterministic_triggers(self):

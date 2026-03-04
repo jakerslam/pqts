@@ -25,7 +25,7 @@ Integration:
 
 import logging
 from typing import Dict, List, Optional, Tuple
-from datetime import datetime
+from datetime import datetime, timezone
 from dataclasses import dataclass
 
 # Import kill switches
@@ -49,66 +49,27 @@ logger = logging.getLogger(__name__)
 
 class _RouterToken:
     """
-    Module-private token for exchange adapter authentication.
-    
-    This token can ONLY be constructed inside RiskAwareRouter via _create_token().
-    Exchange adapters must verify tokens using exact type matching:
-        type(token) is _RouterToken  # NOT isinstance()
-    
-    This provides mechanical prevention of bypass at the Python level.
-    Note: This is a team-safety guardrail, not cryptographic-grade security.
-    For true isolation, adapters would run in separate processes with capability tokens.
+    Module-private capability token for adapter construction and order sends.
+
+    Direct construction is blocked. Tokens are minted only by RiskAwareRouter via
+    its private _create_token() factory and verified with exact type checks.
     """
-    
-    __slots__ = ('_created_by',)  # Prevent attribute injection
-    
-    def __init__(self, *, _internal_only: bool = True):
-        """
-        Token constructor - validates it was created by RiskAwareRouter._create_token().
-        
-        The _internal_only parameter must be passed as True by _create_token().
-        Direct instantiation without this parameter will fail.
-        """
-        if not _internal_only:
-            raise RuntimeError(
-                "RouterToken can only be created by RiskAwareRouter._create_token(). "
-                "Direct instantiation is not allowed. "
-                "All orders must go through RiskAwareRouter."
-            )
-        
-        # Validate provenance via frame inspection
-        import inspect
-        frame = inspect.currentframe()
-        try:
-            caller_found = False
-            for _ in range(10):
-                frame = frame.f_back
-                if frame is None:
-                    break
-                # Must be called from _create_token or submit_order in RiskAwareRouter
-                if frame.f_code.co_name in ('_create_token', 'submit_order'):
-                    # Check if the calling class is RiskAwareRouter
-                    # f_locals['self'] would be the instance if called from method
-                    self_obj = frame.f_locals.get('self')
-                    if self_obj is not None:
-                        if self_obj.__class__.__name__ == 'RiskAwareRouter':
-                            caller_found = True
-                            break
-                    # Also accept if module name contains RiskAwareRouter (for _create_token)
-                    module_name = frame.f_globals.get('__name__', '')
-                    if 'risk_aware_router' in module_name.lower():
-                        caller_found = True
-                        break
-            
-            if not caller_found:
-                raise RuntimeError(
-                    "RouterToken creation must originate from RiskAwareRouter. "
-                    "Bypass attempted from unauthorized code path."
-                )
-        finally:
-            del frame
-        
-        self._created_by = 'RiskAwareRouter'
+
+    __slots__ = ("router_id", "created_at")
+
+    def __new__(cls, *args, **kwargs):
+        raise RuntimeError(
+            "RouterToken is module-private and can only be created by "
+            "RiskAwareRouter._create_token()."
+        )
+
+
+def _mint_router_token(router_id: int) -> "_RouterToken":
+    """Internal mint helper. Keep module-private and callable only by router factory."""
+    token = object.__new__(_RouterToken)
+    object.__setattr__(token, "router_id", router_id)
+    object.__setattr__(token, "created_at", datetime.now(timezone.utc).isoformat())
+    return token
 
 
 @dataclass
@@ -160,6 +121,7 @@ class RiskAwareRouter:
         # Broker adapter (Step 4 - would be real exchange adapter)
         self.broker_config = broker_config
         self.exchange_adapter = None  # Would initialize real adapter
+        self._router_token = self._create_token()
         
         # Audit logging (Step 5)
         self.audit_log: List[Dict] = []
@@ -447,7 +409,7 @@ class RiskAwareRouter:
         Only RiskAwareRouter can create tokens. Adapters must verify
         received token using: type(token) is _RouterToken
         """
-        return _RouterToken(_internal_only=True)
+        return _mint_router_token(id(self))
     
     def get_stats(self) -> Dict:
         """Get order routing statistics."""

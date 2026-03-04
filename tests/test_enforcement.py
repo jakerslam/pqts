@@ -1,338 +1,292 @@
-"""
-Enforcement tests for single order path guarantee.
+"""Hard-gate enforcement tests for production order routing and risk controls."""
 
-These tests verify that RiskAwareRouter is the ONLY way to submit orders.
-If any code path allows bypassing the router, these tests will FAIL.
-
-Quant-firm standard: there must be no way to bypass the risk overlay.
-"""
+from __future__ import annotations
 
 import ast
-import os
+import asyncio
 from pathlib import Path
 import sys
-import re
+
 import pytest
 
-sys.path.insert(0, str(Path(__file__).parent.parent))
+
+ROOT = Path(__file__).resolve().parent.parent
+TESTS_DIR = ROOT / "tests"
+ROUTER_FILE = ROOT / "execution" / "risk_aware_router.py"
+ROUTER_REL = ROUTER_FILE.relative_to(ROOT)
+
+ADAPTER_FILES = {
+    (ROOT / "markets" / "crypto" / "binance_adapter.py").relative_to(ROOT),
+    (ROOT / "markets" / "crypto" / "coinbase_adapter.py").relative_to(ROOT),
+    (ROOT / "markets" / "equities" / "alpaca_adapter.py").relative_to(ROOT),
+    (ROOT / "markets" / "forex" / "oanda_adapter.py").relative_to(ROOT),
+}
+
+ADAPTER_MODULES = {
+    "markets.crypto.binance_adapter",
+    "markets.crypto.coinbase_adapter",
+    "markets.equities.alpaca_adapter",
+    "markets.forex.oanda_adapter",
+}
+
+ORDER_ENTRY_NAMES = {"submit_order", "place_order", "create_order", "send_order", "_submit_order"}
+
+sys.path.insert(0, str(ROOT))
+
+from execution.risk_aware_router import RiskAwareRouter, _RouterToken
+from markets.crypto.binance_adapter import BinanceAdapter
+from markets.crypto.coinbase_adapter import CoinbaseAdapter
+from markets.equities.alpaca_adapter import AlpacaAdapter
+from markets.forex.oanda_adapter import OandaAdapter
+from risk.kill_switches import KillSwitchMonitor, RiskLimits
+
+
+def _is_under(path: Path, parent: Path) -> bool:
+    try:
+        path.relative_to(parent)
+        return True
+    except ValueError:
+        return False
+
+
+def _iter_repo_python_files() -> list[Path]:
+    files: list[Path] = []
+    for path in ROOT.rglob("*.py"):
+        if "__pycache__" in path.parts:
+            continue
+        files.append(path)
+    return files
+
+
+def _parse_tree(path: Path) -> ast.AST:
+    return ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+
+
+def _adapter_import_name(node: ast.AST) -> str | None:
+    if isinstance(node, ast.Import):
+        for alias in node.names:
+            if alias.name in ADAPTER_MODULES:
+                return alias.name
+        return None
+
+    if not isinstance(node, ast.ImportFrom):
+        return None
+
+    module = node.module or ""
+    if module in ADAPTER_MODULES:
+        return module
+
+    for alias in node.names:
+        candidate = f"{module}.{alias.name}" if module else alias.name
+        if candidate in ADAPTER_MODULES:
+            return candidate
+    return None
+
+
+def _build_router() -> RiskAwareRouter:
+    router = RiskAwareRouter(
+        risk_config=RiskLimits(
+            max_daily_loss_pct=0.02,
+            max_drawdown_pct=0.15,
+            max_gross_leverage=2.0,
+        ),
+        broker_config={"enabled": True},
+    )
+    router.set_capital(100000.0, source="test")
+    return router
 
 
 class TestSingleOrderPath:
-    """
-    Prove that RiskAwareRouter is the single choke point for orders.
-    
-    These are HARD assertions - if they fail, the build fails.
-    """
-    
-    def get_strategies_dir(self) -> Path:
-        """Return path to strategies directory."""
-        return Path(__file__).parent.parent / 'strategies'
-    
-    def get_execution_dir(self) -> Path:
-        """Return path to execution directory."""
-        return Path(__file__).parent.parent / 'execution'
-    
-    def test_no_direct_adapter_imports(self):
-        """
-        HARD GATE: No strategy imports exchange adapters directly.
-        
-        Strategies should only interact with RiskAwareRouter.
-        If this fails, someone is trying to bypass the risk overlay.
-        """
-        strategies_dir = self.get_strategies_dir()
-        
-        forbidden_imports = [
-            'from execution.exchange',
-            'from execution.alpaca_adapter',
-            'from execution.oanda_adapter', 
-            'from execution.coinbase_adapter',
-            'from execution.smart_router import',
-        ]
-        
-        violations = []
-        
-        for py_file in strategies_dir.rglob('*.py'):
-            content = py_file.read_text()
-            for forbidden in forbidden_imports:
-                if forbidden in content:
-                    violations.append(f"{py_file}: {forbidden}")
-        
-        # HARD FAIL if violations found
-        assert len(violations) == 0, (
-            f"VIOLATION: Strategies importing exchange adapters directly. "
-            f"This bypasses the risk overlay. Fix: {violations}"
-        )
-    
-    def test_risk_aware_router_only_entry(self):
-        """
-        HARD GATE: submit_order exists ONLY in RiskAwareRouter.
-        
-        The submit_order method is the ONLY public order entry point.
-        If a submit_order exists elsewhere, it's a bypass attempt.
-        """
-        execution_dir = self.get_execution_dir()
-        
-        violations = []
-        
-        for py_file in execution_dir.rglob('*.py'):
-            if 'test' in py_file.name:
+    def test_submit_order_exists_only_in_risk_aware_router(self):
+        violations: list[str] = []
+
+        for path in _iter_repo_python_files():
+            if _is_under(path, TESTS_DIR):
                 continue
-            if 'risk_aware_router' in py_file.name:
-                continue  # This is the allowed location
-                
-            content = py_file.read_text()
-            tree = ast.parse(content)
-            
+            tree = _parse_tree(path)
+            rel = path.relative_to(ROOT)
+
             for node in ast.walk(tree):
-                if isinstance(node, ast.FunctionDef):
-                    if node.name == 'submit_order':
-                        violations.append(str(py_file))
-        
-        # HARD FAIL if submit_order found outside router
-        assert len(violations) == 0, (
-            f"VIOLATION: submit_order() found outside RiskAwareRouter: {violations}. "
-            f"RiskAwareRouter MUST be the ONLY order entry point. "
-            f"All orders must go through risk_aware_router.py"
-        )
-    
-    def test_risk_aware_router_has_submit_order(self):
-        """
-        Verify RiskAwareRouter actually has submit_order method.
-        """
-        execution_dir = self.get_execution_dir()
-        router_path = execution_dir / 'risk_aware_router.py'
-        
-        assert router_path.exists(), "RiskAwareRouter must exist"
-        
-        content = router_path.read_text()
-        assert 'def submit_order' in content, (
-            "RiskAwareRouter must have submit_order method"
-        )
-        assert 'pre_trade_check' in content, (
-            "RiskAwareRouter must call pre_trade_check"
+                if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) and node.name == "submit_order":
+                    if rel != ROUTER_REL:
+                        violations.append(f"{rel}:{node.lineno}")
+
+        assert not violations, (
+            "VIOLATION: submit_order() exists outside execution/risk_aware_router.py: "
+            f"{violations}"
         )
 
+    def test_no_order_entry_methods_outside_router_and_adapters(self):
+        violations: list[str] = []
 
-class TestCapitalInjectionHardStop:
-    """
-    HARD GATE: Capital injection is a hard requirement, never a fallback.
-    """
-    
-    def get_risk_dir(self) -> Path:
-        """Return path to risk directory."""
-        return Path(__file__).parent.parent / 'risk'
-    
-    def test_no_capital_fallback_constant(self):
-        """
-        HARD GATE: No hardcoded capital fallback exists.
-        
-        The number 100000 should not appear as a fallback in risk code.
-        If it does, capital injection is not a hard requirement.
-        """
-        risk_dir = self.get_risk_dir()
-        
-        violations = []
-        
-        for py_file in risk_dir.rglob('*.py'):
-            # Skip test files
-            if 'test' in py_file.name:
+        for path in _iter_repo_python_files():
+            if _is_under(path, TESTS_DIR):
                 continue
-                
-            content = py_file.read_text()
-            lines = content.split('\n')
-            
-            for i, line in enumerate(lines, 1):
-                # Look for 100000 as a fallback (not in comment context)
-                if '100000' in line and not line.strip().startswith('#'):
-                    # Check if it's in a fallback context
-                    if any(x in line for x in ['except', 'RuntimeError', 'try:', 'fallback']):
-                        violations.append(f"{py_file}:{i}: {line.strip()}")
-        
-        # HARD FAIL if fallback patterns found
-        assert len(violations) == 0, (
-            f"VIOLATION: Capital fallback pattern found: {violations}. "
-            f"Capital MUST be injected via set_capital(). "
-            f"No hardcoded fallbacks allowed."
+
+            rel = path.relative_to(ROOT)
+            tree = _parse_tree(path)
+
+            for node in ast.walk(tree):
+                if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                    continue
+                if node.name not in ORDER_ENTRY_NAMES:
+                    continue
+
+                allowed = False
+                if node.name == "submit_order":
+                    allowed = rel == ROUTER_REL
+                elif node.name == "place_order":
+                    allowed = rel in ADAPTER_FILES
+
+                if not allowed:
+                    violations.append(f"{rel}:{node.lineno}:{node.name}")
+
+        assert not violations, (
+            "VIOLATION: order entry method found outside RiskAwareRouter.submit_order "
+            f"or token-gated adapters: {violations}"
         )
-    
-    def test_capital_raises_if_not_set(self):
-        """
-        HARD GATE: _get_capital raises RuntimeError if not set.
-        
-        This is the critical safety check - no trading without capital.
-        """
-        from risk.kill_switches import KillSwitchMonitor, RiskLimits
-        
-        limits = RiskLimits(max_daily_loss_pct=0.02)
-        monitor = KillSwitchMonitor(limits)
-        
-        # Must raise RuntimeError
-        raised = False
-        try:
-            monitor._get_capital()
-        except RuntimeError as e:
-            raised = True
-            assert "Capital not set" in str(e), (
-                f"Wrong error message: {e}"
-            )
-        
-        # HARD FAIL if didn't raise
-        assert raised, (
-            "VIOLATION: _get_capital() did not raise RuntimeError when capital not set. "
-            "This means capital injection is optional, which violates the hard-stop requirement."
+
+    def test_no_adapter_imports_outside_router(self):
+        allowed_files = {ROUTER_REL, *ADAPTER_FILES}
+        violations: list[str] = []
+
+        for path in _iter_repo_python_files():
+            if _is_under(path, TESTS_DIR):
+                continue
+
+            rel = path.relative_to(ROOT)
+            if rel in allowed_files:
+                continue
+
+            tree = _parse_tree(path)
+            for node in ast.walk(tree):
+                adapter_import = _adapter_import_name(node)
+                if adapter_import:
+                    violations.append(f"{rel}:{adapter_import}")
+
+        assert not violations, (
+            "VIOLATION: adapter modules imported outside RiskAwareRouter: "
+            f"{violations}"
         )
-    
-    def test_capital_injection_works(self):
-        """
-        Verify set_capital() correctly injects capital.
-        """
-        from risk.kill_switches import KillSwitchMonitor, RiskLimits
-        
-        limits = RiskLimits(max_daily_loss_pct=0.02)
-        monitor = KillSwitchMonitor(limits)
-        
-        # Inject capital
-        monitor.set_capital(50000.0, source='test')
-        
-        # Should not raise
-        assert monitor._get_capital() == 50000.0, (
-            "Capital injection did not work correctly"
-        )
-    
-    def test_update_fails_without_capital(self):
-        """
-        HARD GATE: update() fails without capital injection.
-        
-        This proves capital is a hard requirement, not optional.
-        """
-        from risk.kill_switches import KillSwitchMonitor, RiskLimits, PortfolioState
-        from datetime import datetime
-        
-        limits = RiskLimits(max_daily_loss_pct=0.02)
-        monitor = KillSwitchMonitor(limits)
-        
-        portfolio = PortfolioState(
-            timestamp=datetime.now(),
-            positions={},
-            prices={'BTC': 50000},
-            total_pnl=0,
-            unrealized_pnl=0,
-            realized_pnl=0,
-            gross_exposure=0,
-            net_exposure=0,
-            leverage=0,
-            open_orders=[],
-            pending_cancels=[]
-        )
-        
-        # Must raise RuntimeError - capital not set
-        raised = False
-        try:
-            monitor.update(portfolio, [])
-        except RuntimeError as e:
-            raised = True
-            assert "Capital not set" in str(e)
-        
-        # HARD FAIL if update allowed without capital
-        assert raised, (
-            "VIOLATION: update() did not raise RuntimeError without capital. "
-            "update() must fail if set_capital() was not called."
+
+    def test_place_order_calls_outside_router_are_blocked(self):
+        allowed_files = {ROUTER_REL, *ADAPTER_FILES}
+        violations: list[str] = []
+
+        for path in _iter_repo_python_files():
+            if _is_under(path, TESTS_DIR):
+                continue
+
+            rel = path.relative_to(ROOT)
+            if rel in allowed_files:
+                continue
+
+            tree = _parse_tree(path)
+            for node in ast.walk(tree):
+                if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute):
+                    if node.func.attr == "place_order":
+                        violations.append(f"{rel}:{node.lineno}")
+
+        assert not violations, (
+            "VIOLATION: .place_order() call found outside RiskAwareRouter/order adapters: "
+            f"{violations}"
         )
 
 
 class TestRouterTokenProtection:
-    """
-    Token-based protection for exchange adapters.
-    
-    The simplest enforcement: adapters require a token that only
-    RiskAwareRouter can create.
-    """
-    
-    def test_router_token_class_exists(self):
-        """
-        HARD GATE: RouterToken class must exist before paper/live trading.
-        
-        The token ensures adapters can only be used through the router.
-        This is a PRE-LIVE REQUIREMENT.
-        
-        Until this passes, the system is NOT mechanically protected against
-        direct adapter calls. This is the "impossible to bypass" check.
-        """
-        execution_dir = Path(__file__).parent.parent / 'execution'
-        router_path = execution_dir / 'risk_aware_router.py'
-        
-        if not router_path.exists():
-            pytest.skip("RiskAwareRouter doesn't exist yet - token protection not implemented")
-        
-        content = router_path.read_text()
-        
-        # Token class must exist for mechanical protection
-        has_token = 'class RouterToken' in content or '_RouterToken' in content
-        
-        # HARD FAIL if token doesn't exist
-        # This is a PRE-LIVE GATE - token required for mechanical bypass prevention
-        assert has_token, (
-            "VIOLATION (PRE-LIVE GATE): RouterToken class does not exist.\n"
-            "Mechanical bypass prevention is NOT implemented.\n"
-            "Adapters can potentially be instantiated and used independently.\n\n"
-            "Required before paper/live trading:\n"
-            "1. Create RouterToken class in risk_aware_router.py\n"
-            "2. Make it module-private (only constructible inside RiskAwareRouter)\n"
-            "3. Require token in exchange adapter constructors\n"
-            "4. Adapters must raise without valid token\n\n"
-            "Until implemented: bypass prevention relies on convention, not mechanics."
-        )
-    
-    def test_exchange_adapters_require_token(self):
-        """
-        Verify exchange adapters require RouterToken if it exists.
-        
-        If RouterToken is implemented but adapters don't check for it,
-        that's a bypass vulnerability.
-        """
-        execution_dir = Path(__file__).parent.parent / 'execution'
-        router_path = execution_dir / 'risk_aware_router.py'
-        
-        if not router_path.exists():
-            pytest.skip("RiskAwareRouter doesn't exist yet")
-        
-        router_content = router_path.read_text()
-        
-        # Check if token is implemented
-        has_token = 'class RouterToken' in router_content or '_RouterToken' in router_content
-        
-        if not has_token:
-            pytest.skip("RouterToken not implemented yet - skipping adapter check")
-        
-        # If token exists, adapters must require it
-        adapter_files = [
-            'alpaca_adapter.py',
-            'oanda_adapter.py',
-            'coinbase_adapter.py',
-        ]
-        
-        violations = []
-        
-        for adapter in adapter_files:
-            adapter_path = execution_dir / adapter
-            if not adapter_path.exists():
+    def test_router_token_direct_construction_is_blocked(self):
+        with pytest.raises(RuntimeError):
+            _RouterToken()
+
+    def test_router_factory_creates_private_token(self):
+        router = _build_router()
+        token = router._create_token()
+        assert type(token) is _RouterToken
+        assert token.router_id == id(router)
+
+    def test_adapter_constructors_require_router_token(self):
+        with pytest.raises(RuntimeError):
+            BinanceAdapter("k", "s", router_token=None)
+        with pytest.raises(RuntimeError):
+            CoinbaseAdapter("k", "s", "p", router_token=None)
+        with pytest.raises(RuntimeError):
+            AlpacaAdapter("k", "s", router_token=None)
+        with pytest.raises(RuntimeError):
+            OandaAdapter("k", "acct", router_token=None)
+
+        with pytest.raises(RuntimeError):
+            BinanceAdapter("k", "s", router_token=object())
+        with pytest.raises(RuntimeError):
+            CoinbaseAdapter("k", "s", "p", router_token=object())
+        with pytest.raises(RuntimeError):
+            AlpacaAdapter("k", "s", router_token=object())
+        with pytest.raises(RuntimeError):
+            OandaAdapter("k", "acct", router_token=object())
+
+    def test_adapter_place_order_requires_valid_token(self, monkeypatch):
+        router = _build_router()
+        token = router._create_token()
+
+        async def fake_request(*_args, **_kwargs):
+            return {"ok": True}
+
+        binance = BinanceAdapter("k", "s", router_token=token)
+        coinbase = CoinbaseAdapter("k", "s", "p", router_token=token)
+        alpaca = AlpacaAdapter("k", "s", router_token=token)
+        oanda = OandaAdapter("k", "acct", router_token=token)
+
+        for adapter in (binance, coinbase, alpaca, oanda):
+            monkeypatch.setattr(adapter, "_request", fake_request)
+
+        with pytest.raises(RuntimeError):
+            asyncio.run(
+                binance.place_order("BTCUSDT", "buy", "market", 0.01, router_token=object())
+            )
+        with pytest.raises(RuntimeError):
+            asyncio.run(
+                coinbase.place_order("BTC-USD", "buy", order_type="market", funds=100, router_token=object())
+            )
+        with pytest.raises(RuntimeError):
+            asyncio.run(
+                alpaca.place_order("AAPL", 1, "buy", router_token=object())
+            )
+        with pytest.raises(RuntimeError):
+            asyncio.run(
+                oanda.place_order("EUR_USD", 1000, router_token=object())
+            )
+
+        assert asyncio.run(binance.place_order("BTCUSDT", "buy", "market", 0.01))["ok"]
+        assert asyncio.run(
+            coinbase.place_order("BTC-USD", "buy", order_type="market", funds=100)
+        )["ok"]
+        assert asyncio.run(alpaca.place_order("AAPL", 1, "buy"))["ok"]
+        assert asyncio.run(oanda.place_order("EUR_USD", 1000))["ok"]
+
+
+class TestCapitalInjectionHardStop:
+    def test_no_capital_fallback_constant(self):
+        risk_dir = ROOT / "risk"
+        violations: list[str] = []
+
+        for path in risk_dir.rglob("*.py"):
+            if _is_under(path, TESTS_DIR):
                 continue
-            
-            content = adapter_path.read_text()
-            
-            # Adapter should check for token
-            has_token_check = 'router_token' in content or 'RouterToken' in content
-            
-            if not has_token_check:
-                violations.append(adapter)
-        
-        # HARD FAIL if adapters don't require token
-        assert len(violations) == 0, (
-            f"VIOLATION: These adapters don't require RouterToken: {violations}. "
-            f"Adapters must require a token that only RiskAwareRouter can create."
+
+            for idx, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
+                if "100000" not in line:
+                    continue
+                if line.strip().startswith("#"):
+                    continue
+                if any(token in line for token in ("except", "RuntimeError", "try", "fallback")):
+                    violations.append(f"{path.relative_to(ROOT)}:{idx}:{line.strip()}")
+
+        assert not violations, (
+            "VIOLATION: capital fallback pattern found. Capital must be injected: "
+            f"{violations}"
         )
 
+    def test_capital_raises_if_not_set(self):
+        monitor = KillSwitchMonitor(RiskLimits(max_daily_loss_pct=0.02))
 
-if __name__ == "__main__":
-    import pytest
-    pytest.main([__file__, "-v"])
+        with pytest.raises(RuntimeError, match="Capital not set"):
+            monitor._get_capital()

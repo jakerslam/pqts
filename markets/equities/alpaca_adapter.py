@@ -13,7 +13,15 @@ class AlpacaAdapter:
     Supports both paper and live trading.
     """
     
-    def __init__(self, api_key: str, api_secret: str, paper: bool = True):
+    def __init__(
+        self,
+        api_key: str,
+        api_secret: str,
+        router_token=None,
+        paper: bool = True,
+    ):
+        self._require_router_token(router_token)
+        self._router_token = router_token
         self.api_key = api_key
         self.api_secret = api_secret
         self.paper = paper
@@ -29,6 +37,21 @@ class AlpacaAdapter:
         self.session: Optional[aiohttp.ClientSession] = None
         
         logger.info(f"AlpacaAdapter initialized: paper={paper}")
+
+    @staticmethod
+    def _require_router_token(router_token) -> None:
+        from execution.risk_aware_router import _RouterToken
+
+        if type(router_token) is not _RouterToken:
+            raise RuntimeError(
+                "AlpacaAdapter requires a valid _RouterToken issued by RiskAwareRouter."
+            )
+
+    def _assert_router_token(self, router_token=None) -> None:
+        token = self._router_token if router_token is None else router_token
+        self._require_router_token(token)
+        if token is not self._router_token:
+            raise RuntimeError("RouterToken mismatch for AlpacaAdapter order path.")
     
     async def connect(self):
         """Establish connection"""
@@ -104,10 +127,19 @@ class AlpacaAdapter:
                                       base='data')
         return response.get('quote', {})
     
-    async def place_order(self, symbol: str, qty: float, side: str,
-                         order_type: str = 'market', limit_price: float = None,
-                         stop_price: float = None) -> dict:
+    async def place_order(
+        self,
+        symbol: str,
+        qty: float,
+        side: str,
+        order_type: str = 'market',
+        limit_price: float = None,
+        stop_price: float = None,
+        router_token=None,
+    ) -> dict:
         """Place an order"""
+        self._assert_router_token(router_token)
+
         order_data = {
             'symbol': symbol,
             'qty': str(qty),
