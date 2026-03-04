@@ -102,6 +102,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--cycles", type=int, default=30)
     parser.add_argument("--sleep-seconds", type=float, default=1.0)
     parser.add_argument("--events-path", default="data/analytics/ws_ingestion_events.jsonl")
+    parser.add_argument("--data-lake-root", default="")
     parser.add_argument("--out-dir", default="data/reports")
     parser.add_argument("--tca-db", default="data/tca_records.csv")
     parser.add_argument("--max-messages-per-stream", type=int, default=10)
@@ -135,7 +136,10 @@ async def _run(args: argparse.Namespace) -> Dict[str, Any]:
     router.configure_market_adapters(config.get("markets", {}))
     await router.start_market_data()
 
-    store = StreamIngestionStore(events_path=str(args.events_path))
+    store = StreamIngestionStore(
+        events_path=str(args.events_path),
+        data_lake_root=str(args.data_lake_root),
+    )
     live_fetcher = None
     if not bool(args.no_live_fetcher):
         live_fetcher = LiveVenueStreamFetcher(
@@ -160,6 +164,7 @@ async def _run(args: argparse.Namespace) -> Dict[str, Any]:
         "risk_profile": profile_payload,
         "cycles": cycles,
         "events_path": str(store.events_path),
+        "data_lake_root": str(args.data_lake_root),
         "stream_registry": router.get_stream_registry(),
     }
     out_dir = Path(args.out_dir)

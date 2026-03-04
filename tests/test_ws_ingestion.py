@@ -14,6 +14,7 @@ from execution.risk_aware_router import RiskAwareRouter, VenueClient
 from execution.stream_contracts import build_stream_registry
 from execution.ws_ingestion import (
     LiveVenueStreamFetcher,
+    StreamIngestionEvent,
     StreamIngestionStore,
     WebSocketIngestionService,
 )
@@ -183,3 +184,31 @@ def test_live_fetcher_builds_venue_specific_subscriptions(tmp_path):
 
     coinbase_fill = fetcher._build_subscriptions("coinbase", "fill")
     assert coinbase_fill[0]["channels"][0]["name"] == "user"
+
+
+def test_stream_ingestion_store_writes_data_lake_rows_when_enabled(tmp_path):
+    store = StreamIngestionStore(
+        events_path=str(tmp_path / "ws_events.jsonl"),
+        data_lake_root=str(tmp_path / "lake"),
+    )
+    store.append_many(
+        [
+            StreamIngestionEvent(
+                event_id="evt_1",
+                timestamp="2026-03-01T00:00:00+00:00",
+                venue="binance",
+                channel="fill",
+                url="wss://example",
+                payload={
+                    "symbol": "BTCUSDT",
+                    "price": 100.0,
+                    "qty": 0.5,
+                    "side": "buy",
+                    "trade_id": "t1",
+                },
+            )
+        ]
+    )
+
+    manifest = tmp_path / "lake" / "stream_trades" / "manifest.jsonl"
+    assert manifest.exists()

@@ -60,9 +60,17 @@ class EventReplaySimulator:
                 queue_ahead_qty=float(event.queue_ahead_qty),
             )
             if str(event.side).lower() == "buy":
-                slip_pct = max((float(fill.executed_price) - float(event.reference_price)) / max(float(event.reference_price), 1e-12), 0.0)
+                slip_pct = max(
+                    (float(fill.executed_price) - float(event.reference_price))
+                    / max(float(event.reference_price), 1e-12),
+                    0.0,
+                )
             else:
-                slip_pct = max((float(event.reference_price) - float(fill.executed_price)) / max(float(event.reference_price), 1e-12), 0.0)
+                slip_pct = max(
+                    (float(event.reference_price) - float(fill.executed_price))
+                    / max(float(event.reference_price), 1e-12),
+                    0.0,
+                )
             slippage_bps = float(slip_pct * 10000.0)
             fill_ratio = float(fill.executed_qty) / max(float(event.requested_qty), 1e-12)
             fills.append(
@@ -85,9 +93,7 @@ class EventReplaySimulator:
                 )
             )
 
-        avg_fill_ratio = (
-            sum(row.fill_ratio for row in fills) / max(len(fills), 1) if fills else 0.0
-        )
+        avg_fill_ratio = sum(row.fill_ratio for row in fills) / max(len(fills), 1) if fills else 0.0
         avg_slippage_bps = (
             sum(row.slippage_bps for row in fills) / max(len(fills), 1) if fills else 0.0
         )

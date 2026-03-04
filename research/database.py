@@ -696,6 +696,59 @@ class ResearchDatabase:
             "total_pnl": float(row.get("total_pnl") or 0.0),
         }
 
+    def get_stage_metrics(
+        self,
+        experiment_id: str,
+        stage: str,
+        lookback_days: int = 365,
+    ) -> pd.DataFrame:
+        query = """
+            SELECT experiment_id, stage, timestamp, pnl, sharpe, drawdown, slippage_mape, kill_switch_triggers, notes
+            FROM stage_metrics
+            WHERE experiment_id = ?
+              AND stage = ?
+              AND timestamp >= datetime('now', ?)
+            ORDER BY timestamp ASC, metric_id ASC
+        """
+        lookback = f"-{int(lookback_days)} days"
+        frame = pd.read_sql_query(query, self.conn, params=(experiment_id, stage, lookback))
+        if frame.empty:
+            return frame
+        frame["timestamp"] = pd.to_datetime(frame["timestamp"], utc=True, errors="coerce")
+        frame = frame[frame["timestamp"].notna()]
+        if "notes" in frame.columns:
+            frame["notes"] = frame["notes"].apply(
+                lambda text: json.loads(text) if isinstance(text, str) and text else {}
+            )
+        return frame.reset_index(drop=True)
+
+    def list_stage_metrics(
+        self,
+        *,
+        stage: Optional[str] = None,
+        lookback_days: int = 365,
+    ) -> pd.DataFrame:
+        query = """
+            SELECT experiment_id, stage, timestamp, pnl, sharpe, drawdown, slippage_mape, kill_switch_triggers, notes
+            FROM stage_metrics
+            WHERE timestamp >= datetime('now', ?)
+        """
+        params: tuple[Any, ...] = (f"-{int(lookback_days)} days",)
+        if stage is not None:
+            query += " AND stage = ?"
+            params += (str(stage),)
+        query += " ORDER BY timestamp ASC, metric_id ASC"
+        frame = pd.read_sql_query(query, self.conn, params=params)
+        if frame.empty:
+            return frame
+        frame["timestamp"] = pd.to_datetime(frame["timestamp"], utc=True, errors="coerce")
+        frame = frame[frame["timestamp"].notna()]
+        if "notes" in frame.columns:
+            frame["notes"] = frame["notes"].apply(
+                lambda text: json.loads(text) if isinstance(text, str) and text else {}
+            )
+        return frame.reset_index(drop=True)
+
     def get_promotion_candidates(
         self, min_sharpe: float = 1.0, max_drawdown: float = 0.2
     ) -> pd.DataFrame:

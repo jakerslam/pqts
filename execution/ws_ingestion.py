@@ -16,6 +16,12 @@ from aiohttp import WSMsgType
 
 from execution.live_ops_controls import WebSocketConnectionManager
 from execution.risk_aware_router import RiskAwareRouter
+from research.data_lake_pipeline import (
+    normalize_funding_row,
+    normalize_l2_row,
+    normalize_trade_row,
+    write_dataset_rows,
+)
 
 
 @dataclass(frozen=True)
@@ -34,9 +40,14 @@ class StreamIngestionEvent:
 class StreamIngestionStore:
     """Append-only JSONL event sink for websocket-ingestion payloads."""
 
-    def __init__(self, events_path: str = "data/analytics/ws_ingestion_events.jsonl"):
+    def __init__(
+        self,
+        events_path: str = "data/analytics/ws_ingestion_events.jsonl",
+        data_lake_root: str = "",
+    ):
         self.events_path = Path(events_path)
         self.events_path.parent.mkdir(parents=True, exist_ok=True)
+        self.data_lake_root = str(data_lake_root or "").strip()
 
     def append_many(self, events: List[StreamIngestionEvent]) -> None:
         if not events:
@@ -44,6 +55,94 @@ class StreamIngestionStore:
         with self.events_path.open("a", encoding="utf-8") as handle:
             for event in events:
                 handle.write(json.dumps(event.to_dict(), sort_keys=True) + "\n")
+        self._write_data_lake(events)
+
+    def _write_data_lake(self, events: List[StreamIngestionEvent]) -> None:
+        if not self.data_lake_root:
+            return
+        trade_rows: List[Dict[str, Any]] = []
+        l2_rows: List[Dict[str, Any]] = []
+        funding_rows: List[Dict[str, Any]] = []
+        for event in events:
+            payload = dict(event.payload or {})
+            symbol = str(
+                payload.get("symbol")
+                or payload.get("product_id")
+                or payload.get("instrument")
+                or "unknown"
+            )
+            if event.channel in {"fill", "order"}:
+                trade_rows.append(
+                    normalize_trade_row(
+                        venue=event.venue,
+                        symbol=symbol,
+                        row={
+                            "timestamp": payload.get("timestamp", event.timestamp),
+                            "price": payload.get("price", payload.get("executed_price", 0.0)),
+                            "qty": payload.get(
+                                "qty", payload.get("size", payload.get("quantity", 0.0))
+                            ),
+                            "side": payload.get("side", "unknown"),
+                            "trade_id": payload.get(
+                                "trade_id", payload.get("order_id", event.event_id)
+                            ),
+                        },
+                    )
+                )
+            if event.channel == "market":
+                l2_rows.append(
+                    normalize_l2_row(
+                        venue=event.venue,
+                        symbol=symbol,
+                        row={
+                            "timestamp": payload.get("timestamp", event.timestamp),
+                            "bids": payload.get("bids", []),
+                            "asks": payload.get("asks", []),
+                            "depth_levels": payload.get("depth_levels", 0),
+                        },
+                    )
+                )
+                if "funding_rate" in payload:
+                    funding_rows.append(
+                        normalize_funding_row(
+                            venue=event.venue,
+                            symbol=symbol,
+                            row={
+                                "timestamp": payload.get("timestamp", event.timestamp),
+                                "funding_rate": payload.get("funding_rate", 0.0),
+                                "interval_hours": payload.get("interval_hours", 8.0),
+                            },
+                        )
+                    )
+
+        partition_date = (
+            events[0].timestamp[:10] if events else datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        )
+        try:
+            if trade_rows:
+                write_dataset_rows(
+                    root=self.data_lake_root,
+                    dataset="stream_trades",
+                    rows=trade_rows,
+                    partition_date=partition_date,
+                )
+            if l2_rows:
+                write_dataset_rows(
+                    root=self.data_lake_root,
+                    dataset="stream_l2",
+                    rows=l2_rows,
+                    partition_date=partition_date,
+                )
+            if funding_rows:
+                write_dataset_rows(
+                    root=self.data_lake_root,
+                    dataset="stream_funding",
+                    rows=funding_rows,
+                    partition_date=partition_date,
+                )
+        except Exception:
+            # Ingestion durability takes precedence over lake side-effects.
+            return
 
 
 Fetcher = Callable[[str, str, Dict[str, Any]], Awaitable[List[Dict[str, Any]]]]

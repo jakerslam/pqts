@@ -11,6 +11,12 @@ from typing import Any, Dict, List, Optional, Tuple
 import numpy as np
 import pandas as pd
 
+from analytics.model_drift import DriftThresholds, evaluate_model_drift, summarize_stage_metrics
+from analytics.monthly_attribution import (
+    compute_feedback_multipliers,
+    summarize_monthly_attribution,
+)
+
 try:
     from backtesting.purged_cv import BacktestValidator, PurgedKFold
 except Exception:  # pragma: no cover - fallback for minimal environments
@@ -80,6 +86,7 @@ from portfolio.strategy_allocator import (
     StrategyCapitalAllocator,
     StrategyUtilityConfig,
 )
+from research.artifact_registry import StrategyArtifactManifest, StrategyArtifactRegistry
 from research.auto_generator import AutoStrategyGenerator, StrategyVariant
 from research.database import BacktestResult, Experiment, ResearchDatabase
 from research.r_analytics_bridge import RAnalyticsBridge
@@ -152,6 +159,9 @@ class AIResearchAgent:
             output_dir=analytics_cfg.get("report_dir", "data/research_reports"),
             schema_version=analytics_cfg.get("report_schema_version", "1.0.0"),
             db=self.db,
+        )
+        self.artifact_registry = StrategyArtifactRegistry(
+            root=str(analytics_cfg.get("artifact_registry_dir", "data/research_artifacts"))
         )
 
         # Search and promotion controls
@@ -239,6 +249,13 @@ class AIResearchAgent:
         )
         self.last_allocation_weights: Dict[str, float] = {}
         self.last_champion_challenger: Dict[str, Dict[str, Any]] = {}
+        feedback_cfg = config.get("allocation_feedback", {})
+        self.monthly_feedback_enabled = bool(feedback_cfg.get("enabled", True))
+        self.monthly_feedback_lookback_days = int(feedback_cfg.get("lookback_days", 90))
+        self.monthly_feedback_min_multiplier = float(feedback_cfg.get("min_multiplier", 0.50))
+        self.monthly_feedback_max_multiplier = float(feedback_cfg.get("max_multiplier", 1.50))
+        self.last_allocation_feedback: Dict[str, float] = {}
+        self.last_monthly_attribution: List[Dict[str, Any]] = []
 
         # Stage gates
         self.stage_gates = {
@@ -277,6 +294,16 @@ class AIResearchAgent:
             max_annual_vol=float(objective_cfg.get("max_annual_vol", 0.25)),
             annual_turnover=float(objective_cfg.get("annual_turnover", 6.0)),
             cost_per_turnover=float(objective_cfg.get("cost_per_turnover", 0.0045)),
+        )
+        drift_cfg = config.get("drift_monitor", {})
+        self.drift_monitor_enabled = bool(drift_cfg.get("enabled", True))
+        self.drift_recent_days = int(drift_cfg.get("recent_days", 14))
+        self.drift_baseline_days = int(drift_cfg.get("baseline_days", 120))
+        self.drift_thresholds = DriftThresholds(
+            max_sharpe_drop=float(drift_cfg.get("max_sharpe_drop", 0.40)),
+            max_drawdown_increase=float(drift_cfg.get("max_drawdown_increase", 0.05)),
+            max_slippage_mape_increase=float(drift_cfg.get("max_slippage_mape_increase", 10.0)),
+            min_recent_samples=int(drift_cfg.get("min_recent_samples", 5)),
         )
 
         # State
@@ -937,6 +964,7 @@ class AIResearchAgent:
             sleeve_budgets=self.horizon_sleeves,
             utility=self.allocation_utility,
         )
+        allocation_weights = self._apply_monthly_attribution_feedback(allocation_weights)
         self.last_allocation_weights = dict(allocation_weights)
         self.last_champion_challenger = self.evaluate_champion_challenger(selected)
 
@@ -1028,6 +1056,123 @@ class AIResearchAgent:
                     ),
                 }
         return hooks
+
+    def _apply_monthly_attribution_feedback(
+        self,
+        allocation_weights: Dict[str, float],
+    ) -> Dict[str, float]:
+        if not allocation_weights:
+            self.last_allocation_feedback = {}
+            self.last_monthly_attribution = []
+            return {}
+        if not self.monthly_feedback_enabled:
+            self.last_allocation_feedback = {
+                strategy_id: 1.0 for strategy_id in allocation_weights.keys()
+            }
+            return dict(allocation_weights)
+
+        summary_rows: List[Dict[str, Any]] = []
+        attribution_rows: List[Dict[str, Any]] = []
+        for strategy_id in sorted(allocation_weights.keys()):
+            summary = self.db.get_stage_summary(
+                strategy_id,
+                "paper",
+                lookback_days=self.monthly_feedback_lookback_days,
+            )
+            summary_rows.append(
+                {
+                    "strategy_id": strategy_id,
+                    "total_pnl": float(summary.get("total_pnl", 0.0)),
+                    "avg_sharpe": float(summary.get("avg_sharpe", 0.0)),
+                    "avg_drawdown": float(summary.get("avg_drawdown", 0.0)),
+                    "avg_slippage_mape": float(summary.get("avg_slippage_mape", 0.0)),
+                }
+            )
+            frame = self.db.get_stage_metrics(
+                strategy_id,
+                "paper",
+                lookback_days=self.monthly_feedback_lookback_days,
+            )
+            if frame.empty:
+                continue
+            for row in frame.to_dict(orient="records"):
+                attribution_rows.append(
+                    {
+                        "strategy_id": strategy_id,
+                        "timestamp": row.get("timestamp"),
+                        "pnl": float(row.get("pnl", 0.0)),
+                        "sharpe": float(row.get("sharpe", 0.0)),
+                        "drawdown": float(row.get("drawdown", 0.0)),
+                        "slippage_mape": float(row.get("slippage_mape", 0.0)),
+                    }
+                )
+
+        feedback = compute_feedback_multipliers(
+            summary_rows,
+            min_multiplier=self.monthly_feedback_min_multiplier,
+            max_multiplier=self.monthly_feedback_max_multiplier,
+        )
+        self.last_allocation_feedback = dict(feedback)
+        self.last_monthly_attribution = summarize_monthly_attribution(attribution_rows)
+
+        weighted = {
+            strategy_id: float(weight) * float(feedback.get(strategy_id, 1.0))
+            for strategy_id, weight in allocation_weights.items()
+        }
+        total = float(sum(weighted.values()))
+        if total <= 1e-12:
+            return dict(allocation_weights)
+        return {strategy_id: float(weight / total) for strategy_id, weight in weighted.items()}
+
+    def _assess_stage_drift(
+        self,
+        *,
+        strategy_id: str,
+        stage: str = "paper",
+    ) -> Dict[str, Any]:
+        lookback = max(self.drift_baseline_days, self.drift_recent_days) + 14
+        frame = self.db.get_stage_metrics(strategy_id, stage, lookback_days=lookback)
+        if frame.empty:
+            return {
+                "drift_alert": False,
+                "checks": {"insufficient_history": True},
+                "reasons": ["insufficient_history"],
+                "baseline": {},
+                "recent": {},
+                "deltas": {},
+            }
+
+        ts = pd.to_datetime(frame["timestamp"], utc=True, errors="coerce")
+        frame = frame.copy()
+        frame["timestamp"] = ts
+        frame = frame[frame["timestamp"].notna()]
+        if frame.empty:
+            return {
+                "drift_alert": False,
+                "checks": {"insufficient_history": True},
+                "reasons": ["insufficient_history"],
+                "baseline": {},
+                "recent": {},
+                "deltas": {},
+            }
+
+        now = pd.Timestamp.now(tz="UTC")
+        recent_cutoff = now - pd.Timedelta(days=max(int(self.drift_recent_days), 1))
+        baseline_cutoff = now - pd.Timedelta(days=max(int(self.drift_baseline_days), 2))
+        recent = frame[frame["timestamp"] >= recent_cutoff]
+        baseline = frame[
+            (frame["timestamp"] < recent_cutoff) & (frame["timestamp"] >= baseline_cutoff)
+        ]
+        if baseline.empty and len(frame) > 1:
+            split = max(len(frame) // 2, 1)
+            baseline = frame.iloc[:split]
+            recent = frame.iloc[split:]
+
+        return evaluate_model_drift(
+            baseline=summarize_stage_metrics(baseline),
+            recent=summarize_stage_metrics(recent),
+            thresholds=self.drift_thresholds,
+        )
 
     # =========================================================================
     # Stage Promotion Gates
@@ -1153,6 +1298,8 @@ class AIResearchAgent:
                 "allocation_mode": "risk_utility",
                 "risk_tolerance_profile": self.risk_tolerance_profile,
                 "allocation_risk_aversion": float(self.allocation_utility.risk_aversion),
+                "allocation_feedback_multipliers": dict(self.last_allocation_feedback),
+                "monthly_attribution_rows": int(len(self.last_monthly_attribution)),
                 "horizon_sleeves": self.horizon_sleeves,
                 "champion_challenger": self.last_champion_challenger,
                 "experiment_runs_recorded": int(
@@ -1194,6 +1341,7 @@ class AIResearchAgent:
     ) -> Dict[str, Any]:
         lineage = self._summarize_data_lineage(historical_data)
         entries: List[Dict[str, Any]] = []
+        artifact_entries: List[Dict[str, Any]] = []
         promoted_set = set(promoted_ids)
 
         for row in results:
@@ -1284,6 +1432,38 @@ class AIResearchAgent:
                     "promoted": bool(promoted),
                 },
             )
+            manifest = StrategyArtifactManifest(
+                run_id=str(run_id or f"run_untracked_{report.report_id}"),
+                experiment_id=str(report.experiment_id),
+                strategy_id=str(report.experiment_id),
+                stage=str(stage),
+                created_at=str(report.created_at),
+                code_sha=str(report.lineage.code_sha),
+                config_hash=str(report.lineage.config_hash),
+                report_id=str(report.report_id),
+                report_path=str(path),
+                report_sha256=str(report_hash),
+                metrics={
+                    "sharpe": float(report.validation.sharpe),
+                    "total_return": float(report.validation.total_return),
+                    "max_drawdown": float(report.validation.max_drawdown),
+                    "deflated_sharpe": float(report.validation.deflated_sharpe),
+                    "pbo_estimate": float(report.validation.pbo_estimate),
+                },
+                extras={
+                    "decision": str(decision_action),
+                    "promoted": bool(promoted),
+                    "promotion_reason": str(decision_reason),
+                },
+            )
+            manifest_path = self.artifact_registry.register(manifest)
+            artifact_entries.append(
+                {
+                    "run_id": manifest.run_id,
+                    "strategy_id": manifest.strategy_id,
+                    "manifest_path": str(manifest_path),
+                }
+            )
             entries.append(
                 {
                     "experiment_id": report.experiment_id,
@@ -1293,6 +1473,7 @@ class AIResearchAgent:
                     "run_id": run_id,
                     "decision": decision_action,
                     "promoted": promoted,
+                    "artifact_manifest": str(manifest_path),
                 }
             )
 
@@ -1300,6 +1481,9 @@ class AIResearchAgent:
             "report_schema_version": self.report_builder.schema_version,
             "report_count": len(entries),
             "report_dir": str(self.report_builder.output_dir),
+            "artifact_manifest_count": len(artifact_entries),
+            "artifact_registry_dir": str(self.artifact_registry.root),
+            "artifacts": artifact_entries,
             "reports": entries,
         }
 
@@ -1336,23 +1520,39 @@ class AIResearchAgent:
         metrics: Dict[str, Dict[str, Any]] = {}
         for strategy_id in list(self.paper_trading):
             summary = self.db.get_stage_summary(strategy_id, "paper", lookback_days=30)
+            drift = (
+                self._assess_stage_drift(strategy_id=strategy_id, stage="paper")
+                if self.drift_monitor_enabled
+                else {
+                    "drift_alert": False,
+                    "checks": {},
+                    "reasons": [],
+                    "baseline": {},
+                    "recent": {},
+                    "deltas": {},
+                }
+            )
             active = (
                 summary["samples"] > 0
                 and summary["avg_sharpe"] >= (self.min_sharpe_for_promotion * 0.5)
                 and summary["avg_drawdown"] <= (self.max_drawdown * 1.2)
+                and not bool(drift.get("drift_alert", False))
             )
             if not active:
                 self.paper_trading.remove(strategy_id)
-                self.db.update_experiment_status(
-                    strategy_id, "backtest", reason="paper_monitor_demote"
+                reason = (
+                    "paper_monitor_model_drift"
+                    if bool(drift.get("drift_alert", False))
+                    else "paper_monitor_demote"
                 )
+                self.db.update_experiment_status(strategy_id, "backtest", reason=reason)
                 self.db.register_experiment_run(
                     experiment_id=strategy_id,
                     stage="backtest",
                     decision_action="demote_to_backtest",
                     operator="autopilot",
                     config_hash="paper_monitor",
-                    evidence={"summary": summary},
+                    evidence={"summary": summary, "drift": drift},
                 )
 
             metrics[strategy_id] = {
@@ -1361,6 +1561,8 @@ class AIResearchAgent:
                 "avg_drawdown": summary["avg_drawdown"],
                 "samples": summary["samples"],
                 "days": summary["days"],
+                "drift_alert": bool(drift.get("drift_alert", False)),
+                "drift_reasons": list(drift.get("reasons", [])),
             }
 
         return metrics

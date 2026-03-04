@@ -45,8 +45,8 @@ from execution.realistic_costs import (
     Side,
 )
 from execution.reliability import ExecutionReliabilityMonitor
-from execution.smart_router import OrderRequest, OrderType, RouteDecision, SmartOrderRouter
 from execution.shorting_controls import ShortingRiskOverlay
+from execution.smart_router import OrderRequest, OrderType, RouteDecision, SmartOrderRouter
 from execution.tca_feedback import (
     ExecutionFill,
     TCADatabase,

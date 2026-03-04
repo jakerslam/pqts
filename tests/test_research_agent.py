@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
+import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-import sys
 
 import numpy as np
 import pandas as pd
@@ -268,3 +268,64 @@ def test_extract_strategy_type_recommendations_from_report():
     }
     names = AIResearchAgent.extract_strategy_type_recommendations(report, max_types=3)
     assert names == ["market_making", "swing_trend", "hold_carry"]
+
+
+def test_monitor_paper_trading_demotes_when_model_drift_alerts(tmp_path):
+    config = _agent_config(tmp_path)
+    config["drift_monitor"] = {
+        "enabled": True,
+        "recent_days": 7,
+        "baseline_days": 90,
+        "max_sharpe_drop": 0.20,
+        "max_drawdown_increase": 0.05,
+        "max_slippage_mape_increase": 10.0,
+        "min_recent_samples": 3,
+    }
+    agent = AIResearchAgent(config)
+    strategy_id = "drift_monitor_case"
+
+    agent.db.log_experiment(
+        Experiment(
+            experiment_id=strategy_id,
+            strategy_name="market_making",
+            variant_id="drift",
+            features=["ob_imbalance"],
+            parameters={},
+            status="paper",
+        )
+    )
+    agent.paper_trading.append(strategy_id)
+
+    now = datetime.now(timezone.utc)
+    for day in range(10, 35):
+        agent.record_stage_metrics(
+            strategy_id,
+            "paper",
+            {
+                "pnl": 40.0,
+                "sharpe": 1.3,
+                "drawdown": 0.06,
+                "slippage_mape": 12.0,
+                "kill_switch_triggers": 0,
+            },
+            timestamp=now - timedelta(days=day),
+        )
+    for day in range(0, 7):
+        agent.record_stage_metrics(
+            strategy_id,
+            "paper",
+            {
+                "pnl": -25.0,
+                "sharpe": 0.2,
+                "drawdown": 0.24,
+                "slippage_mape": 38.0,
+                "kill_switch_triggers": 0,
+            },
+            timestamp=now - timedelta(days=day),
+        )
+
+    payload = agent.monitor_paper_trading()
+
+    assert payload[strategy_id]["status"] == "demoted"
+    assert payload[strategy_id]["drift_alert"] is True
+    assert strategy_id not in agent.paper_trading

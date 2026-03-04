@@ -14,8 +14,11 @@ import yaml
 from analytics.ops_observability import OpsEventStore
 from core.autopilot import HumanStrategyOverride, StrategyAutopilot
 from core.autopilot_policy import enforce_autopilot_policy, resolve_autopilot_policy_pack
+from core.config_validation import validate_engine_config
 from core.market_data_quality import DataQualityReport, MarketDataQualityMonitor
+from core.multi_tenant import enforce_tenant_entitlements, resolve_tenant_entitlements
 from core.operator_tier import resolve_operator_tier
+from core.secrets_policy import enforce_live_secrets
 from core.strategy_contracts import validate_strategy_contract
 from core.toggle_manager import MarketStrategyToggleManager, ToggleValidationError
 from execution.paper_fill_model import MicrostructurePaperFillProvider, PaperFillModelConfig
@@ -103,9 +106,11 @@ class TradingEngine:
 
     def __init__(self, config_path: str):
         self.config = self._load_config(config_path)
+        self._validate_config()
         self.mode = self.config.get("mode", "paper_trading")
         self.toggle_manager = MarketStrategyToggleManager(self.config)
         runtime_cfg = self.config.get("runtime", {})
+        self.tenant_entitlements = resolve_tenant_entitlements(self.config)
         self.operator_tier = resolve_operator_tier(self.config)
         self.autopilot = StrategyAutopilot(runtime_cfg.get("autopilot", {}))
         self.autopilot_policy = resolve_autopilot_policy_pack(
@@ -121,7 +126,9 @@ class TradingEngine:
         self.strict_strategy_contracts = bool(runtime_cfg.get("strict_strategy_contracts", True))
         self.last_autopilot_decision: Dict[str, Any] = {}
         self.ops_events = OpsEventStore(
-            path=str(runtime_cfg.get("ops_events_path", "data/analytics/ops_events.jsonl"))
+            path=str(runtime_cfg.get("ops_events_path", "data/analytics/ops_events.jsonl")),
+            database_url=str(runtime_cfg.get("ops_events_db", "")).strip(),
+            telemetry_enabled=bool(runtime_cfg.get("telemetry_enabled", False)),
         )
         self.positions: Dict[str, Position] = {}
         self.orders: Dict[str, Order] = {}
@@ -152,14 +159,37 @@ class TradingEngine:
         logger.info("Toggle state: %s", self.toggle_manager.snapshot())
         _, profile = self._effective_risk_config()
         logger.info("Risk tolerance profile: %s", profile.name)
+        logger.info(
+            "Tenant entitlements: id=%s plan=%s",
+            self.tenant_entitlements.tenant_id,
+            self.tenant_entitlements.plan,
+        )
 
     def _load_config(self, path: str) -> dict:
-        with open(path, "r") as f:
-            return yaml.safe_load(f)
+        with open(path, "r", encoding="utf-8") as f:
+            return yaml.safe_load(f) or {}
+
+    def _validate_config(self) -> None:
+        issues = validate_engine_config(self.config)
+        errors = [issue for issue in issues if str(issue.severity).lower() == "error"]
+        warnings = [issue for issue in issues if str(issue.severity).lower() != "error"]
+        if errors:
+            messages = "; ".join(f"{issue.key}: {issue.message}" for issue in errors)
+            raise ValueError(f"Engine config validation failed: {messages}")
+        for issue in warnings:
+            logger.warning("Engine config warning [%s]: %s", issue.key, issue.message)
+        enforce_live_secrets(self.config)
 
     async def start(self):
         """Start the trading engine"""
         logger.info("Starting trading engine...")
+        if (
+            self.mode in {"live", "live_trading"}
+            and not self.tenant_entitlements.allow_live_trading
+        ):
+            raise RuntimeError(
+                f"Tenant plan '{self.tenant_entitlements.plan}' does not permit live trading."
+            )
         self.running = True
 
         # Initialize market adapters
@@ -279,6 +309,8 @@ class TradingEngine:
                 {},
             ),
             "risk_profile": risk_profile_payload(_profile),
+            "tenant_plan": self.tenant_entitlements.plan,
+            "tenant_id": self.tenant_entitlements.tenant_id,
         }
         return broker_config
 
@@ -770,6 +802,12 @@ class TradingEngine:
 
     def set_market_enabled(self, market: str, enabled: bool):
         """Enable/disable a market domain at runtime."""
+        if enabled and self.tenant_entitlements.allowed_markets is not None:
+            if market not in self.tenant_entitlements.allowed_markets:
+                raise ToggleValidationError(
+                    f"Market '{market}' is not permitted for tenant plan "
+                    f"'{self.tenant_entitlements.plan}'."
+                )
         self.toggle_manager.set_market_enabled(market, enabled)
         self._sync_toggle_state()
 
@@ -780,11 +818,36 @@ class TradingEngine:
 
     def set_active_markets(self, markets: List[str]):
         """Replace active market set with the provided list."""
+        if self.tenant_entitlements.allowed_markets is not None:
+            disallowed = [
+                market
+                for market in markets
+                if market not in self.tenant_entitlements.allowed_markets
+            ]
+            if disallowed:
+                raise ToggleValidationError(
+                    f"Markets not permitted for plan '{self.tenant_entitlements.plan}': {disallowed}"
+                )
         self.toggle_manager.set_active_markets(markets)
         self._sync_toggle_state()
 
     def set_active_strategies(self, strategies: List[str]):
         """Replace active strategy set with the provided list."""
+        if self.tenant_entitlements.strategy_allowlist is not None:
+            disallowed = [
+                name
+                for name in strategies
+                if name not in self.tenant_entitlements.strategy_allowlist
+            ]
+            if disallowed:
+                raise ToggleValidationError(
+                    f"Strategies not permitted for plan '{self.tenant_entitlements.plan}': {disallowed}"
+                )
+        if len(strategies) > int(self.tenant_entitlements.max_active_strategies):
+            raise ToggleValidationError(
+                f"Plan '{self.tenant_entitlements.plan}' allows at most "
+                f"{self.tenant_entitlements.max_active_strategies} active strategies."
+            )
         self.toggle_manager.set_active_strategies(strategies)
         self._sync_toggle_state()
 
@@ -818,6 +881,8 @@ class TradingEngine:
         state["operator_tier"] = self.operator_tier.name
         state["autopilot_mode"] = self.autopilot.mode
         state["autopilot_last_decision"] = dict(self.last_autopilot_decision)
+        state["tenant_id"] = self.tenant_entitlements.tenant_id
+        state["tenant_plan"] = self.tenant_entitlements.plan
         return state
 
     def _sync_toggle_state(self):
@@ -828,6 +893,8 @@ class TradingEngine:
         is wired for each market adapter and strategy class.
         """
         active_markets = set(self.toggle_manager.get_active_markets())
+        if self.tenant_entitlements.allowed_markets is not None:
+            active_markets = active_markets.intersection(self.tenant_entitlements.allowed_markets)
         if self.router is not None:
             # Reconfigure router-owned venue registry against toggled market set.
             filtered_markets: Dict[str, Any] = {}
@@ -849,6 +916,10 @@ class TradingEngine:
             for target in self.toggle_manager.get_strategy_targets()
         }
         active_strategies = set(self.toggle_manager.get_active_strategies())
+        if self.tenant_entitlements.strategy_allowlist is not None:
+            active_strategies = active_strategies.intersection(
+                self.tenant_entitlements.strategy_allowlist
+            )
         self.strategy_configs = {}
         for strategy_name in sorted(active_strategies):
             config = self.toggle_manager.get_strategy_config(strategy_name)
@@ -906,10 +977,21 @@ class TradingEngine:
             ranked_candidates=list(decision.candidate_scores.keys()),
             policy=self.autopilot_policy,
         )
-        self.toggle_manager.set_active_strategies(enforced.selected)
+        tenant_enforced = enforce_tenant_entitlements(
+            selected=enforced.selected,
+            active_markets=self.toggle_manager.get_active_markets(),
+            ranked_candidates=list(decision.candidate_scores.keys()),
+            entitlements=self.tenant_entitlements,
+        )
+        self.toggle_manager.set_active_markets(tenant_enforced.active_markets)
+        self.toggle_manager.set_active_strategies(tenant_enforced.selected)
         self.last_autopilot_decision = {
             **decision.to_dict(),
             "operator_tier": self.operator_tier.name,
+            "tenant": {
+                "tenant_id": self.tenant_entitlements.tenant_id,
+                "plan": self.tenant_entitlements.plan,
+            },
             "policy_pack": {
                 "name": self.autopilot_policy.name,
                 "allowed_strategies": (
@@ -921,6 +1003,7 @@ class TradingEngine:
                 "max_active_strategies": int(self.autopilot_policy.max_active_strategies),
             },
             "policy_enforcement": enforced.to_dict(),
+            "tenant_enforcement": tenant_enforced.to_dict(),
         }
         self._sync_toggle_state()
         self.ops_events.emit(
@@ -928,21 +1011,23 @@ class TradingEngine:
             severity="info",
             message="autopilot_strategy_selection_applied",
             metrics={
-                "selected_count": len(enforced.selected),
-                "dropped_count": len(enforced.dropped),
+                "selected_count": len(tenant_enforced.selected),
+                "dropped_count": len(enforced.dropped) + len(tenant_enforced.dropped_strategies),
                 "added_count": len(enforced.added),
             },
             metadata={
                 "mode": decision.mode,
                 "operator_tier": self.operator_tier.name,
-                "selected_strategies": list(enforced.selected),
+                "tenant_plan": self.tenant_entitlements.plan,
+                "selected_strategies": list(tenant_enforced.selected),
                 "policy_reasons": list(enforced.reasons),
+                "tenant_reasons": list(tenant_enforced.reasons),
             },
         )
         logger.info(
             "Autopilot applied: mode=%s selected=%s",
             decision.mode,
-            enforced.selected,
+            tenant_enforced.selected,
         )
         return dict(self.last_autopilot_decision)
 

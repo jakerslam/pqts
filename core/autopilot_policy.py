@@ -85,7 +85,9 @@ def resolve_autopilot_policy_pack(
 
     allowed = _set_or_none(tier_cfg.get("allowed_strategies", base.allowed_strategies))
     min_active = max(int(tier_cfg.get("min_active_strategies", base.min_active_strategies)), 1)
-    max_active = max(int(tier_cfg.get("max_active_strategies", base.max_active_strategies)), min_active)
+    max_active = max(
+        int(tier_cfg.get("max_active_strategies", base.max_active_strategies)), min_active
+    )
 
     return AutopilotPolicyPack(
         name=tier,

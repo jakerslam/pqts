@@ -8,6 +8,9 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional
 
+from analytics.telemetry_backbone import TelemetryBackbone
+from core.persistence import EventPersistenceStore
+
 
 def _utc_now() -> datetime:
     return datetime.now(timezone.utc)
@@ -36,9 +39,16 @@ class OpsEvent:
 class OpsEventStore:
     """Append-only JSONL sink with deterministic summaries for alerting."""
 
-    def __init__(self, path: str = "data/analytics/ops_events.jsonl"):
+    def __init__(
+        self,
+        path: str = "data/analytics/ops_events.jsonl",
+        database_url: str = "",
+        telemetry_enabled: bool = False,
+    ):
         self.path = Path(path)
         self.path.parent.mkdir(parents=True, exist_ok=True)
+        self.persistence = EventPersistenceStore(database_url) if database_url else None
+        self.telemetry = TelemetryBackbone(service_name="pqts", enabled=bool(telemetry_enabled))
 
     def emit(
         self,
@@ -60,6 +70,9 @@ class OpsEventStore:
         )
         with self.path.open("a", encoding="utf-8") as handle:
             handle.write(json.dumps(event.to_dict(), sort_keys=True) + "\n")
+        if self.persistence is not None:
+            self.persistence.append(category=event.category, payload=event.to_dict())
+        self.telemetry.record_event(category=event.category, metrics=event.metrics)
         return event
 
     def read_events(self, *, since_minutes: Optional[int] = None) -> List[Dict[str, Any]]:

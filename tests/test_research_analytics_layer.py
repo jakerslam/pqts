@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 import json
-from pathlib import Path
 import sys
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -19,8 +19,12 @@ from research.report_builder import ResearchAnalyticsReportBuilder
 
 def _historical_data() -> dict[str, pd.DataFrame]:
     index = pd.date_range("2025-01-01", periods=240, freq="h")
-    btc = 100.0 + np.linspace(0.0, 6.0, len(index)) + 0.5 * np.sin(np.linspace(0.0, 9.0, len(index)))
-    eth = 60.0 + np.linspace(0.0, 4.0, len(index)) + 0.4 * np.cos(np.linspace(0.0, 10.0, len(index)))
+    btc = (
+        100.0 + np.linspace(0.0, 6.0, len(index)) + 0.5 * np.sin(np.linspace(0.0, 9.0, len(index)))
+    )
+    eth = (
+        60.0 + np.linspace(0.0, 4.0, len(index)) + 0.4 * np.cos(np.linspace(0.0, 10.0, len(index)))
+    )
     return {
         "BTCUSDT": pd.DataFrame({"close": btc}, index=index),
         "ETHUSDT": pd.DataFrame({"close": eth}, index=index),
@@ -150,8 +154,10 @@ def test_agent_research_cycle_emits_strategy_report_artifacts(tmp_path):
     assert analytics["report_count"] == report["summary"]["backtests_run"]
     assert analytics["report_schema_version"] == "1.0.0"
     assert analytics["reports"]
+    assert analytics["artifact_manifest_count"] == analytics["report_count"]
     for item in analytics["reports"]:
         assert Path(item["path"]).exists()
+        assert Path(item["artifact_manifest"]).exists()
 
     artifacts = agent.db.get_report_artifacts()
     assert len(artifacts) == analytics["report_count"]
