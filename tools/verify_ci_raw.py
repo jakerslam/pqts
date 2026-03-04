@@ -44,9 +44,14 @@ def fetch_raw_workflow(repo: str, sha: str) -> str:
 
 def verify(content: str) -> None:
     newline_count = content.count("\n")
+    line_count = len(content.splitlines())
     if newline_count <= MIN_NEWLINE_COUNT:
         raise RuntimeError(
             f"Expected >{MIN_NEWLINE_COUNT} newline chars in raw CI YAML, got {newline_count}."
+        )
+    if line_count <= MIN_NEWLINE_COUNT:
+        raise RuntimeError(
+            f"Expected >{MIN_NEWLINE_COUNT} lines in raw CI YAML, got {line_count}."
         )
 
     missing = [key for key in REQUIRED_KEYS if key not in content]
@@ -64,7 +69,8 @@ def main() -> int:
     verify(content)
     print(
         "PASS: raw CI workflow validation succeeded "
-        f"(repo={args.repo}, sha={args.sha}, newlines={content.count(chr(10))})."
+        f"(repo={args.repo}, sha={args.sha}, newlines={content.count(chr(10))}, "
+        f"lines={len(content.splitlines())})."
     )
     return 0
 
