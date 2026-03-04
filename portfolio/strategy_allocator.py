@@ -16,6 +16,7 @@ class StrategyBudgetInput:
     annual_turnover: float
     cost_per_turnover: float
     capacity_ratio: float
+    horizon: str = "intraday"
 
 
 @dataclass(frozen=True)
@@ -115,3 +116,61 @@ class StrategyCapitalAllocator:
     def allocate(self, inputs: Iterable[StrategyBudgetInput]) -> Dict[str, float]:
         """Backward-compatible alias: now delegates to utility-based allocation."""
         return self.allocate_utility(inputs, utility=self.utility_config)
+
+    @staticmethod
+    def _normalize_budget_map(raw: Dict[str, float]) -> Dict[str, float]:
+        positive = {str(k): max(float(v), 0.0) for k, v in raw.items()}
+        total = float(sum(positive.values()))
+        if total <= 1e-12:
+            n = max(len(positive), 1)
+            return {key: 1.0 / n for key in positive} if positive else {"intraday": 1.0}
+        return {key: value / total for key, value in positive.items()}
+
+    def allocate_multi_horizon(
+        self,
+        inputs: Iterable[StrategyBudgetInput],
+        *,
+        sleeve_budgets: Optional[Dict[str, float]] = None,
+        utility: Optional[StrategyUtilityConfig] = None,
+    ) -> Dict[str, float]:
+        """
+        Allocate by horizon sleeves, then allocate within each sleeve by utility.
+
+        Example horizons: intraday, swing, hold.
+        """
+        rows: List[StrategyBudgetInput] = list(inputs)
+        if not rows:
+            return {}
+
+        rows_by_horizon: Dict[str, List[StrategyBudgetInput]] = {}
+        for row in rows:
+            horizon = str(row.horizon or "intraday").strip().lower() or "intraday"
+            rows_by_horizon.setdefault(horizon, []).append(row)
+
+        if sleeve_budgets:
+            raw_budgets = {
+                horizon: float(sleeve_budgets.get(horizon, 0.0))
+                for horizon in rows_by_horizon.keys()
+            }
+            missing = [h for h, value in raw_budgets.items() if value <= 0.0]
+            if missing:
+                remainder = max(1.0 - sum(max(v, 0.0) for v in raw_budgets.values()), 0.0)
+                fill = remainder / max(len(missing), 1)
+                for horizon in missing:
+                    raw_budgets[horizon] = fill
+            budgets = self._normalize_budget_map(raw_budgets)
+        else:
+            equal = 1.0 / max(len(rows_by_horizon), 1)
+            budgets = {horizon: equal for horizon in rows_by_horizon}
+
+        final_weights: Dict[str, float] = {}
+        for horizon, bucket in rows_by_horizon.items():
+            local = self.allocate_utility(bucket, utility=utility)
+            sleeve_weight = float(budgets.get(horizon, 0.0))
+            for strategy_id, weight in local.items():
+                final_weights[strategy_id] = float(weight) * sleeve_weight
+
+        total = float(sum(final_weights.values()))
+        if total <= 1e-12:
+            return self.allocate_utility(rows, utility=utility)
+        return {sid: float(weight / total) for sid, weight in final_weights.items()}

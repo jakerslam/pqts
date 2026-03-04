@@ -54,15 +54,35 @@ def build_arg_parser() -> argparse.ArgumentParser:
         default="",
         help="Operator UX tier override (simple or pro).",
     )
+    parser.add_argument(
+        "--autopilot-mode",
+        choices=["manual", "auto", "hybrid"],
+        help="Autopilot strategy selector mode.",
+    )
+    parser.add_argument(
+        "--autopilot-include",
+        help="Comma-separated strategy names to force-include after autopilot selection.",
+    )
+    parser.add_argument(
+        "--autopilot-exclude",
+        help="Comma-separated strategy names to force-exclude after autopilot selection.",
+    )
+    parser.add_argument(
+        "--autopilot-replace",
+        help="Comma-separated strategy names to fully replace autopilot output.",
+    )
     return parser
 
 
 def apply_cli_toggles(engine: TradingEngine, args: argparse.Namespace) -> str:
+    has_autopilot_strategy_override = bool(
+        args.autopilot_include or args.autopilot_exclude or args.autopilot_replace
+    )
     tier = resolve_operator_tier(engine.config, override=(args.operator_tier or None))
     validate_operator_tier_overrides(
         tier=tier,
         has_market_override=bool(args.markets),
-        has_strategy_override=bool(args.strategies),
+        has_strategy_override=bool(args.strategies) or has_autopilot_strategy_override,
         has_symbol_override=False,
     )
     if args.profile:
@@ -71,6 +91,16 @@ def apply_cli_toggles(engine: TradingEngine, args: argparse.Namespace) -> str:
         engine.set_active_markets(_csv_list(args.markets))
     if args.strategies:
         engine.set_active_strategies(_csv_list(args.strategies))
+    if args.autopilot_mode:
+        engine.set_autopilot_mode(args.autopilot_mode)
+    if args.autopilot_mode or has_autopilot_strategy_override:
+        engine.apply_autopilot_strategy_selection(
+            include=_csv_list(args.autopilot_include) if args.autopilot_include else [],
+            exclude=_csv_list(args.autopilot_exclude) if args.autopilot_exclude else [],
+            replace_with=(
+                _csv_list(args.autopilot_replace) if args.autopilot_replace is not None else None
+            ),
+        )
     if args.risk_profile:
         engine.set_risk_tolerance_profile(args.risk_profile)
     return tier.name

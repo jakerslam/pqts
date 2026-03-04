@@ -12,14 +12,18 @@ import pandas as pd
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from research.ai_agent import AIResearchAgent
-from research.auto_generator import StrategyVariant
+from research.auto_generator import AutoStrategyGenerator, StrategyVariant
 from research.database import Experiment
 
 
 def _historical_data() -> dict[str, pd.DataFrame]:
     index = pd.date_range("2025-01-01", periods=360, freq="h")
-    btc = 100.0 + np.linspace(0.0, 8.0, len(index)) + 0.8 * np.sin(np.linspace(0.0, 15.0, len(index)))
-    eth = 60.0 + np.linspace(0.0, 4.0, len(index)) + 0.5 * np.cos(np.linspace(0.0, 18.0, len(index)))
+    btc = (
+        100.0 + np.linspace(0.0, 8.0, len(index)) + 0.8 * np.sin(np.linspace(0.0, 15.0, len(index)))
+    )
+    eth = (
+        60.0 + np.linspace(0.0, 4.0, len(index)) + 0.5 * np.cos(np.linspace(0.0, 18.0, len(index)))
+    )
     return {
         "BTCUSDT": pd.DataFrame({"close": btc}, index=index),
         "ETHUSDT": pd.DataFrame({"close": eth}, index=index),
@@ -163,3 +167,104 @@ def test_research_cycle_returns_evidence_report(tmp_path):
     assert report["summary"]["backtests_run"] == report["summary"]["candidates_generated"]
     assert "objective" in report
     assert "profit_target_feasibility" in report["objective"]
+
+
+def test_auto_generator_supports_swing_and_hold_variants():
+    generator = AutoStrategyGenerator()
+
+    swing = generator.generate_strategy_variants("swing_trend", n_per_feature_set=2)
+    hold = generator.generate_strategy_variants("hold_carry", n_per_feature_set=2)
+
+    assert swing
+    assert hold
+    assert all(variant.strategy_type == "swing_trend" for variant in swing)
+    assert all(variant.strategy_type == "hold_carry" for variant in hold)
+
+
+def test_stage_gate_uses_horizon_specific_thresholds(tmp_path):
+    config = _agent_config(tmp_path)
+    config["horizon_stage_gates"] = {
+        "live_canary": {
+            "swing": {
+                "min_days": 20,
+                "min_avg_sharpe": 0.8,
+                "max_avg_drawdown": 0.2,
+                "max_slippage_mape": 30.0,
+                "max_kill_switch_triggers": 0,
+            },
+            "intraday": {
+                "min_days": 30,
+                "min_avg_sharpe": 1.2,
+                "max_avg_drawdown": 0.15,
+                "max_slippage_mape": 20.0,
+                "max_kill_switch_triggers": 0,
+            },
+        }
+    }
+    agent = AIResearchAgent(config)
+
+    swing_id = "swing_gate_pass"
+    intraday_id = "intraday_gate_block"
+    agent.db.log_experiment(
+        Experiment(
+            experiment_id=swing_id,
+            strategy_name="swing_trend",
+            variant_id="s1",
+            features=["price_momentum_1h"],
+            parameters={},
+            status="paper",
+        )
+    )
+    agent.db.log_experiment(
+        Experiment(
+            experiment_id=intraday_id,
+            strategy_name="market_making",
+            variant_id="i1",
+            features=["ob_imbalance"],
+            parameters={},
+            status="paper",
+        )
+    )
+
+    now = datetime.now(timezone.utc)
+    for offset in range(22):
+        payload = {
+            "pnl": 80.0,
+            "sharpe": 0.9,
+            "drawdown": 0.1,
+            "slippage_mape": 22.0,
+            "kill_switch_triggers": 0,
+        }
+        agent.record_stage_metrics(
+            swing_id,
+            "paper",
+            payload,
+            timestamp=now - timedelta(days=offset),
+        )
+        agent.record_stage_metrics(
+            intraday_id,
+            "paper",
+            payload,
+            timestamp=now - timedelta(days=offset),
+        )
+
+    swing_assessment = agent.evaluate_stage_gate(swing_id, "live_canary")
+    intraday_assessment = agent.evaluate_stage_gate(intraday_id, "live_canary")
+
+    assert swing_assessment["horizon"] == "swing"
+    assert swing_assessment["passed"] is True
+    assert intraday_assessment["horizon"] == "intraday"
+    assert intraday_assessment["passed"] is False
+
+
+def test_extract_strategy_type_recommendations_from_report():
+    report = {
+        "top_strategies": [
+            {"id": "a", "type": "market_making"},
+            {"id": "b", "type": "swing_trend"},
+            {"id": "c", "type": "market_making"},
+            {"id": "d", "type": "hold_carry"},
+        ]
+    }
+    names = AIResearchAgent.extract_strategy_type_recommendations(report, max_types=3)
+    assert names == ["market_making", "swing_trend", "hold_carry"]

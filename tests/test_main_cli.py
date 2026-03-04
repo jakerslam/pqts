@@ -62,6 +62,12 @@ def test_parser_accepts_toggle_flags():
             "crypto,forex",
             "--strategies",
             "scalping,arb",
+            "--autopilot-mode",
+            "hybrid",
+            "--autopilot-include",
+            "mean_reversion",
+            "--autopilot-exclude",
+            "arb",
             "--risk-profile",
             "conservative",
             "--operator-tier",
@@ -74,6 +80,9 @@ def test_parser_accepts_toggle_flags():
     assert args.profile == "crypto_only"
     assert args.markets == "crypto,forex"
     assert args.strategies == "scalping,arb"
+    assert args.autopilot_mode == "hybrid"
+    assert args.autopilot_include == "mean_reversion"
+    assert args.autopilot_exclude == "arb"
     assert args.risk_profile == "conservative"
     assert args.operator_tier == "pro"
     assert args.show_toggles is True
@@ -104,6 +113,30 @@ def test_apply_cli_toggles_overrides_profile(tmp_path):
     assert state["active_markets"] == ["forex"]
     assert state["active_strategies"] == ["scalping"]
     assert state["risk_profile"] == "conservative"
+
+
+def test_apply_cli_toggles_autopilot_mode_and_human_overrides(tmp_path):
+    config_path = _write_config(tmp_path)
+    engine = TradingEngine(str(config_path))
+
+    parser = build_arg_parser()
+    args = parser.parse_args(
+        [
+            str(config_path),
+            "--autopilot-mode",
+            "auto",
+            "--autopilot-include",
+            "mean_reversion",
+            "--autopilot-exclude",
+            "arb",
+        ]
+    )
+
+    apply_cli_toggles(engine, args)
+    state = engine.get_toggle_state()
+    assert state["autopilot_mode"] == "auto"
+    assert "mean_reversion" in state["active_strategies"]
+    assert "arb" not in state["active_strategies"]
 
 
 def test_apply_cli_toggles_blocks_simple_tier_direct_overrides(tmp_path):

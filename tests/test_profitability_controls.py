@@ -204,6 +204,47 @@ def test_strategy_allocator_utility_respects_risk_aversion():
     assert aggressive_w["high_vol"] > conservative_w["high_vol"]
 
 
+def test_strategy_allocator_multi_horizon_respects_sleeves():
+    allocator = StrategyCapitalAllocator(max_weight=0.95, min_weight=0.0, capacity_haircut=0.0)
+    weights = allocator.allocate_multi_horizon(
+        [
+            StrategyBudgetInput(
+                strategy_id="intraday_mm",
+                expected_return=0.20,
+                annual_vol=0.22,
+                annual_turnover=4.0,
+                cost_per_turnover=0.004,
+                capacity_ratio=0.8,
+                horizon="intraday",
+            ),
+            StrategyBudgetInput(
+                strategy_id="swing_trend",
+                expected_return=0.18,
+                annual_vol=0.16,
+                annual_turnover=1.8,
+                cost_per_turnover=0.004,
+                capacity_ratio=0.7,
+                horizon="swing",
+            ),
+            StrategyBudgetInput(
+                strategy_id="hold_carry",
+                expected_return=0.12,
+                annual_vol=0.10,
+                annual_turnover=0.7,
+                cost_per_turnover=0.004,
+                capacity_ratio=0.6,
+                horizon="hold",
+            ),
+        ],
+        sleeve_budgets={"intraday": 0.20, "swing": 0.30, "hold": 0.50},
+    )
+
+    assert abs(sum(weights.values()) - 1.0) < 1e-9
+    assert abs(weights["intraday_mm"] - 0.20) < 1e-6
+    assert abs(weights["swing_trend"] - 0.30) < 1e-6
+    assert abs(weights["hold_carry"] - 0.50) < 1e-6
+
+
 def test_market_data_quality_monitor_flags_drift_and_missing_symbols():
     monitor = MarketDataQualityMonitor(
         min_completeness=0.95,
@@ -481,3 +522,119 @@ def test_router_tca_records_strategy_and_expected_alpha(tmp_path):
     latest = router.tca_db.records[-1]
     assert latest.strategy_id == "mm_live"
     assert latest.expected_alpha_bps == 25.0
+
+
+def test_router_rejects_short_without_locate(tmp_path):
+    router = RiskAwareRouter(
+        risk_config=RiskLimits(
+            max_daily_loss_pct=0.02,
+            max_drawdown_pct=0.2,
+            max_gross_leverage=2.0,
+        ),
+        broker_config={
+            "enabled": True,
+            "shorting_controls": {
+                "enabled": True,
+                "require_locate": True,
+                "locates": {"coinbase|BTC-USD": False},
+            },
+        },
+        tca_db_path=str(tmp_path / "router_short_reject.csv"),
+    )
+    router.set_capital(100000.0, source="unit_test")
+    strategy_returns, portfolio_changes = _strategy_inputs()
+    market_data = {
+        "coinbase": {
+            "BTC-USD": {
+                "price": 50000.0,
+                "spread": 0.0002,
+                "volume_24h": 2_000_000,
+            }
+        },
+        "order_book": {
+            "bids": [(49990.0, 2.0), (49980.0, 4.0)],
+            "asks": [(50010.0, 1.5), (50020.0, 3.0)],
+        },
+    }
+    order = OrderRequest(
+        symbol="BTC-USD",
+        side="sell",
+        quantity=0.1,
+        order_type=OrderType.LIMIT,
+        price=50000.0,
+        strategy_id="short_no_locate",
+    )
+
+    result = asyncio.run(
+        router.submit_order(
+            order=order,
+            market_data=market_data,
+            portfolio=_portfolio_snapshot(),
+            strategy_returns=strategy_returns,
+            portfolio_changes=portfolio_changes,
+        )
+    )
+
+    assert result.success is False
+    assert "SHORTING_CONTROL: no_locate" in str(result.rejected_reason)
+    assert result.audit_log["shorting_overlay"]["approved"] is False
+
+
+def test_router_allows_short_when_locate_borrow_and_squeeze_pass(tmp_path):
+    router = RiskAwareRouter(
+        risk_config=RiskLimits(
+            max_daily_loss_pct=0.02,
+            max_drawdown_pct=0.2,
+            max_gross_leverage=2.0,
+        ),
+        broker_config={
+            "enabled": True,
+            "shorting_controls": {
+                "enabled": True,
+                "max_borrow_bps": 30.0,
+                "max_short_exposure_pct": 0.30,
+                "borrow_bps": {"binance|BTC-USD": 8.0},
+                "locates": {"binance|BTC-USD": True},
+                "recalls": {"binance|BTC-USD": False},
+                "squeeze": {"binance|BTC-USD": 1.1},
+            },
+        },
+        tca_db_path=str(tmp_path / "router_short_allow.csv"),
+    )
+    router.set_capital(100000.0, source="unit_test")
+    strategy_returns, portfolio_changes = _strategy_inputs()
+    market_data = {
+        "binance": {
+            "BTC-USD": {
+                "price": 50000.0,
+                "spread": 0.0002,
+                "volume_24h": 2_000_000,
+            }
+        },
+        "order_book": {
+            "bids": [(49990.0, 2.0), (49980.0, 4.0)],
+            "asks": [(50010.0, 1.5), (50020.0, 3.0)],
+        },
+    }
+    order = OrderRequest(
+        symbol="BTC-USD",
+        side="sell",
+        quantity=0.1,
+        order_type=OrderType.LIMIT,
+        price=50000.0,
+        strategy_id="short_pass",
+    )
+
+    result = asyncio.run(
+        router.submit_order(
+            order=order,
+            market_data=market_data,
+            portfolio=_portfolio_snapshot(),
+            strategy_returns=strategy_returns,
+            portfolio_changes=portfolio_changes,
+        )
+    )
+
+    assert result.success is True
+    assert result.audit_log["shorting_overlay"]["approved"] is True
+    assert result.audit_log["shorting_overlay"]["reason"] == "approved"

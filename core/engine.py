@@ -11,6 +11,7 @@ from typing import Any, Dict, List, Optional
 import numpy as np
 import yaml
 
+from core.autopilot import HumanStrategyOverride, StrategyAutopilot
 from core.market_data_quality import DataQualityReport, MarketDataQualityMonitor
 from core.toggle_manager import MarketStrategyToggleManager, ToggleValidationError
 from execution.paper_fill_model import MicrostructurePaperFillProvider, PaperFillModelConfig
@@ -100,6 +101,15 @@ class TradingEngine:
         self.config = self._load_config(config_path)
         self.mode = self.config.get("mode", "paper_trading")
         self.toggle_manager = MarketStrategyToggleManager(self.config)
+        runtime_cfg = self.config.get("runtime", {})
+        self.autopilot = StrategyAutopilot(runtime_cfg.get("autopilot", {}))
+        self.autopilot_auto_apply_on_start = bool(
+            runtime_cfg.get("autopilot", {}).get(
+                "auto_apply_on_start",
+                self.autopilot.mode != "manual",
+            )
+        )
+        self.last_autopilot_decision: Dict[str, Any] = {}
         self.positions: Dict[str, Position] = {}
         self.orders: Dict[str, Order] = {}
         self.market_data: Dict[str, MarketData] = {}
@@ -120,7 +130,6 @@ class TradingEngine:
         self.latest_data_quality_report: Optional[DataQualityReport] = None
         self._portfolio_change_history: List[float] = [0.0] * 30
         self._risk_profile_override: Optional[str] = None
-        runtime_cfg = self.config.get("runtime", {})
         self.state_path = Path(runtime_cfg.get("state_path", "data/engine_state.json"))
         self.state_version = 1
         self.running = False
@@ -145,6 +154,9 @@ class TradingEngine:
 
         # Initialize risk manager
         await self._init_risk_manager()
+
+        if self.autopilot_auto_apply_on_start:
+            self.apply_autopilot_strategy_selection()
 
         # Initialize strategies
         await self._init_strategies()
@@ -773,6 +785,8 @@ class TradingEngine:
         _, profile = self._effective_risk_config()
         state["risk_profile"] = profile.name
         state["risk_profile_scale"] = float(profile.risk_limit_scale)
+        state["autopilot_mode"] = self.autopilot.mode
+        state["autopilot_last_decision"] = dict(self.last_autopilot_decision)
         return state
 
     def _sync_toggle_state(self):
@@ -814,6 +828,56 @@ class TradingEngine:
                 config["enabled_markets"] = enabled_markets
                 self.strategy_configs[strategy_name] = config
         self.active_strategy_names = sorted(self.strategy_configs.keys())
+
+    def set_autopilot_mode(self, mode: str) -> None:
+        self.autopilot.set_mode(mode)
+        logger.info("Autopilot mode set to %s", self.autopilot.mode)
+
+    def apply_autopilot_strategy_selection(
+        self,
+        *,
+        ai_recommendations: Optional[List[str]] = None,
+        include: Optional[List[str]] = None,
+        exclude: Optional[List[str]] = None,
+        replace_with: Optional[List[str]] = None,
+    ) -> Dict[str, Any]:
+        """
+        Select active strategies using autopilot with optional human overrides.
+
+        `ai_recommendations` is typically sourced from research AI outputs.
+        """
+        strategy_names = self.toggle_manager.list_strategies()
+        strategy_configs = {
+            name: self.toggle_manager.get_strategy_config(name) for name in strategy_names
+        }
+        current_active = self.toggle_manager.get_active_strategies()
+        override = HumanStrategyOverride(
+            include=list(include or []),
+            exclude=list(exclude or []),
+            replace_with=(list(replace_with) if replace_with is not None else None),
+        )
+        decision = self.autopilot.decide(
+            strategy_configs=strategy_configs,
+            current_active=current_active,
+            ai_recommendations=(ai_recommendations or []),
+            human_override=override,
+        )
+        self.toggle_manager.set_active_strategies(decision.selected_strategies)
+        self.last_autopilot_decision = decision.to_dict()
+        self._sync_toggle_state()
+        logger.info(
+            "Autopilot applied: mode=%s selected=%s",
+            decision.mode,
+            decision.selected_strategies,
+        )
+        return dict(self.last_autopilot_decision)
+
+    def get_autopilot_state(self) -> Dict[str, Any]:
+        return {
+            "mode": self.autopilot.mode,
+            "auto_apply_on_start": bool(self.autopilot_auto_apply_on_start),
+            "decision": dict(self.last_autopilot_decision),
+        }
 
 
 if __name__ == "__main__":

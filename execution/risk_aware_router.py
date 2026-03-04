@@ -46,6 +46,7 @@ from execution.realistic_costs import (
 )
 from execution.reliability import ExecutionReliabilityMonitor
 from execution.smart_router import OrderRequest, OrderType, RouteDecision, SmartOrderRouter
+from execution.shorting_controls import ShortingRiskOverlay
 from execution.tca_feedback import (
     ExecutionFill,
     TCADatabase,
@@ -245,6 +246,7 @@ class RiskAwareRouter:
         self.market_venues: Dict[str, VenueClient] = {}
         self._markets_config: Dict[str, Any] = {}
         self.regime_overlay = RegimeExposureOverlay(broker_config.get("regime_overlay", {}))
+        self.shorting_overlay = ShortingRiskOverlay(broker_config.get("shorting_controls", {}))
         reliability_cfg = broker_config.get("reliability", {})
         self.reliability_monitor = ExecutionReliabilityMonitor(
             latency_slo_ms=float(reliability_cfg.get("latency_slo_ms", 250.0)),
@@ -878,6 +880,31 @@ class RiskAwareRouter:
             self.reject_count += 1
             audit_entry["rejected"] = True
             audit_entry["reject_reason"] = f"VENUE_CAP: {notional:.2f} > {float(venue_cap):.2f}"
+            self.audit_log.append(audit_entry)
+            return OrderResult(
+                success=False,
+                decision=RiskDecision.HALT,
+                risk_state=risk_state,
+                order_id=None,
+                exchange=route.exchange,
+                rejected_reason=audit_entry["reject_reason"],
+                audit_log=audit_entry,
+            )
+
+        shorting_decision = self.shorting_overlay.evaluate(
+            symbol=order.symbol,
+            venue=route.exchange,
+            side=order.side,
+            order_qty=float(order.quantity),
+            order_price=float(price),
+            portfolio=portfolio,
+            capital=float(capital),
+        )
+        audit_entry["shorting_overlay"] = shorting_decision.to_dict()
+        if not shorting_decision.approved:
+            self.reject_count += 1
+            audit_entry["rejected"] = True
+            audit_entry["reject_reason"] = f"SHORTING_CONTROL: {shorting_decision.reason}"
             self.audit_log.append(audit_entry)
             return OrderResult(
                 success=False,

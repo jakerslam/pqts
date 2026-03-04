@@ -80,6 +80,20 @@ strategies:
     enabled: true
     timeframes: ['1h', '4h', '1d']
     max_positions: 5
+
+  swing_trend:
+    enabled: true
+    timeframes: ['4h', '1d']
+    lookback_bars: 48
+    max_positions: 4
+    markets: ['crypto', 'equities', 'forex']
+
+  hold_carry:
+    enabled: true
+    rebalance_days: 7
+    min_carry_bps: 8.0
+    max_positions: 6
+    markets: ['crypto', 'forex']
   
   mean_reversion:
     enabled: true
@@ -112,6 +126,26 @@ strategies:
     min_touches: 2
     sweep_threshold: 0.005
     reclaim_threshold: 0.003
+
+strategy_profiles:
+  casual_core:
+    markets: ['crypto', 'equities']
+    strategies: ['trend_following', 'mean_reversion', 'swing_trend', 'hold_carry']
+  pro_quant:
+    markets: ['crypto', 'equities', 'forex']
+    strategies:
+      [
+        'scalping',
+        'arbitrage',
+        'trend_following',
+        'swing_trend',
+        'hold_carry',
+        'mean_reversion',
+        'ml',
+        'volume_profile',
+        'order_flow',
+        'liquidity_sweep',
+      ]
 
 # ============================================
 # RISK MANAGEMENT
@@ -181,3 +215,22 @@ notifications:
   on_trade: true
   on_error: true
   on_drawdown: 5.0  # Notify if drawdown exceeds 5%
+
+# ============================================
+# RUNTIME
+# ============================================
+runtime:
+  operator_tier: pro
+  state_path: data/engine_state.json
+  autopilot:
+    mode: hybrid
+    auto_apply_on_start: true
+    min_active_strategies: 2
+    max_active_strategies: 6
+    ai_rank_weight: 1.25
+    enabled_bias: 0.25
+    simple_strategy_allowlist: ['trend_following', 'mean_reversion', 'swing_trend', 'hold_carry']
+    complexity_penalty:
+      ml: 0.20
+      order_flow: 0.10
+      liquidity_sweep: 0.10

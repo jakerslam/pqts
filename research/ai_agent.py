@@ -224,7 +224,21 @@ class AIResearchAgent:
             capacity_haircut=float(allocation_cfg.get("capacity_haircut", 0.05)),
             utility_config=self.allocation_utility,
         )
+        self.horizon_sleeves = self._normalize_horizon_budgets(
+            allocation_cfg.get(
+                "horizon_sleeves",
+                {
+                    "intraday": 0.45,
+                    "swing": 0.35,
+                    "hold": 0.20,
+                },
+            )
+        )
+        self.strategy_horizon_map = self._build_strategy_horizon_map(
+            config.get("strategy_horizons", {})
+        )
         self.last_allocation_weights: Dict[str, float] = {}
+        self.last_champion_challenger: Dict[str, Dict[str, Any]] = {}
 
         # Stage gates
         self.stage_gates = {
@@ -245,6 +259,9 @@ class AIResearchAgent:
                 "max_kill_switch_triggers": int(config.get("live_max_kill_switch_triggers", 0)),
             },
         }
+        self.horizon_stage_gates = self._build_horizon_stage_gates(
+            overrides=config.get("horizon_stage_gates", {})
+        )
         self.live_allowed_strategy_types = {
             str(name).strip().lower()
             for name in config.get(
@@ -284,7 +301,13 @@ class AIResearchAgent:
         """
         self._validate_historical_data(historical_data)
         if strategy_types is None:
-            strategy_types = ["market_making", "cross_exchange", "stat_arb"]
+            strategy_types = [
+                "market_making",
+                "cross_exchange",
+                "stat_arb",
+                "swing_trend",
+                "hold_carry",
+            ]
 
         objective_assessment = self.validate_objective_constraints(self.config.get("objective", {}))
         if not objective_assessment["objective_valid"]:
@@ -328,6 +351,154 @@ class AIResearchAgent:
                 raise ValueError(f"Historical data for {symbol} must include a 'close' column.")
             if not isinstance(frame.index, pd.DatetimeIndex):
                 raise ValueError(f"Historical data for {symbol} must use DatetimeIndex.")
+
+    @staticmethod
+    def _normalize_horizon_budgets(raw: Dict[str, Any]) -> Dict[str, float]:
+        if not raw:
+            return {"intraday": 1.0}
+        positive = {str(k).strip().lower(): max(float(v), 0.0) for k, v in raw.items()}
+        total = float(sum(positive.values()))
+        if total <= 1e-12:
+            n = max(len(positive), 1)
+            return {key: 1.0 / n for key in positive}
+        return {key: value / total for key, value in positive.items()}
+
+    @staticmethod
+    def _build_strategy_horizon_map(user_map: Dict[str, Any]) -> Dict[str, str]:
+        base = {
+            "market_making": "intraday",
+            "stat_arb": "intraday",
+            "cross_exchange": "intraday",
+            "funding_arbitrage": "hold",
+            "trend_following": "swing",
+            "swing_trend": "swing",
+            "hold_carry": "hold",
+            "short_momentum": "intraday",
+            "mean_reversion": "intraday",
+        }
+        for strategy_type, horizon in (user_map or {}).items():
+            strategy_key = str(strategy_type).strip().lower()
+            horizon_key = str(horizon).strip().lower()
+            if strategy_key and horizon_key:
+                base[strategy_key] = horizon_key
+        return base
+
+    def _strategy_horizon(self, strategy_type: str) -> str:
+        token = str(strategy_type).strip().lower()
+        return self.strategy_horizon_map.get(token, "intraday")
+
+    def _strategy_horizon_from_id(self, strategy_id: str) -> str:
+        experiment = self.db.get_experiment(strategy_id)
+        if experiment is None:
+            return "intraday"
+        return self._strategy_horizon(str(experiment.get("strategy_name", "")))
+
+    def _build_horizon_stage_gates(
+        self, overrides: Dict[str, Any]
+    ) -> Dict[str, Dict[str, Dict[str, Any]]]:
+        base = {
+            "live_canary": {
+                "intraday": {
+                    "min_days": int(self.stage_gates["live_canary"]["min_days"]),
+                    "min_avg_sharpe": float(self.stage_gates["live_canary"]["min_avg_sharpe"]),
+                    "max_avg_drawdown": float(self.stage_gates["live_canary"]["max_avg_drawdown"]),
+                    "max_slippage_mape": float(
+                        self.stage_gates["live_canary"]["max_slippage_mape"]
+                    ),
+                    "max_kill_switch_triggers": int(
+                        self.stage_gates["live_canary"]["max_kill_switch_triggers"]
+                    ),
+                },
+                "swing": {
+                    "min_days": max(int(self.stage_gates["live_canary"]["min_days"]) - 9, 14),
+                    "min_avg_sharpe": max(
+                        float(self.stage_gates["live_canary"]["min_avg_sharpe"]) - 0.10,
+                        0.0,
+                    ),
+                    "max_avg_drawdown": float(self.max_drawdown * 1.15),
+                    "max_slippage_mape": float(self.stage_gates["live_canary"]["max_slippage_mape"])
+                    + 5.0,
+                    "max_kill_switch_triggers": int(
+                        self.stage_gates["live_canary"]["max_kill_switch_triggers"]
+                    ),
+                },
+                "hold": {
+                    "min_days": max(int(self.stage_gates["live_canary"]["min_days"]) - 16, 10),
+                    "min_avg_sharpe": max(
+                        float(self.stage_gates["live_canary"]["min_avg_sharpe"]) - 0.20,
+                        0.0,
+                    ),
+                    "max_avg_drawdown": float(self.max_drawdown * 1.30),
+                    "max_slippage_mape": float(self.stage_gates["live_canary"]["max_slippage_mape"])
+                    + 10.0,
+                    "max_kill_switch_triggers": int(
+                        self.stage_gates["live_canary"]["max_kill_switch_triggers"]
+                    ),
+                },
+            },
+            "live": {
+                "intraday": {
+                    "min_days": int(self.stage_gates["live"]["min_days"]),
+                    "min_avg_sharpe": float(self.stage_gates["live"]["min_avg_sharpe"]),
+                    "max_avg_drawdown": float(self.stage_gates["live"]["max_avg_drawdown"]),
+                    "max_slippage_mape": float(self.stage_gates["live"]["max_slippage_mape"]),
+                    "max_kill_switch_triggers": int(
+                        self.stage_gates["live"]["max_kill_switch_triggers"]
+                    ),
+                },
+                "swing": {
+                    "min_days": max(int(self.stage_gates["live"]["min_days"]) - 4, 10),
+                    "min_avg_sharpe": max(
+                        float(self.stage_gates["live"]["min_avg_sharpe"]) - 0.10,
+                        0.0,
+                    ),
+                    "max_avg_drawdown": float(self.stage_gates["live"]["max_avg_drawdown"] * 1.15),
+                    "max_slippage_mape": float(self.stage_gates["live"]["max_slippage_mape"]) + 5.0,
+                    "max_kill_switch_triggers": int(
+                        self.stage_gates["live"]["max_kill_switch_triggers"]
+                    ),
+                },
+                "hold": {
+                    "min_days": max(int(self.stage_gates["live"]["min_days"]) - 7, 7),
+                    "min_avg_sharpe": max(
+                        float(self.stage_gates["live"]["min_avg_sharpe"]) - 0.20,
+                        0.0,
+                    ),
+                    "max_avg_drawdown": float(self.stage_gates["live"]["max_avg_drawdown"] * 1.30),
+                    "max_slippage_mape": float(self.stage_gates["live"]["max_slippage_mape"])
+                    + 10.0,
+                    "max_kill_switch_triggers": int(
+                        self.stage_gates["live"]["max_kill_switch_triggers"]
+                    ),
+                },
+            },
+        }
+
+        raw_overrides = overrides or {}
+        for stage, horizon_cfg in raw_overrides.items():
+            stage_key = str(stage).strip()
+            if stage_key not in base or not isinstance(horizon_cfg, dict):
+                continue
+            for horizon, values in horizon_cfg.items():
+                horizon_key = str(horizon).strip().lower()
+                if not isinstance(values, dict):
+                    continue
+                if horizon_key not in base[stage_key]:
+                    base[stage_key][horizon_key] = {}
+                for key, value in values.items():
+                    if key in {"min_days", "max_kill_switch_triggers"}:
+                        base[stage_key][horizon_key][key] = int(value)
+                    else:
+                        base[stage_key][horizon_key][key] = float(value)
+        return base
+
+    def _resolve_stage_gate(self, strategy_id: str, target_stage: str) -> Dict[str, Any]:
+        base = dict(self.stage_gates[target_stage])
+        horizon = self._strategy_horizon_from_id(strategy_id)
+        gate = dict(self.horizon_stage_gates.get(target_stage, {}).get(horizon, {}))
+        resolved = {**base, **gate}
+        resolved["horizon"] = horizon
+        return resolved
 
     # =========================================================================
     # Candidate Generation
@@ -757,20 +928,25 @@ class AIResearchAgent:
                 annual_turnover=float(row["metrics"].get("turnover_annualized", 0.0)),
                 cost_per_turnover=cost_per_turnover,
                 capacity_ratio=float(row["metrics"].get("capacity_ratio", 0.0)),
+                horizon=self._strategy_horizon(row["variant"].strategy_type),
             )
             for row in selected
         ]
-        allocation_weights = self.strategy_allocator.allocate_utility(
+        allocation_weights = self.strategy_allocator.allocate_multi_horizon(
             allocation_inputs,
+            sleeve_budgets=self.horizon_sleeves,
             utility=self.allocation_utility,
         )
         self.last_allocation_weights = dict(allocation_weights)
+        self.last_champion_challenger = self.evaluate_champion_challenger(selected)
 
         for result in selected:
             variant = result["variant"]
             gates = result.get("promotion_gates", {})
             arm = self.db.assign_pilot_arm(variant.strategy_id)
             target_weight = float(allocation_weights.get(variant.strategy_id, 0.0))
+            horizon = self._strategy_horizon(variant.strategy_type)
+            hook = dict(self.last_champion_challenger.get(variant.strategy_id, {}))
             self.db.update_experiment_status(
                 variant.strategy_id,
                 "paper",
@@ -789,8 +965,10 @@ class AIResearchAgent:
                         "gates": gates,
                         "r_analytics": result.get("r_analytics", {}),
                         "arm": arm,
+                        "horizon": horizon,
                         "target_weight": target_weight,
                         "net_expected_return": float(result.get("net_expected_return", 0.0)),
+                        "promotion_hook": hook,
                     },
                 },
             )
@@ -799,13 +977,57 @@ class AIResearchAgent:
                 self.paper_trading.append(variant.strategy_id)
             promoted.append(variant.strategy_id)
             logger.info(
-                "Promoted %s to paper trading (arm=%s weight=%.3f)",
+                "Promoted %s to paper trading (arm=%s horizon=%s role=%s weight=%.3f)",
                 variant.strategy_id,
                 arm,
+                horizon,
+                hook.get("role", "unknown"),
                 target_weight,
             )
 
         return promoted
+
+    def evaluate_champion_challenger(
+        self, candidates: List[Dict[str, Any]]
+    ) -> Dict[str, Dict[str, Any]]:
+        """
+        Build per-horizon champion/challenger assignments for paper promotion.
+
+        Champion is the highest-fitness candidate within each horizon sleeve.
+        Remaining promoted candidates become challengers.
+        """
+        hooks: Dict[str, Dict[str, Any]] = {}
+        grouped: Dict[str, List[Dict[str, Any]]] = {}
+        for row in candidates:
+            variant = row.get("variant")
+            if variant is None:
+                continue
+            horizon = self._strategy_horizon(getattr(variant, "strategy_type", ""))
+            grouped.setdefault(horizon, []).append(row)
+
+        for horizon, rows in grouped.items():
+            ranked = sorted(rows, key=lambda item: float(item.get("fitness", 0.0)), reverse=True)
+            if not ranked:
+                continue
+
+            champion = ranked[0]
+            champion_id = champion["variant"].strategy_id
+            challenger_count = max(len(ranked) - 1, 0)
+            for idx, row in enumerate(ranked):
+                strategy_id = row["variant"].strategy_id
+                role = "champion" if idx == 0 else "challenger"
+                champion_fitness = float(champion.get("fitness", 0.0))
+                row_fitness = float(row.get("fitness", 0.0))
+                hooks[strategy_id] = {
+                    "role": role,
+                    "horizon": horizon,
+                    "champion_id": champion_id,
+                    "fitness_gap_vs_champion": float(champion_fitness - row_fitness),
+                    "exploration_weight": (
+                        0.0 if role == "champion" else (1.0 / max(challenger_count, 1))
+                    ),
+                }
+        return hooks
 
     # =========================================================================
     # Stage Promotion Gates
@@ -824,7 +1046,7 @@ class AIResearchAgent:
         if target_stage not in self.stage_gates:
             raise ValueError(f"Unknown target stage: {target_stage}")
 
-        gate = self.stage_gates[target_stage]
+        gate = self._resolve_stage_gate(strategy_id, target_stage)
         source_stage = gate["source_stage"]
         summary = self.db.get_stage_summary(strategy_id, source_stage, lookback_days=365)
 
@@ -840,6 +1062,14 @@ class AIResearchAgent:
             "strategy_id": strategy_id,
             "target_stage": target_stage,
             "source_stage": source_stage,
+            "horizon": gate["horizon"],
+            "gate": {
+                "min_days": gate["min_days"],
+                "min_avg_sharpe": gate["min_avg_sharpe"],
+                "max_avg_drawdown": gate["max_avg_drawdown"],
+                "max_slippage_mape": gate["max_slippage_mape"],
+                "max_kill_switch_triggers": gate["max_kill_switch_triggers"],
+            },
             "summary": summary,
             "checks": checks,
             "passed": all(checks.values()),
@@ -923,6 +1153,8 @@ class AIResearchAgent:
                 "allocation_mode": "risk_utility",
                 "risk_tolerance_profile": self.risk_tolerance_profile,
                 "allocation_risk_aversion": float(self.allocation_utility.risk_aversion),
+                "horizon_sleeves": self.horizon_sleeves,
+                "champion_challenger": self.last_champion_challenger,
                 "experiment_runs_recorded": int(
                     len([r for r in strategy_reports.get("reports", []) if r.get("run_id")])
                 ),
@@ -939,6 +1171,7 @@ class AIResearchAgent:
                 {
                     "id": row["variant"].strategy_id,
                     "type": row["variant"].strategy_type,
+                    "horizon": self._strategy_horizon(row["variant"].strategy_type),
                     "fitness": float(row["fitness"]),
                     "sharpe": float(row["metrics"]["sharpe"]),
                     "deflated_sharpe": float(row["deflated_sharpe"]),
@@ -1072,6 +1305,32 @@ class AIResearchAgent:
 
     def get_top_strategies(self, n: int = 10) -> pd.DataFrame:
         return self.db.get_top_experiments(n)
+
+    @staticmethod
+    def extract_strategy_type_recommendations(
+        report: Dict[str, Any], max_types: int = 6
+    ) -> List[str]:
+        """
+        Extract de-duplicated strategy types from research-cycle output.
+
+        Intended input for runtime autopilot strategy selection.
+        """
+        rows = report.get("top_strategies", []) if isinstance(report, dict) else []
+        if not isinstance(rows, list):
+            return []
+        recommendations: List[str] = []
+        seen = set()
+        for row in rows:
+            if not isinstance(row, dict):
+                continue
+            strategy_type = str(row.get("type", "")).strip()
+            if not strategy_type or strategy_type in seen:
+                continue
+            seen.add(strategy_type)
+            recommendations.append(strategy_type)
+            if len(recommendations) >= max(int(max_types), 1):
+                break
+        return recommendations
 
     def monitor_paper_trading(self) -> Dict:
         metrics: Dict[str, Dict[str, Any]] = {}
@@ -1214,23 +1473,36 @@ class AIResearchAgent:
 
     def _build_variant_signal(self, variant: StrategyVariant, returns: pd.Series) -> pd.Series:
         seed = int(hashlib.md5(variant.strategy_id.encode("utf-8")).hexdigest()[:8], 16)
-        fast = 3 + (seed % 8)
-        slow = fast + 10 + (seed % 16)
+        horizon = self._strategy_horizon(variant.strategy_type)
+
+        if horizon == "hold":
+            fast = 24 + (seed % 24)
+            slow = fast + 72 + (seed % 48)
+        elif horizon == "swing":
+            fast = 8 + (seed % 16)
+            slow = fast + 24 + (seed % 24)
+        else:
+            fast = 3 + (seed % 8)
+            slow = fast + 10 + (seed % 16)
 
         fast_ma = returns.rolling(fast, min_periods=1).mean()
         slow_ma = returns.rolling(slow, min_periods=1).mean()
         trend_component = fast_ma - slow_ma
         reversion_component = -returns.rolling(fast, min_periods=1).mean()
 
-        if variant.strategy_type in {"market_making", "stat_arb"}:
+        strategy_type = str(variant.strategy_type).strip().lower()
+        if strategy_type in {"market_making", "stat_arb"}:
             base = reversion_component
+        elif strategy_type in {"hold_carry"}:
+            base = trend_component.rolling(6, min_periods=1).mean()
         else:
             base = trend_component
 
         feature_bias = 1.0 + (0.04 * len(variant.features))
         param_bias = 1.0 + (0.02 * len(variant.parameters))
+        horizon_bias = {"intraday": 120.0, "swing": 70.0, "hold": 35.0}[horizon]
         scaled = base * feature_bias * param_bias
-        return np.tanh(scaled * 120.0).astype(float)
+        return np.tanh(scaled * horizon_bias).astype(float)
 
     def _periods_per_year(self, index: pd.DatetimeIndex) -> float:
         if len(index) < 3:

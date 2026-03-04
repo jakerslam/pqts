@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 import sys
 
@@ -182,10 +183,17 @@ def test_promotion_gate_blocks_negative_economics_and_sets_allocations(tmp_path)
         "SELECT experiment_id, notes FROM stage_metrics WHERE stage = 'paper' ORDER BY experiment_id"
     ).fetchall()
     assert len(notes_rows) == 2
+    roles = {}
     for row in notes_rows:
-        payload = row["notes"]
+        payload = json.loads(row["notes"])
         assert "target_weight" in payload
         assert "net_expected_return" in payload
+        assert payload["horizon"] == "intraday"
+        hook = payload["promotion_hook"]
+        assert hook["champion_id"] == "winning_strategy_1"
+        roles[row["experiment_id"]] = hook["role"]
+    assert roles["winning_strategy_1"] == "champion"
+    assert roles["winning_strategy_2"] == "challenger"
 
     # Re-assignment requests should not mutate immutable arm.
     assert agent.db.assign_pilot_arm("winning_strategy_1", arm="control") == assignment_1["arm"]
