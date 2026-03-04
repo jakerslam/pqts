@@ -24,7 +24,7 @@ Integration:
 """
 
 import logging
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Protocol, Tuple
 from datetime import datetime, timezone
 from dataclasses import dataclass
 
@@ -38,10 +38,23 @@ from risk.kill_switches import (
     TradingEngine as RiskEngine
 )
 from execution.realistic_costs import (
-    RealisticCostModel, OrderBook, OrderBookLevel, Side, NotionalUSD, Price, Quantity
+    Bps,
+    RealisticCostModel,
+    OrderBook,
+    OrderBookLevel,
+    Side,
+    NotionalUSD,
+    Price,
+    Quantity,
 )
 from execution.smart_router import (
     SmartOrderRouter, OrderRequest, OrderType, RouteDecision
+)
+from execution.tca_feedback import (
+    ExecutionFill,
+    TCADatabase,
+    TCATradeRecord,
+    weekly_calibrate_eta,
 )
 
 logger = logging.getLogger(__name__)
@@ -84,6 +97,47 @@ class OrderResult:
     audit_log: Dict
 
 
+class FillProvider(Protocol):
+    """Execution fill source for paper/live environments."""
+
+    async def get_fill(
+        self,
+        *,
+        order_id: str,
+        symbol: str,
+        venue: str,
+        side: str,
+        requested_qty: float,
+        reference_price: float,
+    ) -> ExecutionFill:
+        ...
+
+
+class StubFillProvider:
+    """Deterministic fill source used for paper-testing and unit tests."""
+
+    async def get_fill(
+        self,
+        *,
+        order_id: str,
+        symbol: str,
+        venue: str,
+        side: str,
+        requested_qty: float,
+        reference_price: float,
+    ) -> ExecutionFill:
+        # Side-aware deterministic slippage: +2 bps for buys, -2 bps for sells.
+        slippage_multiplier = 1.0002 if side == "buy" else 0.9998
+        executed_price = float(reference_price) * slippage_multiplier
+        return ExecutionFill(
+            executed_price=executed_price,
+            executed_qty=float(requested_qty),
+            timestamp=datetime.now(timezone.utc),
+            venue=venue,
+            symbol=symbol,
+        )
+
+
 class RiskAwareRouter:
     """
     Unified order router with mandatory risk overlay.
@@ -100,9 +154,13 @@ class RiskAwareRouter:
     NO ORDERS can bypass step 1. Ever.
     """
     
-    def __init__(self, 
-                 risk_config: RiskLimits,
-                 broker_config: dict):
+    def __init__(
+        self,
+        risk_config: RiskLimits,
+        broker_config: dict,
+        fill_provider: Optional[FillProvider] = None,
+        tca_db_path: Optional[str] = None,
+    ):
         """
         Args:
             risk_config: Hard limits for kill switches
@@ -122,6 +180,11 @@ class RiskAwareRouter:
         self.broker_config = broker_config
         self.exchange_adapter = None  # Would initialize real adapter
         self._router_token = self._create_token()
+        self.fill_provider: FillProvider = fill_provider or StubFillProvider()
+        self.tca_db = TCADatabase(
+            tca_db_path or broker_config.get("tca_db_path", "data/tca_records.csv")
+        )
+        self.eta_by_symbol_venue: Dict[Tuple[str, str], float] = {}
         
         # Audit logging (Step 5)
         self.audit_log: List[Dict] = []
@@ -145,6 +208,7 @@ class RiskAwareRouter:
             source: Where capital came from (e.g., 'broker_account', 'config')
         """
         self._capital = capital
+        self.risk_engine.risk_monitor.set_capital(capital, source=source)
         logger.info(f"Capital set: ${capital:,.2f} (source: {source})")
     
     def get_capital(self) -> float:
@@ -160,7 +224,7 @@ class RiskAwareRouter:
                           order: OrderRequest,
                           market_data: Dict,
                           portfolio: Dict,
-                          strategy_returns: Dict[str, any],
+                          strategy_returns: Dict[str, Any],
                           portfolio_changes: List[float]) -> OrderResult:
         """
         Submit an order with mandatory risk checking.
@@ -346,45 +410,87 @@ class RiskAwareRouter:
         # =========================================================================
         # STEP 3: COST ESTIMATION (via RealisticCostModel)
         # =========================================================================
-        
+        cost_breakdown = None
+        spread_bps = 0.0
+        depth_1pct_usd = 0.0
+
         # Build order book from market data
-        if 'order_book' in market_data:
-            from execution.realistic_costs import OrderBook
-            ob_data = market_data['order_book']
-            bids = [OrderBookLevel(Price(p), Quantity(s)) for p, s in ob_data.get('bids', [])]
-            asks = [OrderBookLevel(Price(p), Quantity(s)) for p, s in ob_data.get('asks', [])]
+        if "order_book" in market_data:
+            ob_data = market_data["order_book"]
+            bids = [OrderBookLevel(Price(p), Quantity(s)) for p, s in ob_data.get("bids", [])]
+            asks = [OrderBookLevel(Price(p), Quantity(s)) for p, s in ob_data.get("asks", [])]
             order_book = OrderBook(bids=bids, asks=asks)
-            
-            side_enum = Side.BUY if order.side == 'buy' else Side.SELL
-            
+
+            side_enum = Side.BUY if order.side == "buy" else Side.SELL
+
             cost_breakdown = self.cost_model.calculate_total_cost(
                 NotionalUSD(notional),
                 Price(price),
                 order_book,
                 side_enum,
-                is_maker=(route.order_type == OrderType.LIMIT)
+                is_maker=(route.order_type == OrderType.LIMIT),
             )
-            
-            audit_entry['cost_estimate'] = cost_breakdown.to_dict()
+
+            depth_summary = order_book.get_depth_summary()
+            spread_bps = float(depth_summary["spread_bps"])
+            depth_1pct_usd = float(depth_summary["min_depth_1pct_usd"])
+
+            audit_entry["cost_estimate"] = cost_breakdown.to_dict()
+            audit_entry["market_microstructure"] = {
+                "spread_bps": spread_bps,
+                "depth_1pct_usd": depth_1pct_usd,
+            }
         
         # =========================================================================
         # STEP 4: ORDER EXECUTION
         # =========================================================================
-        # In production, this would call the actual exchange adapter
-        # For now, we simulate success
-        
-        order_id = audit_entry['order_id']
-        logger.info(f"Order {order_id} submitted: {order.symbol} {order.side} {order.quantity}")
-        
-        audit_entry['executed'] = True
-        audit_entry['order_id'] = order_id
+        order_id = audit_entry["order_id"]
+        fill = await self.fill_provider.get_fill(
+            order_id=order_id,
+            symbol=order.symbol,
+            venue=route.exchange,
+            side=order.side,
+            requested_qty=float(order.quantity),
+            reference_price=float(price),
+        )
+        logger.info(
+            "Order %s filled: %s %s qty=%.6f @ %.6f on %s",
+            order_id,
+            fill.symbol,
+            order.side,
+            fill.executed_qty,
+            fill.executed_price,
+            fill.venue,
+        )
+
+        audit_entry["executed"] = True
+        audit_entry["order_id"] = order_id
+        audit_entry["fill"] = {
+            "executed_price": fill.executed_price,
+            "executed_qty": fill.executed_qty,
+            "timestamp": fill.timestamp.isoformat(),
+            "venue": fill.venue,
+            "symbol": fill.symbol,
+        }
         self.audit_log.append(audit_entry)
         
         # =========================================================================
         # STEP 5: POST-TRADE LOGGING (TCA)
         # =========================================================================
         # Feed into TCA for cost model calibration
-        self._update_tca(order_id, audit_entry)
+        self._update_tca(
+            order_id=order_id,
+            audit_entry=audit_entry,
+            order=order,
+            fill=fill,
+            notional=float(notional),
+            reference_price=float(price),
+            route=route,
+            cost_breakdown=cost_breakdown,
+            spread_bps=spread_bps,
+            depth_1pct_usd=depth_1pct_usd,
+            vol_24h=float(market_data.get("vol_24h", self.cost_model.base_vol)),
+        )
         
         return OrderResult(
             success=True,
@@ -396,11 +502,85 @@ class RiskAwareRouter:
             audit_log=audit_entry
         )
     
-    def _update_tca(self, order_id: str, audit_entry: Dict):
-        """Update TCA tracking for cost model calibration."""
-        # This would log to TCA database
-        if 'cost_estimate' in audit_entry:
-            logger.debug(f"TCA: Order {order_id} - estimated cost: {audit_entry['cost_estimate']}")
+    def _update_tca(
+        self,
+        *,
+        order_id: str,
+        audit_entry: Dict,
+        order: OrderRequest,
+        fill: ExecutionFill,
+        notional: float,
+        reference_price: float,
+        route: RouteDecision,
+        cost_breakdown,
+        spread_bps: float,
+        depth_1pct_usd: float,
+        vol_24h: float,
+    ) -> None:
+        """Persist predicted vs. realized slippage/costs for TCA calibration."""
+        if notional <= 0 or reference_price <= 0:
+            logger.warning("TCA skipped for %s due to invalid notional/price.", order_id)
+            return
+
+        if cost_breakdown is not None:
+            predicted_slippage_bps = float(
+                Bps.from_pct(float(cost_breakdown.slippage) / notional)
+            )
+            predicted_commission_bps = float(
+                Bps.from_pct(float(cost_breakdown.commission) / notional)
+            )
+            predicted_total_bps = float(cost_breakdown.total_bps)
+        else:
+            predicted_slippage_bps = float(Bps.from_pct(route.expected_slippage / notional))
+            predicted_commission_bps = float(Bps.from_pct(self.cost_model.commission))
+            predicted_total_bps = predicted_slippage_bps + predicted_commission_bps
+
+        if order.side == "buy":
+            realized_slippage_pct = max((fill.executed_price - reference_price) / reference_price, 0.0)
+        else:
+            realized_slippage_pct = max((reference_price - fill.executed_price) / reference_price, 0.0)
+
+        realized_slippage_bps = float(Bps.from_pct(realized_slippage_pct))
+        realized_commission_bps = float(Bps.from_pct(self.cost_model.commission))
+        realized_total_bps = realized_slippage_bps + realized_commission_bps
+
+        realized_notional = float(fill.executed_price) * float(fill.executed_qty)
+        record = TCATradeRecord(
+            trade_id=order_id,
+            timestamp=fill.timestamp,
+            symbol=fill.symbol,
+            exchange=fill.venue,
+            side=order.side,
+            quantity=float(fill.executed_qty),
+            price=float(fill.executed_price),
+            notional=realized_notional,
+            predicted_slippage_bps=predicted_slippage_bps,
+            predicted_commission_bps=predicted_commission_bps,
+            predicted_total_bps=predicted_total_bps,
+            realized_slippage_bps=realized_slippage_bps,
+            realized_commission_bps=realized_commission_bps,
+            realized_total_bps=realized_total_bps,
+            spread_bps=spread_bps,
+            vol_24h=vol_24h,
+            depth_1pct_usd=depth_1pct_usd,
+        )
+        self.tca_db.add_record(record)
+        self.tca_db.save()
+
+        audit_entry["tca"] = {
+            "predicted_slippage_bps": predicted_slippage_bps,
+            "realized_slippage_bps": realized_slippage_bps,
+            "predicted_total_bps": predicted_total_bps,
+            "realized_total_bps": realized_total_bps,
+        }
+        logger.info(
+            "TCA %s %s@%s: predicted_slip=%.3f bps realized_slip=%.3f bps",
+            order_id,
+            fill.symbol,
+            fill.venue,
+            predicted_slippage_bps,
+            realized_slippage_bps,
+        )
     
     def _create_token(self) -> '_RouterToken':
         """
@@ -422,6 +602,28 @@ class RiskAwareRouter:
             'capital': self._capital,
             'audit_entries': len(self.audit_log)
         }
+
+    def run_weekly_tca_calibration(
+        self,
+        eta_by_symbol_venue: Dict[Tuple[str, str], float],
+        min_samples: int = 50,
+        alert_threshold_pct: float = 20.0,
+        lookback_days: int = 30,
+    ) -> Tuple[Dict[Tuple[str, str], float], List[Dict]]:
+        """Update eta parameters by symbol/venue from realized TCA outcomes."""
+        updated, analyses = weekly_calibrate_eta(
+            tca_db=self.tca_db,
+            current_eta_by_market=eta_by_symbol_venue,
+            min_samples=min_samples,
+            alert_threshold_pct=alert_threshold_pct,
+            days=lookback_days,
+        )
+        self.eta_by_symbol_venue = updated
+
+        if updated:
+            self.cost_model.eta = sum(updated.values()) / len(updated)
+
+        return updated, analyses
     
     def get_audit_log(self, n: int = 100) -> List[Dict]:
         """Get recent audit log entries."""
