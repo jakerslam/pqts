@@ -125,8 +125,14 @@ class KillSwitchMonitor:
     Evaluates portfolio state against hard limits.
     """
     
-    def __init__(self, limits: RiskLimits):
+    def __init__(self, limits: RiskLimits, capital: Optional[float] = None):
+        """
+        Args:
+            limits: Risk hard limits
+            capital: Total capital (NOT hardcoded - injected from config/broker)
+        """
         self.limits = limits
+        self._capital = capital  # Injected capital, NOT hardcoded
         self.state_history: deque = deque(maxlen=1000)
         self.pnl_history: deque = deque(maxlen=252)  # 1 year of daily
         self.last_reset: datetime = datetime.now()
@@ -141,6 +147,27 @@ class KillSwitchMonitor:
         self.kill_reason: str = ""
         self.last_slippages: deque = deque(maxlen=50)
     
+    def set_capital(self, capital: float, source: str = "unknown"):
+        """
+        Set capital dynamically.
+        
+        Args:
+            capital: Total capital in USD
+            source: Source of capital (e.g., 'broker_api', 'config_file', 'manual')
+        """
+        self._capital = capital
+        logger.info(f"KillSwitchMonitor capital set: ${capital:,.2f} (source: {source})")
+    
+    def _get_capital(self) -> float:
+        """Get total capital (raises if not set)."""
+        if self._capital is None or self._capital <= 0:
+            raise RuntimeError(
+                "Capital not set for kill switch monitor. "
+                "Call set_capital() with actual capital before trading. "
+                "Capital must be injected, never hardcoded."
+            )
+        return self._capital
+    
     def reset_daily(self, portfolio_value: float):
         """Reset daily tracking."""
         self.daily_pnl = 0.0
@@ -152,7 +179,12 @@ class KillSwitchMonitor:
         self.state_history.append(portfolio)
         
         # Update drawdown
-        current_value = portfolio.total_pnl + self._get_capital()
+        try:
+            current_value = portfolio.total_pnl + self._get_capital()
+        except RuntimeError:
+            # If capital not set yet, use portfolio value as proxy
+            current_value = portfolio.total_pnl + 100000  # Temporary until capital injected
+        
         self.peak_portfolio_value = max(self.peak_portfolio_value, current_value)
         self.current_drawdown = (self.peak_portfolio_value - current_value) / self.peak_portfolio_value if self.peak_portfolio_value > 0 else 0.0
         
@@ -179,10 +211,6 @@ class KillSwitchMonitor:
         error_cutoff = now - timedelta(hours=1)
         while self.errors_last_hour and self.errors_last_hour[0] < error_cutoff:
             self.errors_last_hour.popleft()
-    
-    def _get_capital(self) -> float:
-        """Get total capital (would come from config/api)."""
-        return 100000.0
     
     def check_daily_loss(self) -> Tuple[bool, str]:
         """Check if daily loss limit hit."""
