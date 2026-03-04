@@ -59,6 +59,27 @@ Provide one canonical, machine-readable artifact per strategy run so research, e
 - `dashboard/app.py`
 - Strategy table now attempts to render real stage-gate strategy rows from `data/research.db` and falls back to deterministic demo rows when research data is unavailable.
 
+8. Optional R validator bridge:
+- Python bridge: `research/r_analytics_bridge.py`
+- R script: `scripts/r/validate_experiment.R`
+- Agent integration: `research/ai_agent.py`
+- Behavior:
+  - If `r_analytics.enabled=true`, the agent calls the R script on CV fold sharpes.
+  - If `r_analytics.required=true`, promotion gates include `r_validator` and fail closed when R validation fails.
+  - R outputs are attached to report `extras.r_analytics` for auditability.
+
+Example config:
+```yaml
+r_analytics:
+  enabled: true
+  required: false
+  rscript_bin: Rscript
+  validator_script: scripts/r/validate_experiment.R
+  min_cv_sharpe: 0.8
+  bootstrap_samples: 2000
+  timeout_seconds: 30
+```
+
 ## Artifact Structure
 
 Each report JSON includes:

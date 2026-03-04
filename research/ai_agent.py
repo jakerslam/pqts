@@ -68,6 +68,7 @@ from research.auto_generator import AutoStrategyGenerator, StrategyVariant
 from research.database import BacktestResult, Experiment, ResearchDatabase
 from research.regime_detector import MarketRegime, RegimeDetector
 from research.report_builder import ResearchAnalyticsReportBuilder
+from research.r_analytics_bridge import RAnalyticsBridge
 from research.walk_forward import WalkForwardTester, WalkForwardWindow
 
 logger = logging.getLogger(__name__)
@@ -146,6 +147,22 @@ class AIResearchAgent:
         self.min_deflated_sharpe = float(config.get("min_deflated_sharpe", 0.8))
         self.min_walk_forward_consistency = float(
             config.get("min_walk_forward_consistency", 0.4)
+        )
+
+        # Optional R analytics validator
+        r_cfg = config.get("r_analytics", {})
+        self.r_analytics_enabled = bool(r_cfg.get("enabled", False))
+        self.r_analytics_required = bool(r_cfg.get("required", False))
+        self.r_min_cv_sharpe = float(r_cfg.get("min_cv_sharpe", self.min_sharpe_for_promotion))
+        self.r_bridge = (
+            RAnalyticsBridge(
+                script_path=str(r_cfg.get("validator_script", "scripts/r/validate_experiment.R")),
+                rscript_bin=str(r_cfg.get("rscript_bin", "Rscript")),
+                timeout_seconds=float(r_cfg.get("timeout_seconds", 30.0)),
+                bootstrap_samples=int(r_cfg.get("bootstrap_samples", 2000)),
+            )
+            if self.r_analytics_enabled
+            else None
         )
 
         # CV controls
@@ -316,6 +333,11 @@ class AIResearchAgent:
                 sharpe=float(cv_stats["cv_sharpe"]),
                 n_trials=max(len(candidates), 1),
             )
+            r_analytics = self._run_r_cv_validation(
+                cv_stats=cv_stats,
+                n_trials=max(len(candidates), 1),
+            )
+            r_validator_passed = self._r_validator_gate_pass(r_analytics)
 
             fitness = self._compute_fitness(
                 metrics=metrics,
@@ -346,6 +368,8 @@ class AIResearchAgent:
                     "pbo_estimate": cv_stats["pbo_estimate"],
                     "validator_passed": cv_stats["validator_passed"],
                     "validator_reasons": cv_stats["validator_reasons"],
+                    "r_analytics": r_analytics,
+                    "r_validator_passed": r_validator_passed,
                     "fitness": fitness,
                 }
             )
@@ -417,6 +441,7 @@ class AIResearchAgent:
                 "validator_passed": False,
                 "validator_reasons": ["Insufficient samples for purged CV"],
                 "pbo_estimate": 1.0,
+                "cv_fold_sharpes": [float(fallback["sharpe"])],
             }
 
         n_splits = max(2, min(self.cv_splits, len(returns) // 20))
@@ -448,6 +473,7 @@ class AIResearchAgent:
                 "validator_passed": False,
                 "validator_reasons": ["Purged CV produced no valid folds"],
                 "pbo_estimate": 1.0,
+                "cv_fold_sharpes": [],
             }
 
         merged_oos_returns = np.concatenate(oos_returns) if oos_returns else np.array([], dtype=float)
@@ -466,7 +492,67 @@ class AIResearchAgent:
             "validator_passed": bool(validation["passed"]),
             "validator_reasons": list(validation["reasons"]),
             "pbo_estimate": pbo_estimate,
+            "cv_fold_sharpes": [float(value) for value in cv_sharpes],
         }
+
+    def _run_r_cv_validation(self, *, cv_stats: Dict[str, Any], n_trials: int) -> Dict[str, Any]:
+        if not self.r_analytics_enabled:
+            return {
+                "status": "disabled",
+                "validator_passed_r": True,
+                "reasons": [],
+            }
+
+        fold_sharpes = [float(value) for value in cv_stats.get("cv_fold_sharpes", [])]
+        if not fold_sharpes:
+            message = "No CV fold sharpe values available for R validation."
+            if self.r_analytics_required:
+                raise RuntimeError(message)
+            logger.warning(message)
+            return {
+                "status": "unavailable",
+                "validator_passed_r": True,
+                "reasons": [message],
+            }
+
+        if self.r_bridge is None:
+            message = "R analytics bridge is not configured."
+            if self.r_analytics_required:
+                raise RuntimeError(message)
+            logger.warning(message)
+            return {
+                "status": "unavailable",
+                "validator_passed_r": True,
+                "reasons": [message],
+            }
+
+        try:
+            result = self.r_bridge.run_cv_validation(
+                cv_sharpes=fold_sharpes,
+                n_trials=n_trials,
+                min_deflated_sharpe=self.min_deflated_sharpe,
+                max_pbo=self.max_pbo,
+                min_cv_sharpe=self.r_min_cv_sharpe,
+            )
+            return result
+        except Exception as exc:
+            if self.r_analytics_required:
+                raise RuntimeError(f"Required R analytics validation failed: {exc}") from exc
+            logger.warning("Optional R analytics validation failed: %s", exc)
+            return {
+                "status": "error",
+                "validator_passed_r": True,
+                "reasons": [str(exc)],
+            }
+
+    def _r_validator_gate_pass(self, payload: Dict[str, Any]) -> bool:
+        if not self.r_analytics_enabled:
+            return True
+        if not isinstance(payload, dict):
+            return not self.r_analytics_required
+        if str(payload.get("status", "")).lower() != "ok":
+            return not self.r_analytics_required
+        return bool(payload.get("validator_passed_r", False))
 
     def _deflated_sharpe(self, sharpe: float, n_trials: int) -> float:
         if n_trials <= 1:
@@ -573,6 +659,12 @@ class AIResearchAgent:
                 "deflated_sharpe": float(result["deflated_sharpe"]) >= self.min_deflated_sharpe,
                 "pbo": float(result["pbo_estimate"]) <= self.max_pbo,
                 "capacity": float(result["metrics"]["capacity_ratio"]) <= 1.0,
+                "r_validator": bool(
+                    result.get(
+                        "r_validator_passed",
+                        self._r_validator_gate_pass(result.get("r_analytics", {})),
+                    )
+                ),
             }
 
             if not all(gates.values()):
@@ -592,7 +684,10 @@ class AIResearchAgent:
                     "drawdown": float(result["walk_forward_drawdown"]),
                     "slippage_mape": 0.0,
                     "kill_switch_triggers": 0,
-                    "notes": {"gates": gates},
+                    "notes": {
+                        "gates": gates,
+                        "r_analytics": result.get("r_analytics", {}),
+                    },
                 },
             )
 
@@ -732,6 +827,12 @@ class AIResearchAgent:
                 "deflated_sharpe": float(row.get("deflated_sharpe", 0.0)) >= self.min_deflated_sharpe,
                 "pbo": float(row.get("pbo_estimate", 1.0)) <= self.max_pbo,
                 "capacity": float(row.get("metrics", {}).get("capacity_ratio", 0.0)) <= 1.0,
+                "r_validator": bool(
+                    row.get(
+                        "r_validator_passed",
+                        self._r_validator_gate_pass(row.get("r_analytics", {})),
+                    )
+                ),
             }
 
             if promoted:
@@ -743,6 +844,9 @@ class AIResearchAgent:
             elif not gate_checks["pbo"]:
                 decision_action = "hold"
                 decision_reason = "overfit_risk_high"
+            elif not gate_checks["r_validator"]:
+                decision_action = "hold"
+                decision_reason = "r_validator_failed"
             elif not gate_checks["capacity"]:
                 decision_action = "hold"
                 decision_reason = "capacity_limit_exceeded"
@@ -775,7 +879,10 @@ class AIResearchAgent:
                     "operator": "autopilot",
                 },
                 tca_snapshot={},
-                extras={"fitness": float(row.get("fitness", 0.0))},
+                extras={
+                    "fitness": float(row.get("fitness", 0.0)),
+                    "r_analytics": row.get("r_analytics", {}),
+                },
             )
             entries.append(
                 {
