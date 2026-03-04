@@ -18,7 +18,11 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from execution.risk_aware_router import RiskAwareRouter  # noqa: E402
-from execution.ws_ingestion import StreamIngestionStore, WebSocketIngestionService  # noqa: E402
+from execution.ws_ingestion import (  # noqa: E402
+    LiveVenueStreamFetcher,
+    StreamIngestionStore,
+    WebSocketIngestionService,
+)
 from risk.kill_switches import RiskLimits  # noqa: E402
 
 
@@ -83,6 +87,10 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--events-path", default="data/analytics/ws_ingestion_events.jsonl")
     parser.add_argument("--out-dir", default="data/reports")
     parser.add_argument("--tca-db", default="data/tca_records.csv")
+    parser.add_argument("--max-messages-per-stream", type=int, default=10)
+    parser.add_argument("--recv-timeout-seconds", type=float, default=2.0)
+    parser.add_argument("--connect-timeout-seconds", type=float, default=10.0)
+    parser.add_argument("--no-live-fetcher", action="store_true")
     return parser
 
 
@@ -96,10 +104,27 @@ async def _run(args: argparse.Namespace) -> Dict[str, Any]:
     capital = float(config.get("risk", {}).get("initial_capital", 10000.0))
     router.set_capital(capital, source="ws_ingestion")
     router.configure_market_adapters(config.get("markets", {}))
+    await router.start_market_data()
 
     store = StreamIngestionStore(events_path=str(args.events_path))
-    worker = WebSocketIngestionService(router=router, store=store)
-    cycles = await worker.run_loop(cycles=int(args.cycles), sleep_seconds=float(args.sleep_seconds))
+    live_fetcher = None
+    if not bool(args.no_live_fetcher):
+        live_fetcher = LiveVenueStreamFetcher(
+            router=router,
+            max_messages=int(args.max_messages_per_stream),
+            recv_timeout_seconds=float(args.recv_timeout_seconds),
+            connect_timeout_seconds=float(args.connect_timeout_seconds),
+        )
+    worker = WebSocketIngestionService(router=router, store=store, fetcher=live_fetcher)
+
+    try:
+        cycles = await worker.run_loop(
+            cycles=int(args.cycles), sleep_seconds=float(args.sleep_seconds)
+        )
+    finally:
+        if live_fetcher is not None:
+            await live_fetcher.close()
+        await router.stop_market_data()
 
     payload = {
         "timestamp": datetime.now(timezone.utc).isoformat(),

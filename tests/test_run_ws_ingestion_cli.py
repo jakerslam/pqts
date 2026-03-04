@@ -15,7 +15,19 @@ SPEC.loader.exec_module(MODULE)
 
 def test_parser_accepts_cycles_and_paths():
     parser = MODULE.build_parser()
-    args = parser.parse_args(["--cycles", "3", "--events-path", "tmp/ws.jsonl"])
+    args = parser.parse_args(
+        [
+            "--cycles",
+            "3",
+            "--events-path",
+            "tmp/ws.jsonl",
+            "--max-messages-per-stream",
+            "5",
+            "--no-live-fetcher",
+        ]
+    )
 
     assert args.cycles == 3
     assert args.events_path == "tmp/ws.jsonl"
+    assert args.max_messages_per_stream == 5
+    assert args.no_live_fetcher is True

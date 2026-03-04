@@ -12,7 +12,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from execution.live_ops_controls import WebSocketConnectionManager
 from execution.risk_aware_router import RiskAwareRouter, VenueClient
 from execution.stream_contracts import build_stream_registry
-from execution.ws_ingestion import StreamIngestionStore, WebSocketIngestionService
+from execution.ws_ingestion import (
+    LiveVenueStreamFetcher,
+    StreamIngestionStore,
+    WebSocketIngestionService,
+)
 from risk.kill_switches import RiskLimits
 
 
@@ -61,8 +65,8 @@ def test_ws_ingestion_collect_once_persists_market_order_fill_events(tmp_path):
     router = _router(tmp_path)
     store = StreamIngestionStore(events_path=str(tmp_path / "ws_events.jsonl"))
 
-    async def fetcher(venue: str, channel: str, _url: str):
-        return [{"venue": venue, "channel": channel, "seq": 1}]
+    async def fetcher(venue: str, channel: str, descriptor: dict):
+        return [{"venue": venue, "channel": channel, "seq": 1, "url": descriptor["url"]}]
 
     svc = WebSocketIngestionService(router=router, store=store, fetcher=fetcher)
     payload = asyncio.run(svc.collect_once())
@@ -93,7 +97,7 @@ def test_ws_ingestion_uses_backoff_after_disconnect(tmp_path):
 
     attempts = {"count": 0}
 
-    async def flaky_fetcher(_venue: str, _channel: str, _url: str):
+    async def flaky_fetcher(_venue: str, _channel: str, _descriptor: dict):
         attempts["count"] += 1
         if attempts["count"] <= 3:
             raise RuntimeError("network_down")
@@ -116,3 +120,19 @@ def test_ws_ingestion_uses_backoff_after_disconnect(tmp_path):
     # No reconnect before backoff expiry.
     assert second["connected_streams"] == 0
     assert third["connected_streams"] >= 1
+
+
+def test_live_fetcher_builds_venue_specific_subscriptions(tmp_path):
+    router = _router(tmp_path)
+    fetcher = LiveVenueStreamFetcher(router=router)
+
+    binance_market = fetcher._build_subscriptions("binance", "market")
+    assert len(binance_market) == 1
+    assert binance_market[0]["method"] == "SUBSCRIBE"
+    assert "btcusdt@bookTicker" in binance_market[0]["params"]
+
+    coinbase_market = fetcher._build_subscriptions("coinbase", "market")
+    assert coinbase_market[0]["type"] == "subscribe"
+
+    # Private channels for coinbase are intentionally not wired without signed auth payload.
+    assert fetcher._build_subscriptions("coinbase", "order") == []
