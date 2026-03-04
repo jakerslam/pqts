@@ -12,6 +12,7 @@ import pytest
 
 ROOT = Path(__file__).resolve().parent.parent
 TESTS_DIR = ROOT / "tests"
+SCRIPTS_DIR = ROOT / "scripts"
 ROUTER_FILE = ROOT / "execution" / "risk_aware_router.py"
 ROUTER_REL = ROUTER_FILE.relative_to(ROOT)
 
@@ -191,6 +192,36 @@ class TestSingleOrderPath:
             "VIOLATION: .place_order() call found outside RiskAwareRouter/order adapters: "
             f"{violations}"
         )
+
+    def test_no_sys_path_mutation_in_library_modules(self):
+        violations: list[str] = []
+
+        for path in _iter_repo_python_files():
+            if _is_under(path, TESTS_DIR) or _is_under(path, SCRIPTS_DIR):
+                continue
+            if path.relative_to(ROOT) == Path("main.py"):
+                continue
+
+            rel = path.relative_to(ROOT)
+            tree = _parse_tree(path)
+            for node in ast.walk(tree):
+                if not isinstance(node, ast.Call):
+                    continue
+                func = node.func
+                if not isinstance(func, ast.Attribute):
+                    continue
+                if func.attr != "insert":
+                    continue
+                path_obj = func.value
+                if (
+                    isinstance(path_obj, ast.Attribute)
+                    and path_obj.attr == "path"
+                    and isinstance(path_obj.value, ast.Name)
+                    and path_obj.value.id == "sys"
+                ):
+                    violations.append(f"{rel}:{node.lineno}")
+
+        assert not violations, f"VIOLATION: sys.path.insert found in library modules: {violations}"
 
 
 class TestRouterTokenProtection:

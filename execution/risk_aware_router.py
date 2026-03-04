@@ -8,59 +8,57 @@ Any attempt to bypass this router will be caught by audit logging.
 
 Integration:
     from execution.risk_aware_router import RiskAwareRouter
-    
+
     router = RiskAwareRouter(
         risk_config=RiskLimits(max_daily_loss_pct=0.02),
         broker_config={'api_key': '...'}
     )
-    
+
     # This is the ONLY way to place orders
     result = await router.submit_order(order_request, market_data, portfolio)
-    
+
     # Result includes RiskDecision - check it
     if result.decision == RiskDecision.FLATTEN:
         # System is in emergency mode - no orders allowed
         pass
 """
 
+import asyncio
 import logging
 import os
-import asyncio
-from typing import Any, Dict, List, Optional, Protocol, Tuple
-from datetime import datetime, timezone
-from dataclasses import dataclass
 import time
+from dataclasses import dataclass
+from datetime import datetime, timezone
+from typing import Any, Dict, List, Optional, Protocol, Tuple
 
-# Import kill switches
-import sys
-from pathlib import Path
-sys.path.insert(0, str(Path(__file__).parent.parent))
-
-from risk.kill_switches import (
-    RiskLimits, KillSwitchMonitor, RiskDecision, RiskState,
-    TradingEngine as RiskEngine
-)
+from analytics.paper_readiness import PaperTrackRecordEvaluator
 from execution.realistic_costs import (
     Bps,
-    RealisticCostModel,
+    NotionalUSD,
     OrderBook,
     OrderBookLevel,
-    Side,
-    NotionalUSD,
     Price,
     Quantity,
-)
-from execution.smart_router import (
-    SmartOrderRouter, OrderRequest, OrderType, RouteDecision
+    RealisticCostModel,
+    Side,
 )
 from execution.reliability import ExecutionReliabilityMonitor
+from execution.smart_router import OrderRequest, OrderType, RouteDecision, SmartOrderRouter
 from execution.tca_feedback import (
     ExecutionFill,
     TCADatabase,
     TCATradeRecord,
     weekly_calibrate_eta,
 )
-from analytics.paper_readiness import PaperTrackRecordEvaluator
+
+# Import kill switches
+from risk.kill_switches import (
+    KillSwitchMonitor,
+    RiskDecision,
+    RiskLimits,
+    RiskState,
+    TradingEngine as RiskEngine,
+)
 from risk.regime_overlay import RegimeExposureOverlay
 
 logger = logging.getLogger(__name__)
@@ -127,6 +125,7 @@ def _is_valid_router_token(token: Any, *, router_id: Optional[int] = None) -> bo
 @dataclass
 class OrderResult:
     """Result of order submission attempt."""
+
     success: bool
     decision: RiskDecision
     risk_state: RiskState
@@ -160,8 +159,7 @@ class FillProvider(Protocol):
         side: str,
         requested_qty: float,
         reference_price: float,
-    ) -> ExecutionFill:
-        ...
+    ) -> ExecutionFill: ...
 
 
 class StubFillProvider:
@@ -192,19 +190,19 @@ class StubFillProvider:
 class RiskAwareRouter:
     """
     Unified order router with mandatory risk overlay.
-    
+
     This is the production router - ALL orders must go through here.
-    
+
     Flow:
     1. Pre-trade risk check (KillSwitchMonitor)
     2. Smart routing (SmartOrderRouter)
     3. Cost estimation (RealisticCostModel)
     4. Order execution (Exchange adapter)
     5. Post-trade logging (TCA)
-    
+
     NO ORDERS can bypass step 1. Ever.
     """
-    
+
     def __init__(
         self,
         risk_config: RiskLimits,
@@ -220,13 +218,13 @@ class RiskAwareRouter:
         # Risk overlay (Step 1)
         self.risk_engine = RiskEngine(risk_config)
         self.risk_limits = risk_config
-        
+
         # Smart routing (Step 2)
         self.smart_router = SmartOrderRouter(broker_config)
-        
+
         # Cost model (Step 3)
         self.cost_model = RealisticCostModel()
-        
+
         # Broker adapter (Step 4 - would be real exchange adapter)
         self.broker_config = broker_config
         self.exchange_adapter = None  # Would initialize real adapter
@@ -238,9 +236,7 @@ class RiskAwareRouter:
         self.eta_by_symbol_venue: Dict[Tuple[str, str], float] = {}
         self.market_venues: Dict[str, VenueClient] = {}
         self._markets_config: Dict[str, Any] = {}
-        self.regime_overlay = RegimeExposureOverlay(
-            broker_config.get("regime_overlay", {})
-        )
+        self.regime_overlay = RegimeExposureOverlay(broker_config.get("regime_overlay", {}))
         reliability_cfg = broker_config.get("reliability", {})
         self.reliability_monitor = ExecutionReliabilityMonitor(
             latency_slo_ms=float(reliability_cfg.get("latency_slo_ms", 250.0)),
@@ -250,24 +246,24 @@ class RiskAwareRouter:
         )
         # Order admission gate to prevent race-condition bypass across state changes.
         self._submit_order_lock = asyncio.Lock()
-        
+
         # Audit logging (Step 5)
         self.audit_log: List[Dict] = []
         self.order_count: int = 0
         self.reject_count: int = 0
-        
+
         # Capital injection (not hardcoded)
         self._capital = None  # Set via set_capital()
-        
+
         logger.info("RiskAwareRouter initialized")
         logger.info(f"  Daily loss limit: {risk_config.max_daily_loss_pct:.1%}")
         logger.info(f"  Max drawdown: {risk_config.max_drawdown_pct:.1%}")
         logger.info(f"  Max leverage: {risk_config.max_gross_leverage:.1f}x")
-    
+
     def set_capital(self, capital: float, source: str = "manual"):
         """
         Set capital - NOT hardcoded.
-        
+
         Args:
             capital: Total capital in USD
             source: Where capital came from (e.g., 'broker_account', 'config')
@@ -275,7 +271,7 @@ class RiskAwareRouter:
         self._capital = capital
         self.risk_engine.risk_monitor.set_capital(capital, source=source)
         logger.info(f"Capital set: ${capital:,.2f} (source: {source})")
-    
+
     def get_capital(self) -> float:
         """Get capital - raises if not set."""
         if self._capital is None:
@@ -320,13 +316,15 @@ class RiskAwareRouter:
 
         post_notional = abs(post_qty) * position_price
         return float(post_notional / capital)
-    
-    async def submit_order(self,
-                          order: OrderRequest,
-                          market_data: Dict,
-                          portfolio: Dict,
-                          strategy_returns: Dict[str, Any],
-                          portfolio_changes: List[float]) -> OrderResult:
+
+    async def submit_order(
+        self,
+        order: OrderRequest,
+        market_data: Dict,
+        portfolio: Dict,
+        strategy_returns: Dict[str, Any],
+        portfolio_changes: List[float],
+    ) -> OrderResult:
         """Serialized order-admission wrapper that prevents race-condition bypass."""
         async with self._submit_order_lock:
             return await self._submit_order_unlocked(
@@ -337,53 +335,55 @@ class RiskAwareRouter:
                 portfolio_changes=portfolio_changes,
             )
 
-    async def _submit_order_unlocked(self,
-                          order: OrderRequest,
-                          market_data: Dict,
-                          portfolio: Dict,
-                          strategy_returns: Dict[str, Any],
-                          portfolio_changes: List[float]) -> OrderResult:
+    async def _submit_order_unlocked(
+        self,
+        order: OrderRequest,
+        market_data: Dict,
+        portfolio: Dict,
+        strategy_returns: Dict[str, Any],
+        portfolio_changes: List[float],
+    ) -> OrderResult:
         """
         Submit an order with mandatory risk checking.
-        
+
         This is the ONLY order submission method. All orders must pass through here.
-        
+
         Args:
             order: OrderRequest with symbol, side, quantity, etc.
             market_data: Current market data for risk assessment
             portfolio: Current portfolio state
             strategy_returns: Returns by strategy for correlation check
             portfolio_changes: Recent P&L changes for VaR calc
-        
+
         Returns:
             OrderResult with success/failure, risk decision, and audit trail
         """
         self.order_count += 1
         audit_entry = {
-            'order_id': f"ord_{self.order_count}_{datetime.now().strftime('%Y%m%d%H%M%S')}",
-            'timestamp': datetime.now().isoformat(),
-            'order': {
-                'symbol': order.symbol,
-                'side': order.side,
-                'quantity': order.quantity,
-                'type': order.order_type.value,
-                'price': order.price
-            }
+            "order_id": f"ord_{self.order_count}_{datetime.now().strftime('%Y%m%d%H%M%S')}",
+            "timestamp": datetime.now().isoformat(),
+            "order": {
+                "symbol": order.symbol,
+                "side": order.side,
+                "quantity": order.quantity,
+                "type": order.order_type.value,
+                "price": order.price,
+            },
         }
-        
+
         # =========================================================================
         # STEP 1: MANDATORY PRE-TRADE RISK CHECK
         # =========================================================================
         # THIS CANNOT BE BYPASSED. EVER.
-        
+
         try:
             capital = self.get_capital()
         except RuntimeError as e:
-            audit_entry['rejected'] = True
-            audit_entry['reject_reason'] = f"RISK_ERROR: {str(e)}"
+            audit_entry["rejected"] = True
+            audit_entry["reject_reason"] = f"RISK_ERROR: {str(e)}"
             self.audit_log.append(audit_entry)
             self.reject_count += 1
-            
+
             return OrderResult(
                 success=False,
                 decision=RiskDecision.HALT,
@@ -391,7 +391,7 @@ class RiskAwareRouter:
                 order_id=None,
                 exchange=None,
                 rejected_reason=str(e),
-                audit_log=audit_entry
+                audit_log=audit_entry,
             )
 
         emergency_state = self._active_emergency_state()
@@ -410,7 +410,7 @@ class RiskAwareRouter:
                 rejected_reason=audit_entry["reject_reason"],
                 audit_log=audit_entry,
             )
-        
+
         requested_quantity = float(order.quantity)
         throttled_qty, regime_decision = self.regime_overlay.throttle_quantity(
             order.symbol,
@@ -441,63 +441,64 @@ class RiskAwareRouter:
             )
 
         # Calculate notional
-        price = order.price or market_data.get('last_price', 0)
+        price = order.price or market_data.get("last_price", 0)
         notional = order.quantity * price
-        
+
         # Build portfolio state for risk check
         from risk.kill_switches import PortfolioState
+
         portfolio_state = PortfolioState(
             timestamp=datetime.now(),
-            positions=portfolio.get('positions', {}),
-            prices=portfolio.get('prices', {}),
-            total_pnl=portfolio.get('total_pnl', 0),
-            unrealized_pnl=portfolio.get('unrealized_pnl', 0),
-            realized_pnl=portfolio.get('realized_pnl', 0),
-            gross_exposure=portfolio.get('gross_exposure', 0),
-            net_exposure=portfolio.get('net_exposure', 0),
-            leverage=portfolio.get('leverage', 0),
-            open_orders=portfolio.get('open_orders', []),
-            pending_cancels=[]
+            positions=portfolio.get("positions", {}),
+            prices=portfolio.get("prices", {}),
+            total_pnl=portfolio.get("total_pnl", 0),
+            unrealized_pnl=portfolio.get("unrealized_pnl", 0),
+            realized_pnl=portfolio.get("realized_pnl", 0),
+            gross_exposure=portfolio.get("gross_exposure", 0),
+            net_exposure=portfolio.get("net_exposure", 0),
+            leverage=portfolio.get("leverage", 0),
+            open_orders=portfolio.get("open_orders", []),
+            pending_cancels=[],
         )
-        
+
         # MANDATORY: Pre-trade risk check
         decision, risk_state = self.risk_engine.pre_trade_check(
             {
-                'notional': notional,
-                'symbol': order.symbol,
-                'side': order.side,
-                'quantity': order.quantity
+                "notional": notional,
+                "symbol": order.symbol,
+                "side": order.side,
+                "quantity": order.quantity,
             },
             portfolio_state,
             strategy_returns,
-            portfolio_changes
+            portfolio_changes,
         )
-        
-        audit_entry['risk_check'] = {
-            'decision': decision.value,
-            'reason': risk_state.reason,
-            'limits': {
-                'max_order': risk_state.max_order_notional,
-                'max_leverage': risk_state.max_gross_leverage,
-                'max_participation': risk_state.max_participation
-            }
+
+        audit_entry["risk_check"] = {
+            "decision": decision.value,
+            "reason": risk_state.reason,
+            "limits": {
+                "max_order": risk_state.max_order_notional,
+                "max_leverage": risk_state.max_gross_leverage,
+                "max_participation": risk_state.max_participation,
+            },
         }
-        
+
         # =========================================================================
         # RISK DECISION HANDLING
         # =========================================================================
-        
+
         if decision == RiskDecision.FLATTEN:
             # CRITICAL: System is in emergency mode
             logger.critical(f"ORDER REJECTED - FLATTEN ACTIVE: {risk_state.reason}")
             self.reject_count += 1
-            audit_entry['rejected'] = True
-            audit_entry['reject_reason'] = f"FLATTEN: {risk_state.reason}"
+            audit_entry["rejected"] = True
+            audit_entry["reject_reason"] = f"FLATTEN: {risk_state.reason}"
             self.audit_log.append(audit_entry)
-            
+
             # Cancel any existing orders
             self.risk_engine._initiate_flatten(portfolio_state)
-            
+
             return OrderResult(
                 success=False,
                 decision=decision,
@@ -505,16 +506,16 @@ class RiskAwareRouter:
                 order_id=None,
                 exchange=None,
                 rejected_reason=f"FLATTEN: {risk_state.reason}",
-                audit_log=audit_entry
+                audit_log=audit_entry,
             )
-        
+
         if decision == RiskDecision.HALT:
             logger.warning(f"ORDER REJECTED - HALT: {risk_state.reason}")
             self.reject_count += 1
-            audit_entry['rejected'] = True
-            audit_entry['reject_reason'] = f"HALT: {risk_state.reason}"
+            audit_entry["rejected"] = True
+            audit_entry["reject_reason"] = f"HALT: {risk_state.reason}"
             self.audit_log.append(audit_entry)
-            
+
             return OrderResult(
                 success=False,
                 decision=decision,
@@ -522,32 +523,36 @@ class RiskAwareRouter:
                 order_id=None,
                 exchange=None,
                 rejected_reason=f"HALT: {risk_state.reason}",
-                audit_log=audit_entry
+                audit_log=audit_entry,
             )
-        
+
         if decision == RiskDecision.REDUCE:
             # Reduce order size
             reduction_factor = 0.5
             original_qty = order.quantity
             order.quantity *= reduction_factor
             logger.warning(f"Order reduced from {original_qty} to {order.quantity} due to risk")
-            audit_entry['modified'] = {
-                'original_quantity': original_qty,
-                'new_quantity': order.quantity,
-                'reason': risk_state.reason
+            audit_entry["modified"] = {
+                "original_quantity": original_qty,
+                "new_quantity": order.quantity,
+                "reason": risk_state.reason,
             }
-            
+
             # Recalculate notional
             notional = order.quantity * price
-        
+
         # Check order size against risk limits
         if notional > risk_state.max_order_notional:
-            logger.warning(f"Order notional ${notional:,.0f} > limit ${risk_state.max_order_notional:,.0f}")
+            logger.warning(
+                f"Order notional ${notional:,.0f} > limit ${risk_state.max_order_notional:,.0f}"
+            )
             self.reject_count += 1
-            audit_entry['rejected'] = True
-            audit_entry['reject_reason'] = f"OVERSIZED: {notional:,.0f} > {risk_state.max_order_notional:,.0f}"
+            audit_entry["rejected"] = True
+            audit_entry["reject_reason"] = (
+                f"OVERSIZED: {notional:,.0f} > {risk_state.max_order_notional:,.0f}"
+            )
             self.audit_log.append(audit_entry)
-            
+
             return OrderResult(
                 success=False,
                 decision=decision,
@@ -555,7 +560,7 @@ class RiskAwareRouter:
                 order_id=None,
                 exchange=None,
                 rejected_reason=f"Order size exceeds risk limit",
-                audit_log=audit_entry
+                audit_log=audit_entry,
             )
 
         post_trade_position_pct = self._post_trade_position_pct(
@@ -603,11 +608,11 @@ class RiskAwareRouter:
                 rejected_reason=audit_entry["reject_reason"],
                 audit_log=audit_entry,
             )
-        
+
         # =========================================================================
         # STEP 2: SMART ROUTING
         # =========================================================================
-        
+
         route = await self.smart_router.route_order(order, market_data)
         ranked_exchanges = list(route.ranked_exchanges or [route.exchange])
         failover_target = self.reliability_monitor.choose_failover(
@@ -624,9 +629,7 @@ class RiskAwareRouter:
         elif self.reliability_monitor.is_degraded(route.exchange):
             self.reject_count += 1
             audit_entry["rejected"] = True
-            audit_entry["reject_reason"] = (
-                f"DEGRADED_VENUE_NO_FAILOVER: {route.exchange}"
-            )
+            audit_entry["reject_reason"] = f"DEGRADED_VENUE_NO_FAILOVER: {route.exchange}"
             self.audit_log.append(audit_entry)
             return OrderResult(
                 success=False,
@@ -638,12 +641,12 @@ class RiskAwareRouter:
                 audit_log=audit_entry,
             )
 
-        audit_entry['routing'] = {
-            'exchange': route.exchange,
-            'order_type': route.order_type.value,
-            'expected_cost': route.expected_cost,
-            'expected_slippage': route.expected_slippage,
-            'ranked_exchanges': ranked_exchanges,
+        audit_entry["routing"] = {
+            "exchange": route.exchange,
+            "order_type": route.order_type.value,
+            "expected_cost": route.expected_cost,
+            "expected_slippage": route.expected_slippage,
+            "ranked_exchanges": ranked_exchanges,
         }
 
         venue_caps = self.broker_config.get("max_venue_notional", {})
@@ -662,7 +665,7 @@ class RiskAwareRouter:
                 rejected_reason=audit_entry["reject_reason"],
                 audit_log=audit_entry,
             )
-        
+
         # =========================================================================
         # STEP 3: COST ESTIMATION (via RealisticCostModel)
         # =========================================================================
@@ -696,7 +699,7 @@ class RiskAwareRouter:
                 "spread_bps": spread_bps,
                 "depth_1pct_usd": depth_1pct_usd,
             }
-        
+
         # =========================================================================
         # STEP 4: ORDER EXECUTION
         # =========================================================================
@@ -786,7 +789,7 @@ class RiskAwareRouter:
         if live_order_response is not None:
             audit_entry["live_order_response"] = live_order_response
         self.audit_log.append(audit_entry)
-        
+
         # =========================================================================
         # STEP 5: POST-TRADE LOGGING (TCA)
         # =========================================================================
@@ -831,7 +834,7 @@ class RiskAwareRouter:
             "fill_ratio": fill_ratio,
             "reliability_degraded": self.reliability_monitor.is_degraded(route.exchange),
         }
-        
+
         return OrderResult(
             success=True,
             decision=decision,
@@ -839,9 +842,9 @@ class RiskAwareRouter:
             order_id=order_id,
             exchange=route.exchange,
             rejected_reason=None,
-            audit_log=audit_entry
+            audit_log=audit_entry,
         )
-    
+
     def _update_tca(
         self,
         *,
@@ -868,9 +871,7 @@ class RiskAwareRouter:
             }
 
         if cost_breakdown is not None:
-            predicted_slippage_bps = float(
-                Bps.from_pct(float(cost_breakdown.slippage) / notional)
-            )
+            predicted_slippage_bps = float(Bps.from_pct(float(cost_breakdown.slippage) / notional))
             predicted_commission_bps = float(
                 Bps.from_pct(float(cost_breakdown.commission) / notional)
             )
@@ -881,9 +882,13 @@ class RiskAwareRouter:
             predicted_total_bps = predicted_slippage_bps + predicted_commission_bps
 
         if order.side == "buy":
-            realized_slippage_pct = max((fill.executed_price - reference_price) / reference_price, 0.0)
+            realized_slippage_pct = max(
+                (fill.executed_price - reference_price) / reference_price, 0.0
+            )
         else:
-            realized_slippage_pct = max((reference_price - fill.executed_price) / reference_price, 0.0)
+            realized_slippage_pct = max(
+                (reference_price - fill.executed_price) / reference_price, 0.0
+            )
 
         realized_slippage_bps = float(Bps.from_pct(realized_slippage_pct))
         realized_commission_bps = float(Bps.from_pct(self.cost_model.commission))
@@ -932,11 +937,11 @@ class RiskAwareRouter:
             "predicted_total_bps": predicted_total_bps,
             "realized_total_bps": realized_total_bps,
         }
-    
-    def _create_token(self) -> '_RouterToken':
+
+    def _create_token(self) -> "_RouterToken":
         """
         Private factory for creating RouterToken.
-        
+
         Only RiskAwareRouter can create tokens. Adapters must verify
         received token using: type(token) is _RouterToken
         """
@@ -1168,7 +1173,9 @@ class RiskAwareRouter:
         snapshot["order_book"] = fallback_order_book
         return snapshot
 
-    async def _fetch_symbol_quote(self, venue: VenueClient, symbol: str) -> Optional[Dict[str, Any]]:
+    async def _fetch_symbol_quote(
+        self, venue: VenueClient, symbol: str
+    ) -> Optional[Dict[str, Any]]:
         if venue.adapter is None or not venue.connected:
             return None
 
@@ -1183,7 +1190,9 @@ class RiskAwareRouter:
                 return {
                     "price": price or (ask + bid) / 2,
                     "spread": spread,
-                    "volume_24h": float(ticker.get("quoteVolume", 0) or ticker.get("volume", 0) or 0),
+                    "volume_24h": float(
+                        ticker.get("quoteVolume", 0) or ticker.get("volume", 0) or 0
+                    ),
                     "order_book": {
                         "bids": [(float(p), float(s)) for p, s in orderbook.get("bids", [])[:5]],
                         "asks": [(float(p), float(s)) for p, s in orderbook.get("asks", [])[:5]],
@@ -1259,7 +1268,9 @@ class RiskAwareRouter:
             "order_book": order_book,
         }
 
-    async def _place_live_order(self, *, route: RouteDecision, order: OrderRequest) -> Optional[Dict[str, Any]]:
+    async def _place_live_order(
+        self, *, route: RouteDecision, order: OrderRequest
+    ) -> Optional[Dict[str, Any]]:
         """Send a live order through the configured venue adapter."""
         venue = self.market_venues.get(route.exchange)
         if venue is None or venue.adapter is None or not venue.connected:
@@ -1311,18 +1322,18 @@ class RiskAwareRouter:
             return None
 
         return None
-    
+
     def get_stats(self) -> Dict:
         """Get order routing statistics."""
         return {
-            'total_orders': self.order_count,
-            'rejects': self.reject_count,
-            'reject_rate': self.reject_count / max(self.order_count, 1),
-            'kill_switch_active': self.risk_engine.risk_monitor.kill_switch_active,
-            'kill_reason': self.risk_engine.risk_monitor.kill_reason,
-            'capital': self._capital,
-            'audit_entries': len(self.audit_log),
-            'reliability': self.reliability_monitor.summary(),
+            "total_orders": self.order_count,
+            "rejects": self.reject_count,
+            "reject_rate": self.reject_count / max(self.order_count, 1),
+            "kill_switch_active": self.risk_engine.risk_monitor.kill_switch_active,
+            "kill_reason": self.risk_engine.risk_monitor.kill_reason,
+            "capital": self._capital,
+            "audit_entries": len(self.audit_log),
+            "reliability": self.reliability_monitor.summary(),
         }
 
     def run_weekly_tca_calibration(
@@ -1365,11 +1376,11 @@ class RiskAwareRouter:
             max_mape_pct=max_mape_pct,
         )
         return result.to_dict()
-    
+
     def get_audit_log(self, n: int = 100) -> List[Dict]:
         """Get recent audit log entries."""
         return self.audit_log[-n:]
-    
+
     async def reset_risk(self):
         """Reset risk engine (requires manual review)."""
         self.risk_engine.reset()

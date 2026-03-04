@@ -49,7 +49,9 @@ class RegimeExposureOverlay:
             return RegimeDecision("high_vol", self.high_vol_multiplier, "high_spread")
         return RegimeDecision("normal", self.normal_multiplier, "within_limits")
 
-    def throttle_quantity(self, symbol: str, quantity: float, market_data: Dict) -> Tuple[float, RegimeDecision]:
+    def throttle_quantity(
+        self, symbol: str, quantity: float, market_data: Dict
+    ) -> Tuple[float, RegimeDecision]:
         decision = self.classify(symbol, market_data)
         adjusted = float(quantity) * float(decision.multiplier)
         return max(adjusted, 0.0), decision

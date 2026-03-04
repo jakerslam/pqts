@@ -6,6 +6,7 @@ from collections import deque
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 from typing import Deque, Dict, Iterable, Optional
+
 import numpy as np
 
 
