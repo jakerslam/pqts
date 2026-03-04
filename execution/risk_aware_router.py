@@ -85,9 +85,18 @@ class _RouterToken:
                 frame = frame.f_back
                 if frame is None:
                     break
-                # Must be called from _create_token or submit_order
+                # Must be called from _create_token or submit_order in RiskAwareRouter
                 if frame.f_code.co_name in ('_create_token', 'submit_order'):
-                    if 'RiskAwareRouter' in frame.f_globals.get('__qualname__', ''):
+                    # Check if the calling class is RiskAwareRouter
+                    # f_locals['self'] would be the instance if called from method
+                    self_obj = frame.f_locals.get('self')
+                    if self_obj is not None:
+                        if self_obj.__class__.__name__ == 'RiskAwareRouter':
+                            caller_found = True
+                            break
+                    # Also accept if module name contains RiskAwareRouter (for _create_token)
+                    module_name = frame.f_globals.get('__name__', '')
+                    if 'risk_aware_router' in module_name.lower():
                         caller_found = True
                         break
             
