@@ -39,7 +39,23 @@ def _load_stage_gate_snapshot():
 app.layout = html.Div([
     html.Div([
         html.H1("Protheus Quant Trading System", className="title"),
-        html.Div(id="clock", className="clock")
+        html.Div(id="clock", className="clock"),
+        html.Div(
+            [
+                html.A(
+                    "Upgrade to Protheus",
+                    href="https://github.com/jakerslam/protheus?utm_source=pqts_dashboard&utm_medium=cta",
+                    target="_blank",
+                    style={"marginRight": "16px"},
+                ),
+                html.A(
+                    "Toybox Launch Guide",
+                    href="https://github.com/jakerslam/pqts/blob/main/docs/PROTHEUS_TOYBOX.md",
+                    target="_blank",
+                ),
+            ],
+            className="clock",
+        ),
     ], className="header"),
     
     # Summary Cards

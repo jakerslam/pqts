@@ -21,11 +21,9 @@
 
 ```bash
 # Clone and setup
-git clone https://github.com/protheuslabs/pqts.git
+git clone https://github.com/jakerslam/pqts.git
 cd pqts
 pip install -r requirements.txt
-# Or strict install with hashes:
-pip install --require-hashes -r requirements.lock
 
 # Copy environment template
 cp .env.example .env
@@ -37,6 +35,18 @@ python dashboard/start.py
 # Run paper trading
 python main.py config/paper.yaml
 ```
+
+## ⚡ One-Command Demo
+
+```bash
+python demo.py --market crypto --strat ml-ensemble --source x_launch_thread
+```
+
+The demo runs a deterministic paper-simulation slice, emits:
+
+- a markdown demo report in `data/reports/`
+- a Protheus handoff blob for agent-pilot workflows
+- an attribution event row in `data/analytics/attribution_events.jsonl`
 
 ## 🎛️ Dashboard
 
@@ -88,6 +98,8 @@ Access at `http://localhost:8501`
 - [Pricing And Packaging](docs/PRICING_AND_PACKAGING.md)
 - [GTM 90-Day Plan](docs/GTM_90_DAY_PLAN.md)
 - [Self-Serve Signup Spec](docs/SELF_SERVE_SIGNUP_SPEC.md)
+- [Protheus Toybox Launch](docs/PROTHEUS_TOYBOX.md)
+- [X Thread Template](docs/X_THREAD_TEMPLATE.md)
 
 ## 🛠️ Configuration
 
@@ -120,6 +132,7 @@ markets:
 ## ⚠️ Risk Disclaimer
 
 Trading involves substantial risk. Past performance doesn't guarantee future results. Always start with paper trading.
+Any Sharpe/return claim should come from reproducible backtest or paper/live reports.
 
 ## 📄 License
 
