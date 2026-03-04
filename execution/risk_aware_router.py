@@ -50,10 +50,7 @@ from execution.tca_feedback import (
     TCATradeRecord,
     weekly_calibrate_eta,
 )
-
-# Import kill switches
 from risk.kill_switches import (
-    KillSwitchMonitor,
     RiskDecision,
     RiskLimits,
     RiskState,
@@ -159,6 +156,8 @@ class FillProvider(Protocol):
         side: str,
         requested_qty: float,
         reference_price: float,
+        order_book: Optional[Dict[str, Any]] = None,
+        queue_ahead_qty: Optional[float] = None,
     ) -> ExecutionFill: ...
 
 
@@ -174,7 +173,11 @@ class StubFillProvider:
         side: str,
         requested_qty: float,
         reference_price: float,
+        order_book: Optional[Dict[str, Any]] = None,
+        queue_ahead_qty: Optional[float] = None,
     ) -> ExecutionFill:
+        _ = order_book
+        _ = queue_ahead_qty
         # Side-aware deterministic slippage: +2 bps for buys, -2 bps for sells.
         slippage_multiplier = 1.0002 if side == "buy" else 0.9998
         executed_price = float(reference_price) * slippage_multiplier
@@ -316,6 +319,38 @@ class RiskAwareRouter:
 
         post_notional = abs(post_qty) * position_price
         return float(post_notional / capital)
+
+    @staticmethod
+    def _estimate_queue_ahead_qty(
+        *,
+        side: str,
+        route_order_type: OrderType,
+        market_data: Dict[str, Any],
+    ) -> float:
+        """
+        Estimate queue ahead quantity from top-of-book for passive (limit) orders.
+
+        Market/IOC style orders are assumed to cross the spread immediately.
+        """
+        if route_order_type != OrderType.LIMIT:
+            return 0.0
+
+        order_book = market_data.get("order_book", {})
+        if not isinstance(order_book, dict):
+            return 0.0
+
+        side_token = str(side).lower()
+        if side_token == "buy":
+            levels = order_book.get("bids", []) or []
+        else:
+            levels = order_book.get("asks", []) or []
+
+        if not levels:
+            return 0.0
+        try:
+            return float(max(float(levels[0][1]), 0.0))
+        except (TypeError, ValueError, IndexError):
+            return 0.0
 
     async def submit_order(
         self,
@@ -559,7 +594,7 @@ class RiskAwareRouter:
                 risk_state=risk_state,
                 order_id=None,
                 exchange=None,
-                rejected_reason=f"Order size exceeds risk limit",
+                rejected_reason="Order size exceeds risk limit",
                 audit_log=audit_entry,
             )
 
@@ -741,6 +776,12 @@ class RiskAwareRouter:
             side=order.side,
             requested_qty=float(order.quantity),
             reference_price=float(price),
+            order_book=market_data.get("order_book", {}),
+            queue_ahead_qty=self._estimate_queue_ahead_qty(
+                side=order.side,
+                route_order_type=route.order_type,
+                market_data=market_data,
+            ),
         )
         logger.info(
             "Order %s filled: %s %s qty=%.6f @ %.6f on %s",
@@ -1127,6 +1168,37 @@ class RiskAwareRouter:
             }
         return registry
 
+    def get_stream_registry(self) -> Dict[str, Dict[str, Any]]:
+        """
+        Expose configured stream descriptors per venue.
+
+        Adapters provide canonical `market/order/fill` endpoints for parity
+        monitoring and future stream-worker wiring.
+        """
+        registry: Dict[str, Dict[str, Any]] = {}
+        for venue_name, venue in self.market_venues.items():
+            if venue.adapter is None or not hasattr(venue.adapter, "stream_descriptors"):
+                registry[venue_name] = {"available": False, "reason": "adapter_unavailable"}
+                continue
+
+            try:
+                descriptors = venue.adapter.stream_descriptors()
+            except Exception as exc:
+                registry[venue_name] = {
+                    "available": False,
+                    "reason": f"descriptor_error:{exc}",
+                }
+                continue
+
+            registry[venue_name] = {
+                "available": True,
+                "market": venue.market,
+                "connected": bool(venue.connected),
+                "stub": bool(venue.is_stub),
+                "streams": descriptors,
+            }
+        return registry
+
     async def fetch_market_snapshot(self) -> Dict[str, Any]:
         """
         Fetch a unified market snapshot keyed by venue for smart routing.
@@ -1385,3 +1457,22 @@ class RiskAwareRouter:
         """Reset risk engine (requires manual review)."""
         self.risk_engine.reset()
         logger.info("Risk engine reset - trading resumed")
+
+    def force_halt(self, reason: str) -> RiskState:
+        """
+        Manually halt order admission without flattening.
+
+        Used by external operational controls such as reconciliation daemons
+        when venue/internal state diverges.
+        """
+        state = self.risk_engine.manual_halt(reason)
+        self.audit_log.append(
+            {
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "control": "manual_halt",
+                "reason": str(reason),
+                "decision": state.decision.value,
+            }
+        )
+        logger.critical("Manual HALT engaged by external control: %s", reason)
+        return state

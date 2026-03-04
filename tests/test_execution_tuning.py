@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 import asyncio
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
-import sys
 
 import numpy as np
 import pytest
@@ -100,6 +100,42 @@ def test_paper_fill_provider_hard_rejects_extreme_notional():
     assert fill.executed_qty == 0.0
 
 
+def test_paper_fill_provider_applies_queue_position_penalty():
+    provider = MicrostructurePaperFillProvider(
+        config=PaperFillModelConfig(
+            partial_fill_notional_usd=1000.0,
+            min_partial_fill_ratio=0.10,
+            queue_penalty_floor=0.10,
+        )
+    )
+
+    low_queue = asyncio.run(
+        provider.get_fill(
+            order_id="ord_queue",
+            symbol="BTC-USD",
+            venue="binance",
+            side="buy",
+            requested_qty=1.0,
+            reference_price=1000.0,
+            queue_ahead_qty=0.0,
+        )
+    )
+    high_queue = asyncio.run(
+        provider.get_fill(
+            order_id="ord_queue",
+            symbol="BTC-USD",
+            venue="binance",
+            side="buy",
+            requested_qty=1.0,
+            reference_price=1000.0,
+            queue_ahead_qty=10.0,
+        )
+    )
+
+    assert high_queue.executed_qty < low_queue.executed_qty
+    assert high_queue.executed_price > low_queue.executed_price
+
+
 def test_router_rejects_order_when_fill_provider_returns_no_fill(tmp_path):
     fill_provider = MicrostructurePaperFillProvider(
         config=PaperFillModelConfig(hard_reject_notional_usd=100.0)
@@ -150,6 +186,84 @@ def test_router_rejects_order_when_fill_provider_returns_no_fill(tmp_path):
 
     assert result.success is False
     assert "NO_FILL" in (result.rejected_reason or "")
+
+
+def test_router_passes_queue_context_to_fill_provider(tmp_path):
+    class _CaptureQueueFillProvider:
+        def __init__(self):
+            self.queue_ahead_qty = None
+            self.order_book = None
+
+        async def get_fill(
+            self,
+            *,
+            order_id,
+            symbol,
+            venue,
+            side,
+            requested_qty,
+            reference_price,
+            order_book=None,
+            queue_ahead_qty=None,
+        ):
+            self.queue_ahead_qty = queue_ahead_qty
+            self.order_book = order_book
+            return ExecutionFill(
+                executed_price=float(reference_price),
+                executed_qty=float(requested_qty),
+                timestamp=datetime.now(timezone.utc),
+                venue=venue,
+                symbol=symbol,
+            )
+
+    fill_provider = _CaptureQueueFillProvider()
+    router = RiskAwareRouter(
+        risk_config=RiskLimits(
+            max_daily_loss_pct=0.02,
+            max_drawdown_pct=0.2,
+            max_gross_leverage=2.0,
+        ),
+        broker_config={"enabled": True},
+        fill_provider=fill_provider,
+        tca_db_path=str(tmp_path / "queue_capture.csv"),
+    )
+    router.set_capital(100000.0, source="unit_test")
+
+    order = OrderRequest(
+        symbol="BTC-USD",
+        side="buy",
+        quantity=0.1,
+        order_type=OrderType.LIMIT,
+        price=50000.0,
+    )
+    market_data = {
+        "binance": {
+            "BTC-USD": {
+                "price": 50000.0,
+                "spread": 0.0002,
+                "volume_24h": 2_000_000,
+            }
+        },
+        "order_book": {
+            "bids": [(49990.0, 2.25), (49980.0, 4.0)],
+            "asks": [(50010.0, 1.5), (50020.0, 3.0)],
+        },
+    }
+    strategy_returns, portfolio_changes = _strategy_inputs()
+
+    result = asyncio.run(
+        router.submit_order(
+            order=order,
+            market_data=market_data,
+            portfolio=_portfolio_snapshot(),
+            strategy_returns=strategy_returns,
+            portfolio_changes=portfolio_changes,
+        )
+    )
+
+    assert result.success is True
+    assert fill_provider.order_book == market_data["order_book"]
+    assert fill_provider.queue_ahead_qty == pytest.approx(2.25)
 
 
 def test_router_blocks_degraded_venue_when_no_failover(tmp_path):
@@ -388,8 +502,19 @@ def test_router_submit_order_serializes_concurrent_admissions(tmp_path):
             self.active = 0
             self.max_active = 0
 
-        async def get_fill(self, *, order_id, symbol, venue, side, requested_qty, reference_price):
-            _ = order_id, side
+        async def get_fill(
+            self,
+            *,
+            order_id,
+            symbol,
+            venue,
+            side,
+            requested_qty,
+            reference_price,
+            order_book=None,
+            queue_ahead_qty=None,
+        ):
+            _ = order_id, side, order_book, queue_ahead_qty
             self.active += 1
             self.max_active = max(self.max_active, self.active)
             await asyncio.sleep(0.02)

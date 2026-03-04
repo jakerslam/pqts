@@ -182,3 +182,16 @@ class BinanceAdapter:
     async def get_exchange_info(self) -> dict:
         """Get exchange information"""
         return await self._request("GET", "/api/v3/exchangeInfo")
+
+    def stream_descriptors(self) -> Dict[str, Dict[str, str | float]]:
+        """Canonical market/order/fill stream endpoints for parity monitoring."""
+        from execution.stream_contracts import build_stream_registry
+
+        base = str(self.ws_url)
+        return build_stream_registry(
+            market_url=f"{base}",
+            order_url=f"{base}",
+            fill_url=f"{base}",
+            transport="websocket",
+            heartbeat_seconds=15.0,
+        )

@@ -38,8 +38,10 @@ class CoinbaseAdapter:
         # Base URL
         if sandbox:
             self.base_url = "https://api-public.sandbox.exchange.coinbase.com"
+            self.ws_url = "wss://ws-feed-public.sandbox.exchange.coinbase.com"
         else:
             self.base_url = "https://api.exchange.coinbase.com"
+            self.ws_url = "wss://ws-feed.exchange.coinbase.com"
 
         self.session: Optional[aiohttp.ClientSession] = None
 
@@ -186,3 +188,16 @@ class CoinbaseAdapter:
     async def cancel_order(self, order_id: str) -> dict:
         """Cancel an order"""
         return await self._request("DELETE", f"/orders/{order_id}")
+
+    def stream_descriptors(self) -> Dict[str, Dict[str, str | float]]:
+        """Canonical market/order/fill stream endpoints for parity monitoring."""
+        from execution.stream_contracts import build_stream_registry
+
+        base = str(self.ws_url)
+        return build_stream_registry(
+            market_url=f"{base}",
+            order_url=f"{base}",
+            fill_url=f"{base}",
+            transport="websocket",
+            heartbeat_seconds=15.0,
+        )

@@ -584,6 +584,22 @@ class TradingEngine:
             self.is_flattening = True
             return state
 
+    def manual_halt(self, reason: str) -> RiskState:
+        """Manual halt without flattening positions."""
+        with self._state_lock:
+            self.is_halted = True
+            self.risk_monitor.kill_switch_active = True
+            self.risk_monitor.kill_reason = f"MANUAL_HALT: {reason}"
+            return RiskState(
+                decision=RiskDecision.HALT,
+                reason=f"MANUAL_HALT: {reason}",
+                timestamp=datetime.now(),
+                metrics={},
+                max_order_notional=0.0,
+                max_gross_leverage=0.0,
+                max_participation=0.0,
+            )
+
     def reset(self):
         """Reset engine after review."""
         with self._state_lock:

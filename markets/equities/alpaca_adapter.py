@@ -35,9 +35,12 @@ class AlpacaAdapter:
         if paper:
             self.base_url = "https://paper-api.alpaca.markets"
             self.data_url = "https://data.alpaca.markets"
+            self.order_ws_url = "wss://paper-api.alpaca.markets/stream"
         else:
             self.base_url = "https://api.alpaca.markets"
             self.data_url = "https://data.alpaca.markets"
+            self.order_ws_url = "wss://api.alpaca.markets/stream"
+        self.market_ws_url = "wss://stream.data.alpaca.markets/v2/iex"
 
         self.session: Optional[aiohttp.ClientSession] = None
 
@@ -175,3 +178,15 @@ class AlpacaAdapter:
     async def cancel_order(self, order_id: str) -> None:
         """Cancel an order"""
         await self._request("DELETE", f"/v2/orders/{order_id}")
+
+    def stream_descriptors(self) -> Dict[str, Dict[str, str | float]]:
+        """Canonical market/order/fill stream endpoints for parity monitoring."""
+        from execution.stream_contracts import build_stream_registry
+
+        return build_stream_registry(
+            market_url=str(self.market_ws_url),
+            order_url=str(self.order_ws_url),
+            fill_url=str(self.order_ws_url),
+            transport="websocket",
+            heartbeat_seconds=15.0,
+        )

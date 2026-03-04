@@ -35,6 +35,10 @@ class OandaAdapter:
             self.base_url = "https://api-fxpractice.oanda.com"
         else:
             self.base_url = "https://api-fxtrade.oanda.com"
+        self.pricing_stream_url = f"{self.base_url}/v3/accounts/{account_id}/pricing/stream"
+        self.transaction_stream_url = (
+            f"{self.base_url}/v3/accounts/{account_id}/transactions/stream"
+        )
 
         self.session: Optional[aiohttp.ClientSession] = None
 
@@ -167,4 +171,16 @@ class OandaAdapter:
 
         return await self._request(
             "PUT", f"/v3/accounts/{self.account_id}/trades/{trade_id}/close", json_data=data
+        )
+
+    def stream_descriptors(self) -> Dict[str, Dict[str, str | float]]:
+        """Canonical market/order/fill stream endpoints for parity monitoring."""
+        from execution.stream_contracts import build_stream_registry
+
+        return build_stream_registry(
+            market_url=str(self.pricing_stream_url),
+            order_url=str(self.transaction_stream_url),
+            fill_url=str(self.transaction_stream_url),
+            transport="http_stream",
+            heartbeat_seconds=15.0,
         )

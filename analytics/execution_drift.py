@@ -1,0 +1,168 @@
+"""Execution parity drift analysis from predicted vs realized TCA outcomes."""
+
+from __future__ import annotations
+
+import json
+from dataclasses import asdict, dataclass
+from datetime import datetime, timedelta, timezone
+from pathlib import Path
+from typing import Any, Dict, List
+
+import numpy as np
+import pandas as pd
+
+from execution.tca_feedback import TCADatabase
+
+
+@dataclass(frozen=True)
+class DriftThresholds:
+    """Thresholds that define alerting boundaries for paper/live drift."""
+
+    min_samples: int = 30
+    max_mape_pct: float = 35.0
+    max_realized_to_predicted_ratio: float = 1.50
+
+
+def _safe_float(value: Any, default: float = 0.0) -> float:
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return float(default)
+
+
+def _summarize_group(
+    *,
+    symbol: str,
+    exchange: str,
+    frame: pd.DataFrame,
+    thresholds: DriftThresholds,
+) -> Dict[str, Any]:
+    predicted = pd.to_numeric(frame["predicted_slippage_bps"], errors="coerce").fillna(0.0)
+    realized = pd.to_numeric(frame["realized_slippage_bps"], errors="coerce").fillna(0.0)
+
+    p = predicted.to_numpy(dtype=float)
+    r = realized.to_numpy(dtype=float)
+    denom = np.maximum(np.abs(r), 1e-6)
+    mape_pct = float(np.mean(np.abs(p - r) / denom) * 100.0)
+    predicted_avg = float(np.mean(p))
+    realized_avg = float(np.mean(r))
+    ratio = float(realized_avg / max(predicted_avg, 1e-6))
+
+    alerts: List[str] = []
+    if len(frame) < int(thresholds.min_samples):
+        alerts.append(f"insufficient_samples:{len(frame)}<{int(thresholds.min_samples)}")
+    if mape_pct > float(thresholds.max_mape_pct):
+        alerts.append(f"mape:{mape_pct:.2f}>{float(thresholds.max_mape_pct):.2f}")
+    if ratio > float(thresholds.max_realized_to_predicted_ratio):
+        alerts.append(
+            "ratio:" f"{ratio:.2f}>{float(thresholds.max_realized_to_predicted_ratio):.2f}"
+        )
+
+    return {
+        "symbol": str(symbol),
+        "exchange": str(exchange),
+        "samples": int(len(frame)),
+        "predicted_slippage_bps_avg": predicted_avg,
+        "realized_slippage_bps_avg": realized_avg,
+        "slippage_mape_pct": mape_pct,
+        "realized_to_predicted_ratio": ratio,
+        "status": "alert" if alerts else "ok",
+        "alerts": alerts,
+    }
+
+
+def analyze_execution_drift(
+    *,
+    tca_db: TCADatabase,
+    lookback_days: int = 30,
+    thresholds: DriftThresholds | None = None,
+) -> Dict[str, Any]:
+    """Analyze symbol/venue drift between predicted and realized execution costs."""
+    cfg = thresholds or DriftThresholds()
+    frame = tca_db.as_dataframe()
+    if frame.empty:
+        return {
+            "generated_at": datetime.now(timezone.utc).isoformat(),
+            "lookback_days": int(lookback_days),
+            "thresholds": asdict(cfg),
+            "summary": {
+                "pairs": 0,
+                "alerts": 0,
+                "healthy": True,
+                "samples": 0,
+            },
+            "pairs": [],
+        }
+
+    timestamps = pd.to_datetime(frame["timestamp"], utc=True, errors="coerce")
+    cutoff = datetime.now(timezone.utc) - timedelta(days=int(lookback_days))
+    scoped = frame[timestamps >= pd.Timestamp(cutoff)].copy()
+    if scoped.empty:
+        return {
+            "generated_at": datetime.now(timezone.utc).isoformat(),
+            "lookback_days": int(lookback_days),
+            "thresholds": asdict(cfg),
+            "summary": {
+                "pairs": 0,
+                "alerts": 0,
+                "healthy": True,
+                "samples": 0,
+            },
+            "pairs": [],
+        }
+
+    pair_rows: List[Dict[str, Any]] = []
+    for (symbol, exchange), group in scoped.groupby(["symbol", "exchange"], sort=True):
+        pair_rows.append(
+            _summarize_group(
+                symbol=str(symbol),
+                exchange=str(exchange),
+                frame=group,
+                thresholds=cfg,
+            )
+        )
+    pair_rows.sort(
+        key=lambda row: (
+            str(row.get("status", "")) != "alert",
+            -_safe_float(row.get("slippage_mape_pct", 0.0)),
+        )
+    )
+
+    alert_count = sum(1 for row in pair_rows if str(row.get("status")) == "alert")
+    return {
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "lookback_days": int(lookback_days),
+        "thresholds": asdict(cfg),
+        "summary": {
+            "pairs": len(pair_rows),
+            "alerts": alert_count,
+            "healthy": alert_count == 0,
+            "samples": int(len(scoped)),
+            "mape_p95_pct": float(
+                np.percentile([row["slippage_mape_pct"] for row in pair_rows], 95)
+            ),
+        },
+        "pairs": pair_rows,
+    }
+
+
+def write_execution_drift_report(
+    *,
+    tca_db_path: str,
+    out_dir: str = "data/reports",
+    lookback_days: int = 30,
+    thresholds: DriftThresholds | None = None,
+) -> Path:
+    """Write execution drift report JSON and return output path."""
+    db = TCADatabase(tca_db_path)
+    payload = analyze_execution_drift(
+        tca_db=db,
+        lookback_days=lookback_days,
+        thresholds=thresholds,
+    )
+    out = Path(out_dir)
+    out.mkdir(parents=True, exist_ok=True)
+    stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
+    path = out / f"execution_drift_{stamp}.json"
+    path.write_text(json.dumps(payload, indent=2, sort_keys=True), encoding="utf-8")
+    return path
