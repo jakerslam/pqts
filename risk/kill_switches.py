@@ -178,12 +178,9 @@ class KillSwitchMonitor:
         """Update metrics with latest portfolio state."""
         self.state_history.append(portfolio)
         
-        # Update drawdown
-        try:
-            current_value = portfolio.total_pnl + self._get_capital()
-        except RuntimeError:
-            # If capital not set yet, use portfolio value as proxy
-            current_value = portfolio.total_pnl + 100000  # Temporary until capital injected
+        # Update drawdown - HARD STOP if capital not set (no fallback)
+        capital = self._get_capital()  # Raises RuntimeError if not set
+        current_value = portfolio.total_pnl + capital
         
         self.peak_portfolio_value = max(self.peak_portfolio_value, current_value)
         self.current_drawdown = (self.peak_portfolio_value - current_value) / self.peak_portfolio_value if self.peak_portfolio_value > 0 else 0.0

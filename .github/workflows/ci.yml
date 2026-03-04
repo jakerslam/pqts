@@ -1,103 +1,116 @@
-name: PQTS Tests
+name: PQTS CI
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main, develop, prod ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, prod ]
 
 jobs:
   test:
+    name: Test Suite
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ['3.10', '3.11', '3.12']
+        python-version: ['3.11', '3.12']
+      fail-fast: false
 
     steps:
-    - uses: actions/checkout@v3
-    
+    - name: Checkout
+      uses: actions/checkout@v4
+
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
-    
-    - name: Cache pip packages
-      uses: actions/cache@v3
-      with:
-        path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-        restore-keys: |
-          ${{ runner.os }}-pip-
-    
+        cache: 'pip'
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-        pip install pytest pytest-cov
-    
+        pip install pytest pytest-cov pytest-xdist
+
     - name: Run kill switch tests
-      run: |
-        pytest tests/test_kill_switches.py -v --tb=short
-    
+      run: pytest tests/test_kill_switches.py -v --tb=short -x
+
     - name: Run backtesting tests
-      run: |
-        pytest tests/test_backtesting.py -v --tb=short
-    
+      run: pytest tests/test_backtesting.py -v --tb=short -x
+
     - name: Run all tests
-      run: |
-        pytest tests/ -v --tb=short --ignore=tests/test_cost_model.py || true
-    
-    - name: Run cost model tests (if file exists)
-      run: |
-        python execution/realistic_costs.py || true
-    
-    - name: Run Kelly integration tests (if file exists)
-      run: |
-        python portfolio/fractional_kelly.py > /dev/null 2>&1 || true
-    
-    - name: Run meta-learner tests
-      run: |
-        python test_meta_learner_fix.py 2>&1 | tail -20 || true
+      run: pytest tests/ -v --tb=short --cov=pqts --cov-report=xml
+
+    - name: Upload coverage
+      uses: codecov/codecov-action@v4
+      if: matrix.python-version == '3.11'
+      with:
+        files: ./coverage.xml
+        fail_ci_if_error: false
 
   lint:
+    name: Lint
     runs-on: ubuntu-latest
-    
+
     steps:
-    - uses: actions/checkout@v3
-    
-    - name: Set up Python
-      uses: actions/setup-python@v4
+    - uses: actions/checkout@v4
+
+    - uses: actions/setup-python@v5
       with:
         python-version: '3.11'
-    
-    - name: Install linting tools
+        cache: 'pip'
+
+    - name: Install tools
+      run: pip install flake8 black isort
+
+    - name: Check black formatting
+      run: black --check --diff .
+
+    - name: Check import ordering
+      run: isort --check --diff .
+
+    - name: Run flake8
       run: |
-        pip install flake8
-    
-    - name: Lint with flake8
-      run: |
-        # Stop on syntax errors or undefined names
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        # Exit-zero treats all errors as warnings
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
   security:
+    name: Security Audit
     runs-on: ubuntu-latest
-    
+
     steps:
-    - uses: actions/checkout@v3
-    
-    - name: Set up Python
-      uses: actions/setup-python@v4
+    - uses: actions/checkout@v4
+
+    - uses: actions/setup-python@v5
       with:
         python-version: '3.11'
-    
-    - name: Install security tools
-      run: |
-        pip install bandit
-    
-    - name: Check for security issues
-      run: |
-        # Run bandit but don't fail (for now, as this is a prototype)
-        bandit -r . -f json -o bandit-report.json || true
-        cat bandit-report.json || echo "No security report generated"
+        cache: 'pip'
+
+    - name: Install bandit
+      run: pip install bandit[sarif]
+
+    - name: Run security scan
+      run: bandit -r pqts/ -f sarif -o bandit-report.sarif || true
+
+    - name: Upload SARIF
+      uses: github/codeql-action/upload-sarif@v3
+      if: always()
+      with:
+        sarif_file: bandit-report.sarif
+
+  type-check:
+    name: Type Check
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+
+    - name: Install mypy
+      run: pip install mypy types-requests types-python-dateutil
+
+    - name: Run type checker
+      run: mypy pqts/ --ignore-missing-imports --strict || true
