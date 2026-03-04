@@ -5,6 +5,7 @@ import numpy as np
 from typing import Dict, List, Optional, Callable
 from datetime import datetime, timedelta
 from dataclasses import dataclass
+from backtesting.event_engine import EventDrivenBacktester
 
 logger = logging.getLogger(__name__)
 
@@ -152,23 +153,60 @@ class WalkForwardTester:
     
     def _evaluate(self, strategy, data: Dict[str, pd.DataFrame]) -> Dict:
         """Run backtest and return metrics."""
-        # This would call the event-driven backtester
-        # For now, placeholder
-        return {
-            'sharpe': np.random.uniform(0.5, 2.0),
-            'total_return': np.random.uniform(-0.1, 0.3),
-            'max_drawdown': np.random.uniform(-0.2, -0.05),
-            'trades': 100
-        }
+        if not data:
+            return {'sharpe': 0.0, 'total_return': 0.0, 'max_drawdown': 0.0, 'trades': 0}
+
+        # Primary path: strategy supplies deterministic evaluator.
+        if hasattr(strategy, 'evaluate'):
+            metrics = strategy.evaluate(data)
+            return {
+                'sharpe': float(metrics.get('sharpe', 0.0)),
+                'total_return': float(metrics.get('total_return', 0.0)),
+                'max_drawdown': float(metrics.get('max_drawdown', 0.0)),
+                'trades': int(metrics.get('total_trades', metrics.get('trades', 0))),
+            }
+
+        # Fallback path: run event-driven simulation for on_tick strategies.
+        if hasattr(strategy, 'on_tick'):
+            backtester = EventDrivenBacktester({
+                'initial_capital': self.config.get('initial_capital', 10000.0),
+                'latency_ms': self.config.get('latency_ms', 100),
+                'fee_rate': self.config.get('fee_rate', 0.001),
+                'partial_fills': self.config.get('partial_fills', True),
+            })
+            metrics = backtester.run_backtest(strategy, data)
+            return {
+                'sharpe': float(metrics.get('sharpe', 0.0)),
+                'total_return': float(metrics.get('total_return', 0.0)),
+                'max_drawdown': float(metrics.get('max_drawdown', 0.0)),
+                'trades': int(metrics.get('total_trades', 0)),
+            }
+
+        raise TypeError(
+            "WalkForwardTester requires strategies implementing either "
+            "evaluate(data)->metrics or on_tick(symbol,tick,timestamp)."
+        )
     
     def _aggregate_results(self, results: List[Dict]) -> Dict:
         """Aggregate results across windows."""
+        if not results:
+            return {
+                'avg_sharpe': 0.0,
+                'sharpe_std': 0.0,
+                'min_sharpe': 0.0,
+                'max_sharpe': 0.0,
+                'avg_return': 0.0,
+                'avg_drawdown': 0.0,
+                'consistency_score': 0.0
+            }
+
         sharpes = [r['test_sharpe'] for r in results]
         returns = [r['test_return'] for r in results]
         drawdowns = [r['test_drawdown'] for r in results]
         
         # Consistency: do results degrade over time?
-        consistency = 1 - abs(np.std(sharpes) / (np.mean(sharpes) + 0.01))
+        consistency = 1 - abs(np.std(sharpes) / (abs(np.mean(sharpes)) + 0.01))
+        consistency = float(np.clip(consistency, 0.0, 1.0))
         
         return {
             'avg_sharpe': np.mean(sharpes),
@@ -179,24 +217,3 @@ class WalkForwardTester:
             'avg_drawdown': np.mean(drawdowns),
             'consistency_score': consistency
         }
-
-
-if __name__ == "__main__":
-    # Test
-    tester = WalkForwardTester({
-        'train_years': 2,
-        'validate_years': 1,
-        'test_years': 1,
-        'step_years': 1
-    })
-    
-    start = datetime(2019, 1, 1)
-    end = datetime(2024, 12, 31)
-    
-    windows = tester.generate_windows(start, end)
-    
-    print(f"\nGenerated {len(windows)} windows:")
-    for w in windows:
-        print(f"  Train: {w.train_start.year}-{w.train_end.year}, "
-              f"Val: {w.validation_start.year}, "
-              f"Test: {w.test_start.year}")

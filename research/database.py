@@ -109,6 +109,35 @@ class ResearchDatabase:
                 FOREIGN KEY (experiment_id) REFERENCES experiments(experiment_id)
             )
         ''')
+
+        # Stage metrics for promotion gating (paper, live_canary, live)
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS stage_metrics (
+                metric_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                experiment_id TEXT NOT NULL,
+                stage TEXT NOT NULL,
+                timestamp TIMESTAMP NOT NULL,
+                pnl REAL DEFAULT 0,
+                sharpe REAL DEFAULT 0,
+                drawdown REAL DEFAULT 0,
+                slippage_mape REAL DEFAULT 0,
+                kill_switch_triggers INTEGER DEFAULT 0,
+                notes TEXT,
+                FOREIGN KEY (experiment_id) REFERENCES experiments(experiment_id)
+            )
+        ''')
+
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS promotion_audit (
+                audit_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                experiment_id TEXT NOT NULL,
+                from_stage TEXT,
+                to_stage TEXT NOT NULL,
+                reason TEXT,
+                timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (experiment_id) REFERENCES experiments(experiment_id)
+            )
+        ''')
         
         # Feature importance tracking
         cursor.execute('''
@@ -297,11 +326,16 @@ class ResearchDatabase:
         cursor = self.conn.cursor()
         
         try:
+            previous_status = self.get_experiment_status(experiment_id)
             cursor.execute('''
                 UPDATE experiments 
                 SET status = 'paper', promoted_at = ?
                 WHERE experiment_id = ?
             ''', (datetime.now().isoformat(), experiment_id))
+            cursor.execute('''
+                INSERT INTO promotion_audit (experiment_id, from_stage, to_stage, reason, timestamp)
+                VALUES (?, ?, ?, ?, ?)
+            ''', (experiment_id, previous_status, 'paper', 'research_promotion', datetime.now().isoformat()))
             
             self.conn.commit()
             logger.info(f"Promoted {experiment_id} to paper trading")
@@ -310,6 +344,109 @@ class ResearchDatabase:
         except sqlite3.Error as e:
             logger.error(f"Failed to promote experiment: {e}")
             return False
+
+    def get_experiment_status(self, experiment_id: str) -> Optional[str]:
+        cursor = self.conn.cursor()
+        row = cursor.execute(
+            "SELECT status FROM experiments WHERE experiment_id = ?",
+            (experiment_id,),
+        ).fetchone()
+        return row["status"] if row else None
+
+    def update_experiment_status(self, experiment_id: str, status: str, reason: str = "") -> bool:
+        cursor = self.conn.cursor()
+        try:
+            previous_status = self.get_experiment_status(experiment_id)
+            cursor.execute(
+                '''
+                UPDATE experiments
+                SET status = ?, updated_at = ?
+                WHERE experiment_id = ?
+                ''',
+                (status, datetime.now().isoformat(), experiment_id),
+            )
+            cursor.execute(
+                '''
+                INSERT INTO promotion_audit (experiment_id, from_stage, to_stage, reason, timestamp)
+                VALUES (?, ?, ?, ?, ?)
+                ''',
+                (experiment_id, previous_status, status, reason, datetime.now().isoformat()),
+            )
+            self.conn.commit()
+            return True
+        except sqlite3.Error as e:
+            logger.error(f"Failed to update experiment status: {e}")
+            return False
+
+    def log_stage_metric(self, experiment_id: str, stage: str, metrics: Dict, timestamp: Optional[datetime] = None) -> bool:
+        ts = (timestamp or datetime.now()).isoformat()
+        cursor = self.conn.cursor()
+        try:
+            cursor.execute(
+                '''
+                INSERT INTO stage_metrics
+                (experiment_id, stage, timestamp, pnl, sharpe, drawdown, slippage_mape, kill_switch_triggers, notes)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ''',
+                (
+                    experiment_id,
+                    stage,
+                    ts,
+                    float(metrics.get('pnl', 0.0)),
+                    float(metrics.get('sharpe', 0.0)),
+                    float(metrics.get('drawdown', 0.0)),
+                    float(metrics.get('slippage_mape', 0.0)),
+                    int(metrics.get('kill_switch_triggers', 0)),
+                    json.dumps(metrics.get('notes', {})),
+                ),
+            )
+            self.conn.commit()
+            return True
+        except sqlite3.Error as e:
+            logger.error(f"Failed to log stage metrics: {e}")
+            return False
+
+    def get_stage_summary(self, experiment_id: str, stage: str, lookback_days: int = 365) -> Dict[str, float]:
+        query = '''
+            SELECT
+                COUNT(*) AS samples,
+                MIN(timestamp) AS first_timestamp,
+                MAX(timestamp) AS last_timestamp,
+                AVG(sharpe) AS avg_sharpe,
+                AVG(drawdown) AS avg_drawdown,
+                AVG(slippage_mape) AS avg_slippage_mape,
+                SUM(kill_switch_triggers) AS total_kill_switch_triggers,
+                SUM(pnl) AS total_pnl
+            FROM stage_metrics
+            WHERE experiment_id = ?
+              AND stage = ?
+              AND timestamp >= datetime('now', ?)
+        '''
+        lookback = f'-{int(lookback_days)} days'
+        frame = pd.read_sql_query(query, self.conn, params=(experiment_id, stage, lookback))
+        if frame.empty:
+            return {
+                'samples': 0,
+                'days': 0,
+                'avg_sharpe': 0.0,
+                'avg_drawdown': 0.0,
+                'avg_slippage_mape': 0.0,
+                'total_kill_switch_triggers': 0,
+                'total_pnl': 0.0,
+            }
+        row = frame.iloc[0]
+        first_ts = pd.to_datetime(row.get('first_timestamp')) if row.get('first_timestamp') else None
+        last_ts = pd.to_datetime(row.get('last_timestamp')) if row.get('last_timestamp') else None
+        days = int((last_ts - first_ts).days + 1) if first_ts is not None and last_ts is not None else 0
+        return {
+            'samples': int(row.get('samples') or 0),
+            'days': max(days, 0),
+            'avg_sharpe': float(row.get('avg_sharpe') or 0.0),
+            'avg_drawdown': float(row.get('avg_drawdown') or 0.0),
+            'avg_slippage_mape': float(row.get('avg_slippage_mape') or 0.0),
+            'total_kill_switch_triggers': int(row.get('total_kill_switch_triggers') or 0),
+            'total_pnl': float(row.get('total_pnl') or 0.0),
+        }
     
     def get_promotion_candidates(self, min_sharpe: float = 1.0,
                                 max_drawdown: float = 0.2) -> pd.DataFrame:
@@ -329,42 +466,3 @@ class ResearchDatabase:
     
     def close(self):
         self.conn.close()
-
-
-if __name__ == "__main__":
-    db = ResearchDatabase("data/research_test.db")
-    
-    # Example experiment
-    experiment = Experiment(
-        experiment_id="mm_imb_001",
-        strategy_name="market_making",
-        variant_id="imbalance_v1",
-        features=["ob_imbalance", "volatility", "trade_toxicity"],
-        parameters={"spread_bps": 50, "skew_factor": 0.5},
-        status="backtest"
-    )
-    
-    db.log_experiment(experiment)
-    
-    # Example backtest result
-    result = BacktestResult(
-        strategy_id="mm_imb_001",
-        features_used=["ob_imbalance", "volatility"],
-        hyperparameters={"spread_bps": 50},
-        pnl=15.3,
-        sharpe=1.45,
-        drawdown=0.08,
-        win_rate=0.62,
-        total_trades=150,
-        market_regime="mean_reversion",
-        timestamp=datetime.now()
-    )
-    
-    db.log_backtest_result(result)
-    
-    # Get top experiments
-    top = db.get_top_experiments(n=5)
-    print("\nTop Experiments:")
-    print(top[['experiment_id', 'sharpe_ratio', 'fitness_score']].head())
-    
-    db.close()

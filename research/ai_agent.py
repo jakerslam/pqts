@@ -1,351 +1,864 @@
-# AI Research Agent - Main Orchestrator
+# AI Research Agent - Deterministic Orchestrator
+from __future__ import annotations
+
+import hashlib
 import logging
-import pandas as pd
+from dataclasses import dataclass
+from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional, Tuple
+
 import numpy as np
-from typing import Dict, List, Optional
-from datetime import datetime
-import sqlite3
-from pathlib import Path
-import json
-import time
+import pandas as pd
+
+try:
+    from backtesting.purged_cv import BacktestValidator, PurgedKFold
+except Exception:  # pragma: no cover - fallback for minimal environments
+    class PurgedKFold:  # type: ignore[override]
+        def __init__(self, n_splits: int = 5, pct_purge: float = 0.01, pct_embargo: float = 0.01):
+            self.n_splits = n_splits
+            self.pct_purge = pct_purge
+            self.pct_embargo = pct_embargo
+
+        def split(self, X: pd.DataFrame):
+            n = len(X)
+            fold = max(1, n // max(self.n_splits, 1))
+            purge = int(fold * self.pct_purge)
+            embargo = int(fold * self.pct_embargo)
+            indices = np.arange(n)
+            for i in range(self.n_splits):
+                test_start = i * fold
+                test_end = min((i + 1) * fold, n)
+                if test_start >= test_end:
+                    continue
+                test_idx = indices[test_start:test_end]
+                train_left = indices[: max(0, test_start - purge)]
+                train_right = indices[min(n, test_end + embargo) :]
+                train_idx = np.concatenate([train_left, train_right])
+                yield train_idx, test_idx
+
+    class BacktestValidator:  # type: ignore[override]
+        def __init__(self, min_sharpe: float = 0.8, min_profit_factor: float = 1.4, max_drawdown: float = 0.15):
+            self.min_sharpe = min_sharpe
+            self.min_pf = min_profit_factor
+            self.max_dd = max_drawdown
+
+        def validate(self, returns: np.ndarray) -> Dict[str, Any]:
+            if len(returns) < 10:
+                return {"passed": False, "reasons": ["insufficient_returns"], "metrics": {}}
+            returns = np.asarray(returns, dtype=float)
+            mean = float(np.mean(returns))
+            std = float(np.std(returns))
+            sharpe = mean / std * np.sqrt(252.0) if std > 0 else 0.0
+            gains = float(np.sum(returns[returns > 0]))
+            losses = abs(float(np.sum(returns[returns < 0])))
+            pf = gains / losses if losses > 0 else 0.0
+            curve = np.cumprod(1.0 + returns)
+            dd = float(abs(np.min(curve / np.maximum.accumulate(curve) - 1.0)))
+            reasons: List[str] = []
+            if sharpe < self.min_sharpe:
+                reasons.append("low_sharpe")
+            if pf < self.min_pf:
+                reasons.append("low_profit_factor")
+            if dd > self.max_dd:
+                reasons.append("high_drawdown")
+            return {"passed": len(reasons) == 0, "reasons": reasons, "metrics": {"sharpe": sharpe, "profit_factor": pf, "max_drawdown": dd}}
 
 from research.auto_generator import AutoStrategyGenerator, StrategyVariant
-from research.database import ResearchDatabase, BacktestResult, Experiment
-from research.regime_detector import RegimeDetector, MarketRegime
-from research.walk_forward import WalkForwardTester
+from research.database import BacktestResult, Experiment, ResearchDatabase
+from research.regime_detector import MarketRegime, RegimeDetector
+from research.walk_forward import WalkForwardTester, WalkForwardWindow
 
 logger = logging.getLogger(__name__)
 
+
+@dataclass(frozen=True)
+class ObjectiveBounds:
+    max_sharpe: float
+    max_annual_vol: float
+    annual_turnover: float
+    cost_per_turnover: float
+
+    @property
+    def max_net_annual_return(self) -> float:
+        gross = self.max_sharpe * self.max_annual_vol
+        cost_drag = self.annual_turnover * self.cost_per_turnover
+        return gross - cost_drag
+
+    @property
+    def max_net_monthly_return(self) -> float:
+        return self.max_net_annual_return / 12.0
+
+
+class _DeterministicVariantStrategy:
+    """Walk-forward adapter exposing evaluate(data)->metrics."""
+
+    def __init__(self, agent: "AIResearchAgent", variant: StrategyVariant):
+        self._agent = agent
+        self._variant = variant
+
+    def evaluate(self, data: Dict[str, pd.DataFrame]) -> Dict[str, float]:
+        metrics = self._agent._run_deterministic_backtest(self._variant, data)
+        return {
+            "sharpe": metrics["sharpe"],
+            "total_return": metrics["total_return"],
+            "max_drawdown": metrics["max_drawdown"],
+            "total_trades": metrics["total_trades"],
+        }
+
+
 class AIResearchAgent:
     """
-    Autonomous AI agent that discovers and optimizes trading strategies.
-    
-    Implements the research cycle described in ChatGPT analysis:
+    Autonomous research cycle with deterministic scoring and hard promotion gates.
+
+    Pipeline:
     1. Generate strategy variants
-    2. Run backtests
-    3. Record results
-    4. Rank by fitness
-    5. Promote winners to paper trading
-    6. Retire weak strategies
-    
-    This is the system's "quant research team" - continuously searching
-    for profitable edges.
+    2. Run deterministic cost-aware backtests
+    3. Run purged CV + overfit controls
+    4. Run walk-forward validation
+    5. Promote to paper only when all gates pass
+    6. Promote paper -> canary -> live only via persisted stage metrics
     """
-    
+
     def __init__(self, config: dict):
         self.config = config
-        
+
         # Subsystems
-        self.db = ResearchDatabase(config.get('db_path', 'data/research.db'))
+        self.db = ResearchDatabase(config.get("db_path", "data/research.db"))
         self.generator = AutoStrategyGenerator()
-        self.regime_detector = RegimeDetector(config.get('regime', {}))
-        self.walk_forward = WalkForwardTester(config.get('walk_forward', {}))
-        
-        # Parameters
-        self.search_budget = config.get('search_budget', 100)  # Variants to test
-        self.top_performers = config.get('top_performers', 10)
-        self.min_sharpe_for_promotion = config.get('min_sharpe', 1.0)
-        self.max_drawdown = config.get('max_drawdown', 0.15)
-        
+        self.regime_detector = RegimeDetector(config.get("regime", {}))
+        self.walk_forward = WalkForwardTester(config.get("walk_forward", {}))
+
+        # Search and promotion controls
+        self.search_budget = int(config.get("search_budget", 100))
+        self.top_performers = int(config.get("top_performers", 10))
+        self.min_sharpe_for_promotion = float(config.get("min_sharpe", 1.0))
+        self.max_drawdown = float(config.get("max_drawdown", 0.15))
+        self.min_profit_factor = float(config.get("min_profit_factor", 1.25))
+        self.max_pbo = float(config.get("max_pbo", 0.4))
+        self.min_deflated_sharpe = float(config.get("min_deflated_sharpe", 0.8))
+        self.min_walk_forward_consistency = float(
+            config.get("min_walk_forward_consistency", 0.4)
+        )
+
+        # CV controls
+        self.cv_splits = int(config.get("cv_splits", 5))
+        self.cv_pct_purge = float(config.get("cv_pct_purge", 0.01))
+        self.cv_pct_embargo = float(config.get("cv_pct_embargo", 0.01))
+
+        # Cost model controls
+        costs_cfg = config.get("costs", {})
+        self.commission_bps = float(costs_cfg.get("commission_bps", 6.0))
+        self.slippage_bps = float(costs_cfg.get("slippage_bps", 8.0))
+        self.borrow_funding_bps = float(costs_cfg.get("borrow_funding_bps", 4.0))
+
+        # Capacity model controls (capital must be injected from config)
+        capacity_cfg = config.get("capacity", {})
+        self.deployable_capital = float(
+            capacity_cfg.get(
+                "deployable_capital",
+                config.get("deployable_capital", config.get("risk", {}).get("initial_capital", 0.0)),
+            )
+        )
+        self.max_annual_turnover_notional = float(
+            capacity_cfg.get("max_annual_turnover_notional", max(self.deployable_capital, 0.0))
+        )
+
+        # Stage gates
+        self.stage_gates = {
+            "live_canary": {
+                "source_stage": "paper",
+                "min_days": int(config.get("paper_min_days", 30)),
+                "min_avg_sharpe": self.min_sharpe_for_promotion,
+                "max_avg_drawdown": self.max_drawdown,
+                "max_slippage_mape": float(config.get("paper_max_slippage_mape", 25.0)),
+                "max_kill_switch_triggers": int(config.get("paper_max_kill_switch_triggers", 0)),
+            },
+            "live": {
+                "source_stage": "live_canary",
+                "min_days": int(config.get("canary_min_days", 14)),
+                "min_avg_sharpe": float(config.get("live_min_sharpe", 0.8)),
+                "max_avg_drawdown": float(config.get("live_max_drawdown", 0.12)),
+                "max_slippage_mape": float(config.get("live_max_slippage_mape", 20.0)),
+                "max_kill_switch_triggers": int(config.get("live_max_kill_switch_triggers", 0)),
+            },
+        }
+
+        # Agent objective constraints
+        objective_cfg = config.get("objective", {})
+        self.objective_bounds = ObjectiveBounds(
+            max_sharpe=float(objective_cfg.get("max_sharpe", 1.5)),
+            max_annual_vol=float(objective_cfg.get("max_annual_vol", 0.25)),
+            annual_turnover=float(objective_cfg.get("annual_turnover", 6.0)),
+            cost_per_turnover=float(objective_cfg.get("cost_per_turnover", 0.0045)),
+        )
+
         # State
         self.active_strategies: Dict[str, Dict] = {}
         self.paper_trading: List[str] = []
+        self.live_canary: List[str] = []
         self.live_trading: List[str] = []
-        
-        logger.info(f"AIResearchAgent initialized: budget={self.search_budget}")
-    
-    def research_cycle(self, historical_data: Dict[str, pd.DataFrame],
-                      strategy_types: List[str] = None) -> Dict:
+
+        logger.info("AIResearchAgent initialized: budget=%s", self.search_budget)
+
+    # =========================================================================
+    # Main Cycle
+    # =========================================================================
+
+    def research_cycle(
+        self,
+        historical_data: Dict[str, pd.DataFrame],
+        strategy_types: Optional[List[str]] = None,
+    ) -> Dict:
         """
-        Main research loop: generate → test → rank → promote.
-        
-        Args:
-            historical_data: Historical market data for testing
-            strategy_types: List of strategy types to explore
+        Main research loop: generate -> test -> rank -> walk-forward -> promote.
         """
+        self._validate_historical_data(historical_data)
         if strategy_types is None:
-            strategy_types = ['market_making', 'cross_exchange', 'stat_arb']
-        
-        logger.info(f"Starting research cycle for: {strategy_types}")
-        
-        # Phase 1: Generate candidates
+            strategy_types = ["market_making", "cross_exchange", "stat_arb"]
+
+        objective_assessment = self.validate_objective_constraints(self.config.get("objective", {}))
+        if not objective_assessment["objective_valid"]:
+            logger.warning("Objective constraints failed: %s", objective_assessment["violations"])
+
+        logger.info("Starting research cycle for: %s", strategy_types)
         candidates = self._generate_candidates(strategy_types)
-        
-        # Phase 2: Run backtests
         results = self._run_backtests(candidates, historical_data)
-        
-        # Phase 3: Rank by fitness
         ranked = self._rank_strategies(results)
-        
-        # Phase 4: Walk-forward validation
-        validated = self._walk_forward_test(ranked[:20], historical_data)
-        
-        # Phase 5: Promote winners
+        validated = self._walk_forward_test(ranked[: min(20, len(ranked))], historical_data)
         promoted = self._promote_to_paper(validated)
-        
-        # Phase 6: Report results
-        report = self._generate_report(candidates, results, promoted)
-        
-        logger.info(f"Research cycle complete: {len(candidates)} generated, {len(promoted)} promoted")
-        
+        report = self._generate_report(
+            candidates=candidates,
+            results=results,
+            validated=validated,
+            promoted=promoted,
+            objective_assessment=objective_assessment,
+        )
+
+        logger.info(
+            "Research cycle complete: %s generated, %s promoted",
+            len(candidates),
+            len(promoted),
+        )
         return report
-    
-    def _generate_candidates(self, strategy_types: List[str],
-                            variants_per_type: int = 10) -> List[StrategyVariant]:
-        """Generate strategy candidates."""
-        candidates = []
-        
-        for stype in strategy_types:
-            variants = self.generator.generate_strategy_variants(stype, variants_per_type)
+
+    def _validate_historical_data(self, data: Dict[str, pd.DataFrame]) -> None:
+        if not data:
+            raise ValueError("Historical data is required.")
+        for symbol, frame in data.items():
+            if frame.empty:
+                raise ValueError(f"Historical data for {symbol} is empty.")
+            if "close" not in frame.columns:
+                raise ValueError(f"Historical data for {symbol} must include a 'close' column.")
+            if not isinstance(frame.index, pd.DatetimeIndex):
+                raise ValueError(f"Historical data for {symbol} must use DatetimeIndex.")
+
+    # =========================================================================
+    # Candidate Generation
+    # =========================================================================
+
+    def _generate_candidates(
+        self,
+        strategy_types: List[str],
+        variants_per_type: int = 10,
+    ) -> List[StrategyVariant]:
+        candidates: List[StrategyVariant] = []
+        for strategy_type in strategy_types:
+            variants = self.generator.generate_strategy_variants(
+                strategy_type=strategy_type,
+                n_per_feature_set=variants_per_type,
+            )
             candidates.extend(variants)
-        
-        logger.info(f"Generated {len(candidates)} candidate strategies")
+
+        candidates = sorted(candidates, key=lambda v: v.strategy_id)[: self.search_budget]
+        logger.info("Generated %s candidate strategies", len(candidates))
         return candidates
-    
-    def _run_backtests(self, candidates: List[StrategyVariant],
-                      data: Dict[str, pd.DataFrame]) -> List[Dict]:
-        """Backtest all candidates."""
-        results = []
-        
-        # Log experiment
+
+    # =========================================================================
+    # Backtesting + CV + Overfit Controls
+    # =========================================================================
+
+    def _run_backtests(
+        self,
+        candidates: List[StrategyVariant],
+        data: Dict[str, pd.DataFrame],
+    ) -> List[Dict]:
+        results: List[Dict] = []
+
         for variant in candidates:
             experiment = Experiment(
                 experiment_id=variant.strategy_id,
                 strategy_name=variant.strategy_type,
-                variant_id=variant.strategy_id.split('_')[-1],
+                variant_id=variant.strategy_id.split("_")[-1],
                 features=variant.features,
                 parameters=variant.parameters,
-                status='backtest'
+                status="backtest",
             )
             self.db.log_experiment(experiment)
-        
-        # Run backtests (parallelizable in future)
-        for i, variant in enumerate(candidates):
-            logger.debug(f"Backtesting {i+1}/{len(candidates)}: {variant.strategy_id}")
-            
-            # Simulate backtest with realistic parameters
-            # In real implementation, this calls EventDrivenBacktester
-            metrics = self._simulate_backtest(variant, data)
-            
-            # Store result
-            result = BacktestResult(
+
+            metrics = self._run_deterministic_backtest(variant, data)
+            cv_stats = self._run_purged_cv(variant, data)
+            deflated_sharpe = self._deflated_sharpe(
+                sharpe=float(cv_stats["cv_sharpe"]),
+                n_trials=max(len(candidates), 1),
+            )
+
+            fitness = self._compute_fitness(
+                metrics=metrics,
+                cv_stats=cv_stats,
+                deflated_sharpe=deflated_sharpe,
+            )
+
+            backtest_result = BacktestResult(
                 strategy_id=variant.strategy_id,
                 features_used=variant.features,
                 hyperparameters=variant.parameters,
-                pnl=metrics['total_return'],
-                sharpe=metrics['sharpe'],
-                drawdown=metrics['max_drawdown'],
-                win_rate=metrics['win_rate'],
-                total_trades=metrics['total_trades'],
-                market_regime=metrics.get('market_regime', 'unknown'),
-                timestamp=datetime.now()
+                pnl=float(metrics["total_return"]),
+                sharpe=float(metrics["sharpe"]),
+                drawdown=float(metrics["max_drawdown"]),
+                win_rate=float(metrics["win_rate"]),
+                total_trades=int(metrics["total_trades"]),
+                market_regime=metrics.get("market_regime", "unknown"),
+                timestamp=datetime.now(),
             )
-            
-            self.db.log_backtest_result(result)
-            results.append({
-                'variant': variant,
-                'metrics': metrics,
-                'fitness': metrics['sharpe'] - 0.3 * abs(metrics['max_drawdown'])
-            })
-            
-            time.sleep(0.01)  # Prevent CPU thrashing
-        
-        return results
-    
-    def _simulate_backtest(self, variant: StrategyVariant,
-                          data: Dict[str, pd.DataFrame]) -> Dict:
-        """
-        Simulate realistic backtest metrics.
-        
-        Real implementation would use EventDrivenBacktester.
-        """
-        import random
-        random.seed(hash(variant.strategy_id) % 10000)
-        
-        # Base performance varies by strategy quality
-        base_sharpe = random.gauss(0.8, 0.5)
-        
-        # Boost for good feature selection
-        if 'ob_imbalance' in variant.features and variant.strategy_type == 'market_making':
-            base_sharpe += 0.5
-        
-        # Random metrics
-        sharpe = max(-0.5, min(3.0, base_sharpe))
-        total_return = sharpe * 0.1  # Approximate
-        drawdown = random.uniform(-0.3, -0.05)
-        win_rate = random.uniform(0.45, 0.65)
-        trades = random.randint(50, 500)
-        
-        return {
-            'sharpe': sharpe,
-            'total_return': total_return,
-            'max_drawdown': drawdown,
-            'win_rate': win_rate,
-            'total_trades': trades
-        }
-    
-    def _rank_strategies(self, results: List[Dict]) -> List[Dict]:
-        """Rank strategies by fitness."""
-        # Sort by fitness
-        ranked = sorted(results, key=lambda x: x['fitness'], reverse=True)
-        return ranked
-    
-    def _walk_forward_test(self, top_strategies: List[Dict],
-                          data: Dict[str, pd.DataFrame]) -> List[Dict]:
-        """Validate top strategies with walk-forward testing."""
-        confirmed = []
-        
-        for strategy_data in top_strategies:
-            variant = strategy_data['variant']
-            
-            # Run walk-forward
-            # In real implementation: result = self.walk_forward.run(...)
-            # For now, assume walk-forward reduces performance by 20%
-            wf_sharpe = strategy_data['metrics']['sharpe'] * 0.8
-            
-            if wf_sharpe >= self.min_sharpe_for_promotion:
-                strategy_data['walk_forward_sharpe'] = wf_sharpe
-                confirmed.append(strategy_data)
-        
-        logger.info(f"Walk-forward validated: {len(confirmed)}/{len(top_strategies)}")
-        return confirmed
-    
-    def _promote_to_paper(self, validated: List[Dict]) -> List[str]:
-        """Promote validated strategies to paper trading."""
-        promoted = []
-        
-        for result in validated[:self.top_performers]:
-            variant = result['variant']
-            
-            # Check constraints
-            if abs(result['metrics']['max_drawdown']) < self.max_drawdown:
-                if result['walk_forward_sharpe'] >= self.min_sharpe_for_promotion:
-                    
-                    # Promote
-                    self.db.promote_to_paper(variant.strategy_id)
-                    self.paper_trading.append(variant.strategy_id)
-                    promoted.append(variant.strategy_id)
-                    
-                    logger.info(f"Promoted {variant.strategy_id} to paper trading")
-        
-        return promoted
-    
-    def _generate_report(self, candidates: List[StrategyVariant],
-                        results: List[Dict],
-                        promoted: List[str]) -> Dict:
-        """Generate research report."""
-        sharpes = [r['metrics']['sharpe'] for r in results]
-        returns = [r['metrics']['total_return'] for r in results]
-        
-        return {
-            'timestamp': datetime.now().isoformat(),
-            'summary': {
-                'candidates_generated': len(candidates),
-                'backtests_run': len(results),
-                'promoted_to_paper': len(promoted),
-                'promoted_ids': promoted
-            },
-            'performance': {
-                'avg_sharpe': np.mean(sharpes),
-                'best_sharpe': np.max(sharpes) if sharpes else 0,
-                'avg_return': np.mean(returns),
-                'best_return': np.max(returns) if returns else 0
-            },
-            'top_strategies': [
+            self.db.log_backtest_result(backtest_result)
+
+            results.append(
                 {
-                    'id': r['variant'].strategy_id,
-                    'type': r['variant'].strategy_type,
-                    'sharpe': r['metrics']['sharpe'],
-                    'features': r['variant'].features
+                    "variant": variant,
+                    "metrics": metrics,
+                    "cv": cv_stats,
+                    "deflated_sharpe": deflated_sharpe,
+                    "pbo_estimate": cv_stats["pbo_estimate"],
+                    "validator_passed": cv_stats["validator_passed"],
+                    "validator_reasons": cv_stats["validator_reasons"],
+                    "fitness": fitness,
                 }
-                for r in sorted(results, key=lambda x: x['fitness'], reverse=True)[:5]
-            ]
-        }
-    
-    def get_top_strategies(self, n: int = 10) -> pd.DataFrame:
-        """Get top performing strategies from database."""
-        return self.db.get_top_experiments(n)
-    
-    def monitor_paper_trading(self) -> Dict:
-        """
-        Monitor paper trading performance.
-        
-        Strategies with declining performance get demoted.
-        """
-        metrics = {}
-        
-        for strategy_id in self.paper_trading:
-            # Get recent performance
-            # In real implementation: query metrics from trading system
-            recent_sharpe = np.random.uniform(0.5, 2.0)  # Placeholder
-            
-            if recent_sharpe < self.min_sharpe_for_promotion * 0.5:
-                # Demote
-                logger.warning(f"Demoting {strategy_id}: sharpe={recent_sharpe:.2f}")
-                self.paper_trading.remove(strategy_id)
-            
-            metrics[strategy_id] = {
-                'sharpe': recent_sharpe,
-                'status': 'active' if strategy_id in self.paper_trading else 'demoted'
-            }
-        
-        return metrics
-    
-    def discover_new_regime_strategies(self, current_regime: MarketRegime,
-                                     data: Dict[str, pd.DataFrame]) -> List[StrategyVariant]:
-        """
-        When regime changes, discover strategies specific to new regime.
-        """
-        optimal_strategies = self.regime_detector.get_optimal_strategies(current_regime)
-        
-        logger.info(f"Generating regime-specific strategies for {current_regime.value}: {optimal_strategies}")
-        
-        variants = self.generator.generate_strategy_variants(
-            optimal_strategies[0] if optimal_strategies else 'market_making',
-            n_per_feature_set=10
+            )
+
+        return results
+
+    def _run_deterministic_backtest(
+        self,
+        variant: StrategyVariant,
+        data: Dict[str, pd.DataFrame],
+    ) -> Dict[str, Any]:
+        returns = self._aggregate_market_returns(data)
+        signal = self._build_variant_signal(variant, returns)
+        position = signal.clip(-1.0, 1.0)
+        turnover = position.diff().abs().fillna(0.0)
+
+        cost_per_turnover = (self.commission_bps + self.slippage_bps + self.borrow_funding_bps) / 10000.0
+        pnl_series = position.shift(1).fillna(0.0) * returns - turnover * cost_per_turnover
+        pnl_series = pnl_series.replace([np.inf, -np.inf], 0.0).fillna(0.0)
+
+        equity = (1.0 + pnl_series).cumprod()
+        if equity.empty:
+            equity = pd.Series([1.0], dtype=float)
+
+        total_return = float(equity.iloc[-1] - 1.0)
+        pnl_std = float(pnl_series.std(ddof=0))
+        periods_per_year = self._periods_per_year(returns.index)
+        sharpe = float(
+            (pnl_series.mean() / pnl_std) * np.sqrt(periods_per_year) if pnl_std > 0 else 0.0
         )
-        
-        return variants
 
+        running_max = equity.cummax()
+        drawdown = (equity / running_max) - 1.0
+        max_drawdown = float(abs(drawdown.min())) if not drawdown.empty else 0.0
 
-if __name__ == "__main__":
-    # Test the AI agent
-    config = {
-        'search_budget': 50,
-        'top_performers': 5,
-        'min_sharpe': 1.0,
-        'max_drawdown': 0.15,
-        'db_path': 'data/research_test.db'
-    }
-    
-    agent = AIResearchAgent(config)
-    
-    # Generate synthetic data
-    symbols = ['BTCUSDT', 'ETHUSDT', 'SOLUSDT']
-    dates = pd.date_range('2022-01-01', '2024-12-31', freq='h')
-    
-    data = {}
-    for symbol in symbols:
-        data[symbol] = pd.DataFrame({
-            'close': 100 + np.cumsum(np.random.randn(len(dates)) * 0.01),
-            'rsi': 50 + np.random.randn(len(dates)) * 20
-        }, index=dates)
-    
-    # Run research cycle
-    print("\n" + "="*60)
-    print("AI RESEARCH AGENT - RUNNING RESEARCH CYCLE")
-    print("="*60 + "\n")
-    
-    report = agent.research_cycle(data, ['market_making'])
-    
-    print("\n" + "="*60)
-    print("RESEARCH REPORT")
-    print("="*60)
-    print(f"\nCandidates Generated: {report['summary']['candidates_generated']}")
-    print(f"Backtests Run: {report['summary']['backtests_run']}")
-    print(f"Promoted to Paper: {report['summary']['promoted_to_paper']}")
-    print(f"\nAverage Sharpe: {report['performance']['avg_sharpe']:.2f}")
-    print(f"Best Sharpe: {report['performance']['best_sharpe']:.2f}")
-    print(f"\nTop 3 Strategies:")
-    for s in report['top_strategies'][:3]:
-        print(f"  {s['id']}: sharpe={s['sharpe']:.2f}, features={s['features'][:3]}")
+        traded_mask = turnover > 1e-8
+        trade_pnls = pnl_series[traded_mask]
+        win_rate = float((trade_pnls > 0).mean()) if len(trade_pnls) else 0.0
+        total_trades = int(traded_mask.sum())
+
+        annualized_turnover = float(turnover.sum()) * (periods_per_year / max(len(turnover), 1))
+        annual_turnover_notional = annualized_turnover * max(self.deployable_capital, 0.0)
+        capacity_ratio = (
+            annual_turnover_notional / self.max_annual_turnover_notional
+            if self.max_annual_turnover_notional > 0
+            else float("inf")
+        )
+
+        return {
+            "sharpe": sharpe,
+            "total_return": total_return,
+            "max_drawdown": max_drawdown,
+            "win_rate": win_rate,
+            "total_trades": total_trades,
+            "turnover_annualized": annualized_turnover,
+            "cost_drag_bps": float(turnover.sum() * cost_per_turnover * 10000.0),
+            "capacity_ratio": float(capacity_ratio),
+            "returns_series": pnl_series,
+        }
+
+    def _run_purged_cv(self, variant: StrategyVariant, data: Dict[str, pd.DataFrame]) -> Dict[str, Any]:
+        returns = self._aggregate_market_returns(data)
+        if len(returns) < 40:
+            fallback = self._run_deterministic_backtest(variant, data)
+            return {
+                "cv_sharpe": float(fallback["sharpe"]),
+                "cv_sharpe_std": 0.0,
+                "cv_drawdown": float(fallback["max_drawdown"]),
+                "validator_passed": False,
+                "validator_reasons": ["Insufficient samples for purged CV"],
+                "pbo_estimate": 1.0,
+            }
+
+        n_splits = max(2, min(self.cv_splits, len(returns) // 20))
+        cv = PurgedKFold(
+            n_splits=n_splits,
+            pct_purge=self.cv_pct_purge,
+            pct_embargo=self.cv_pct_embargo,
+        )
+
+        cv_sharpes: List[float] = []
+        cv_drawdowns: List[float] = []
+        oos_returns: List[np.ndarray] = []
+        frame = pd.DataFrame({"returns": returns}, index=returns.index)
+
+        for _train_idx, test_idx in cv.split(frame):
+            if len(test_idx) < 5:
+                continue
+            subset = self._slice_data_by_timestamps(data, frame.index[test_idx])
+            metrics = self._run_deterministic_backtest(variant, subset)
+            cv_sharpes.append(float(metrics["sharpe"]))
+            cv_drawdowns.append(float(metrics["max_drawdown"]))
+            oos_returns.append(metrics["returns_series"].to_numpy())
+
+        if not cv_sharpes:
+            return {
+                "cv_sharpe": 0.0,
+                "cv_sharpe_std": 0.0,
+                "cv_drawdown": 1.0,
+                "validator_passed": False,
+                "validator_reasons": ["Purged CV produced no valid folds"],
+                "pbo_estimate": 1.0,
+            }
+
+        merged_oos_returns = np.concatenate(oos_returns) if oos_returns else np.array([], dtype=float)
+        validator = BacktestValidator(
+            min_sharpe=self.min_sharpe_for_promotion,
+            min_profit_factor=self.min_profit_factor,
+            max_drawdown=self.max_drawdown,
+        )
+        validation = validator.validate(merged_oos_returns)
+        pbo_estimate = float(np.mean(np.array(cv_sharpes) <= 0.0))
+
+        return {
+            "cv_sharpe": float(np.mean(cv_sharpes)),
+            "cv_sharpe_std": float(np.std(cv_sharpes)),
+            "cv_drawdown": float(np.mean(cv_drawdowns)),
+            "validator_passed": bool(validation["passed"]),
+            "validator_reasons": list(validation["reasons"]),
+            "pbo_estimate": pbo_estimate,
+        }
+
+    def _deflated_sharpe(self, sharpe: float, n_trials: int) -> float:
+        if n_trials <= 1:
+            return float(sharpe)
+        penalty = np.sqrt(2.0 * np.log(float(n_trials))) / np.sqrt(252.0)
+        return float(sharpe - penalty)
+
+    def _compute_fitness(self, metrics: Dict[str, Any], cv_stats: Dict[str, Any], deflated_sharpe: float) -> float:
+        capacity_penalty = max(float(metrics["capacity_ratio"]) - 1.0, 0.0)
+        drawdown_penalty = float(metrics["max_drawdown"])
+        pbo_penalty = float(cv_stats["pbo_estimate"])
+        return float(
+            (1.2 * deflated_sharpe)
+            + (0.5 * float(metrics["total_return"]))
+            + (0.4 * float(cv_stats["cv_sharpe"]))
+            - (0.8 * drawdown_penalty)
+            - (0.6 * pbo_penalty)
+            - (0.5 * capacity_penalty)
+        )
+
+    # =========================================================================
+    # Walk-Forward + Promotion
+    # =========================================================================
+
+    def _rank_strategies(self, results: List[Dict]) -> List[Dict]:
+        return sorted(results, key=lambda row: row["fitness"], reverse=True)
+
+    def _walk_forward_test(self, top_strategies: List[Dict], data: Dict[str, pd.DataFrame]) -> List[Dict]:
+        confirmed: List[Dict] = []
+        windows = self._build_walk_forward_windows(data)
+
+        for strategy_data in top_strategies:
+            variant = strategy_data["variant"]
+            strategy_factory = lambda v=variant: _DeterministicVariantStrategy(self, v)
+            wf_result = self.walk_forward.run_walk_forward(strategy_factory, data, windows)
+            aggregate = wf_result.get("aggregate", {})
+
+            wf_sharpe = float(aggregate.get("avg_sharpe", 0.0))
+            wf_drawdown = float(abs(aggregate.get("avg_drawdown", 1.0)))
+            wf_consistency = float(aggregate.get("consistency_score", 0.0))
+
+            strategy_data["walk_forward"] = wf_result
+            strategy_data["walk_forward_sharpe"] = wf_sharpe
+            strategy_data["walk_forward_drawdown"] = wf_drawdown
+            strategy_data["walk_forward_consistency"] = wf_consistency
+
+            passed = (
+                wf_sharpe >= self.min_sharpe_for_promotion
+                and wf_drawdown <= self.max_drawdown
+                and wf_consistency >= self.min_walk_forward_consistency
+            )
+            strategy_data["walk_forward_passed"] = passed
+
+            if passed:
+                confirmed.append(strategy_data)
+
+        logger.info("Walk-forward validated: %s/%s", len(confirmed), len(top_strategies))
+        return confirmed
+
+    def _build_walk_forward_windows(self, data: Dict[str, pd.DataFrame]) -> List[WalkForwardWindow]:
+        primary_index = self._primary_index(data)
+        start = primary_index.min().to_pydatetime()
+        end = primary_index.max().to_pydatetime()
+        windows = self.walk_forward.generate_windows(start, end)
+
+        if windows:
+            return windows
+
+        span = end - start
+        if span <= timedelta(days=2):
+            return [
+                WalkForwardWindow(
+                    train_start=start,
+                    train_end=end,
+                    validation_start=end,
+                    validation_end=end,
+                    test_start=end,
+                    test_end=end,
+                )
+            ]
+
+        train_end = start + timedelta(seconds=span.total_seconds() * 0.6)
+        val_end = start + timedelta(seconds=span.total_seconds() * 0.8)
+        return [
+            WalkForwardWindow(
+                train_start=start,
+                train_end=train_end,
+                validation_start=train_end,
+                validation_end=val_end,
+                test_start=val_end,
+                test_end=end,
+            )
+        ]
+
+    def _promote_to_paper(self, validated: List[Dict]) -> List[str]:
+        promoted: List[str] = []
+        for result in validated[: self.top_performers]:
+            variant = result["variant"]
+            gates = {
+                "validator": bool(result["validator_passed"]),
+                "drawdown": float(result["metrics"]["max_drawdown"]) <= self.max_drawdown,
+                "wf_sharpe": float(result["walk_forward_sharpe"]) >= self.min_sharpe_for_promotion,
+                "wf_consistency": float(result["walk_forward_consistency"]) >= self.min_walk_forward_consistency,
+                "deflated_sharpe": float(result["deflated_sharpe"]) >= self.min_deflated_sharpe,
+                "pbo": float(result["pbo_estimate"]) <= self.max_pbo,
+                "capacity": float(result["metrics"]["capacity_ratio"]) <= 1.0,
+            }
+
+            if not all(gates.values()):
+                continue
+
+            self.db.update_experiment_status(
+                variant.strategy_id,
+                "paper",
+                reason="passed_research_gate",
+            )
+            self.db.log_stage_metric(
+                variant.strategy_id,
+                "paper",
+                {
+                    "pnl": float(result["metrics"]["total_return"]),
+                    "sharpe": float(result["walk_forward_sharpe"]),
+                    "drawdown": float(result["walk_forward_drawdown"]),
+                    "slippage_mape": 0.0,
+                    "kill_switch_triggers": 0,
+                    "notes": {"gates": gates},
+                },
+            )
+
+            if variant.strategy_id not in self.paper_trading:
+                self.paper_trading.append(variant.strategy_id)
+            promoted.append(variant.strategy_id)
+            logger.info("Promoted %s to paper trading", variant.strategy_id)
+
+        return promoted
+
+    # =========================================================================
+    # Stage Promotion Gates
+    # =========================================================================
+
+    def record_stage_metrics(
+        self,
+        strategy_id: str,
+        stage: str,
+        metrics: Dict[str, Any],
+        timestamp: Optional[datetime] = None,
+    ) -> bool:
+        return self.db.log_stage_metric(strategy_id, stage, metrics, timestamp=timestamp)
+
+    def evaluate_stage_gate(self, strategy_id: str, target_stage: str) -> Dict[str, Any]:
+        if target_stage not in self.stage_gates:
+            raise ValueError(f"Unknown target stage: {target_stage}")
+
+        gate = self.stage_gates[target_stage]
+        source_stage = gate["source_stage"]
+        summary = self.db.get_stage_summary(strategy_id, source_stage, lookback_days=365)
+
+        checks = {
+            "days": summary["days"] >= gate["min_days"],
+            "sharpe": summary["avg_sharpe"] >= gate["min_avg_sharpe"],
+            "drawdown": summary["avg_drawdown"] <= gate["max_avg_drawdown"],
+            "slippage_mape": summary["avg_slippage_mape"] <= gate["max_slippage_mape"],
+            "kill_switches": summary["total_kill_switch_triggers"] <= gate["max_kill_switch_triggers"],
+        }
+        return {
+            "strategy_id": strategy_id,
+            "target_stage": target_stage,
+            "source_stage": source_stage,
+            "summary": summary,
+            "checks": checks,
+            "passed": all(checks.values()),
+        }
+
+    def promote_from_stage(self, strategy_id: str, target_stage: str) -> bool:
+        assessment = self.evaluate_stage_gate(strategy_id, target_stage)
+        if not assessment["passed"]:
+            logger.warning("Promotion blocked for %s -> %s: %s", strategy_id, target_stage, assessment["checks"])
+            return False
+
+        updated = self.db.update_experiment_status(
+            strategy_id,
+            target_stage,
+            reason=f"passed_{assessment['source_stage']}_gate",
+        )
+        if not updated:
+            return False
+
+        if target_stage == "live_canary" and strategy_id not in self.live_canary:
+            self.live_canary.append(strategy_id)
+        if target_stage == "live" and strategy_id not in self.live_trading:
+            self.live_trading.append(strategy_id)
+        return True
+
+    # =========================================================================
+    # Reporting + Monitoring
+    # =========================================================================
+
+    def _generate_report(
+        self,
+        candidates: List[StrategyVariant],
+        results: List[Dict],
+        validated: List[Dict],
+        promoted: List[str],
+        objective_assessment: Dict[str, Any],
+    ) -> Dict:
+        sharpes = [row["metrics"]["sharpe"] for row in results]
+        returns = [row["metrics"]["total_return"] for row in results]
+
+        top_ranked = sorted(results, key=lambda row: row["fitness"], reverse=True)[:5]
+        return {
+            "timestamp": datetime.now().isoformat(),
+            "summary": {
+                "candidates_generated": len(candidates),
+                "backtests_run": len(results),
+                "walk_forward_passed": len(validated),
+                "promoted_to_paper": len(promoted),
+                "promoted_ids": promoted,
+            },
+            "objective": objective_assessment,
+            "performance": {
+                "avg_sharpe": float(np.mean(sharpes)) if sharpes else 0.0,
+                "best_sharpe": float(np.max(sharpes)) if sharpes else 0.0,
+                "avg_return": float(np.mean(returns)) if returns else 0.0,
+                "best_return": float(np.max(returns)) if returns else 0.0,
+            },
+            "top_strategies": [
+                {
+                    "id": row["variant"].strategy_id,
+                    "type": row["variant"].strategy_type,
+                    "fitness": float(row["fitness"]),
+                    "sharpe": float(row["metrics"]["sharpe"]),
+                    "deflated_sharpe": float(row["deflated_sharpe"]),
+                    "pbo_estimate": float(row["pbo_estimate"]),
+                    "capacity_ratio": float(row["metrics"]["capacity_ratio"]),
+                    "features": row["variant"].features,
+                }
+                for row in top_ranked
+            ],
+        }
+
+    def get_top_strategies(self, n: int = 10) -> pd.DataFrame:
+        return self.db.get_top_experiments(n)
+
+    def monitor_paper_trading(self) -> Dict:
+        metrics: Dict[str, Dict[str, Any]] = {}
+        for strategy_id in list(self.paper_trading):
+            summary = self.db.get_stage_summary(strategy_id, "paper", lookback_days=30)
+            active = (
+                summary["samples"] > 0
+                and summary["avg_sharpe"] >= (self.min_sharpe_for_promotion * 0.5)
+                and summary["avg_drawdown"] <= (self.max_drawdown * 1.2)
+            )
+            if not active:
+                self.paper_trading.remove(strategy_id)
+                self.db.update_experiment_status(strategy_id, "backtest", reason="paper_monitor_demote")
+
+            metrics[strategy_id] = {
+                "status": "active" if active else "demoted",
+                "avg_sharpe": summary["avg_sharpe"],
+                "avg_drawdown": summary["avg_drawdown"],
+                "samples": summary["samples"],
+                "days": summary["days"],
+            }
+
+        return metrics
+
+    def discover_new_regime_strategies(
+        self,
+        current_regime: MarketRegime,
+        data: Dict[str, pd.DataFrame],
+    ) -> List[StrategyVariant]:
+        _ = data  # Data retained in signature for future regime-specific scoring.
+        optimal = self.regime_detector.get_optimal_strategies(current_regime)
+        strategy_type = optimal[0] if optimal else "market_making"
+        logger.info("Generating regime-specific strategies for %s: %s", current_regime.value, optimal)
+        return self.generator.generate_strategy_variants(strategy_type, n_per_feature_set=10)
+
+    # =========================================================================
+    # Objective + Feasibility
+    # =========================================================================
+
+    def assess_profit_target_feasibility(
+        self,
+        target_annual_profit: float = 1_000_000.0,
+        capital: Optional[float] = None,
+    ) -> Dict[str, Any]:
+        deployable_capital = float(capital if capital is not None else self.deployable_capital)
+        scenarios = [
+            ("conservative", 1.0, 0.15),
+            ("realistic", 1.25, 0.20),
+            ("aggressive", 1.5, 0.25),
+        ]
+
+        cost_drag = self.objective_bounds.annual_turnover * self.objective_bounds.cost_per_turnover
+        rows = []
+        for name, sharpe, vol in scenarios:
+            gross_return = sharpe * vol
+            net_return = gross_return - cost_drag
+            required_capital = (target_annual_profit / net_return) if net_return > 0 else float("inf")
+            rows.append(
+                {
+                    "scenario": name,
+                    "sharpe": sharpe,
+                    "annual_vol": vol,
+                    "gross_return": gross_return,
+                    "cost_drag": cost_drag,
+                    "net_return": net_return,
+                    "required_capital": required_capital,
+                    "feasible_with_capital": deployable_capital >= required_capital if required_capital != float("inf") else False,
+                }
+            )
+
+        return {
+            "target_annual_profit": float(target_annual_profit),
+            "deployable_capital": deployable_capital,
+            "scenarios": rows,
+        }
+
+    def validate_objective_constraints(self, objective: Dict[str, Any]) -> Dict[str, Any]:
+        violations: List[str] = []
+        target_monthly_return = objective.get("target_monthly_return")
+        if target_monthly_return is not None:
+            requested = float(target_monthly_return)
+            if requested > self.objective_bounds.max_net_monthly_return:
+                violations.append(
+                    (
+                        f"target_monthly_return={requested:.2%} exceeds feasible bound "
+                        f"{self.objective_bounds.max_net_monthly_return:.2%} "
+                        "(Sharpe/vol/cost constrained)."
+                    )
+                )
+
+        target_annual_profit = float(objective.get("target_annual_profit", 1_000_000.0))
+        feasibility = self.assess_profit_target_feasibility(
+            target_annual_profit=target_annual_profit,
+            capital=self.deployable_capital,
+        )
+
+        return {
+            "objective_valid": len(violations) == 0,
+            "violations": violations,
+            "bounds": {
+                "max_net_annual_return": self.objective_bounds.max_net_annual_return,
+                "max_net_monthly_return": self.objective_bounds.max_net_monthly_return,
+            },
+            "profit_target_feasibility": feasibility,
+        }
+
+    # =========================================================================
+    # Deterministic Helpers
+    # =========================================================================
+
+    def _aggregate_market_returns(self, data: Dict[str, pd.DataFrame]) -> pd.Series:
+        aligned: List[pd.Series] = []
+        for symbol in sorted(data.keys()):
+            frame = data[symbol]
+            close = pd.to_numeric(frame["close"], errors="coerce").astype(float)
+            returns = close.pct_change().replace([np.inf, -np.inf], np.nan).fillna(0.0)
+            returns = returns.clip(-0.2, 0.2)
+            aligned.append(returns.rename(symbol))
+
+        merged = pd.concat(aligned, axis=1).sort_index().fillna(0.0)
+        return merged.mean(axis=1).astype(float)
+
+    def _build_variant_signal(self, variant: StrategyVariant, returns: pd.Series) -> pd.Series:
+        seed = int(hashlib.md5(variant.strategy_id.encode("utf-8")).hexdigest()[:8], 16)
+        fast = 3 + (seed % 8)
+        slow = fast + 10 + (seed % 16)
+
+        fast_ma = returns.rolling(fast, min_periods=1).mean()
+        slow_ma = returns.rolling(slow, min_periods=1).mean()
+        trend_component = fast_ma - slow_ma
+        reversion_component = -returns.rolling(fast, min_periods=1).mean()
+
+        if variant.strategy_type in {"market_making", "stat_arb"}:
+            base = reversion_component
+        else:
+            base = trend_component
+
+        feature_bias = 1.0 + (0.04 * len(variant.features))
+        param_bias = 1.0 + (0.02 * len(variant.parameters))
+        scaled = base * feature_bias * param_bias
+        return np.tanh(scaled * 120.0).astype(float)
+
+    def _periods_per_year(self, index: pd.DatetimeIndex) -> float:
+        if len(index) < 3:
+            return 252.0
+        deltas = index.to_series().diff().dropna()
+        median_delta = deltas.median()
+        if pd.isna(median_delta) or median_delta <= pd.Timedelta(0):
+            return 252.0
+        periods = pd.Timedelta(days=365.25) / median_delta
+        return float(np.clip(periods, 12.0, 24.0 * 365.25))
+
+    def _slice_data_by_timestamps(
+        self,
+        data: Dict[str, pd.DataFrame],
+        timestamps: pd.DatetimeIndex,
+    ) -> Dict[str, pd.DataFrame]:
+        index_set = pd.Index(sorted(set(timestamps)))
+        sliced: Dict[str, pd.DataFrame] = {}
+        for symbol, frame in data.items():
+            subset = frame.loc[frame.index.intersection(index_set)]
+            if not subset.empty:
+                sliced[symbol] = subset
+        return sliced
+
+    def _primary_index(self, data: Dict[str, pd.DataFrame]) -> pd.DatetimeIndex:
+        first_symbol = sorted(data.keys())[0]
+        return data[first_symbol].index
