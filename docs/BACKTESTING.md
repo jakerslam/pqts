@@ -1,0 +1,100 @@
+# PQTS Backtesting Framework
+
+Event-driven backtesting engine for validating trading strategies.
+
+## Features
+
+- **Realistic Execution**: Simulates slippage, commissions, and market impact
+- **Walk-Forward Analysis**: Tests strategies on out-of-sample data
+- **Position Tracking**: Maintains realistic position state and P&L
+- **Performance Metrics**: Calculates Sharpe, drawdown, win rate, etc.
+- **Trade Log**: Records all trades for detailed analysis
+
+## Usage
+
+```python
+from backtesting.engine import BacktestingEngine
+from datetime import datetime
+
+# Initialize
+engine = BacktestingEngine({
+    'data_dir': 'data/historical',
+    'commission_rate': 0.001,  # 0.1%
+    'slippage_bps': 5  # 5 basis points
+})
+
+# Define strategy
+def my_strategy(market_data, historical_df):
+    signals = []
+    current = market_data['close']
+    sma20 = historical_df['close'].rolling(20).mean().iloc[-1]
+    
+    if current > sma20:
+        signals.append({
+            'symbol': 'BTCUSDT',
+            'direction': 'long',
+            'quantity': 0.1
+        })
+    
+    return signals
+
+# Run backtest
+result = engine.run_backtest(
+    strategy=my_strategy,
+    symbol='BTCUSDT',
+    start_date=datetime(2024, 1, 1),
+    end_date=datetime(2024, 3, 31),
+    initial_capital=10000.0
+)
+
+# View results
+print(f"Return: {result.total_return_pct:.2f}%")
+print(f"Sharpe: {result.sharpe_ratio:.2f}")
+print(f"Max DD: {result.max_drawdown_pct:.2f}%")
+print(f"Trades: {result.total_trades}")
+
+# Save results
+engine.save_results(result, 'backtest_btc_q1.json')
+```
+
+## Configuration
+
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `data_dir` | data/historical | Historical data directory |
+| `commission_rate` | 0.001 | Trading commission (0.1%) |
+| `slippage_bps` | 5 | Slippage in basis points |
+| `slippage_model` | fixed | Slippage model (fixed/volume) |
+
+## Historical Data Format
+
+CSV format with columns:
+```csv
+timestamp,open,high,low,close,volume
+2024-01-01 00:00:00,43500,43800,43200,43600,1500.5
+```
+
+## Performance Metrics
+
+- **Total Return**: Overall strategy return
+- **Sharpe Ratio**: Risk-adjusted return
+- **Max Drawdown**: Peak-to-trough decline
+- **Win Rate**: % of winning trades
+- **Profit Factor**: Gross profit / gross loss
+- **Total Trades**: Number of closed trades
+
+## Example Results
+
+```
+Strategy: trend_following
+Period: 2024-01-01 to 2024-03-31
+Initial Capital: $10,000
+Final Capital: $11,245
+
+Total Return: 12.45%
+Sharpe Ratio: 1.34
+Max Drawdown: -8.20%
+Win Rate: 58.3%
+Profit Factor: 1.65
+Total Trades: 42
+```

@@ -1,79 +1,209 @@
 # Paper Trading Configuration
-mode: paper_trading
+# Rename to paper.yaml and fill in your API credentials
 
+mode: paper_trading
+version: "1.0.0"
+
+# Account settings
+account:
+  initial_capital: 10000.0
+  currency: USD
+  base_currency: USDT
+
+# Markets configuration
 markets:
   crypto:
     enabled: true
+    default_leverage: 1.0
+    max_positions: 10
+    
     exchanges:
       - name: binance
         api_key: ${BINANCE_TESTNET_API_KEY}
         api_secret: ${BINANCE_TESTNET_API_SECRET}
         testnet: true
+        weight: 0.7  # 70% of crypto allocation
         symbols:
           - BTCUSDT
           - ETHUSDT
           - SOLUSDT
           - ADAUSDT
           - DOTUSDT
+          - LINKUSDT
+          - MATICUSDT
+          - AVAXUSDT
+      
+      - name: coinbase
+        api_key: ${COINBASE_SANDBOX_API_KEY}
+        api_secret: ${COINBASE_SANDBOX_SECRET}
+        passphrase: ${COINBASE_SANDBOX_PASSPHRASE}
+        sandbox: true
+        weight: 0.3  # 30% of crypto allocation
+        symbols:
+          - BTC-USD
+          - ETH-USD
+          - SOL-USD
   
   equities:
-    enabled: false
+    enabled: true
+    default_leverage: 1.0
+    max_positions: 10
+    
     brokers:
       - name: alpaca
         api_key: ${ALPACA_PAPER_API_KEY}
         api_secret: ${ALPACA_PAPER_API_SECRET}
         paper: true
+        symbols:
+          - AAPL
+          - MSFT
+          - GOOGL
+          - AMZN
+          - TSLA
+          - NVDA
+          - META
+          - SPY
+          - QQQ
   
   forex:
-    enabled: false
+    enabled: false  # Set to true when ready
+    default_leverage: 10.0
+    max_positions: 5
+    
     brokers:
       - name: oanda
         api_key: ${OANDA_API_KEY}
         account_id: ${OANDA_ACCOUNT_ID}
+        environment: practice
+        symbols:
+          - EUR_USD
+          - GBP_USD
+          - USD_JPY
+          - USD_CHF
 
+# Strategy configuration
 strategies:
   scalping:
     enabled: true
+    capital_allocation: 20  # % of portfolio
     max_positions: 3
     timeframes: ['1m', '5m']
-    min_spread: 0.001
-    max_hold_time: 300
+    min_spread: 0.0005
+    max_hold_time: 300  # seconds
     risk_reward_ratio: 1.5
   
   arbitrage:
     enabled: true
+    capital_allocation: 15
     min_spread_pct: 0.1
     max_execution_time_ms: 500
   
   trend_following:
     enabled: true
+    capital_allocation: 25
     timeframes: ['1h', '4h', '1d']
     max_positions: 5
+    trailing_stop: true
+    trailing_stop_pct: 2.0
   
   mean_reversion:
     enabled: true
+    capital_allocation: 20
     lookback: 20
     max_positions: 3
+    entry_std_dev: 2.0
+    exit_std_dev: 0.5
   
   ml:
     enabled: true
+    capital_allocation: 20
     model_type: ensemble
     confidence_threshold: 0.6
     retrain_interval_hours: 24
     prediction_horizon: 1h
 
+# Risk management
 risk:
-  max_portfolio_risk_pct: 2.0
-  max_position_risk_pct: 1.0
-  max_drawdown_pct: 10.0
-  max_correlation: 0.7
-  max_positions: 15
-  max_leverage: 2.0
+  max_portfolio_risk_pct: 2.0  # max 2% portfolio risk per trade
+  max_position_risk_pct: 1.0   # max 1% risk per position
+  max_drawdown_pct: 10.0       # stop trading at 10% drawdown
+  daily_loss_limit_pct: 5.0    # stop at 5% daily loss
+  max_correlation: 0.7         # max correlation between positions
+  max_positions: 15            # max simultaneous positions
+  max_leverage: 2.0          # max 2x leverage
+  position_sizing_method: kelly  # kelly, fixed, volatility
+  
+# Trading costs (for paper trading simulation)
+costs:
+  commission_pct: 0.1  # 0.1% per trade
+  slippage_bps: 5      # 5 basis points
+  spread_bps: 10       # 10 basis points
 
+# Execution settings
+execution:
+  order_type: limit    # prefer limit orders when possible
+  time_in_force: GTC   # Good Till Canceled
+  iceberg_threshold: 1.0  # split orders larger than 1 BTC
+  use_smart_router: true
+  prefer_maker: true   # prefer maker orders for lower fees
+
+# Analytics
 analytics:
+  enabled: true
   data_dir: data/analytics
   report_interval_hours: 24
+  metrics:
+    - sharpe_ratio
+    - sortino_ratio
+    - max_drawdown
+    - win_rate
+    - profit_factor
+    - calmar_ratio
 
+# Data storage
+data:
+  historical_dir: data/historical
+  realtime_dir: data/realtime
+  backup_interval_hours: 1
+
+# Logging
 logging:
   level: INFO
   file: logs/pqts.log
+  max_size_mb: 100
+  backup_count: 5
+  
+# Dashboard
+dashboard:
+  enabled: true
+  auto_refresh: true
+  refresh_interval_seconds: 5
+  port: 8501
+
+# Notifications
+notifications:
+  enabled: true
+  channels:
+    - type: slack
+      webhook: ${SLACK_WEBHOOK_URL}
+      events: [trade_executed, error, daily_summary]
+    - type: email
+      smtp_server: ${SMTP_SERVER}
+      from: ${EMAIL_FROM}
+      to: ${EMAIL_TO}
+      events: [error, daily_summary]
+
+# Backtesting
+backtesting:
+  data_dir: data/historical
+  commission_rate: 0.001
+  slippage_bps: 5
+  start_date: "2024-01-01"
+  end_date: "2024-12-31"
+
+# Monitoring
+monitoring:
+  enabled: true
+  health_check_interval_seconds: 60
+  alert_on_error: true
+  metrics_endpoint: /metrics
