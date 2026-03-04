@@ -17,7 +17,9 @@ class PaperFillModelConfig:
     latency_jitter_ms: float = 45.0
     partial_fill_notional_usd: float = 25000.0
     min_partial_fill_ratio: float = 0.55
-    adverse_selection_bps: float = 2.5
+    adverse_selection_bps: float = 8.0
+    min_slippage_bps: float = 1.0
+    stress_slippage_multiplier: float = 1.5
     hard_reject_notional_usd: float = 250000.0
 
 
@@ -87,6 +89,8 @@ class MicrostructurePaperFillProvider:
         impact_scale = max((notional / max(self.config.partial_fill_notional_usd, 1e-9)) - 1.0, 0.0)
         stochastic_component = (self._uniform(order_id, symbol, venue, "slippage") - 0.5) * 0.6
         slip_bps = self.config.adverse_selection_bps * (0.5 + impact_scale) + stochastic_component
+        slip_bps = max(float(slip_bps), float(self.config.min_slippage_bps))
+        slip_bps *= float(self.config.stress_slippage_multiplier)
 
         if str(side).lower() == "buy":
             executed_price = float(reference_price) * (1.0 + (slip_bps / 10000.0))

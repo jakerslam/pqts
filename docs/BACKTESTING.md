@@ -97,6 +97,25 @@ data/historical/<venue>/<symbol>/<interval>/<YYYYMMDD_YYYYMMDD>.csv
 data/historical/<venue>/<symbol>/<interval>/<YYYYMMDD_YYYYMMDD>.manifest.json
 ```
 
+## Paper Readiness Gate
+
+Generate a paper-live readiness report from realized fills (track record + slippage thresholds):
+
+```bash
+python3 scripts/paper_readiness_report.py \
+  --tca-db data/tca_records.csv \
+  --lookback-days 60 \
+  --min-days 30 \
+  --min-fills 200 \
+  --max-p95-slippage-bps 20 \
+  --max-mape-pct 35 \
+  --out-dir data/reports
+```
+
+`ready_for_canary` is true only if:
+- Track record gate passes (`trading_days >= min_days` and `fills >= min_fills`)
+- Slippage gate passes (`p95_realized_slippage_bps <= max_p95` and `MAPE <= max_mape`)
+
 ## Performance Metrics
 
 - **Total Return**: Overall strategy return

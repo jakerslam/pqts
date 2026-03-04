@@ -59,6 +59,7 @@ from execution.tca_feedback import (
     TCATradeRecord,
     weekly_calibrate_eta,
 )
+from analytics.paper_readiness import PaperTrackRecordEvaluator
 from risk.regime_overlay import RegimeExposureOverlay
 
 logger = logging.getLogger(__name__)
@@ -1245,6 +1246,25 @@ class RiskAwareRouter:
             self.cost_model.eta = sum(updated.values()) / len(updated)
 
         return updated, analyses
+
+    def evaluate_paper_live_readiness(
+        self,
+        *,
+        lookback_days: int = 60,
+        min_days_required: int = 30,
+        min_fills_required: int = 200,
+        max_p95_slippage_bps: float = 20.0,
+        max_mape_pct: float = 35.0,
+    ) -> Dict[str, Any]:
+        evaluator = PaperTrackRecordEvaluator(self.tca_db)
+        result = evaluator.evaluate(
+            lookback_days=lookback_days,
+            min_days_required=min_days_required,
+            min_fills_required=min_fills_required,
+            max_p95_slippage_bps=max_p95_slippage_bps,
+            max_mape_pct=max_mape_pct,
+        )
+        return result.to_dict()
     
     def get_audit_log(self, n: int = 100) -> List[Dict]:
         """Get recent audit log entries."""

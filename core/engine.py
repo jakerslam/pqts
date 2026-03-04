@@ -171,7 +171,11 @@ class TradingEngine:
                 paper_cfg.get('partial_fill_notional_usd', 25000.0)
             ),
             min_partial_fill_ratio=float(paper_cfg.get('min_partial_fill_ratio', 0.55)),
-            adverse_selection_bps=float(paper_cfg.get('adverse_selection_bps', 2.5)),
+            adverse_selection_bps=float(paper_cfg.get('adverse_selection_bps', 8.0)),
+            min_slippage_bps=float(paper_cfg.get('min_slippage_bps', 1.0)),
+            stress_slippage_multiplier=float(
+                paper_cfg.get('stress_slippage_multiplier', 1.5)
+            ),
             hard_reject_notional_usd=float(
                 paper_cfg.get('hard_reject_notional_usd', 250000.0)
             ),
