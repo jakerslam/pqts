@@ -38,7 +38,7 @@ from risk.kill_switches import (
     TradingEngine as RiskEngine
 )
 from execution.realistic_costs import (
-    RealisticCostModel, OrderBook, Side, NotionalUSD, Price
+    RealisticCostModel, OrderBook, OrderBookLevel, Side, NotionalUSD, Price, Quantity
 )
 from execution.smart_router import (
     SmartOrderRouter, OrderRequest, OrderType, RouteDecision
@@ -448,6 +448,8 @@ class RiskAwareRouter:
         received token using: type(token) is _RouterToken
         """
         return _RouterToken(_internal_only=True)
+    
+    def get_stats(self) -> Dict:
         """Get order routing statistics."""
         return {
             'total_orders': self.order_count,
