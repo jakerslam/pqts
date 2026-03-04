@@ -91,6 +91,17 @@ Live secret validation:
 python scripts/validate_live_secrets.py --config config/live_canary.yaml --strict
 ```
 
+PnL truth ledger + strategy auto-disable list:
+
+```bash
+python scripts/pnl_truth_ledger_report.py \
+  --tca-db data/tca_records.csv \
+  --lookback-days 30 \
+  --min-trades 50 \
+  --disable-threshold-net-alpha-usd 0 \
+  --strict
+```
+
 ## 🧪 Simulation Suite + Telemetry
 
 Run multi-market, multi-strategy simulation suites and emit optimization telemetry:
@@ -252,6 +263,11 @@ markets:
 execution:
   require_live_client_order_id: true
   idempotency_ttl_seconds: 300.0
+  strategy_disable_list_path: data/analytics/strategy_disable_list.json
+  allocation_controls:
+    enabled: true
+    default_max_strategy_allocation_pct: 0.25
+    default_max_venue_allocation_pct: 0.50
   rate_limits:
     binance:
       order_create:

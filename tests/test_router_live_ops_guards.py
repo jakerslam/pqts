@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import json
 import sys
 from pathlib import Path
 from typing import Any, Dict
@@ -274,3 +275,111 @@ def test_cancel_live_order_uses_rate_limit_controls(tmp_path):
     stats = router.get_stats()
     assert stats["live_ops_controls"]["rate_limit_rejects"] == 1
     assert stats["live_ops_controls"]["rate_limit_denials_by_endpoint"]["binance:order_cancel"] >= 1
+
+
+def test_router_blocks_strategy_from_disable_list(tmp_path):
+    disable_path = tmp_path / "strategy_disable_list.json"
+    disable_path.write_text(
+        json.dumps(
+            {
+                "disabled_strategies": [
+                    {"strategy_id": "disabled_alpha", "net_alpha_usd": -50.0, "trades": 100}
+                ]
+            }
+        ),
+        encoding="utf-8",
+    )
+    router = _router(
+        tmp_path,
+        strategy_disable_list_path=str(disable_path),
+        strategy_disable_reload_seconds=0.0,
+    )
+    order = OrderRequest(
+        symbol="BTCUSDT",
+        side="buy",
+        quantity=0.01,
+        order_type=OrderType.LIMIT,
+        price=50000.0,
+        strategy_id="disabled_alpha",
+        client_order_id="disable-1",
+    )
+
+    result = asyncio.run(_submit(router, order))
+    assert result.success is False
+    assert "STRATEGY_DISABLED_NEGATIVE_NET_ALPHA" in str(result.rejected_reason)
+    stats = router.get_stats()
+    assert stats["live_ops_controls"]["strategy_disable_rejects"] == 1
+
+
+def test_router_enforces_strategy_allocation_cap(tmp_path):
+    router = _router(
+        tmp_path,
+        allocation_controls={
+            "enabled": True,
+            "lookback_seconds": 3600,
+            "default_max_strategy_allocation_pct": 0.10,
+            "default_max_venue_allocation_pct": 1.0,
+        },
+    )
+    first = OrderRequest(
+        symbol="BTCUSDT",
+        side="buy",
+        quantity=0.18,
+        order_type=OrderType.LIMIT,
+        price=50000.0,
+        strategy_id="strat_a",
+        client_order_id="alloc-a-1",
+    )
+    second = OrderRequest(
+        symbol="BTCUSDT",
+        side="buy",
+        quantity=0.05,
+        order_type=OrderType.LIMIT,
+        price=50000.0,
+        strategy_id="strat_a",
+        client_order_id="alloc-a-2",
+    )
+
+    result_1 = asyncio.run(_submit(router, first))
+    result_2 = asyncio.run(_submit(router, second))
+
+    assert result_1.success is True
+    assert result_2.success is False
+    assert "STRATEGY_ALLOCATION_CAP" in str(result_2.rejected_reason)
+
+
+def test_router_enforces_venue_allocation_cap(tmp_path):
+    router = _router(
+        tmp_path,
+        allocation_controls={
+            "enabled": True,
+            "lookback_seconds": 3600,
+            "default_max_strategy_allocation_pct": 1.0,
+            "default_max_venue_allocation_pct": 0.10,
+        },
+    )
+    first = OrderRequest(
+        symbol="BTCUSDT",
+        side="buy",
+        quantity=0.18,
+        order_type=OrderType.LIMIT,
+        price=50000.0,
+        strategy_id="strat_a",
+        client_order_id="alloc-v-1",
+    )
+    second = OrderRequest(
+        symbol="BTCUSDT",
+        side="buy",
+        quantity=0.05,
+        order_type=OrderType.LIMIT,
+        price=50000.0,
+        strategy_id="strat_b",
+        client_order_id="alloc-v-2",
+    )
+
+    result_1 = asyncio.run(_submit(router, first))
+    result_2 = asyncio.run(_submit(router, second))
+
+    assert result_1.success is True
+    assert result_2.success is False
+    assert "VENUE_ALLOCATION_CAP" in str(result_2.rejected_reason)

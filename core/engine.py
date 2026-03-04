@@ -325,6 +325,15 @@ class TradingEngine:
             "idempotency_ttl_seconds": execution_cfg.get("idempotency_ttl_seconds", 300.0),
             "distributed_ops_state": execution_cfg.get("distributed_ops_state", {}),
             "rate_limits": execution_cfg.get("rate_limits", {}),
+            "strategy_disable_list_path": execution_cfg.get(
+                "strategy_disable_list_path",
+                "data/analytics/strategy_disable_list.json",
+            ),
+            "strategy_disable_reload_seconds": execution_cfg.get(
+                "strategy_disable_reload_seconds",
+                30.0,
+            ),
+            "allocation_controls": execution_cfg.get("allocation_controls", {}),
             "risk_profile": risk_profile_payload(_profile),
             "tenant_plan": self.tenant_entitlements.plan,
             "tenant_id": self.tenant_entitlements.tenant_id,

@@ -20,6 +20,8 @@ class StrategyBudgetInput:
     market: str = "global"
     short_exposure_ratio: float = 0.0
     borrow_bps: float = 0.0
+    risk_budget_pct: float = 1.0
+    drawdown_pct: float = 0.0
 
 
 @dataclass(frozen=True)
@@ -281,5 +283,55 @@ class StrategyCapitalAllocator:
                         weights[strategy_id] *= max(min(scale, 1.0), 0.0)
 
         vec = np.array([max(float(weights[row.strategy_id]), 0.0) for row in rows], dtype=float)
+        vec = self._clip(self._normalize(vec))
+        return {row.strategy_id: float(weight) for row, weight in zip(rows, vec)}
+
+    def allocate_enterprise(
+        self,
+        inputs: Iterable[StrategyBudgetInput],
+        *,
+        correlation_matrix: Optional[Dict[tuple[str, str], float]] = None,
+        max_pair_correlation: float = 0.85,
+        market_caps: Optional[Dict[str, float]] = None,
+        max_total_short_exposure: Optional[float] = None,
+        max_weighted_borrow_bps: Optional[float] = None,
+        max_drawdown_pct: float = 0.25,
+        utility: Optional[StrategyUtilityConfig] = None,
+    ) -> Dict[str, float]:
+        """
+        Enterprise allocator:
+        - constrained optimizer baseline (corr/market/short/borrow limits)
+        - per-strategy risk-budget caps
+        - drawdown throttling for stressed strategies
+        """
+        rows: List[StrategyBudgetInput] = list(inputs)
+        if not rows:
+            return {}
+
+        base = self.allocate_constrained(
+            rows,
+            correlation_matrix=correlation_matrix,
+            max_pair_correlation=max_pair_correlation,
+            market_caps=market_caps,
+            max_total_short_exposure=max_total_short_exposure,
+            max_weighted_borrow_bps=max_weighted_borrow_bps,
+            utility=utility,
+        )
+
+        adjusted: Dict[str, float] = {}
+        for row in rows:
+            strategy_id = str(row.strategy_id)
+            weight = float(base.get(strategy_id, 0.0))
+            budget_cap = max(float(row.risk_budget_pct), 0.0)
+            weight = min(weight, budget_cap)
+
+            drawdown = max(float(row.drawdown_pct), 0.0)
+            cap = max(float(max_drawdown_pct), 1e-9)
+            if drawdown > cap:
+                weight *= cap / drawdown
+
+            adjusted[strategy_id] = max(weight, 0.0)
+
+        vec = np.array([adjusted[str(row.strategy_id)] for row in rows], dtype=float)
         vec = self._clip(self._normalize(vec))
         return {row.strategy_id: float(weight) for row, weight in zip(rows, vec)}

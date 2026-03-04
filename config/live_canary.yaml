@@ -37,6 +37,19 @@ risk:
 execution:
   require_live_client_order_id: true
   idempotency_ttl_seconds: 300.0
+  strategy_disable_list_path: data/analytics/strategy_disable_list.json
+  strategy_disable_reload_seconds: 15.0
+  allocation_controls:
+    enabled: true
+    lookback_seconds: 3600
+    default_max_strategy_allocation_pct: 0.25
+    default_max_venue_allocation_pct: 0.50
+    max_strategy_allocation_pct_by_strategy:
+      market_making: 0.30
+      funding_arbitrage: 0.40
+    max_venue_allocation_pct_by_venue:
+      binance: 0.40
+      coinbase: 0.40
   distributed_ops_state:
     redis_url: ""
     namespace: pqts_live_canary

@@ -303,6 +303,39 @@ def test_strategy_allocator_constrained_enforces_corr_market_and_borrow_limits()
     assert weighted_borrow <= 20.1
 
 
+def test_strategy_allocator_enterprise_enforces_risk_budget_and_drawdown():
+    allocator = StrategyCapitalAllocator(max_weight=0.95, min_weight=0.0, capacity_haircut=0.0)
+    rows = [
+        StrategyBudgetInput(
+            strategy_id="low_dd",
+            expected_return=0.25,
+            annual_vol=0.2,
+            annual_turnover=3.0,
+            cost_per_turnover=0.004,
+            capacity_ratio=0.8,
+            risk_budget_pct=0.8,
+            drawdown_pct=0.10,
+        ),
+        StrategyBudgetInput(
+            strategy_id="high_dd",
+            expected_return=0.30,
+            annual_vol=0.25,
+            annual_turnover=3.0,
+            cost_per_turnover=0.004,
+            capacity_ratio=0.8,
+            risk_budget_pct=0.5,
+            drawdown_pct=0.40,
+        ),
+    ]
+    weights = allocator.allocate_enterprise(
+        rows,
+        max_drawdown_pct=0.20,
+    )
+
+    assert abs(sum(weights.values()) - 1.0) < 1e-9
+    assert weights["high_dd"] < weights["low_dd"]
+
+
 def test_market_data_quality_monitor_flags_drift_and_missing_symbols():
     monitor = MarketDataQualityMonitor(
         min_completeness=0.95,

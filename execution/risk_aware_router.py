@@ -30,7 +30,8 @@ import logging
 import os
 import time
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
+from pathlib import Path
 from typing import Any, Dict, List, Optional, Protocol, Tuple
 
 from analytics.paper_readiness import PaperTrackRecordEvaluator
@@ -298,8 +299,49 @@ class RiskAwareRouter:
         self._live_rate_limit_rejects = 0
         self._live_idempotency_rejects = 0
         self._rate_limit_denials: Dict[str, int] = {}
+        self._strategy_disable_rejects = 0
         self._last_live_order_error: Optional[str] = None
         self._last_live_order_controls: Dict[str, Any] = {}
+        disable_enabled_cfg = broker_config.get("strategy_disable_enabled", None)
+        if disable_enabled_cfg is None:
+            self.strategy_disable_enabled = "strategy_disable_list_path" in broker_config
+        else:
+            self.strategy_disable_enabled = bool(disable_enabled_cfg)
+        self.strategy_disable_list_path = Path(
+            str(
+                broker_config.get(
+                    "strategy_disable_list_path",
+                    "data/analytics/strategy_disable_list.json",
+                )
+            )
+        )
+        self.strategy_disable_reload_seconds = float(
+            broker_config.get("strategy_disable_reload_seconds", 30.0)
+        )
+        self._disabled_strategies: Dict[str, Dict[str, Any]] = {}
+        self._strategy_disable_last_loaded: Optional[datetime] = None
+
+        allocation_cfg = broker_config.get("allocation_controls", {}) or {}
+        self.allocation_controls_enabled = bool(allocation_cfg.get("enabled", False))
+        self.allocation_lookback_seconds = float(allocation_cfg.get("lookback_seconds", 3600.0))
+        self.default_strategy_allocation_cap_pct = float(
+            allocation_cfg.get("default_max_strategy_allocation_pct", 1.0)
+        )
+        self.default_venue_allocation_cap_pct = float(
+            allocation_cfg.get("default_max_venue_allocation_pct", 1.0)
+        )
+        self.strategy_allocation_cap_pct = {
+            str(k): float(v)
+            for k, v in (
+                allocation_cfg.get("max_strategy_allocation_pct_by_strategy", {}) or {}
+            ).items()
+        }
+        self.venue_allocation_cap_pct = {
+            str(k): float(v)
+            for k, v in (allocation_cfg.get("max_venue_allocation_pct_by_venue", {}) or {}).items()
+        }
+        self._allocation_events: List[Tuple[datetime, str, str, float]] = []
+        self._load_strategy_disable_list(force=True)
         # Order admission gate to prevent race-condition bypass across state changes.
         self._submit_order_lock = asyncio.Lock()
 
@@ -391,6 +433,65 @@ class RiskAwareRouter:
     @staticmethod
     def _idempotency_state_key(client_order_id: str, fingerprint: str) -> str:
         return f"idempotency:{str(client_order_id)}:{str(fingerprint)}"
+
+    def _load_strategy_disable_list(self, *, force: bool = False) -> None:
+        if not self.strategy_disable_enabled:
+            self._disabled_strategies = {}
+            self._strategy_disable_last_loaded = datetime.now(timezone.utc)
+            return
+
+        now = datetime.now(timezone.utc)
+        if (
+            not force
+            and self._strategy_disable_last_loaded is not None
+            and (now - self._strategy_disable_last_loaded).total_seconds()
+            < self.strategy_disable_reload_seconds
+        ):
+            return
+        self._strategy_disable_last_loaded = now
+        if not self.strategy_disable_list_path.exists():
+            self._disabled_strategies = {}
+            return
+        try:
+            payload = json.loads(self.strategy_disable_list_path.read_text(encoding="utf-8"))
+            rows = payload.get("disabled_strategies", [])
+            out: Dict[str, Dict[str, Any]] = {}
+            if isinstance(rows, list):
+                for row in rows:
+                    if not isinstance(row, dict):
+                        continue
+                    strategy_id = str(row.get("strategy_id", "")).strip()
+                    if not strategy_id:
+                        continue
+                    out[strategy_id] = dict(row)
+            self._disabled_strategies = out
+        except Exception as exc:
+            logger.warning(
+                "Could not parse strategy disable list at %s: %s",
+                self.strategy_disable_list_path,
+                exc,
+            )
+            self._disabled_strategies = {}
+
+    def _prune_allocation_events(self, *, now: datetime) -> None:
+        if self.allocation_lookback_seconds <= 0:
+            self._allocation_events.clear()
+            return
+        cutoff = now - timedelta(seconds=self.allocation_lookback_seconds)
+        self._allocation_events = [row for row in self._allocation_events if row[0] >= cutoff]
+
+    def _allocation_usage(
+        self, *, strategy_id: str, venue: str, now: datetime
+    ) -> Tuple[float, float]:
+        self._prune_allocation_events(now=now)
+        strategy_used = 0.0
+        venue_used = 0.0
+        for _ts, strat, ven, notional in self._allocation_events:
+            if strat == strategy_id:
+                strategy_used += float(notional)
+            if ven == venue:
+                venue_used += float(notional)
+        return float(strategy_used), float(venue_used)
 
     def set_capital(self, capital: float, source: str = "manual"):
         """
@@ -675,6 +776,26 @@ class RiskAwareRouter:
             return OrderResult(
                 success=False,
                 decision=decision,
+                risk_state=None,
+                order_id=None,
+                exchange=None,
+                rejected_reason=audit_entry["reject_reason"],
+                audit_log=audit_entry,
+            )
+
+        self._load_strategy_disable_list()
+        strategy_id = str(order.strategy_id)
+        if strategy_id in self._disabled_strategies:
+            self._strategy_disable_rejects += 1
+            self.reject_count += 1
+            details = self._disabled_strategies.get(strategy_id, {})
+            audit_entry["rejected"] = True
+            audit_entry["reject_reason"] = f"STRATEGY_DISABLED_NEGATIVE_NET_ALPHA: {strategy_id}"
+            audit_entry["strategy_disable"] = details
+            self.audit_log.append(audit_entry)
+            return OrderResult(
+                success=False,
+                decision=RiskDecision.HALT,
                 risk_state=None,
                 order_id=None,
                 exchange=None,
@@ -1094,6 +1215,73 @@ class RiskAwareRouter:
                 audit_log=audit_entry,
             )
 
+        if self.allocation_controls_enabled:
+            now = datetime.now(timezone.utc)
+            strategy_used, venue_used = self._allocation_usage(
+                strategy_id=str(order.strategy_id),
+                venue=str(route.exchange),
+                now=now,
+            )
+            strategy_cap_pct = float(
+                self.strategy_allocation_cap_pct.get(
+                    str(order.strategy_id),
+                    self.default_strategy_allocation_cap_pct,
+                )
+            )
+            venue_cap_pct = float(
+                self.venue_allocation_cap_pct.get(
+                    str(route.exchange),
+                    self.default_venue_allocation_cap_pct,
+                )
+            )
+            strategy_cap_usd = max(strategy_cap_pct, 0.0) * float(capital)
+            venue_cap_usd = max(venue_cap_pct, 0.0) * float(capital)
+            audit_entry["allocation_controls"] = {
+                "enabled": True,
+                "lookback_seconds": float(self.allocation_lookback_seconds),
+                "strategy_id": str(order.strategy_id),
+                "venue": str(route.exchange),
+                "candidate_notional_usd": float(notional),
+                "strategy_used_usd": float(strategy_used),
+                "strategy_cap_usd": float(strategy_cap_usd),
+                "venue_used_usd": float(venue_used),
+                "venue_cap_usd": float(venue_cap_usd),
+            }
+            if strategy_used + float(notional) > float(strategy_cap_usd) + 1e-9:
+                self.reject_count += 1
+                audit_entry["rejected"] = True
+                audit_entry["reject_reason"] = (
+                    "STRATEGY_ALLOCATION_CAP: "
+                    f"{strategy_used + float(notional):.2f} > {strategy_cap_usd:.2f}"
+                )
+                self.audit_log.append(audit_entry)
+                return OrderResult(
+                    success=False,
+                    decision=RiskDecision.HALT,
+                    risk_state=risk_state,
+                    order_id=None,
+                    exchange=route.exchange,
+                    rejected_reason=audit_entry["reject_reason"],
+                    audit_log=audit_entry,
+                )
+            if venue_used + float(notional) > float(venue_cap_usd) + 1e-9:
+                self.reject_count += 1
+                audit_entry["rejected"] = True
+                audit_entry["reject_reason"] = (
+                    "VENUE_ALLOCATION_CAP: "
+                    f"{venue_used + float(notional):.2f} > {venue_cap_usd:.2f}"
+                )
+                self.audit_log.append(audit_entry)
+                return OrderResult(
+                    success=False,
+                    decision=RiskDecision.HALT,
+                    risk_state=risk_state,
+                    order_id=None,
+                    exchange=route.exchange,
+                    rejected_reason=audit_entry["reject_reason"],
+                    audit_log=audit_entry,
+                )
+
         # =========================================================================
         # STEP 3: COST ESTIMATION (via RealisticCostModel)
         # =========================================================================
@@ -1278,6 +1466,16 @@ class RiskAwareRouter:
             net_alpha_bps=float(tca_payload.get("realized_net_alpha_bps", 0.0)),
             timestamp=fill.timestamp,
         )
+        if self.allocation_controls_enabled:
+            self._allocation_events.append(
+                (
+                    fill.timestamp,
+                    str(order.strategy_id),
+                    str(route.exchange),
+                    float(realized_notional),
+                )
+            )
+            self._prune_allocation_events(now=datetime.now(timezone.utc))
         audit_entry["execution_quality"] = {
             "latency_ms": execution_latency_ms,
             "fill_ratio": fill_ratio,
@@ -1931,6 +2129,17 @@ class RiskAwareRouter:
                 "idempotency_rejects": int(self._live_idempotency_rejects),
                 "rate_limit_rejects": int(self._live_rate_limit_rejects),
                 "rate_limit_denials_by_endpoint": dict(self._rate_limit_denials),
+                "strategy_disable_rejects": int(self._strategy_disable_rejects),
+                "disabled_strategies_count": int(len(self._disabled_strategies)),
+            },
+            "allocation_controls": {
+                "enabled": bool(self.allocation_controls_enabled),
+                "lookback_seconds": float(self.allocation_lookback_seconds),
+                "events": int(len(self._allocation_events)),
+                "default_max_strategy_allocation_pct": float(
+                    self.default_strategy_allocation_cap_pct
+                ),
+                "default_max_venue_allocation_pct": float(self.default_venue_allocation_cap_pct),
             },
         }
 
