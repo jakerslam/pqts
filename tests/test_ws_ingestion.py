@@ -42,11 +42,49 @@ class _Adapter:
         )
 
 
+class _CoinbaseAdapter(_Adapter):
+    api_key = "cb_key"
+    api_secret = "cb_secret"
+    passphrase = "cb_passphrase"
+
+    @staticmethod
+    def _generate_signature(timestamp: str, method: str, path: str, body: str = "") -> str:
+        _ = body
+        return f"sig::{timestamp}::{method}::{path}"
+
+
 def _router(tmp_path: Path) -> RiskAwareRouter:
     router = RiskAwareRouter(
         risk_config=RiskLimits(),
         broker_config={"enabled": True, "live_execution": False},
         tca_db_path=str(tmp_path / "tca.csv"),
+    )
+    router.market_venues = {
+        "binance": VenueClient(
+            market="crypto",
+            venue="binance",
+            symbols=["BTCUSDT"],
+            adapter=_Adapter(),
+            connected=True,
+            is_stub=False,
+        ),
+        "coinbase": VenueClient(
+            market="crypto",
+            venue="coinbase",
+            symbols=["BTC-USD"],
+            adapter=_CoinbaseAdapter(),
+            connected=True,
+            is_stub=False,
+        ),
+    }
+    return router
+
+
+def _router_single_venue(tmp_path: Path) -> RiskAwareRouter:
+    router = RiskAwareRouter(
+        risk_config=RiskLimits(),
+        broker_config={"enabled": True, "live_execution": False},
+        tca_db_path=str(tmp_path / "tca_single.csv"),
     )
     router.market_venues = {
         "binance": VenueClient(
@@ -62,7 +100,7 @@ def _router(tmp_path: Path) -> RiskAwareRouter:
 
 
 def test_ws_ingestion_collect_once_persists_market_order_fill_events(tmp_path):
-    router = _router(tmp_path)
+    router = _router_single_venue(tmp_path)
     store = StreamIngestionStore(events_path=str(tmp_path / "ws_events.jsonl"))
 
     async def fetcher(venue: str, channel: str, descriptor: dict):
@@ -86,7 +124,7 @@ def test_ws_ingestion_collect_once_persists_market_order_fill_events(tmp_path):
 
 
 def test_ws_ingestion_uses_backoff_after_disconnect(tmp_path):
-    router = _router(tmp_path)
+    router = _router_single_venue(tmp_path)
     store = StreamIngestionStore(events_path=str(tmp_path / "ws_events.jsonl"))
     clock = _Clock(10.0)
     ws_manager = WebSocketConnectionManager(
@@ -133,6 +171,15 @@ def test_live_fetcher_builds_venue_specific_subscriptions(tmp_path):
 
     coinbase_market = fetcher._build_subscriptions("coinbase", "market")
     assert coinbase_market[0]["type"] == "subscribe"
+    assert coinbase_market[0]["channels"][0]["name"] == "ticker"
 
-    # Private channels for coinbase are intentionally not wired without signed auth payload.
-    assert fetcher._build_subscriptions("coinbase", "order") == []
+    coinbase_order = fetcher._build_subscriptions("coinbase", "order")
+    assert len(coinbase_order) == 1
+    assert coinbase_order[0]["type"] == "subscribe"
+    assert coinbase_order[0]["key"] == "cb_key"
+    assert coinbase_order[0]["passphrase"] == "cb_passphrase"
+    assert coinbase_order[0]["signature"].startswith("sig::")
+    assert coinbase_order[0]["channels"][0]["name"] == "user"
+
+    coinbase_fill = fetcher._build_subscriptions("coinbase", "fill")
+    assert coinbase_fill[0]["channels"][0]["name"] == "user"

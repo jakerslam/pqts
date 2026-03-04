@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import hashlib
+import hmac
 import json
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
@@ -150,8 +151,47 @@ class LiveVenueStreamFetcher:
                         "channels": [{"name": "ticker", "product_ids": products}],
                     }
                 ]
-            # Private user channels require signed auth payload not implemented here.
-            return []
+            adapter = self._venue_adapter(venue)
+            if adapter is None:
+                return []
+
+            api_key = str(getattr(adapter, "api_key", "")).strip()
+            passphrase = str(getattr(adapter, "passphrase", "")).strip()
+            api_secret = str(getattr(adapter, "api_secret", "")).strip()
+            if not api_key or not passphrase or not api_secret:
+                return []
+
+            timestamp = f"{datetime.now(timezone.utc).timestamp():.6f}"
+            signature = ""
+            if hasattr(adapter, "_generate_signature"):
+                try:
+                    signature = str(
+                        adapter._generate_signature(timestamp, "GET", "/users/self/verify", "")
+                    ).strip()
+                except Exception:
+                    signature = ""
+            if not signature:
+                payload = f"{timestamp}GET/users/self/verify"
+                signature = hmac.new(
+                    api_secret.encode("utf-8"),
+                    payload.encode("utf-8"),
+                    hashlib.sha256,
+                ).hexdigest()
+
+            products = [str(symbol) for symbol in symbols if str(symbol)]
+            user_channel: Dict[str, Any] = {"name": "user"}
+            if products:
+                user_channel["product_ids"] = products
+            return [
+                {
+                    "type": "subscribe",
+                    "key": api_key,
+                    "passphrase": passphrase,
+                    "timestamp": timestamp,
+                    "signature": signature,
+                    "channels": [user_channel],
+                }
+            ]
 
         if venue_token == "alpaca":
             adapter = self._venue_adapter(venue)
