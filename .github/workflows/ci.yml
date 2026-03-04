@@ -1,83 +1,119 @@
-# GitHub Actions CI for PQTS
-# Tests: pytest, lint, security, type-check
 name: PQTS CI
 
 on:
   push:
-    branches: [ main, develop, prod ]
+    branches:
+      - main
+      - prod
   pull_request:
-    branches: [ main, prod ]
+    branches:
+      - main
+      - prod
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
+  verify_workflow_raw:
+    name: Verify CI YAML on GitHub Raw
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Verify raw workflow structure
+        run: |
+          python tools/verify_ci_raw.py \
+            --sha "${GITHUB_SHA}" \
+            --repo "${GITHUB_REPOSITORY}"
+
   test:
-    name: Test Suite
+    name: Pytest
+    needs: verify_workflow_raw
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         python-version: ["3.11", "3.12"]
-      fail-fast: false
-
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5
-      with:
-        python-version: ${{ matrix.python-version }}
-        cache: pip
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        pip install pytest pytest-cov
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest
 
-    - name: Run kill switch tests
-      run: pytest tests/test_kill_switches.py -v --tb=short -x
-
-    - name: Run backtesting tests
-      run: pytest tests/test_backtesting.py -v --tb=short -x
-
-    - name: Run all tests
-      run: pytest tests/ -v --tb=short
+      - name: Run pytest (gating)
+        run: pytest tests -q
 
   lint:
     name: Lint
+    needs: verify_workflow_raw
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-    - uses: actions/setup-python@v5
-      with:
-        python-version: "3.11"
-        cache: pip
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
 
-    - name: Install tools
-      run: pip install flake8 black isort
+      - name: Install lint tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install flake8 black isort
 
-    - name: Check black formatting
-      run: black --check --diff . || true
+      - name: Black format check (non-gating)
+        continue-on-error: true
+        run: black --check .
 
-    - name: Check import ordering
-      run: isort --check --diff . || true
+      - name: Isort import check (non-gating)
+        continue-on-error: true
+        run: isort --check-only .
 
-    - name: Run flake8
-      run: flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+      - name: Flake8 hard errors (gating)
+        run: flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
 
-  security:
-    name: Security Audit
+  static_analysis:
+    name: Bandit and Mypy (non-gating)
+    needs: verify_workflow_raw
     runs-on: ubuntu-latest
+    continue-on-error: true
     steps:
-    - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-    - uses: actions/setup-python@v5
-      with:
-        python-version: "3.11"
-        cache: pip
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
 
-    - name: Install bandit
-      run: pip install bandit[sarif]
+      - name: Install analysis tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install mypy bandit
 
-    - name: Run security scan
-      run: bandit -r . -f sarif -o bandit-report.sarif || true
+      - name: Run bandit (non-gating)
+        continue-on-error: true
+        run: bandit -r execution risk core backtesting strategies
+
+      - name: Run mypy (non-gating)
+        continue-on-error: true
+        run: mypy execution risk core --ignore-missing-imports
