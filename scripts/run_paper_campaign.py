@@ -98,6 +98,10 @@ def _build_broker_config(config: Dict[str, Any], *, risk_cfg: Dict[str, Any]) ->
         "regime_overlay": execution_cfg.get("regime_overlay", {}),
         "capacity_curves": execution_cfg.get("capacity_curves", {}),
         "expected_alpha_bps_by_strategy": execution_cfg.get("expected_alpha_bps_by_strategy", {}),
+        "require_live_client_order_id": execution_cfg.get("require_live_client_order_id", True),
+        "idempotency_ttl_seconds": execution_cfg.get("idempotency_ttl_seconds", 300.0),
+        "distributed_ops_state": execution_cfg.get("distributed_ops_state", {}),
+        "rate_limits": execution_cfg.get("rate_limits", {}),
     }
 
 

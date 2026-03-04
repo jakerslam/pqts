@@ -32,6 +32,7 @@ class OrderRequest:
     time_in_force: str = "GTC"  # GTC, IOC, FOK
     strategy_id: str = "unknown"
     expected_alpha_bps: float = 0.0
+    client_order_id: Optional[str] = None
 
 
 @dataclass

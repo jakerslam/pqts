@@ -34,6 +34,23 @@ risk:
   max_participation: 0.02
   max_slippage_bps: 35.0
 
+execution:
+  require_live_client_order_id: true
+  idempotency_ttl_seconds: 300.0
+  distributed_ops_state:
+    redis_url: ""
+    namespace: pqts_live_canary
+    ttl_seconds: 300
+  rate_limits:
+    binance:
+      order_create:
+        limit: 10
+        window_seconds: 1.0
+    coinbase:
+      order_create:
+        limit: 5
+        window_seconds: 1.0
+
 runtime:
   operator_tier: pro
   tenant:

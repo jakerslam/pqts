@@ -318,6 +318,13 @@ class TradingEngine:
                 "expected_alpha_bps_by_strategy",
                 {},
             ),
+            "require_live_client_order_id": execution_cfg.get(
+                "require_live_client_order_id",
+                True,
+            ),
+            "idempotency_ttl_seconds": execution_cfg.get("idempotency_ttl_seconds", 300.0),
+            "distributed_ops_state": execution_cfg.get("distributed_ops_state", {}),
+            "rate_limits": execution_cfg.get("rate_limits", {}),
             "risk_profile": risk_profile_payload(_profile),
             "tenant_plan": self.tenant_entitlements.plan,
             "tenant_id": self.tenant_entitlements.tenant_id,

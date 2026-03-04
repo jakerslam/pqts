@@ -77,6 +77,10 @@ def _build_broker_config(
         "default_taker_fee_bps": execution_cfg.get("default_taker_fee_bps", 12.0),
         "reliability": execution_cfg.get("reliability", {}),
         "regime_overlay": execution_cfg.get("regime_overlay", {}),
+        "require_live_client_order_id": execution_cfg.get("require_live_client_order_id", True),
+        "idempotency_ttl_seconds": execution_cfg.get("idempotency_ttl_seconds", 300.0),
+        "distributed_ops_state": execution_cfg.get("distributed_ops_state", {}),
+        "rate_limits": execution_cfg.get("rate_limits", {}),
         "risk_profile": dict(risk_profile_payload_value),
     }
 

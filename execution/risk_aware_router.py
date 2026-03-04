@@ -24,6 +24,8 @@ Integration:
 """
 
 import asyncio
+import hashlib
+import json
 import logging
 import os
 import time
@@ -33,6 +35,12 @@ from typing import Any, Dict, List, Optional, Protocol, Tuple
 
 from analytics.paper_readiness import PaperTrackRecordEvaluator
 from execution.capacity_curves import StrategyCapacityCurveModel
+from execution.distributed_ops_state import DistributedOpsState, DistributedStateConfig
+from execution.live_ops_controls import (
+    OrderIdempotencyGuard,
+    RateLimitConfig,
+    RateLimitTracker,
+)
 from execution.order_ledger import ImmutableOrderLedger
 from execution.realistic_costs import (
     Bps,
@@ -270,6 +278,27 @@ class RiskAwareRouter:
                 broker_config.get("expected_alpha_bps_by_strategy", {}) or {}
             ).items()
         }
+        self.require_live_client_order_id = bool(
+            broker_config.get("require_live_client_order_id", True)
+        )
+        self.idempotency_guard = OrderIdempotencyGuard(
+            ttl_seconds=float(broker_config.get("idempotency_ttl_seconds", 300.0))
+        )
+        distributed_cfg = broker_config.get("distributed_ops_state", {}) or {}
+        self.distributed_ops_state = DistributedOpsState(
+            DistributedStateConfig(
+                redis_url=str(distributed_cfg.get("redis_url", "")),
+                namespace=str(distributed_cfg.get("namespace", "pqts")),
+                ttl_seconds=int(distributed_cfg.get("ttl_seconds", 300)),
+            )
+        )
+        self.rate_limit_tracker = RateLimitTracker(
+            self._parse_rate_limit_configs(broker_config.get("rate_limits", {}))
+        )
+        self._live_rate_limit_rejects = 0
+        self._live_idempotency_rejects = 0
+        self._last_live_order_error: Optional[str] = None
+        self._last_live_order_controls: Dict[str, Any] = {}
         # Order admission gate to prevent race-condition bypass across state changes.
         self._submit_order_lock = asyncio.Lock()
 
@@ -291,6 +320,76 @@ class RiskAwareRouter:
         if explicit != 0.0:
             return explicit
         return float(self._default_expected_alpha_bps.get(str(order.strategy_id), 0.0))
+
+    @staticmethod
+    def _parse_rate_limit_configs(raw_cfg: Any) -> Dict[Tuple[str, str], RateLimitConfig]:
+        configs: Dict[Tuple[str, str], RateLimitConfig] = {}
+        if isinstance(raw_cfg, dict):
+            for venue, venue_cfg in raw_cfg.items():
+                venue_name = str(venue).strip().lower()
+                if not venue_name:
+                    continue
+                if not isinstance(venue_cfg, dict):
+                    continue
+                if "limit" in venue_cfg and "window_seconds" in venue_cfg:
+                    limit = int(venue_cfg.get("limit", 0))
+                    window_seconds = float(venue_cfg.get("window_seconds", 0.0))
+                    if limit > 0 and window_seconds > 0:
+                        configs[(venue_name, "*")] = RateLimitConfig(
+                            limit=limit,
+                            window_seconds=window_seconds,
+                        )
+                    continue
+                for endpoint, endpoint_cfg in venue_cfg.items():
+                    if not isinstance(endpoint_cfg, dict):
+                        continue
+                    endpoint_name = str(endpoint).strip().lower() or "*"
+                    limit = int(endpoint_cfg.get("limit", 0))
+                    window_seconds = float(endpoint_cfg.get("window_seconds", 0.0))
+                    if limit <= 0 or window_seconds <= 0:
+                        continue
+                    configs[(venue_name, endpoint_name)] = RateLimitConfig(
+                        limit=limit,
+                        window_seconds=window_seconds,
+                    )
+            return configs
+
+        if isinstance(raw_cfg, list):
+            for row in raw_cfg:
+                if not isinstance(row, dict):
+                    continue
+                venue_name = str(row.get("venue", "")).strip().lower()
+                if not venue_name:
+                    continue
+                endpoint_name = str(row.get("endpoint", "*")).strip().lower() or "*"
+                limit = int(row.get("limit", 0))
+                window_seconds = float(row.get("window_seconds", 0.0))
+                if limit <= 0 or window_seconds <= 0:
+                    continue
+                configs[(venue_name, endpoint_name)] = RateLimitConfig(
+                    limit=limit,
+                    window_seconds=window_seconds,
+                )
+        return configs
+
+    @staticmethod
+    def _order_intent_fingerprint(order: OrderRequest) -> str:
+        payload = {
+            "symbol": str(order.symbol),
+            "side": str(order.side).lower(),
+            "quantity": round(float(order.quantity), 10),
+            "order_type": str(order.order_type.value),
+            "price": None if order.price is None else round(float(order.price), 10),
+            "stop_price": None if order.stop_price is None else round(float(order.stop_price), 10),
+            "strategy_id": str(order.strategy_id),
+            "time_in_force": str(order.time_in_force),
+        }
+        encoded = json.dumps(payload, sort_keys=True, separators=(",", ":")).encode("utf-8")
+        return hashlib.sha256(encoded).hexdigest()
+
+    @staticmethod
+    def _idempotency_state_key(client_order_id: str, fingerprint: str) -> str:
+        return f"idempotency:{str(client_order_id)}:{str(fingerprint)}"
 
     def set_capital(self, capital: float, source: str = "manual"):
         """
@@ -566,6 +665,69 @@ class RiskAwareRouter:
                 rejected_reason=audit_entry["reject_reason"],
                 audit_log=audit_entry,
             )
+
+        client_order_id = str(getattr(order, "client_order_id", "") or "").strip()
+        intent_fingerprint = self._order_intent_fingerprint(order)
+        audit_entry["idempotency"] = {
+            "client_order_id": client_order_id,
+            "fingerprint": intent_fingerprint,
+            "required_for_live": bool(self.require_live_client_order_id),
+        }
+        if (
+            bool(self.broker_config.get("live_execution", False))
+            and self.require_live_client_order_id
+            and not client_order_id
+        ):
+            self._live_idempotency_rejects += 1
+            self.reject_count += 1
+            audit_entry["rejected"] = True
+            audit_entry["reject_reason"] = "LIVE_REQUIRES_CLIENT_ORDER_ID"
+            audit_entry["idempotency"]["decision"] = "rejected_missing_client_order_id"
+            self.audit_log.append(audit_entry)
+            return OrderResult(
+                success=False,
+                decision=RiskDecision.HALT,
+                risk_state=None,
+                order_id=None,
+                exchange=None,
+                rejected_reason=audit_entry["reject_reason"],
+                audit_log=audit_entry,
+            )
+
+        if client_order_id:
+            state_key = self._idempotency_state_key(client_order_id, intent_fingerprint)
+            duplicate = self.idempotency_guard.seen(client_order_id, intent_fingerprint) or bool(
+                self.distributed_ops_state.seen_recently(state_key)
+            )
+            if duplicate:
+                self._live_idempotency_rejects += 1
+                self.reject_count += 1
+                audit_entry["rejected"] = True
+                audit_entry["reject_reason"] = (
+                    f"IDEMPOTENCY_DUPLICATE: client_order_id={client_order_id}"
+                )
+                audit_entry["idempotency"]["decision"] = "rejected_duplicate"
+                self.audit_log.append(audit_entry)
+                return OrderResult(
+                    success=False,
+                    decision=RiskDecision.HALT,
+                    risk_state=None,
+                    order_id=None,
+                    exchange=None,
+                    rejected_reason=audit_entry["reject_reason"],
+                    audit_log=audit_entry,
+                )
+            self.idempotency_guard.register(client_order_id, intent_fingerprint)
+            self.distributed_ops_state.put(
+                state_key,
+                {
+                    "order_id": str(audit_entry["order_id"]),
+                    "timestamp": str(audit_entry["timestamp"]),
+                },
+            )
+            audit_entry["idempotency"]["decision"] = "accepted"
+        else:
+            audit_entry["idempotency"]["decision"] = "skipped_no_client_order_id"
 
         requested_quantity = float(order.quantity)
         throttled_qty, regime_decision = self.regime_overlay.throttle_quantity(
@@ -968,7 +1130,11 @@ class RiskAwareRouter:
                 )
                 self.reject_count += 1
                 audit_entry["rejected"] = True
-                audit_entry["reject_reason"] = f"LIVE_EXECUTION_FAILED: {route.exchange}"
+                audit_entry["reject_reason"] = str(
+                    self._last_live_order_error or f"LIVE_EXECUTION_FAILED: {route.exchange}"
+                )
+                if self._last_live_order_controls:
+                    audit_entry["live_controls"] = dict(self._last_live_order_controls)
                 audit_entry["execution_quality"] = {
                     "latency_ms": latency_ms,
                     "failed": True,
@@ -1044,6 +1210,8 @@ class RiskAwareRouter:
         }
         if live_order_response is not None:
             audit_entry["live_order_response"] = live_order_response
+        if self._last_live_order_controls:
+            audit_entry["live_controls"] = dict(self._last_live_order_controls)
         self.audit_log.append(audit_entry)
 
         # =========================================================================
@@ -1579,12 +1747,35 @@ class RiskAwareRouter:
         self, *, route: RouteDecision, order: OrderRequest
     ) -> Optional[Dict[str, Any]]:
         """Send a live order through the configured venue adapter."""
+        self._last_live_order_error = None
+        self._last_live_order_controls = {}
         venue = self.market_venues.get(route.exchange)
         if venue is None or venue.adapter is None or not venue.connected:
+            self._last_live_order_error = f"LIVE_VENUE_UNAVAILABLE: {route.exchange}"
             return None
 
         try:
             venue_name = venue.venue.lower()
+            endpoint = "order_create"
+            rate_decision = self.rate_limit_tracker.request(venue_name, endpoint)
+            self._last_live_order_controls = {
+                "rate_limit": {
+                    "venue": venue_name,
+                    "endpoint": endpoint,
+                    "allowed": bool(rate_decision.allowed),
+                    "remaining": int(rate_decision.remaining),
+                    "retry_after_seconds": float(rate_decision.retry_after_seconds),
+                }
+            }
+            if not rate_decision.allowed:
+                self._live_rate_limit_rejects += 1
+                self._last_live_order_error = (
+                    "RATE_LIMIT_EXCEEDED: "
+                    f"{venue_name}/{endpoint} retry_after={rate_decision.retry_after_seconds:.3f}s"
+                )
+                logger.warning(self._last_live_order_error)
+                return None
+
             if venue.market == "crypto" and venue_name == "binance":
                 return await venue.adapter.place_order(
                     symbol=order.symbol,
@@ -1626,8 +1817,10 @@ class RiskAwareRouter:
                 )
         except Exception as exc:
             logger.error("Live order send failed for %s: %s", route.exchange, exc)
+            self._last_live_order_error = f"LIVE_EXECUTION_EXCEPTION: {route.exchange}: {exc}"
             return None
 
+        self._last_live_order_error = f"LIVE_EXECUTION_UNSUPPORTED_VENUE: {route.exchange}"
         return None
 
     def get_stats(self) -> Dict:
@@ -1644,6 +1837,12 @@ class RiskAwareRouter:
             "capacity_curves": {
                 "enabled": bool(self.capacity_model.enabled),
                 "storage_path": str(self.capacity_model.storage_path),
+            },
+            "live_ops_controls": {
+                "idempotency_ttl_seconds": float(self.idempotency_guard.ttl_seconds),
+                "require_live_client_order_id": bool(self.require_live_client_order_id),
+                "idempotency_rejects": int(self._live_idempotency_rejects),
+                "rate_limit_rejects": int(self._live_rate_limit_rejects),
             },
         }
 

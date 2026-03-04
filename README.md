@@ -249,6 +249,14 @@ markets:
         testnet: false
         api_key: ${BINANCE_API_KEY}
         api_secret: ${BINANCE_API_SECRET}
+execution:
+  require_live_client_order_id: true
+  idempotency_ttl_seconds: 300.0
+  rate_limits:
+    binance:
+      order_create:
+        limit: 10
+        window_seconds: 1.0
 ```
 
 ## ⚠️ Risk Disclaimer
