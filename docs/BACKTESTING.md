@@ -74,6 +74,29 @@ timestamp,open,high,low,close,volume
 2024-01-01 00:00:00,43500,43800,43200,43600,1500.5
 ```
 
+## Download Historical Data
+
+Use the built-in downloader to fetch Binance/Coinbase OHLCV with pagination and manifest checks:
+
+```bash
+python3 scripts/download_historical_data.py \
+  --venue all \
+  --binance-symbols BTCUSDT,ETHUSDT \
+  --coinbase-symbols BTC-USD,ETH-USD \
+  --interval 1h \
+  --start 2024-01-01 \
+  --end 2024-12-31 \
+  --output-dir data/historical \
+  --format csv
+```
+
+Output layout:
+
+```text
+data/historical/<venue>/<symbol>/<interval>/<YYYYMMDD_YYYYMMDD>.csv
+data/historical/<venue>/<symbol>/<interval>/<YYYYMMDD_YYYYMMDD>.manifest.json
+```
+
 ## Performance Metrics
 
 - **Total Return**: Overall strategy return
