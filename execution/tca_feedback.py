@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Dict, List, Tuple
-import logging
 
 import numpy as np
 import pandas as pd
@@ -195,9 +195,7 @@ class TCADatabase:
         cutoff = datetime.now(timezone.utc) - timedelta(days=days)
         timestamps = pd.to_datetime(frame["timestamp"], utc=True, errors="coerce")
         return frame[
-            (frame["symbol"] == symbol)
-            & (frame["exchange"] == exchange)
-            & (timestamps >= cutoff)
+            (frame["symbol"] == symbol) & (frame["exchange"] == exchange) & (timestamps >= cutoff)
         ]
 
 
@@ -252,7 +250,9 @@ class TCACalibrator:
 
         return analysis
 
-    def calibrate_eta(self, symbol: str, exchange: str, current_eta: float, days: int = 30) -> Tuple[float, Dict]:
+    def calibrate_eta(
+        self, symbol: str, exchange: str, current_eta: float, days: int = 30
+    ) -> Tuple[float, Dict]:
         frame = self.tca_db.get_by_symbol_venue(symbol, exchange, days=days)
         if len(frame) < self.min_samples:
             return current_eta, {

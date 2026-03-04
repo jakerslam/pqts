@@ -32,6 +32,11 @@ from execution.paper_fill_model import (  # noqa: E402
 from execution.risk_aware_router import RiskAwareRouter  # noqa: E402
 from execution.smart_router import OrderType  # noqa: E402
 from risk.kill_switches import RiskLimits  # noqa: E402
+from analytics.ops_health import OpsThresholds, evaluate_operational_health  # noqa: E402
+from analytics.promotion_gates import (  # noqa: E402
+    PromotionGateThresholds,
+    evaluate_promotion_gate,
+)
 
 
 def _parse_csv(value: str) -> List[str]:
@@ -141,7 +146,12 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--max-mape-pct", type=float, default=35.0)
     parser.add_argument("--paper-base-slippage-bps", type=float, default=8.0)
     parser.add_argument("--paper-min-slippage-bps", type=float, default=1.0)
-    parser.add_argument("--paper-stress-multiplier", type=float, default=1.5)
+    parser.add_argument("--paper-stress-multiplier", type=float, default=3.0)
+    parser.add_argument("--paper-stress-fill-ratio-multiplier", type=float, default=0.70)
+    parser.add_argument("--max-degraded-venues", type=int, default=0)
+    parser.add_argument("--max-calibration-alerts", type=int, default=0)
+    parser.add_argument("--promotion-min-days", type=int, default=30)
+    parser.add_argument("--promotion-max-days", type=int, default=90)
     return parser
 
 
@@ -154,7 +164,9 @@ async def _run(args: argparse.Namespace) -> Dict[str, Any]:
         config=PaperFillModelConfig(
             adverse_selection_bps=float(args.paper_base_slippage_bps),
             min_slippage_bps=float(args.paper_min_slippage_bps),
+            reality_stress_mode=True,
             stress_slippage_multiplier=float(args.paper_stress_multiplier),
+            stress_fill_ratio_multiplier=float(args.paper_stress_fill_ratio_multiplier),
         )
     )
     router = RiskAwareRouter(
@@ -246,6 +258,43 @@ async def _run(args: argparse.Namespace) -> Dict[str, Any]:
                     max_p95_slippage_bps=float(args.max_p95_slippage_bps),
                     max_mape_pct=float(args.max_mape_pct),
                 )
+                router_stats = router.get_stats()
+                reliability = router_stats.get("reliability", {})
+                ops_health = evaluate_operational_health(
+                    campaign_stats={
+                        "submitted": stats.submitted,
+                        "filled": stats.filled,
+                        "rejected": stats.rejected,
+                        "reject_rate": stats.reject_rate,
+                    },
+                    readiness=readiness,
+                    reliability=reliability,
+                    calibration=calibration,
+                    thresholds=OpsThresholds(
+                        max_reject_rate=float(args.max_reject_rate),
+                        max_p95_slippage_bps=float(args.max_p95_slippage_bps),
+                        max_mape_pct=float(args.max_mape_pct),
+                        max_degraded_venues=int(args.max_degraded_venues),
+                        max_calibration_alerts=int(args.max_calibration_alerts),
+                    ),
+                )
+                promotion_gate = evaluate_promotion_gate(
+                    readiness=readiness,
+                    campaign_stats={
+                        "submitted": stats.submitted,
+                        "filled": stats.filled,
+                        "rejected": stats.rejected,
+                        "reject_rate": stats.reject_rate,
+                    },
+                    ops_summary=ops_health.get("summary", {}),
+                    thresholds=PromotionGateThresholds(
+                        min_days=int(args.promotion_min_days),
+                        max_days=int(args.promotion_max_days),
+                        min_fills=int(args.min_fills),
+                        max_reject_rate=float(args.max_reject_rate),
+                        max_critical_alerts=0,
+                    ),
+                )
                 last_snapshot = {
                     "timestamp": datetime.now(timezone.utc).isoformat(),
                     "cycle": cycle + 1,
@@ -258,11 +307,18 @@ async def _run(args: argparse.Namespace) -> Dict[str, Any]:
                     "eta": {
                         "markets": {f"{key[0]}@{key[1]}": float(val) for key, val in updated_eta.items()},
                     },
+                    "reliability": reliability,
                     "calibration": calibration,
                     "readiness": readiness,
+                    "ops_health": ops_health,
+                    "promotion_gate": promotion_gate,
                 }
                 path = _write_snapshot(out_dir, last_snapshot)
-                print(f"snapshot={path} readiness={readiness['ready_for_canary']}")
+                print(
+                    "snapshot="
+                    f"{path} readiness={readiness['ready_for_canary']} "
+                    f"promotion={promotion_gate['decision']}"
+                )
 
             if float(args.sleep_seconds) > 0:
                 await asyncio.sleep(float(args.sleep_seconds))
@@ -275,6 +331,9 @@ async def _run(args: argparse.Namespace) -> Dict[str, Any]:
         "filled": stats.filled,
         "rejected": stats.rejected,
         "reject_rate": stats.reject_rate,
+        "ops_health": last_snapshot.get("ops_health", {}),
+        "promotion_gate": last_snapshot.get("promotion_gate", {}),
+        "reliability": last_snapshot.get("reliability", {}),
         "readiness": last_snapshot.get("readiness", {}),
     }
     return final

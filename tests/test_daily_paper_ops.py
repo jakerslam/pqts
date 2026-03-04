@@ -27,16 +27,22 @@ def _args() -> Namespace:
         campaign_readiness_every=30,
         paper_base_slippage_bps=8.0,
         paper_min_slippage_bps=1.0,
-        paper_stress_multiplier=1.5,
+        paper_stress_multiplier=3.0,
+        paper_stress_fill_ratio_multiplier=0.70,
         tca_db="data/tca_records.csv",
         lookback_days=60,
         min_days=30,
         min_fills=200,
         max_p95_slippage_bps=20.0,
         max_mape_pct=35.0,
+        max_degraded_venues=0,
+        max_calibration_alerts=0,
+        promotion_min_days=30,
+        promotion_max_days=90,
         out_dir="data/reports",
         skip_campaign=False,
         require_ready=False,
+        require_no_critical_alerts=False,
     )
 
 
@@ -52,6 +58,7 @@ def test_build_campaign_cmd_contains_expected_flags():
     assert "--symbols BTCUSDT,ETHUSDT" in joined
     assert "--cycles 120" in joined
     assert "--notional-usd 150.0" in joined
+    assert "--paper-stress-multiplier 3.0" in joined
 
 
 def test_build_readiness_cmd_contains_expected_flags():

@@ -110,7 +110,12 @@ class PaperTrackRecordEvaluator:
         predicted = pd.to_numeric(frame["predicted_slippage_bps"], errors="coerce").fillna(0.0)
 
         denom = np.maximum(np.abs(realized.to_numpy(dtype=float)), 1e-6)
-        mape = float(np.mean(np.abs(predicted.to_numpy(dtype=float) - realized.to_numpy(dtype=float)) / denom) * 100.0)
+        mape = float(
+            np.mean(
+                np.abs(predicted.to_numpy(dtype=float) - realized.to_numpy(dtype=float)) / denom
+            )
+            * 100.0
+        )
 
         trading_days = int(frame["trade_day"].nunique())
         fills = int(len(frame))
@@ -118,13 +123,11 @@ class PaperTrackRecordEvaluator:
         avg_realized = float(realized.mean())
         avg_predicted = float(predicted.mean())
 
-        passed_track_record = (
-            trading_days >= int(min_days_required)
-            and fills >= int(min_fills_required)
+        passed_track_record = trading_days >= int(min_days_required) and fills >= int(
+            min_fills_required
         )
-        passed_slippage = (
-            p95_realized <= float(max_p95_slippage_bps)
-            and mape <= float(max_mape_pct)
+        passed_slippage = p95_realized <= float(max_p95_slippage_bps) and mape <= float(
+            max_mape_pct
         )
 
         return PaperReadinessResult(

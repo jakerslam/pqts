@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Dict, Iterable, Optional
-import math
 
 
 @dataclass(frozen=True)
@@ -74,7 +74,9 @@ class MarketDataQualityMonitor:
         )
 
     @staticmethod
-    def feature_parity(backtest_features: Dict[str, float], live_features: Dict[str, float]) -> float:
+    def feature_parity(
+        backtest_features: Dict[str, float], live_features: Dict[str, float]
+    ) -> float:
         if not backtest_features:
             return 1.0 if not live_features else 0.0
         keys = sorted(backtest_features.keys())

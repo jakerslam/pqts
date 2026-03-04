@@ -19,7 +19,6 @@ class CampaignStats:
         return float(self.rejected / max(self.submitted, 1))
 
 
-
 def build_portfolio_snapshot(
     *,
     positions: Dict[str, float],

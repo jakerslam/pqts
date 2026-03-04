@@ -127,6 +127,8 @@ python3 scripts/run_paper_campaign.py \
   --cycles 5000 \
   --sleep-seconds 60 \
   --notional-usd 200 \
+  --paper-stress-multiplier 3.0 \
+  --paper-stress-fill-ratio-multiplier 0.70 \
   --readiness-every 100 \
   --out-dir data/reports
 ```
@@ -136,6 +138,11 @@ This writes rolling readiness snapshots:
 ```text
 data/reports/paper_campaign_snapshot_<timestamp>.json
 ```
+
+Each snapshot now includes:
+- `ops_health`: deterministic critical/warning incident checks
+- `promotion_gate`: explicit `promote_to_live_canary | remain_in_paper | reject_or_research`
+- `reliability`: per-venue degradation telemetry
 
 ## Daily Ops Wrapper
 
@@ -149,6 +156,9 @@ python3 scripts/daily_paper_ops.py \
   --campaign-sleep-seconds 60 \
   --campaign-notional-usd 150 \
   --campaign-readiness-every 60 \
+  --paper-stress-multiplier 3.0 \
+  --paper-stress-fill-ratio-multiplier 0.70 \
+  --require-no-critical-alerts \
   --out-dir data/reports
 ```
 
@@ -156,6 +166,16 @@ Example cron schedule (daily at 00:05 local time):
 
 ```cron
 5 0 * * * cd /Users/jay/.openclaw/workspace/pqts && /usr/bin/python3 scripts/daily_paper_ops.py >> logs/daily_paper_ops.log 2>&1
+```
+
+## Ops Health Report
+
+Generate a standalone ops-health report from the latest campaign snapshot:
+
+```bash
+python3 scripts/ops_health_report.py \
+  --reports-dir data/reports \
+  --out-dir data/reports
 ```
 
 ## Performance Metrics

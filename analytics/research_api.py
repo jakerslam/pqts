@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-from copy import deepcopy
-from datetime import datetime, timedelta, timezone
 import json
 import logging
+from copy import deepcopy
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Dict, Optional
 
@@ -193,7 +193,9 @@ class ResearchDashboardAPI:
 
         rows = []
         for strategy_id in experiment_ids:
-            summary = self.db.get_stage_summary(strategy_id, source_stage, lookback_days=lookback_days)
+            summary = self.db.get_stage_summary(
+                strategy_id, source_stage, lookback_days=lookback_days
+            )
             checks = {
                 "days": summary["days"] >= gate["min_days"],
                 "sharpe": summary["avg_sharpe"] >= gate["min_avg_sharpe"],
@@ -270,13 +272,11 @@ class ResearchDashboardAPI:
             "control": _empty_arm_metrics(),
             "treatment": _empty_arm_metrics(),
         }
-        frame = self._read_sql(
-            """
+        frame = self._read_sql("""
             SELECT experiment_id, from_stage, to_stage, reason, timestamp
             FROM promotion_audit
             ORDER BY timestamp ASC
-            """
-        )
+            """)
         if frame.empty:
             return outcomes
 
@@ -334,13 +334,11 @@ class ResearchDashboardAPI:
         lookback_days: int = 90,
         stage: Optional[str] = None,
     ) -> Dict[str, Any]:
-        frame = self._read_sql(
-            """
+        frame = self._read_sql("""
             SELECT experiment_id, stage, timestamp, pnl, sharpe, drawdown,
                    slippage_mape, kill_switch_triggers, notes
             FROM stage_metrics
-            """
-        )
+            """)
 
         cutoff = datetime.now(timezone.utc) - timedelta(days=int(lookback_days))
         window_end = datetime.now(timezone.utc)
@@ -403,7 +401,8 @@ class ResearchDashboardAPI:
             }
 
         arm_by_experiment = {
-            str(exp_id): arm for exp_id, arm in frame[["experiment_id", "arm"]].drop_duplicates().values
+            str(exp_id): arm
+            for exp_id, arm in frame[["experiment_id", "arm"]].drop_duplicates().values
         }
         promotion_outcomes = self._promotion_outcomes(
             lookback_days=lookback_days,
@@ -460,7 +459,9 @@ class ResearchDashboardAPI:
                     "schema_version": str(row["schema_version"]),
                     "decision_action": str(row["decision_action"]),
                     "promoted": bool(row["promoted"]),
-                    "summary": row.get("summary", {}) if isinstance(row.get("summary"), dict) else {},
+                    "summary": (
+                        row.get("summary", {}) if isinstance(row.get("summary"), dict) else {}
+                    ),
                 }
             )
 

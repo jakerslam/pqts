@@ -77,7 +77,9 @@ class FeeRebateOptimizer:
         best_fee = float("inf")
         for venue in venues:
             monthly_volume = float((monthly_volume_by_venue or {}).get(venue, 0.0))
-            fee = self.effective_fee_bps(venue, is_maker=is_maker, monthly_volume_usd=monthly_volume)
+            fee = self.effective_fee_bps(
+                venue, is_maker=is_maker, monthly_volume_usd=monthly_volume
+            )
             if fee < best_fee:
                 best_fee = fee
                 best = venue
@@ -100,8 +102,12 @@ class FeeRebateOptimizer:
         if str(urgency).lower() in {"urgent", "ioc"}:
             return "taker"
 
-        maker_fee = self.effective_fee_bps(venue, is_maker=True, monthly_volume_usd=monthly_volume_usd)
-        taker_fee = self.effective_fee_bps(venue, is_maker=False, monthly_volume_usd=monthly_volume_usd)
+        maker_fee = self.effective_fee_bps(
+            venue, is_maker=True, monthly_volume_usd=monthly_volume_usd
+        )
+        taker_fee = self.effective_fee_bps(
+            venue, is_maker=False, monthly_volume_usd=monthly_volume_usd
+        )
 
         # Approximate all-in: maker may capture half-spread, taker pays half-spread.
         maker_all_in = maker_fee - (float(spread_bps) * 0.5)

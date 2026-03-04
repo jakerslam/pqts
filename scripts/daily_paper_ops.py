@@ -60,6 +60,16 @@ def _build_campaign_cmd(args: argparse.Namespace) -> List[str]:
         str(float(args.paper_min_slippage_bps)),
         "--paper-stress-multiplier",
         str(float(args.paper_stress_multiplier)),
+        "--paper-stress-fill-ratio-multiplier",
+        str(float(args.paper_stress_fill_ratio_multiplier)),
+        "--max-degraded-venues",
+        str(int(args.max_degraded_venues)),
+        "--max-calibration-alerts",
+        str(int(args.max_calibration_alerts)),
+        "--promotion-min-days",
+        str(int(args.promotion_min_days)),
+        "--promotion-max-days",
+        str(int(args.promotion_max_days)),
     ]
     if args.campaign_symbols:
         cmd.extend(["--symbols", args.campaign_symbols])
@@ -101,16 +111,22 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--campaign-readiness-every", type=int, default=60)
     parser.add_argument("--paper-base-slippage-bps", type=float, default=8.0)
     parser.add_argument("--paper-min-slippage-bps", type=float, default=1.0)
-    parser.add_argument("--paper-stress-multiplier", type=float, default=1.5)
+    parser.add_argument("--paper-stress-multiplier", type=float, default=3.0)
+    parser.add_argument("--paper-stress-fill-ratio-multiplier", type=float, default=0.70)
     parser.add_argument("--tca-db", default="data/tca_records.csv")
     parser.add_argument("--lookback-days", type=int, default=60)
     parser.add_argument("--min-days", type=int, default=30)
     parser.add_argument("--min-fills", type=int, default=200)
     parser.add_argument("--max-p95-slippage-bps", type=float, default=20.0)
     parser.add_argument("--max-mape-pct", type=float, default=35.0)
+    parser.add_argument("--max-degraded-venues", type=int, default=0)
+    parser.add_argument("--max-calibration-alerts", type=int, default=0)
+    parser.add_argument("--promotion-min-days", type=int, default=30)
+    parser.add_argument("--promotion-max-days", type=int, default=90)
     parser.add_argument("--out-dir", default="data/reports")
     parser.add_argument("--skip-campaign", action="store_true")
     parser.add_argument("--require-ready", action="store_true")
+    parser.add_argument("--require-no-critical-alerts", action="store_true")
     return parser
 
 
@@ -147,6 +163,12 @@ def main() -> int:
 
     if args.require_ready and not bool(readiness_payload.get("ready_for_canary", False)):
         return 3
+    if args.require_no_critical_alerts:
+        critical_alerts = int(
+            campaign_payload.get("ops_health", {}).get("summary", {}).get("critical", 0)
+        )
+        if critical_alerts > 0:
+            return 4
     return 0
 
 

@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
+import hashlib
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
-import hashlib
 
 from execution.tca_feedback import ExecutionFill
 
