@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import hashlib
 import logging
+import subprocess
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Tuple
@@ -66,6 +67,7 @@ except Exception:  # pragma: no cover - fallback for minimal environments
 from research.auto_generator import AutoStrategyGenerator, StrategyVariant
 from research.database import BacktestResult, Experiment, ResearchDatabase
 from research.regime_detector import MarketRegime, RegimeDetector
+from research.report_builder import ResearchAnalyticsReportBuilder
 from research.walk_forward import WalkForwardTester, WalkForwardWindow
 
 logger = logging.getLogger(__name__)
@@ -127,6 +129,12 @@ class AIResearchAgent:
         self.generator = AutoStrategyGenerator()
         self.regime_detector = RegimeDetector(config.get("regime", {}))
         self.walk_forward = WalkForwardTester(config.get("walk_forward", {}))
+        analytics_cfg = config.get("analytics", {})
+        self.report_builder = ResearchAnalyticsReportBuilder(
+            output_dir=analytics_cfg.get("report_dir", "data/research_reports"),
+            schema_version=analytics_cfg.get("report_schema_version", "1.0.0"),
+            db=self.db,
+        )
 
         # Search and promotion controls
         self.search_budget = int(config.get("search_budget", 100))
@@ -226,12 +234,19 @@ class AIResearchAgent:
         ranked = self._rank_strategies(results)
         validated = self._walk_forward_test(ranked[: min(20, len(ranked))], historical_data)
         promoted = self._promote_to_paper(validated)
+        strategy_reports = self._build_strategy_reports(
+            historical_data=historical_data,
+            results=results,
+            promoted_ids=promoted,
+            objective_assessment=objective_assessment,
+        )
         report = self._generate_report(
             candidates=candidates,
             results=results,
             validated=validated,
             promoted=promoted,
             objective_assessment=objective_assessment,
+            strategy_reports=strategy_reports,
         )
 
         logger.info(
@@ -656,6 +671,7 @@ class AIResearchAgent:
         validated: List[Dict],
         promoted: List[str],
         objective_assessment: Dict[str, Any],
+        strategy_reports: Dict[str, Any],
     ) -> Dict:
         sharpes = [row["metrics"]["sharpe"] for row in results]
         returns = [row["metrics"]["total_return"] for row in results]
@@ -677,6 +693,7 @@ class AIResearchAgent:
                 "avg_return": float(np.mean(returns)) if returns else 0.0,
                 "best_return": float(np.max(returns)) if returns else 0.0,
             },
+            "analytics": strategy_reports,
             "top_strategies": [
                 {
                     "id": row["variant"].strategy_id,
@@ -690,6 +707,92 @@ class AIResearchAgent:
                 }
                 for row in top_ranked
             ],
+        }
+
+    def _build_strategy_reports(
+        self,
+        *,
+        historical_data: Dict[str, pd.DataFrame],
+        results: List[Dict[str, Any]],
+        promoted_ids: List[str],
+        objective_assessment: Dict[str, Any],
+    ) -> Dict[str, Any]:
+        lineage = self._summarize_data_lineage(historical_data)
+        entries: List[Dict[str, Any]] = []
+        promoted_set = set(promoted_ids)
+
+        for row in results:
+            variant = row["variant"]
+            strategy_id = variant.strategy_id
+            promoted = strategy_id in promoted_set
+            stage = self.db.get_experiment_status(strategy_id) or "backtest"
+
+            gate_checks = {
+                "validator": bool(row.get("validator_passed", False)),
+                "deflated_sharpe": float(row.get("deflated_sharpe", 0.0)) >= self.min_deflated_sharpe,
+                "pbo": float(row.get("pbo_estimate", 1.0)) <= self.max_pbo,
+                "capacity": float(row.get("metrics", {}).get("capacity_ratio", 0.0)) <= 1.0,
+            }
+
+            if promoted:
+                decision_action = "promote_to_paper"
+                decision_reason = "passed_research_gate"
+            elif not gate_checks["validator"]:
+                decision_action = "hold"
+                decision_reason = "validator_failed"
+            elif not gate_checks["pbo"]:
+                decision_action = "hold"
+                decision_reason = "overfit_risk_high"
+            elif not gate_checks["capacity"]:
+                decision_action = "hold"
+                decision_reason = "capacity_limit_exceeded"
+            else:
+                decision_action = "hold"
+                decision_reason = "ranked_below_promotion_cutoff"
+
+            validator_reasons = row.get("validator_reasons", [])
+            rationale = (
+                decision_reason
+                if not validator_reasons
+                else f"{decision_reason}: {', '.join(str(r) for r in validator_reasons)}"
+            )
+
+            confidence = float(np.clip((float(row.get("fitness", 0.0)) + 2.0) / 4.0, 0.0, 1.0))
+            report, path, report_hash = self.report_builder.build_and_save_from_result_row(
+                result_row=row,
+                data_lineage=lineage,
+                objective_assessment=objective_assessment,
+                promotion_stage=stage,
+                promoted=promoted,
+                promotion_reason=decision_reason,
+                promotion_gate_checks=gate_checks,
+                decision={
+                    "action": decision_action,
+                    "rationale": rationale,
+                    "supporting_card_ids": [],
+                    "counterevidence_card_ids": [],
+                    "confidence": confidence,
+                    "operator": "autopilot",
+                },
+                tca_snapshot={},
+                extras={"fitness": float(row.get("fitness", 0.0))},
+            )
+            entries.append(
+                {
+                    "experiment_id": report.experiment_id,
+                    "report_id": report.report_id,
+                    "path": str(path),
+                    "sha256": report_hash,
+                    "decision": decision_action,
+                    "promoted": promoted,
+                }
+            )
+
+        return {
+            "report_schema_version": self.report_builder.schema_version,
+            "report_count": len(entries),
+            "report_dir": str(self.report_builder.output_dir),
+            "reports": entries,
         }
 
     def get_top_strategies(self, n: int = 10) -> pd.DataFrame:
@@ -862,3 +965,41 @@ class AIResearchAgent:
     def _primary_index(self, data: Dict[str, pd.DataFrame]) -> pd.DatetimeIndex:
         first_symbol = sorted(data.keys())[0]
         return data[first_symbol].index
+
+    def _summarize_data_lineage(self, data: Dict[str, pd.DataFrame]) -> Dict[str, Any]:
+        index = self._primary_index(data)
+        config_fingerprint = {
+            "search_budget": self.search_budget,
+            "top_performers": self.top_performers,
+            "min_sharpe": self.min_sharpe_for_promotion,
+            "max_drawdown": self.max_drawdown,
+            "commission_bps": self.commission_bps,
+            "slippage_bps": self.slippage_bps,
+            "borrow_funding_bps": self.borrow_funding_bps,
+        }
+        return {
+            "dataset_id": self.config.get("dataset_id", "historical_market_data"),
+            "symbols": sorted(list(data.keys())),
+            "start": index.min().isoformat(),
+            "end": index.max().isoformat(),
+            "bars": int(sum(len(df) for df in data.values())),
+            "timezone": "UTC",
+            "source": self.config.get("data_source", "historical"),
+            "code_sha": self._resolve_code_sha(),
+            "config_hash": hashlib.sha256(
+                str(sorted(config_fingerprint.items())).encode("utf-8")
+            ).hexdigest(),
+        }
+
+    @staticmethod
+    def _resolve_code_sha() -> str:
+        try:
+            completed = subprocess.run(
+                ["git", "rev-parse", "HEAD"],
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            return completed.stdout.strip() or "unknown"
+        except Exception:
+            return "unknown"

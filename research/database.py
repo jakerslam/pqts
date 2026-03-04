@@ -3,7 +3,7 @@ import logging
 import sqlite3
 import pandas as pd
 import json
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 from datetime import datetime
 from dataclasses import dataclass, asdict
 from pathlib import Path
@@ -135,6 +135,22 @@ class ResearchDatabase:
                 to_stage TEXT NOT NULL,
                 reason TEXT,
                 timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (experiment_id) REFERENCES experiments(experiment_id)
+            )
+        ''')
+
+        # Canonical strategy analytics report artifacts
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS analytics_reports (
+                report_id TEXT PRIMARY KEY,
+                experiment_id TEXT NOT NULL,
+                created_at TIMESTAMP NOT NULL,
+                report_path TEXT NOT NULL,
+                report_sha256 TEXT NOT NULL,
+                schema_version TEXT NOT NULL,
+                decision_action TEXT NOT NULL,
+                promoted INTEGER NOT NULL DEFAULT 0,
+                summary TEXT,
                 FOREIGN KEY (experiment_id) REFERENCES experiments(experiment_id)
             )
         ''')
@@ -463,6 +479,63 @@ class ResearchDatabase:
         
         return pd.read_sql_query(query, self.conn, 
                                 params=(min_sharpe, max_drawdown))
+
+    def log_report_artifact(
+        self,
+        *,
+        report_id: str,
+        experiment_id: str,
+        report_path: str,
+        report_sha256: str,
+        schema_version: str,
+        decision_action: str,
+        promoted: bool,
+        summary: Optional[Dict[str, Any]] = None,
+    ) -> bool:
+        cursor = self.conn.cursor()
+        try:
+            cursor.execute(
+                '''
+                INSERT OR REPLACE INTO analytics_reports
+                (report_id, experiment_id, created_at, report_path, report_sha256, schema_version, decision_action, promoted, summary)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ''',
+                (
+                    report_id,
+                    experiment_id,
+                    datetime.now().isoformat(),
+                    report_path,
+                    report_sha256,
+                    schema_version,
+                    decision_action,
+                    1 if promoted else 0,
+                    json.dumps(summary or {}, sort_keys=True),
+                ),
+            )
+            self.conn.commit()
+            return True
+        except sqlite3.Error as e:
+            logger.error(f"Failed to log report artifact: {e}")
+            return False
+
+    def get_report_artifacts(self, experiment_id: Optional[str] = None) -> pd.DataFrame:
+        query = '''
+            SELECT report_id, experiment_id, created_at, report_path,
+                   report_sha256, schema_version, decision_action, promoted, summary
+            FROM analytics_reports
+        '''
+        params: tuple = ()
+        if experiment_id:
+            query += " WHERE experiment_id = ?"
+            params = (experiment_id,)
+        query += " ORDER BY created_at DESC"
+
+        frame = pd.read_sql_query(query, self.conn, params=params)
+        if not frame.empty and "summary" in frame.columns:
+            frame["summary"] = frame["summary"].apply(
+                lambda text: json.loads(text) if isinstance(text, str) and text else {}
+            )
+        return frame
     
     def close(self):
         self.conn.close()
