@@ -92,3 +92,22 @@ def test_engine_live_mode_supports_file_json_secret_backend(tmp_path):
     exchange = engine.config["markets"]["crypto"]["exchanges"][0]
     assert exchange["api_key"] == "from_file_key"
     assert exchange["api_secret"] == "from_file_secret"
+
+
+def test_validate_live_secrets_enforces_rotation_metadata_when_enabled():
+    config = _live_config()
+    config["runtime"] = {
+        "secrets": {
+            "backend": "env",
+            "enforce_rotation": True,
+            "rotation_metadata": {
+                "BINANCE_API_KEY": "2020-01-01T00:00:00+00:00",
+                "BINANCE_API_SECRET": "2020-01-01T00:00:00+00:00",
+            },
+        }
+    }
+    issues = validate_live_secrets(
+        config,
+        env={"BINANCE_API_KEY": "k_live", "BINANCE_API_SECRET": "s_live"},
+    )
+    assert any("exceeded max rotation age" in issue.message for issue in issues)

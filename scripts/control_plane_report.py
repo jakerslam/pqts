@@ -14,7 +14,11 @@ ROOT = Path(__file__).resolve().parent.parent
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from analytics.control_plane import ControlPlaneMeter, pricing_tier_recommendation  # noqa: E402
+from analytics.control_plane import (  # noqa: E402
+    ControlPlaneMeter,
+    pricing_tier_recommendation,
+    resolve_usage_entitlement,
+)
 
 
 def _write_report(out_dir: Path, payload: Dict[str, Any]) -> Path:
@@ -29,6 +33,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--usage-log", default="data/analytics/control_plane_usage.jsonl")
     parser.add_argument("--window-days", type=int, default=30)
+    parser.add_argument("--tenant-plan", default="pro")
     parser.add_argument("--out-dir", default="data/reports")
     return parser
 
@@ -38,6 +43,8 @@ def main() -> int:
 
     meter = ControlPlaneMeter(log_path=str(args.usage_log))
     summary = meter.usage_summary(window_days=int(args.window_days))
+    audit = meter.audit_usage_report(window_days=int(args.window_days))
+    entitlement = resolve_usage_entitlement(args.tenant_plan)
     top = summary.get("tenants", [])
     top_row = top[0] if top else {"total_units": 0.0, "events": 0}
     recommendation = pricing_tier_recommendation(
@@ -49,6 +56,13 @@ def main() -> int:
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "usage_log": str(args.usage_log),
         "summary": summary,
+        "audit_report": audit,
+        "entitlement_policy": {
+            "plan": entitlement.plan,
+            "max_events_per_day": entitlement.max_events_per_day,
+            "max_units_per_day": entitlement.max_units_per_day,
+            "allowed_event_types": entitlement.allowed_event_types,
+        },
         "pricing_recommendation": recommendation,
     }
     report_path = _write_report(Path(args.out_dir), payload)

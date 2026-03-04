@@ -7,6 +7,8 @@ import re
 from dataclasses import dataclass
 from typing import Any, Dict, Iterable, List, Mapping, MutableMapping, Optional, Sequence
 
+from core.compliance_security import validate_secret_rotation
+
 _LIVE_MODES = {"live", "live_trading"}
 _SECRET_KEY_TOKENS = (
     "api_key",
@@ -125,6 +127,20 @@ def validate_live_secrets(
                 message="live mode requires credential fields (api_key/api_secret/token/etc.)",
             )
         )
+    runtime = config.get("runtime", {})
+    secrets_cfg = runtime.get("secrets", {}) if isinstance(runtime, Mapping) else {}
+    enforce_rotation = bool(
+        secrets_cfg.get("enforce_rotation", False) if isinstance(secrets_cfg, Mapping) else False
+    )
+    if enforce_rotation:
+        rotation_issues = validate_secret_rotation(config, max_age_days=90)
+        for issue in rotation_issues:
+            issues.append(
+                SecretPolicyIssue(
+                    key=str(issue.key),
+                    message=str(issue.message),
+                )
+            )
     return issues
 
 

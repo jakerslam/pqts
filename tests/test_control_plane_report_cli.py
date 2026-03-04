@@ -16,8 +16,9 @@ SPEC.loader.exec_module(MODULE)
 
 def test_parser_accepts_window_days():
     parser = MODULE.build_parser()
-    args = parser.parse_args(["--window-days", "14"])
+    args = parser.parse_args(["--window-days", "14", "--tenant-plan", "starter"])
     assert args.window_days == 14
+    assert args.tenant_plan == "starter"
 
 
 def test_write_report_persists_json(tmp_path):
