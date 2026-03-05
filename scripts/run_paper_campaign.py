@@ -103,6 +103,14 @@ def _to_float(value: Any) -> float | None:
         return None
 
 
+def _first_float(*values: Any) -> float | None:
+    for value in values:
+        parsed = _to_float(value)
+        if parsed is not None:
+            return parsed
+    return None
+
+
 def _build_risk_limits(risk_cfg: Dict[str, Any]) -> RiskLimits:
     return RiskLimits(
         max_daily_loss_pct=_pct(
@@ -163,6 +171,8 @@ def _build_broker_config(
         "allocation_controls": execution_cfg.get("allocation_controls", {}),
         "market_data_resilience": execution_cfg.get("market_data_resilience", {}),
         "tca_calibration": execution_cfg.get("tca_calibration", {}),
+        "confidence_allocator": execution_cfg.get("confidence_allocator", {}),
+        "maker_urgency_ladder": execution_cfg.get("maker_urgency_ladder", {}),
         "paper_prediction_blend": execution_cfg.get("paper_prediction_blend", 1.0),
     }
 
@@ -243,15 +253,41 @@ def _load_research_validation_from_report(path: str) -> Dict[str, Any]:
     cv_sharpe = float(_to_float(validation.get("cv_sharpe")) or 0.0)
     walk_forward_sharpe = float(_to_float(validation.get("walk_forward_sharpe")) or 0.0)
     deflated_sharpe = float(_to_float(validation.get("deflated_sharpe")) or 0.0)
+    walk_forward_consistency = float(_to_float(validation.get("walk_forward_consistency")) or 1.0)
+    cv_sharpe_std = float(_to_float(validation.get("cv_sharpe_std")) or 0.0)
+    parameter_stability_score = float(
+        _first_float(
+            validation.get("parameter_stability_score"),
+            validation.get("parameter_stability"),
+            max(min(1.0 / (1.0 + max(cv_sharpe_std, 0.0)), 1.0), 0.0),
+        )
+        or 0.0
+    )
+    regime_robustness_score = float(
+        _first_float(
+            validation.get("regime_robustness_score"),
+            validation.get("regime_robustness"),
+            max(min(walk_forward_consistency, 1.0), 0.0),
+        )
+        or 0.0
+    )
     payload_out = {
         "purged_cv_sharpe": cv_sharpe,
         "walk_forward_sharpe": walk_forward_sharpe,
         "deflated_sharpe": deflated_sharpe,
+        "parameter_stability_score": parameter_stability_score,
+        "regime_robustness_score": regime_robustness_score,
         "purged_cv_passed": bool(gate_checks.get("validator", cv_sharpe > 0.0)),
         "walk_forward_passed": bool(
             gate_checks.get("walk_forward_sharpe", walk_forward_sharpe > 0.0)
         ),
         "deflated_sharpe_passed": bool(gate_checks.get("deflated_sharpe", deflated_sharpe > 0.0)),
+        "parameter_stability_passed": bool(
+            gate_checks.get("parameter_stability", parameter_stability_score >= 0.55)
+        ),
+        "regime_robustness_passed": bool(
+            gate_checks.get("regime_robustness", regime_robustness_score >= 0.55)
+        ),
     }
 
     turnover = float(_to_float(validation.get("turnover_annualized")) or 0.0)
@@ -407,6 +443,12 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--promotion-min-purged-cv-sharpe", type=float, default=1.0)
     parser.add_argument("--promotion-min-walk-forward-sharpe", type=float, default=1.0)
     parser.add_argument("--promotion-min-deflated-sharpe", type=float, default=0.8)
+    parser.add_argument("--promotion-min-parameter-stability-score", type=float, default=0.55)
+    parser.add_argument("--promotion-min-regime-robustness-score", type=float, default=0.55)
+    parser.add_argument("--promotion-min-realized-net-alpha-bps", type=float, default=0.0)
+    parser.add_argument(
+        "--promotion-min-ci95-lower-realized-net-alpha-bps", type=float, default=0.0
+    )
     parser.add_argument(
         "--allow-short-probes",
         action="store_true",
@@ -420,7 +462,8 @@ def build_arg_parser() -> argparse.ArgumentParser:
         help=(
             "Mechanism switch override for ablations, e.g. --switch capacity_curves=off. "
             "Valid keys: routing_failover,capacity_curves,allocation_controls,regime_overlay,"
-            "shorting_controls,market_data_resilience,tca_calibration_feedback,"
+            "maker_urgency_ladder,confidence_allocator,shorting_controls,"
+            "market_data_resilience,tca_calibration_feedback,"
             "slippage_stress_model"
         ),
     )
@@ -645,6 +688,16 @@ async def _run(args: argparse.Namespace) -> Dict[str, Any]:
                         min_purged_cv_sharpe=float(args.promotion_min_purged_cv_sharpe),
                         min_walk_forward_sharpe=float(args.promotion_min_walk_forward_sharpe),
                         min_deflated_sharpe=float(args.promotion_min_deflated_sharpe),
+                        min_parameter_stability_score=float(
+                            args.promotion_min_parameter_stability_score
+                        ),
+                        min_regime_robustness_score=float(
+                            args.promotion_min_regime_robustness_score
+                        ),
+                        min_realized_net_alpha_bps=float(args.promotion_min_realized_net_alpha_bps),
+                        min_ci95_lower_realized_net_alpha_bps=float(
+                            args.promotion_min_ci95_lower_realized_net_alpha_bps
+                        ),
                     ),
                 )
                 last_snapshot = {

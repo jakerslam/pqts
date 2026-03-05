@@ -30,5 +30,8 @@ def get_revenue_kpis(
         "notional_usd": float(summary.get("notional_usd", 0.0)),
         "estimated_realized_pnl_usd": float(summary.get("estimated_realized_pnl_usd", 0.0)),
         "avg_realized_net_alpha_bps": float(summary.get("avg_realized_net_alpha_bps", 0.0)),
+        "ci95_lower_realized_net_alpha_bps": float(
+            summary.get("ci95_lower_realized_net_alpha_bps", 0.0)
+        ),
         "slippage_mape_pct": float(summary.get("slippage_mape_pct", 0.0)),
     }

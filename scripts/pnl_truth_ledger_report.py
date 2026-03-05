@@ -15,6 +15,7 @@ if str(ROOT) not in sys.path:
 
 from analytics.pnl_truth_ledger import (  # noqa: E402
     build_pnl_truth_ledger,
+    detect_negative_net_alpha_scopes,
     detect_negative_net_alpha_strategies,
 )
 from execution.tca_feedback import TCADatabase  # noqa: E402
@@ -26,6 +27,9 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--lookback-days", type=int, default=30)
     parser.add_argument("--min-trades", type=int, default=50)
     parser.add_argument("--disable-threshold-net-alpha-usd", type=float, default=0.0)
+    parser.add_argument("--disable-strategy-venues", action="store_true", default=True)
+    parser.add_argument("--disable-strategy-symbols", action="store_true", default=True)
+    parser.add_argument("--disable-strategy-venue-symbols", action="store_true", default=True)
     parser.add_argument(
         "--disable-list-path",
         default="data/analytics/strategy_disable_list.json",
@@ -47,6 +51,14 @@ def main() -> int:
         min_trades=int(args.min_trades),
         max_net_alpha_usd=float(args.disable_threshold_net_alpha_usd),
     )
+    scoped_decisions = detect_negative_net_alpha_scopes(
+        rows,
+        min_trades=int(args.min_trades),
+        max_net_alpha_usd=float(args.disable_threshold_net_alpha_usd),
+        include_strategy_venue=bool(args.disable_strategy_venues),
+        include_strategy_symbol=bool(args.disable_strategy_symbols),
+        include_strategy_venue_symbol=bool(args.disable_strategy_venue_symbols),
+    )
 
     disable_payload = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -54,6 +66,15 @@ def main() -> int:
         "min_trades": int(args.min_trades),
         "threshold_net_alpha_usd": float(args.disable_threshold_net_alpha_usd),
         "disabled_strategies": [row.to_dict() for row in disable_decisions],
+        "disabled_strategy_venues": [
+            row.to_dict() for row in scoped_decisions.get("strategy_venues", [])
+        ],
+        "disabled_strategy_symbols": [
+            row.to_dict() for row in scoped_decisions.get("strategy_symbols", [])
+        ],
+        "disabled_strategy_venue_symbols": [
+            row.to_dict() for row in scoped_decisions.get("strategy_venue_symbols", [])
+        ],
     }
     disable_path = Path(args.disable_list_path)
     disable_path.parent.mkdir(parents=True, exist_ok=True)
@@ -68,12 +89,22 @@ def main() -> int:
         "rows": rows,
         "disable_list_path": str(disable_path),
         "disabled_strategies_count": len(disable_decisions),
+        "disabled_strategy_venues_count": len(scoped_decisions.get("strategy_venues", [])),
+        "disabled_strategy_symbols_count": len(scoped_decisions.get("strategy_symbols", [])),
+        "disabled_strategy_venue_symbols_count": len(
+            scoped_decisions.get("strategy_venue_symbols", [])
+        ),
     }
     report_path.write_text(json.dumps(report_payload, sort_keys=True, indent=2), encoding="utf-8")
     report_payload["report_path"] = str(report_path)
     print(json.dumps(report_payload, sort_keys=True))
 
-    if args.strict and disable_decisions:
+    if args.strict and (
+        disable_decisions
+        or scoped_decisions.get("strategy_venues")
+        or scoped_decisions.get("strategy_symbols")
+        or scoped_decisions.get("strategy_venue_symbols")
+    ):
         return 1
     return 0
 

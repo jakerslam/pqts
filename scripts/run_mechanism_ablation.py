@@ -121,7 +121,9 @@ def _summarize_case(
     payload: Dict[str, Any],
 ) -> Dict[str, Any]:
     revenue_summary = (
-        payload.get("revenue", {}).get("summary", {}) if isinstance(payload.get("revenue"), dict) else {}
+        payload.get("revenue", {}).get("summary", {})
+        if isinstance(payload.get("revenue"), dict)
+        else {}
     )
     pnl_usd = float(revenue_summary.get("estimated_realized_pnl_usd", 0.0) or 0.0)
     notional_usd = float(revenue_summary.get("notional_usd", 0.0) or 0.0)
@@ -130,7 +132,9 @@ def _summarize_case(
         "case_id": str(case_id),
         "mechanism": str(mechanism),
         "switch_state": {key: bool(switch_state.get(key, False)) for key in list_switches()},
-        "campaign_expected_alpha_bps": float(payload.get("campaign_expected_alpha_bps", 0.0) or 0.0),
+        "campaign_expected_alpha_bps": float(
+            payload.get("campaign_expected_alpha_bps", 0.0) or 0.0
+        ),
         "campaign_expected_alpha_source": str(payload.get("campaign_expected_alpha_source", "")),
         "submitted": int(payload.get("submitted", 0) or 0),
         "filled": int(payload.get("filled", 0) or 0),
@@ -172,6 +176,10 @@ def _build_research_validation(args: argparse.Namespace) -> str:
         str(float(args.min_walk_forward_sharpe)),
         "--min-deflated-sharpe",
         str(float(args.min_deflated_sharpe)),
+        "--min-parameter-stability-score",
+        str(float(args.min_parameter_stability_score)),
+        "--min-regime-robustness-score",
+        str(float(args.min_regime_robustness_score)),
     ]
     if str(args.report or "").strip():
         cmd.extend(["--report", str(args.report)])
@@ -219,6 +227,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--min-purged-cv-sharpe", type=float, default=1.0)
     parser.add_argument("--min-walk-forward-sharpe", type=float, default=1.0)
     parser.add_argument("--min-deflated-sharpe", type=float, default=0.8)
+    parser.add_argument("--min-parameter-stability-score", type=float, default=0.55)
+    parser.add_argument("--min-regime-robustness-score", type=float, default=0.55)
     parser.add_argument("--include-agent-off", action="store_true")
     parser.add_argument(
         "--switch",
@@ -300,7 +310,9 @@ def main() -> int:
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "config": str(args.config),
         "research_validation_path": str(research_validation_path),
-        "baseline_switches": {key: bool(baseline_switches.get(key, False)) for key in list_switches()},
+        "baseline_switches": {
+            key: bool(baseline_switches.get(key, False)) for key in list_switches()
+        },
         "mechanisms_tested": mechanisms,
         "cases_run": len(run_rows),
         "rows": run_rows,

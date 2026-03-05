@@ -40,6 +40,8 @@ def _build_research_validation_cmd(
     min_purged_cv_sharpe: float,
     min_walk_forward_sharpe: float,
     min_deflated_sharpe: float,
+    min_parameter_stability_score: float,
+    min_regime_robustness_score: float,
 ) -> List[str]:
     cmd = [
         sys.executable,
@@ -54,6 +56,10 @@ def _build_research_validation_cmd(
         str(float(min_walk_forward_sharpe)),
         "--min-deflated-sharpe",
         str(float(min_deflated_sharpe)),
+        "--min-parameter-stability-score",
+        str(float(min_parameter_stability_score)),
+        "--min-regime-robustness-score",
+        str(float(min_regime_robustness_score)),
     ]
     if str(report).strip():
         cmd.extend(["--report", report])
@@ -108,6 +114,14 @@ def _build_campaign_cmd(
         str(float(args.promotion_min_walk_forward_sharpe)),
         "--promotion-min-deflated-sharpe",
         str(float(args.promotion_min_deflated_sharpe)),
+        "--promotion-min-parameter-stability-score",
+        str(float(args.promotion_min_parameter_stability_score)),
+        "--promotion-min-regime-robustness-score",
+        str(float(args.promotion_min_regime_robustness_score)),
+        "--promotion-min-realized-net-alpha-bps",
+        str(float(args.promotion_min_realized_net_alpha_bps)),
+        "--promotion-min-ci95-lower-realized-net-alpha-bps",
+        str(float(args.promotion_min_ci95_lower_realized_net_alpha_bps)),
     ]
     symbols = str(args.campaign_symbols or "").strip()
     if symbols:
@@ -216,6 +230,12 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--promotion-min-purged-cv-sharpe", type=float, default=1.0)
     parser.add_argument("--promotion-min-walk-forward-sharpe", type=float, default=1.0)
     parser.add_argument("--promotion-min-deflated-sharpe", type=float, default=0.8)
+    parser.add_argument("--promotion-min-parameter-stability-score", type=float, default=0.55)
+    parser.add_argument("--promotion-min-regime-robustness-score", type=float, default=0.55)
+    parser.add_argument("--promotion-min-realized-net-alpha-bps", type=float, default=0.0)
+    parser.add_argument(
+        "--promotion-min-ci95-lower-realized-net-alpha-bps", type=float, default=0.0
+    )
     parser.add_argument("--canary-state-path", default="data/analytics/canary_ramp_state.json")
     parser.add_argument("--canary-min-days-per-step", type=int, default=14)
     parser.add_argument("--canary-max-slippage-mape-pct", type=float, default=25.0)
@@ -250,6 +270,8 @@ def main() -> int:
                 min_purged_cv_sharpe=float(args.promotion_min_purged_cv_sharpe),
                 min_walk_forward_sharpe=float(args.promotion_min_walk_forward_sharpe),
                 min_deflated_sharpe=float(args.promotion_min_deflated_sharpe),
+                min_parameter_stability_score=float(args.promotion_min_parameter_stability_score),
+                min_regime_robustness_score=float(args.promotion_min_regime_robustness_score),
             )
             build_run = _run(cmd)
             build_payload = _parse_json_from_output(build_run.stdout)

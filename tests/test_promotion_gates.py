@@ -163,3 +163,33 @@ def test_promotion_gate_blocks_when_deflated_sharpe_fails():
     )
     assert result["decision"] == "remain_in_paper"
     assert result["checks"]["deflated_sharpe_passed"] is False
+
+
+def test_promotion_gate_blocks_when_net_alpha_confidence_is_negative():
+    result = evaluate_promotion_gate(
+        readiness={
+            "trading_days": 45,
+            "fills": 500,
+            "ready_for_canary": True,
+            "slippage_mape_pct": 10.0,
+        },
+        campaign_stats={"reject_rate": 0.02},
+        ops_summary={"critical": 0},
+        research_validation={
+            "purged_cv_sharpe": 1.3,
+            "walk_forward_sharpe": 1.1,
+            "deflated_sharpe": 0.9,
+            "purged_cv_passed": True,
+            "walk_forward_passed": True,
+            "deflated_sharpe_passed": True,
+            "parameter_stability_score": 0.8,
+            "regime_robustness_score": 0.8,
+        },
+        revenue_summary={
+            "estimated_realized_pnl_usd": 300.0,
+            "avg_realized_net_alpha_bps": 1.0,
+            "ci95_lower_realized_net_alpha_bps": -2.0,
+        },
+    )
+    assert result["decision"] == "remain_in_paper"
+    assert result["checks"]["net_alpha_confidence_passed"] is False

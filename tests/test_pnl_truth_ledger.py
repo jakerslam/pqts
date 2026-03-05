@@ -10,6 +10,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from analytics.pnl_truth_ledger import (
     build_pnl_truth_ledger,
+    detect_negative_net_alpha_scopes,
     detect_negative_net_alpha_strategies,
 )
 from execution.tca_feedback import TCADatabase, TCATradeRecord
@@ -147,3 +148,24 @@ def test_net_alpha_declines_monotonically_with_higher_realized_costs(tmp_path):
     assert abs(float(low["gross_alpha_usd"]) - float(high["gross_alpha_usd"])) < 1e-12
     assert float(high["slippage_cost_usd"]) > float(low["slippage_cost_usd"])
     assert float(high["net_alpha_usd"]) < float(low["net_alpha_usd"])
+
+
+def test_detect_negative_net_alpha_scopes_finds_symbol_and_venue_rows(tmp_path):
+    db = TCADatabase(str(tmp_path / "tca.csv"))
+    for idx in range(6):
+        db.add_record(
+            _record(
+                trade_id=f"scope_{idx}",
+                strategy_id="bad_scope",
+                exchange="coinbase",
+                expected_alpha_bps=0.0,
+                realized_slippage_bps=8.0,
+                realized_commission_bps=2.0,
+            )
+        )
+
+    _summary, rows = build_pnl_truth_ledger(db, lookback_days=30)
+    scoped = detect_negative_net_alpha_scopes(rows, min_trades=3, max_net_alpha_usd=0.0)
+    assert scoped["strategy_venues"]
+    assert scoped["strategy_symbols"]
+    assert scoped["strategy_venue_symbols"]

@@ -121,4 +121,6 @@ def test_load_research_validation_from_report_maps_validation_fields(tmp_path):
     assert payload["purged_cv_sharpe"] == 1.2
     assert payload["walk_forward_sharpe"] == 1.1
     assert payload["deflated_sharpe"] == 0.9
+    assert payload["parameter_stability_passed"] is True
+    assert payload["regime_robustness_passed"] is True
     assert payload["expected_alpha_bps"] == 25.0

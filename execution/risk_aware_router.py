@@ -36,6 +36,7 @@ from typing import Any, Dict, List, Optional, Protocol, Tuple
 
 from analytics.paper_readiness import PaperTrackRecordEvaluator
 from execution.capacity_curves import StrategyCapacityCurveModel
+from execution.confidence_allocator import ConfidenceWeightedAllocator
 from execution.distributed_ops_state import DistributedOpsState, DistributedStateConfig
 from execution.live_ops_controls import (
     OrderIdempotencyGuard,
@@ -46,6 +47,7 @@ from execution.market_data_resilience import (
     MarketDataResilienceManager,
     MarketDataResiliencePolicy,
 )
+from execution.microstructure_features import extract_microstructure_features
 from execution.order_ledger import ImmutableOrderLedger
 from execution.realistic_costs import (
     Bps,
@@ -348,7 +350,25 @@ class RiskAwareRouter:
             broker_config.get("strategy_disable_reload_seconds", 30.0)
         )
         self._disabled_strategies: Dict[str, Dict[str, Any]] = {}
+        self._disabled_strategy_venues: Dict[Tuple[str, str], Dict[str, Any]] = {}
+        self._disabled_strategy_symbols: Dict[Tuple[str, str], Dict[str, Any]] = {}
+        self._disabled_strategy_venue_symbols: Dict[Tuple[str, str, str], Dict[str, Any]] = {}
         self._strategy_disable_last_loaded: Optional[datetime] = None
+        confidence_cfg = broker_config.get("confidence_allocator", {}) or {}
+        self.confidence_allocator = ConfidenceWeightedAllocator(
+            enabled=bool(confidence_cfg.get("enabled", False)),
+            lookback_days=int(confidence_cfg.get("lookback_days", 30)),
+            min_samples=int(confidence_cfg.get("min_samples", 40)),
+            min_multiplier=float(confidence_cfg.get("min_multiplier", 0.25)),
+            max_multiplier=float(confidence_cfg.get("max_multiplier", 1.50)),
+            neutral_multiplier=float(confidence_cfg.get("neutral_multiplier", 1.0)),
+            z_score=float(confidence_cfg.get("z_score", 1.96)),
+            target_lower_bps=float(confidence_cfg.get("target_lower_bps", 2.0)),
+            response_slope=float(confidence_cfg.get("response_slope", 0.5)),
+            hard_floor_on_negative_lower=bool(
+                confidence_cfg.get("hard_floor_on_negative_lower", True)
+            ),
+        )
 
         allocation_cfg = broker_config.get("allocation_controls", {}) or {}
         self.allocation_controls_enabled = bool(allocation_cfg.get("enabled", False))
@@ -527,7 +547,9 @@ class RiskAwareRouter:
             "commission_rate": float(self.cost_model.commission),
             "impact_constant": float(self.broker_config.get("impact_constant", 0.5)),
             "base_volatility": float(self.cost_model.base_vol),
-            "impact_volatility_scale": float(getattr(self.cost_model, "impact_volatility_scale", 0.0)),
+            "impact_volatility_scale": float(
+                getattr(self.cost_model, "impact_volatility_scale", 0.0)
+            ),
             "paper_prediction_blend": float(self.broker_config.get("paper_prediction_blend", 1.0)),
             "live_execution": bool(self.broker_config.get("live_execution", False)),
             "fill_provider": self.fill_provider.__class__.__name__,
@@ -559,6 +581,9 @@ class RiskAwareRouter:
     def _load_strategy_disable_list(self, *, force: bool = False) -> None:
         if not self.strategy_disable_enabled:
             self._disabled_strategies = {}
+            self._disabled_strategy_venues = {}
+            self._disabled_strategy_symbols = {}
+            self._disabled_strategy_venue_symbols = {}
             self._strategy_disable_last_loaded = datetime.now(timezone.utc)
             return
 
@@ -573,20 +598,66 @@ class RiskAwareRouter:
         self._strategy_disable_last_loaded = now
         if not self.strategy_disable_list_path.exists():
             self._disabled_strategies = {}
+            self._disabled_strategy_venues = {}
+            self._disabled_strategy_symbols = {}
+            self._disabled_strategy_venue_symbols = {}
             return
         try:
             payload = json.loads(self.strategy_disable_list_path.read_text(encoding="utf-8"))
-            rows = payload.get("disabled_strategies", [])
-            out: Dict[str, Dict[str, Any]] = {}
-            if isinstance(rows, list):
-                for row in rows:
+            strategy_rows = payload.get("disabled_strategies", [])
+            strategy_venue_rows = payload.get("disabled_strategy_venues", [])
+            strategy_symbol_rows = payload.get("disabled_strategy_symbols", [])
+            strategy_venue_symbol_rows = payload.get("disabled_strategy_venue_symbols", [])
+
+            by_strategy: Dict[str, Dict[str, Any]] = {}
+            by_strategy_venue: Dict[Tuple[str, str], Dict[str, Any]] = {}
+            by_strategy_symbol: Dict[Tuple[str, str], Dict[str, Any]] = {}
+            by_strategy_venue_symbol: Dict[Tuple[str, str, str], Dict[str, Any]] = {}
+
+            if isinstance(strategy_rows, list):
+                for row in strategy_rows:
                     if not isinstance(row, dict):
                         continue
                     strategy_id = str(row.get("strategy_id", "")).strip()
                     if not strategy_id:
                         continue
-                    out[strategy_id] = dict(row)
-            self._disabled_strategies = out
+                    by_strategy[strategy_id] = dict(row)
+
+            if isinstance(strategy_venue_rows, list):
+                for row in strategy_venue_rows:
+                    if not isinstance(row, dict):
+                        continue
+                    strategy_id = str(row.get("strategy_id", "")).strip()
+                    venue = str(row.get("exchange", "")).strip()
+                    if not strategy_id or not venue:
+                        continue
+                    by_strategy_venue[(strategy_id, venue)] = dict(row)
+
+            if isinstance(strategy_symbol_rows, list):
+                for row in strategy_symbol_rows:
+                    if not isinstance(row, dict):
+                        continue
+                    strategy_id = str(row.get("strategy_id", "")).strip()
+                    symbol = str(row.get("symbol", "")).strip()
+                    if not strategy_id or not symbol:
+                        continue
+                    by_strategy_symbol[(strategy_id, symbol)] = dict(row)
+
+            if isinstance(strategy_venue_symbol_rows, list):
+                for row in strategy_venue_symbol_rows:
+                    if not isinstance(row, dict):
+                        continue
+                    strategy_id = str(row.get("strategy_id", "")).strip()
+                    venue = str(row.get("exchange", "")).strip()
+                    symbol = str(row.get("symbol", "")).strip()
+                    if not strategy_id or not venue or not symbol:
+                        continue
+                    by_strategy_venue_symbol[(strategy_id, venue, symbol)] = dict(row)
+
+            self._disabled_strategies = by_strategy
+            self._disabled_strategy_venues = by_strategy_venue
+            self._disabled_strategy_symbols = by_strategy_symbol
+            self._disabled_strategy_venue_symbols = by_strategy_venue_symbol
         except Exception as exc:
             logger.warning(
                 "Could not parse strategy disable list at %s: %s",
@@ -594,6 +665,41 @@ class RiskAwareRouter:
                 exc,
             )
             self._disabled_strategies = {}
+            self._disabled_strategy_venues = {}
+            self._disabled_strategy_symbols = {}
+            self._disabled_strategy_venue_symbols = {}
+
+    def _find_disable_scope(
+        self,
+        *,
+        strategy_id: str,
+        symbol: str,
+        venue: str = "",
+    ) -> Optional[Tuple[str, Dict[str, Any]]]:
+        strategy = str(strategy_id).strip()
+        symbol_token = str(symbol).strip()
+        venue_token = str(venue).strip()
+        if not strategy:
+            return None
+
+        if venue_token and symbol_token:
+            key = (strategy, venue_token, symbol_token)
+            if key in self._disabled_strategy_venue_symbols:
+                return "strategy_venue_symbol", self._disabled_strategy_venue_symbols[key]
+
+        if venue_token:
+            key = (strategy, venue_token)
+            if key in self._disabled_strategy_venues:
+                return "strategy_venue", self._disabled_strategy_venues[key]
+
+        if symbol_token:
+            key = (strategy, symbol_token)
+            if key in self._disabled_strategy_symbols:
+                return "strategy_symbol", self._disabled_strategy_symbols[key]
+
+        if strategy in self._disabled_strategies:
+            return "strategy", self._disabled_strategies[strategy]
+        return None
 
     def _prune_allocation_events(self, *, now: datetime) -> None:
         if self.allocation_lookback_seconds <= 0:
@@ -907,12 +1013,18 @@ class RiskAwareRouter:
 
         self._load_strategy_disable_list()
         strategy_id = str(order.strategy_id)
-        if strategy_id in self._disabled_strategies:
+        scoped_disable = self._find_disable_scope(
+            strategy_id=strategy_id,
+            symbol=str(order.symbol),
+        )
+        if scoped_disable is not None:
             self._strategy_disable_rejects += 1
             self.reject_count += 1
-            details = self._disabled_strategies.get(strategy_id, {})
+            scope, details = scoped_disable
             audit_entry["rejected"] = True
-            audit_entry["reject_reason"] = f"STRATEGY_DISABLED_NEGATIVE_NET_ALPHA: {strategy_id}"
+            audit_entry["reject_reason"] = (
+                f"STRATEGY_DISABLED_NEGATIVE_NET_ALPHA[{scope}]: {strategy_id}"
+            )
             audit_entry["strategy_disable"] = details
             self.audit_log.append(audit_entry)
             return OrderResult(
@@ -993,12 +1105,15 @@ class RiskAwareRouter:
             order.symbol,
             requested_quantity,
             market_data,
+            strategy_id=strategy_id,
         )
         order.quantity = float(throttled_qty)
         audit_entry["regime_overlay"] = {
             "regime": regime_decision.regime,
             "reason": regime_decision.reason,
             "multiplier": regime_decision.multiplier,
+            "strategy_multiplier": regime_decision.strategy_multiplier,
+            "strategy_blocked": bool(regime_decision.strategy_blocked),
             "requested_quantity": requested_quantity,
             "approved_quantity": float(order.quantity),
         }
@@ -1006,6 +1121,33 @@ class RiskAwareRouter:
             self.reject_count += 1
             audit_entry["rejected"] = True
             audit_entry["reject_reason"] = "REGIME_OVERLAY: quantity throttled to zero"
+            self.audit_log.append(audit_entry)
+            return OrderResult(
+                success=False,
+                decision=RiskDecision.HALT,
+                risk_state=None,
+                order_id=None,
+                exchange=None,
+                rejected_reason=audit_entry["reject_reason"],
+                audit_log=audit_entry,
+            )
+
+        confidence_decision = self.confidence_allocator.evaluate(
+            strategy_id=str(strategy_id),
+            tca_db=self.tca_db,
+            prediction_profile=str(self.prediction_profile),
+        )
+        confidence_requested_quantity = float(order.quantity)
+        order.quantity = float(order.quantity) * float(confidence_decision.multiplier)
+        audit_entry["confidence_allocator"] = {
+            **confidence_decision.to_dict(),
+            "requested_quantity": confidence_requested_quantity,
+            "approved_quantity": float(order.quantity),
+        }
+        if order.quantity <= 0:
+            self.reject_count += 1
+            audit_entry["rejected"] = True
+            audit_entry["reject_reason"] = "CONFIDENCE_ALLOCATOR: quantity throttled to zero"
             self.audit_log.append(audit_entry)
             return OrderResult(
                 success=False,
@@ -1211,6 +1353,32 @@ class RiskAwareRouter:
             self.reject_count += 1
             audit_entry["rejected"] = True
             audit_entry["reject_reason"] = f"DEGRADED_VENUE_NO_FAILOVER: {route.exchange}"
+            self.audit_log.append(audit_entry)
+            return OrderResult(
+                success=False,
+                decision=RiskDecision.HALT,
+                risk_state=risk_state,
+                order_id=None,
+                exchange=route.exchange,
+                rejected_reason=audit_entry["reject_reason"],
+                audit_log=audit_entry,
+            )
+
+        scoped_disable = self._find_disable_scope(
+            strategy_id=strategy_id,
+            symbol=str(order.symbol),
+            venue=str(route.exchange),
+        )
+        if scoped_disable is not None:
+            self._strategy_disable_rejects += 1
+            self.reject_count += 1
+            scope, details = scoped_disable
+            audit_entry["rejected"] = True
+            audit_entry["reject_reason"] = (
+                "STRATEGY_DISABLED_NEGATIVE_NET_ALPHA"
+                f"[{scope}]: strategy={strategy_id} venue={route.exchange} symbol={order.symbol}"
+            )
+            audit_entry["strategy_disable"] = details
             self.audit_log.append(audit_entry)
             return OrderResult(
                 success=False,
@@ -1676,10 +1844,9 @@ class RiskAwareRouter:
                 )
                 blend = float(self.broker_config.get("paper_prediction_blend", 1.0))
                 blend = max(0.0, min(blend, 1.0))
-                predicted_slippage_bps = (
-                    (1.0 - blend) * float(predicted_slippage_bps)
-                    + blend * float(paper_expected_slippage_bps)
-                )
+                predicted_slippage_bps = (1.0 - blend) * float(
+                    predicted_slippage_bps
+                ) + blend * float(paper_expected_slippage_bps)
                 predicted_total_bps = predicted_slippage_bps + predicted_commission_bps
             except Exception as exc:
                 logger.debug("Paper slippage estimate unavailable for %s: %s", order_id, exc)
@@ -1698,6 +1865,28 @@ class RiskAwareRouter:
         realized_total_bps = realized_slippage_bps + realized_commission_bps
 
         realized_notional = float(fill.executed_price) * float(fill.executed_qty)
+        microstructure_features = extract_microstructure_features(
+            order_book=order_book,
+            reference_price=float(reference_price),
+            side=str(order.side),
+            requested_qty=float(order.quantity),
+            queue_ahead_qty=float(queue_ahead_qty),
+        )
+        expected_gross_alpha_usd = realized_notional * float(expected_alpha_bps) / 10000.0
+        realized_commission_cost_usd = realized_notional * float(realized_commission_bps) / 10000.0
+        realized_slippage_cost_usd = realized_notional * float(realized_slippage_bps) / 10000.0
+        realized_net_alpha_usd = (
+            expected_gross_alpha_usd - realized_commission_cost_usd - realized_slippage_cost_usd
+        )
+        spread_capture_proxy_usd = 0.0
+        if route.order_type == OrderType.LIMIT and spread_bps > 0.0:
+            spread_capture_proxy_usd = realized_notional * (float(spread_bps) / 2.0) / 10000.0
+        adverse_selection_proxy_usd = (
+            realized_notional
+            * max(float(realized_slippage_bps) - float(predicted_slippage_bps), 0.0)
+            / 10000.0
+        )
+        inventory_carry_proxy_usd = 0.0
         record = TCATradeRecord(
             trade_id=order_id,
             timestamp=fill.timestamp,
@@ -1719,6 +1908,13 @@ class RiskAwareRouter:
             strategy_id=str(order.strategy_id),
             expected_alpha_bps=float(expected_alpha_bps),
             prediction_profile=str(self.prediction_profile),
+            expected_gross_alpha_usd=float(expected_gross_alpha_usd),
+            realized_commission_cost_usd=float(realized_commission_cost_usd),
+            realized_slippage_cost_usd=float(realized_slippage_cost_usd),
+            realized_net_alpha_usd=float(realized_net_alpha_usd),
+            spread_capture_proxy_usd=float(spread_capture_proxy_usd),
+            adverse_selection_proxy_usd=float(adverse_selection_proxy_usd),
+            inventory_carry_proxy_usd=float(inventory_carry_proxy_usd),
         )
         self.tca_db.add_record(record)
         self.tca_db.save()
@@ -1732,6 +1928,16 @@ class RiskAwareRouter:
             "strategy_id": str(order.strategy_id),
             "expected_alpha_bps": float(expected_alpha_bps),
             "realized_net_alpha_bps": realized_net_alpha_bps,
+            "pnl_budget": {
+                "expected_gross_alpha_usd": float(expected_gross_alpha_usd),
+                "realized_commission_cost_usd": float(realized_commission_cost_usd),
+                "realized_slippage_cost_usd": float(realized_slippage_cost_usd),
+                "realized_net_alpha_usd": float(realized_net_alpha_usd),
+                "spread_capture_proxy_usd": float(spread_capture_proxy_usd),
+                "adverse_selection_proxy_usd": float(adverse_selection_proxy_usd),
+                "inventory_carry_proxy_usd": float(inventory_carry_proxy_usd),
+            },
+            "microstructure_features": microstructure_features,
         }
         logger.info(
             "TCA %s %s@%s strategy=%s: predicted_slip=%.3f bps realized_slip=%.3f bps net_alpha=%.3f bps",
@@ -1750,6 +1956,8 @@ class RiskAwareRouter:
             "realized_total_bps": realized_total_bps,
             "expected_alpha_bps": float(expected_alpha_bps),
             "realized_net_alpha_bps": realized_net_alpha_bps,
+            "impact_proxy_bps": float(microstructure_features.get("impact_proxy_bps", 0.0)),
+            "queue_turnover": float(microstructure_features.get("queue_turnover", 0.0)),
         }
 
     def _create_token(self) -> "_RouterToken":
@@ -2349,6 +2557,11 @@ class RiskAwareRouter:
                 "rate_limit_denials_by_endpoint": dict(self._rate_limit_denials),
                 "strategy_disable_rejects": int(self._strategy_disable_rejects),
                 "disabled_strategies_count": int(len(self._disabled_strategies)),
+                "disabled_strategy_venues_count": int(len(self._disabled_strategy_venues)),
+                "disabled_strategy_symbols_count": int(len(self._disabled_strategy_symbols)),
+                "disabled_strategy_venue_symbols_count": int(
+                    len(self._disabled_strategy_venue_symbols)
+                ),
             },
             "allocation_controls": {
                 "enabled": bool(self.allocation_controls_enabled),
@@ -2358,6 +2571,13 @@ class RiskAwareRouter:
                     self.default_strategy_allocation_cap_pct
                 ),
                 "default_max_venue_allocation_pct": float(self.default_venue_allocation_cap_pct),
+            },
+            "confidence_allocator": {
+                "enabled": bool(self.confidence_allocator.enabled),
+                "lookback_days": int(self.confidence_allocator.lookback_days),
+                "min_samples": int(self.confidence_allocator.min_samples),
+                "min_multiplier": float(self.confidence_allocator.min_multiplier),
+                "max_multiplier": float(self.confidence_allocator.max_multiplier),
             },
         }
 

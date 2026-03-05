@@ -24,6 +24,7 @@ def test_parse_switch_overrides_accepts_aliases_and_boolean_tokens():
             "routing_failover=off",
             "slippage_stress=false",
             "md_resilience=1",
+            "confidence=on",
         ]
     )
 
@@ -31,6 +32,7 @@ def test_parse_switch_overrides_accepts_aliases_and_boolean_tokens():
     assert overrides["routing_failover"] is False
     assert overrides["slippage_stress_model"] is False
     assert overrides["market_data_resilience"] is True
+    assert overrides["confidence_allocator"] is True
 
 
 def test_parse_switch_overrides_rejects_invalid_entries():
@@ -48,6 +50,8 @@ def test_resolve_mechanism_switches_uses_config_defaults_then_overrides():
             "capacity_curves": {"enabled": False},
             "allocation_controls": {"enabled": True},
             "regime_overlay": {"enabled": True},
+            "maker_urgency_ladder": {"enabled": True},
+            "confidence_allocator": {"enabled": False},
             "shorting_controls": {"enabled": False},
             "market_data_resilience": {"enabled": True},
             "reliability": {"enable_failover": True},
@@ -72,6 +76,8 @@ def test_resolve_mechanism_switches_uses_config_defaults_then_overrides():
     assert resolved["allocation_controls"] is False
     assert resolved["market_data_resilience"] is False
     assert resolved["routing_failover"] is True
+    assert resolved["maker_urgency_ladder"] is True
+    assert resolved["confidence_allocator"] is False
 
 
 def test_apply_mechanism_switches_materializes_execution_paths():
@@ -88,4 +94,6 @@ def test_apply_mechanism_switches_materializes_execution_paths():
     assert execution["regime_overlay"]["enabled"] is False
     assert execution["shorting_controls"]["enabled"] is True
     assert execution["tca_calibration"]["enabled"] is False
+    assert execution["maker_urgency_ladder"]["enabled"] is True
+    assert execution["confidence_allocator"]["enabled"] is False
     assert switched["mechanism_switches"]["shorting_controls"] is True

@@ -5,6 +5,7 @@ from __future__ import annotations
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, Iterable, List
 
+import numpy as np
 import pandas as pd
 
 from execution.tca_feedback import TCADatabase
@@ -17,8 +18,20 @@ def _empty_summary() -> Dict[str, Any]:
         "avg_expected_alpha_bps": 0.0,
         "avg_realized_cost_bps": 0.0,
         "avg_realized_net_alpha_bps": 0.0,
+        "std_realized_net_alpha_bps": 0.0,
+        "stderr_realized_net_alpha_bps": 0.0,
+        "ci95_lower_realized_net_alpha_bps": 0.0,
+        "ci95_upper_realized_net_alpha_bps": 0.0,
+        "p05_realized_net_alpha_bps": 0.0,
         "estimated_predicted_pnl_usd": 0.0,
         "estimated_realized_pnl_usd": 0.0,
+        "expected_gross_alpha_usd": 0.0,
+        "realized_commission_cost_usd": 0.0,
+        "realized_slippage_cost_usd": 0.0,
+        "realized_net_alpha_usd": 0.0,
+        "spread_capture_proxy_usd": 0.0,
+        "adverse_selection_proxy_usd": 0.0,
+        "inventory_carry_proxy_usd": 0.0,
         "slippage_mape_pct": 0.0,
     }
 
@@ -66,6 +79,13 @@ class RevenueDiagnostics:
             "predicted_slippage_bps",
             "realized_slippage_bps",
             "expected_alpha_bps",
+            "expected_gross_alpha_usd",
+            "realized_commission_cost_usd",
+            "realized_slippage_cost_usd",
+            "realized_net_alpha_usd",
+            "spread_capture_proxy_usd",
+            "adverse_selection_proxy_usd",
+            "inventory_carry_proxy_usd",
         )
         for col in numeric_columns:
             if col in df.columns:
@@ -75,6 +95,20 @@ class RevenueDiagnostics:
         df["realized_net_alpha_bps"] = df["expected_alpha_bps"] - df["realized_total_bps"]
         df["predicted_pnl_usd"] = df["notional"] * df["predicted_net_alpha_bps"] / 10000.0
         df["realized_pnl_usd"] = df["notional"] * df["realized_net_alpha_bps"] / 10000.0
+        if "expected_gross_alpha_usd" not in df.columns:
+            df["expected_gross_alpha_usd"] = 0.0
+        if "realized_commission_cost_usd" not in df.columns:
+            df["realized_commission_cost_usd"] = 0.0
+        if "realized_slippage_cost_usd" not in df.columns:
+            df["realized_slippage_cost_usd"] = 0.0
+        if "realized_net_alpha_usd" not in df.columns:
+            df["realized_net_alpha_usd"] = df["realized_pnl_usd"]
+        if "spread_capture_proxy_usd" not in df.columns:
+            df["spread_capture_proxy_usd"] = 0.0
+        if "adverse_selection_proxy_usd" not in df.columns:
+            df["adverse_selection_proxy_usd"] = 0.0
+        if "inventory_carry_proxy_usd" not in df.columns:
+            df["inventory_carry_proxy_usd"] = 0.0
         denom = df["realized_slippage_bps"].abs().replace(0.0, 1e-6)
         df["slippage_ape_pct"] = (
             (df["predicted_slippage_bps"] - df["realized_slippage_bps"]).abs() / denom
@@ -94,14 +128,34 @@ class RevenueDiagnostics:
         frame = self._frame(lookback_days=lookback_days, prediction_profile=prediction_profile)
         if frame.empty:
             return _empty_summary()
+        realized_net_alpha = pd.to_numeric(frame["realized_net_alpha_bps"], errors="coerce").fillna(
+            0.0
+        )
+        n = int(len(realized_net_alpha))
+        mean = float(realized_net_alpha.mean())
+        std = float(realized_net_alpha.std(ddof=1)) if n > 1 else 0.0
+        stderr = float(std / np.sqrt(n)) if n > 1 else 0.0
+        ci_margin = 1.96 * stderr
         return {
             "trades": int(len(frame)),
             "notional_usd": float(frame["notional"].sum()),
             "avg_expected_alpha_bps": float(frame["expected_alpha_bps"].mean()),
             "avg_realized_cost_bps": float(frame["realized_total_bps"].mean()),
-            "avg_realized_net_alpha_bps": float(frame["realized_net_alpha_bps"].mean()),
+            "avg_realized_net_alpha_bps": mean,
+            "std_realized_net_alpha_bps": std,
+            "stderr_realized_net_alpha_bps": stderr,
+            "ci95_lower_realized_net_alpha_bps": float(mean - ci_margin),
+            "ci95_upper_realized_net_alpha_bps": float(mean + ci_margin),
+            "p05_realized_net_alpha_bps": float(realized_net_alpha.quantile(0.05)),
             "estimated_predicted_pnl_usd": float(frame["predicted_pnl_usd"].sum()),
             "estimated_realized_pnl_usd": float(frame["realized_pnl_usd"].sum()),
+            "expected_gross_alpha_usd": float(frame["expected_gross_alpha_usd"].sum()),
+            "realized_commission_cost_usd": float(frame["realized_commission_cost_usd"].sum()),
+            "realized_slippage_cost_usd": float(frame["realized_slippage_cost_usd"].sum()),
+            "realized_net_alpha_usd": float(frame["realized_net_alpha_usd"].sum()),
+            "spread_capture_proxy_usd": float(frame["spread_capture_proxy_usd"].sum()),
+            "adverse_selection_proxy_usd": float(frame["adverse_selection_proxy_usd"].sum()),
+            "inventory_carry_proxy_usd": float(frame["inventory_carry_proxy_usd"].sum()),
             "slippage_mape_pct": float(frame["slippage_ape_pct"].mean()),
         }
 

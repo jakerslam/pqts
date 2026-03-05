@@ -11,6 +11,8 @@ class RegimeDecision:
     regime: str
     multiplier: float
     reason: str
+    strategy_multiplier: float = 1.0
+    strategy_blocked: bool = False
 
 
 class RegimeExposureOverlay:
@@ -26,6 +28,22 @@ class RegimeExposureOverlay:
         self.high_vol_multiplier = float(cfg.get("high_vol_multiplier", 0.7))
         self.low_liquidity_multiplier = float(cfg.get("low_liquidity_multiplier", 0.5))
         self.crisis_multiplier = float(cfg.get("crisis_multiplier", 0.25))
+        strategy_mult_cfg = cfg.get("strategy_multipliers", {}) or {}
+        self.strategy_multipliers: Dict[str, Dict[str, float]] = {}
+        for regime, regime_values in dict(strategy_mult_cfg).items():
+            if not isinstance(regime_values, dict):
+                continue
+            self.strategy_multipliers[str(regime)] = {
+                str(strategy_id): float(multiplier)
+                for strategy_id, multiplier in regime_values.items()
+            }
+        disabled_cfg = cfg.get("disabled_strategies_by_regime", {}) or {}
+        self.disabled_strategies_by_regime: Dict[str, set[str]] = {}
+        for regime, values in dict(disabled_cfg).items():
+            items = values if isinstance(values, (list, tuple, set)) else [values]
+            self.disabled_strategies_by_regime[str(regime)] = {
+                str(item).strip() for item in items if str(item).strip()
+            }
 
     def classify(self, symbol: str, market_data: Dict) -> RegimeDecision:
         if not bool(self.enabled):
@@ -53,9 +71,38 @@ class RegimeExposureOverlay:
             return RegimeDecision("high_vol", self.high_vol_multiplier, "high_spread")
         return RegimeDecision("normal", self.normal_multiplier, "within_limits")
 
+    def strategy_adjustment(self, *, regime: str, strategy_id: str) -> Tuple[float, bool, str]:
+        strategy_token = str(strategy_id or "").strip()
+        if not strategy_token:
+            return 1.0, False, "strategy_unspecified"
+        blocked = strategy_token in self.disabled_strategies_by_regime.get(str(regime), set())
+        if blocked:
+            return 0.0, True, "strategy_blocked_for_regime"
+        regime_map = self.strategy_multipliers.get(str(regime), {})
+        multiplier = float(regime_map.get(strategy_token, 1.0))
+        return max(multiplier, 0.0), False, "strategy_regime_multiplier"
+
     def throttle_quantity(
-        self, symbol: str, quantity: float, market_data: Dict
+        self,
+        symbol: str,
+        quantity: float,
+        market_data: Dict,
+        *,
+        strategy_id: str = "",
     ) -> Tuple[float, RegimeDecision]:
         decision = self.classify(symbol, market_data)
-        adjusted = float(quantity) * float(decision.multiplier)
-        return max(adjusted, 0.0), decision
+        strategy_multiplier, strategy_blocked, strategy_reason = self.strategy_adjustment(
+            regime=decision.regime,
+            strategy_id=strategy_id,
+        )
+        adjusted = float(quantity) * float(decision.multiplier) * float(strategy_multiplier)
+        reason = decision.reason
+        if strategy_id:
+            reason = f"{decision.reason};{strategy_reason}"
+        return max(adjusted, 0.0), RegimeDecision(
+            regime=decision.regime,
+            multiplier=decision.multiplier,
+            reason=reason,
+            strategy_multiplier=float(strategy_multiplier),
+            strategy_blocked=bool(strategy_blocked),
+        )

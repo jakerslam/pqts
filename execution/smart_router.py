@@ -79,8 +79,59 @@ class SmartOrderRouter:
             default_maker_fee_bps=float(config.get("default_maker_fee_bps", 10.0)),
             default_taker_fee_bps=float(config.get("default_taker_fee_bps", 12.0)),
         )
+        maker_ladder_cfg = config.get("maker_urgency_ladder", {}) or {}
+        self.maker_urgency_ladder_enabled = bool(maker_ladder_cfg.get("enabled", True))
+        raw_thresholds = maker_ladder_cfg.get("urgency_alpha_thresholds_bps", {}) or {}
+        self.maker_ladder_thresholds_bps = {
+            "normal": float(raw_thresholds.get("normal", 2.0)),
+            "urgent": float(raw_thresholds.get("urgent", 0.5)),
+        }
+        self.maker_ladder_cost_buffer_bps = float(
+            maker_ladder_cfg.get("incremental_cost_buffer_bps", 0.5)
+        )
 
         logger.info(f"SmartOrderRouter initialized")
+
+    @staticmethod
+    def _urgency_bucket(time_in_force: str) -> str:
+        token = str(time_in_force or "").upper().strip()
+        if token in {"IOC", "FOK"}:
+            return "urgent"
+        return "normal"
+
+    def _maker_ladder_decision(
+        self,
+        *,
+        request: OrderRequest,
+        exchange: str,
+        spread_bps: float,
+    ) -> Optional[OrderType]:
+        if not bool(self.maker_urgency_ladder_enabled):
+            return None
+        monthly_volume = float(
+            self.monthly_volume_by_venue.get(exchange, self.default_monthly_volume_usd)
+        )
+        maker_fee = self.fee_optimizer.effective_fee_bps(
+            exchange,
+            is_maker=True,
+            monthly_volume_usd=monthly_volume,
+        )
+        taker_fee = self.fee_optimizer.effective_fee_bps(
+            exchange,
+            is_maker=False,
+            monthly_volume_usd=monthly_volume,
+        )
+        incremental_cross_cost_bps = (
+            max(float(spread_bps), 0.0)
+            + max(float(taker_fee) - float(maker_fee), 0.0)
+            + float(self.maker_ladder_cost_buffer_bps)
+        )
+        urgency = self._urgency_bucket(request.time_in_force)
+        threshold = float(self.maker_ladder_thresholds_bps.get(urgency, 0.0))
+        required_alpha_bps = float(incremental_cross_cost_bps + threshold)
+        if float(request.expected_alpha_bps) >= required_alpha_bps:
+            return OrderType.MARKET
+        return OrderType.LIMIT
 
     async def route_order(self, request: OrderRequest, market_data: Dict) -> RouteDecision:
         """Determine optimal routing for order"""
@@ -197,6 +248,15 @@ class SmartOrderRouter:
         if request.quantity > self.max_single_order_size:
             return OrderType.TWAP
 
+        spread_bps = self._get_spread_for_venue(exchange, request.symbol, market_data) * 10000.0
+        maker_ladder_decision = self._maker_ladder_decision(
+            request=request,
+            exchange=exchange,
+            spread_bps=spread_bps,
+        )
+        if maker_ladder_decision is not None:
+            return maker_ladder_decision
+
         # If we can get filled as maker, use limit
         if self.prefer_maker and request.price:
             current_price = self._get_current_price(request.symbol, market_data)
@@ -210,7 +270,6 @@ class SmartOrderRouter:
         if request.time_in_force == "IOC":
             return OrderType.MARKET
 
-        spread_bps = self._get_spread_for_venue(exchange, request.symbol, market_data) * 10000.0
         monthly_volume = float(
             self.monthly_volume_by_venue.get(exchange, self.default_monthly_volume_usd)
         )

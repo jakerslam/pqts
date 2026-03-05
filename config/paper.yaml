@@ -175,6 +175,23 @@ risk:
 execution:
   reliability:
     enable_failover: true
+  maker_urgency_ladder:
+    enabled: true
+    urgency_alpha_thresholds_bps:
+      normal: 2.0
+      urgent: 0.5
+    incremental_cost_buffer_bps: 0.5
+  confidence_allocator:
+    enabled: false
+    lookback_days: 30
+    min_samples: 40
+    min_multiplier: 0.25
+    max_multiplier: 1.5
+    neutral_multiplier: 1.0
+    z_score: 1.96
+    target_lower_bps: 2.0
+    response_slope: 0.5
+    hard_floor_on_negative_lower: true
   tca_calibration:
     enabled: true
   paper_prediction_blend: 1.0
@@ -193,6 +210,8 @@ mechanism_switches:
   capacity_curves: false
   allocation_controls: false
   regime_overlay: true
+  maker_urgency_ladder: true
+  confidence_allocator: false
   shorting_controls: false
   market_data_resilience: true
   tca_calibration_feedback: true

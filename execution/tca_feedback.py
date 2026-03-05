@@ -85,6 +85,13 @@ class TCATradeRecord:
     strategy_id: str = "unknown"
     expected_alpha_bps: float = 0.0
     prediction_profile: str = "unknown"
+    expected_gross_alpha_usd: float = 0.0
+    realized_commission_cost_usd: float = 0.0
+    realized_slippage_cost_usd: float = 0.0
+    realized_net_alpha_usd: float = 0.0
+    spread_capture_proxy_usd: float = 0.0
+    adverse_selection_proxy_usd: float = 0.0
+    inventory_carry_proxy_usd: float = 0.0
 
     @property
     def slippage_error(self) -> float:
@@ -164,6 +171,17 @@ class TCADatabase:
             prediction_profile = payload.get("prediction_profile", "unknown")
             if pd.isna(prediction_profile) or str(prediction_profile).strip() == "":
                 prediction_profile = "unknown"
+            for key in (
+                "expected_gross_alpha_usd",
+                "realized_commission_cost_usd",
+                "realized_slippage_cost_usd",
+                "realized_net_alpha_usd",
+                "spread_capture_proxy_usd",
+                "adverse_selection_proxy_usd",
+                "inventory_carry_proxy_usd",
+            ):
+                value = payload.get(key, 0.0)
+                payload[key] = 0.0 if pd.isna(value) else float(value)
             payload["strategy_id"] = str(strategy_id)
             payload["expected_alpha_bps"] = float(expected_alpha_bps)
             payload["prediction_profile"] = str(prediction_profile)
@@ -195,6 +213,13 @@ class TCADatabase:
                     "strategy_id": record.strategy_id,
                     "expected_alpha_bps": record.expected_alpha_bps,
                     "prediction_profile": record.prediction_profile,
+                    "expected_gross_alpha_usd": record.expected_gross_alpha_usd,
+                    "realized_commission_cost_usd": record.realized_commission_cost_usd,
+                    "realized_slippage_cost_usd": record.realized_slippage_cost_usd,
+                    "realized_net_alpha_usd": record.realized_net_alpha_usd,
+                    "spread_capture_proxy_usd": record.spread_capture_proxy_usd,
+                    "adverse_selection_proxy_usd": record.adverse_selection_proxy_usd,
+                    "inventory_carry_proxy_usd": record.inventory_carry_proxy_usd,
                 }
             )
         return pd.DataFrame(rows)
@@ -404,9 +429,7 @@ class TCACalibrator:
         status = "ok"
         if mape > self.alert_threshold_pct:
             status = "alert"
-            alerts.append(
-                f"MAPE {mape:.2f}% exceeds threshold {self.alert_threshold_pct:.2f}%"
-            )
+            alerts.append(f"MAPE {mape:.2f}% exceeds threshold {self.alert_threshold_pct:.2f}%")
         analysis: Dict[str, Any] = {
             "symbol": symbol,
             "exchange": exchange,

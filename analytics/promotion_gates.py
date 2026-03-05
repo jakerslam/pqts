@@ -21,9 +21,16 @@ class PromotionGateThresholds:
     min_purged_cv_sharpe: float = 1.0
     min_walk_forward_sharpe: float = 1.0
     min_deflated_sharpe: float = 0.8
+    min_parameter_stability_score: float = 0.55
+    min_regime_robustness_score: float = 0.55
+    min_realized_net_alpha_bps: float = 0.0
+    min_ci95_lower_realized_net_alpha_bps: float = 0.0
     require_purged_cv_passed: bool = True
     require_walk_forward_passed: bool = True
     require_deflated_sharpe_passed: bool = True
+    require_parameter_stability_passed: bool = True
+    require_regime_robustness_passed: bool = True
+    require_net_alpha_confidence_passed: bool = True
 
 
 def evaluate_promotion_gate(
@@ -53,6 +60,24 @@ def evaluate_promotion_gate(
     purged_cv_sharpe = float(validation.get("purged_cv_sharpe", 0.0))
     walk_forward_sharpe = float(validation.get("walk_forward_sharpe", 0.0))
     deflated_sharpe = float(validation.get("deflated_sharpe", 0.0))
+    parameter_stability_score = float(
+        validation.get(
+            "parameter_stability_score",
+            validation.get("walk_forward_consistency", 1.0),
+        )
+    )
+    regime_robustness_score = float(
+        validation.get(
+            "regime_robustness_score",
+            validation.get("walk_forward_consistency", 1.0),
+        )
+    )
+    avg_realized_net_alpha_bps = float(
+        (revenue_summary or {}).get("avg_realized_net_alpha_bps", 0.0)
+    )
+    ci95_lower_realized_net_alpha_bps = float(
+        (revenue_summary or {}).get("ci95_lower_realized_net_alpha_bps", avg_realized_net_alpha_bps)
+    )
     purged_cv_passed = bool(
         validation.get("purged_cv_passed", purged_cv_sharpe >= float(gate.min_purged_cv_sharpe))
     )
@@ -68,7 +93,23 @@ def evaluate_promotion_gate(
             deflated_sharpe >= float(gate.min_deflated_sharpe),
         )
     )
+    parameter_stability_passed = bool(
+        validation.get(
+            "parameter_stability_passed",
+            parameter_stability_score >= float(gate.min_parameter_stability_score),
+        )
+    )
+    regime_robustness_passed = bool(
+        validation.get(
+            "regime_robustness_passed",
+            regime_robustness_score >= float(gate.min_regime_robustness_score),
+        )
+    )
     paper_track_record_passed = bool(readiness.get("ready_for_canary", False))
+    net_alpha_confidence_passed = bool(
+        (avg_realized_net_alpha_bps >= float(gate.min_realized_net_alpha_bps))
+        and (ci95_lower_realized_net_alpha_bps >= float(gate.min_ci95_lower_realized_net_alpha_bps))
+    )
 
     checks = {
         "min_days": trading_days >= int(gate.min_days),
@@ -83,12 +124,29 @@ def evaluate_promotion_gate(
         "purged_cv_sharpe": purged_cv_sharpe >= float(gate.min_purged_cv_sharpe),
         "walk_forward_sharpe": walk_forward_sharpe >= float(gate.min_walk_forward_sharpe),
         "deflated_sharpe": deflated_sharpe >= float(gate.min_deflated_sharpe),
+        "parameter_stability_score": parameter_stability_score
+        >= float(gate.min_parameter_stability_score),
+        "regime_robustness_score": regime_robustness_score
+        >= float(gate.min_regime_robustness_score),
+        "realized_net_alpha_bps": avg_realized_net_alpha_bps
+        >= float(gate.min_realized_net_alpha_bps),
+        "realized_net_alpha_ci95_lower_bps": ci95_lower_realized_net_alpha_bps
+        >= float(gate.min_ci95_lower_realized_net_alpha_bps),
         "purged_cv_passed": purged_cv_passed if bool(gate.require_purged_cv_passed) else True,
         "walk_forward_passed": (
             walk_forward_passed if bool(gate.require_walk_forward_passed) else True
         ),
         "deflated_sharpe_passed": (
             deflated_sharpe_passed if bool(gate.require_deflated_sharpe_passed) else True
+        ),
+        "parameter_stability_passed": (
+            parameter_stability_passed if bool(gate.require_parameter_stability_passed) else True
+        ),
+        "regime_robustness_passed": (
+            regime_robustness_passed if bool(gate.require_regime_robustness_passed) else True
+        ),
+        "net_alpha_confidence_passed": (
+            net_alpha_confidence_passed if bool(gate.require_net_alpha_confidence_passed) else True
         ),
     }
 
@@ -106,9 +164,16 @@ def evaluate_promotion_gate(
             "purged_cv_sharpe",
             "walk_forward_sharpe",
             "deflated_sharpe",
+            "parameter_stability_score",
+            "regime_robustness_score",
+            "realized_net_alpha_bps",
+            "realized_net_alpha_ci95_lower_bps",
             "purged_cv_passed",
             "walk_forward_passed",
             "deflated_sharpe_passed",
+            "parameter_stability_passed",
+            "regime_robustness_passed",
+            "net_alpha_confidence_passed",
         )
     ):
         decision = "promote_to_live_canary"
@@ -131,9 +196,16 @@ def evaluate_promotion_gate(
             "purged_cv_sharpe": purged_cv_sharpe,
             "walk_forward_sharpe": walk_forward_sharpe,
             "deflated_sharpe": deflated_sharpe,
+            "parameter_stability_score": parameter_stability_score,
+            "regime_robustness_score": regime_robustness_score,
             "purged_cv_passed": purged_cv_passed,
             "walk_forward_passed": walk_forward_passed,
             "deflated_sharpe_passed": deflated_sharpe_passed,
+            "avg_realized_net_alpha_bps": avg_realized_net_alpha_bps,
+            "ci95_lower_realized_net_alpha_bps": ci95_lower_realized_net_alpha_bps,
+            "parameter_stability_passed": parameter_stability_passed,
+            "regime_robustness_passed": regime_robustness_passed,
+            "net_alpha_confidence_passed": net_alpha_confidence_passed,
         },
         "thresholds": asdict(gate),
     }

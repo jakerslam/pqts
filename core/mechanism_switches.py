@@ -11,6 +11,8 @@ SWITCH_KEYS: tuple[str, ...] = (
     "capacity_curves",
     "allocation_controls",
     "regime_overlay",
+    "maker_urgency_ladder",
+    "confidence_allocator",
     "shorting_controls",
     "market_data_resilience",
     "tca_calibration_feedback",
@@ -26,6 +28,12 @@ _ALIASES: Dict[str, str] = {
     "allocation": "allocation_controls",
     "regime_overlay": "regime_overlay",
     "regime": "regime_overlay",
+    "maker_urgency_ladder": "maker_urgency_ladder",
+    "maker_ladder": "maker_urgency_ladder",
+    "urgency_ladder": "maker_urgency_ladder",
+    "confidence_allocator": "confidence_allocator",
+    "confidence_alloc": "confidence_allocator",
+    "confidence": "confidence_allocator",
     "shorting_controls": "shorting_controls",
     "shorting": "shorting_controls",
     "market_data_resilience": "market_data_resilience",
@@ -89,6 +97,8 @@ def _switch_defaults(config: Mapping[str, Any]) -> Dict[str, bool]:
     capacity_cfg = execution_cfg.get("capacity_curves", {})
     allocation_cfg = execution_cfg.get("allocation_controls", {})
     regime_cfg = execution_cfg.get("regime_overlay", {})
+    maker_ladder_cfg = execution_cfg.get("maker_urgency_ladder", {})
+    confidence_alloc_cfg = execution_cfg.get("confidence_allocator", {})
     shorting_cfg = execution_cfg.get("shorting_controls", {})
     md_resilience_cfg = execution_cfg.get("market_data_resilience", {})
     tca_calibration_cfg = execution_cfg.get("tca_calibration", {})
@@ -102,6 +112,10 @@ def _switch_defaults(config: Mapping[str, Any]) -> Dict[str, bool]:
         allocation_cfg = {}
     if not isinstance(regime_cfg, Mapping):
         regime_cfg = {}
+    if not isinstance(maker_ladder_cfg, Mapping):
+        maker_ladder_cfg = {}
+    if not isinstance(confidence_alloc_cfg, Mapping):
+        confidence_alloc_cfg = {}
     if not isinstance(shorting_cfg, Mapping):
         shorting_cfg = {}
     if not isinstance(md_resilience_cfg, Mapping):
@@ -116,6 +130,8 @@ def _switch_defaults(config: Mapping[str, Any]) -> Dict[str, bool]:
         "capacity_curves": bool(capacity_cfg.get("enabled", False)),
         "allocation_controls": bool(allocation_cfg.get("enabled", False)),
         "regime_overlay": bool(regime_cfg.get("enabled", True)),
+        "maker_urgency_ladder": bool(maker_ladder_cfg.get("enabled", True)),
+        "confidence_allocator": bool(confidence_alloc_cfg.get("enabled", False)),
         "shorting_controls": bool(shorting_cfg.get("enabled", False)),
         "market_data_resilience": bool(md_resilience_cfg.get("enabled", True)),
         "tca_calibration_feedback": bool(tca_calibration_cfg.get("enabled", True)),
@@ -166,6 +182,8 @@ def apply_mechanism_switches(
     capacity_cfg = _ensure_dict(execution_cfg, "capacity_curves")
     allocation_cfg = _ensure_dict(execution_cfg, "allocation_controls")
     regime_cfg = _ensure_dict(execution_cfg, "regime_overlay")
+    maker_ladder_cfg = _ensure_dict(execution_cfg, "maker_urgency_ladder")
+    confidence_alloc_cfg = _ensure_dict(execution_cfg, "confidence_allocator")
     shorting_cfg = _ensure_dict(execution_cfg, "shorting_controls")
     md_resilience_cfg = _ensure_dict(execution_cfg, "market_data_resilience")
     tca_calibration_cfg = _ensure_dict(execution_cfg, "tca_calibration")
@@ -175,6 +193,8 @@ def apply_mechanism_switches(
     capacity_cfg["enabled"] = bool(state["capacity_curves"])
     allocation_cfg["enabled"] = bool(state["allocation_controls"])
     regime_cfg["enabled"] = bool(state["regime_overlay"])
+    maker_ladder_cfg["enabled"] = bool(state["maker_urgency_ladder"])
+    confidence_alloc_cfg["enabled"] = bool(state["confidence_allocator"])
     shorting_cfg["enabled"] = bool(state["shorting_controls"])
     md_resilience_cfg["enabled"] = bool(state["market_data_resilience"])
     tca_calibration_cfg["enabled"] = bool(state["tca_calibration_feedback"])

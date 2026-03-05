@@ -21,6 +21,14 @@ def _to_float(value: Any) -> float | None:
         return None
 
 
+def _first_float(*values: Any) -> float | None:
+    for value in values:
+        parsed = _to_float(value)
+        if parsed is not None:
+            return parsed
+    return None
+
+
 def _load_json(path: Path) -> Dict[str, Any]:
     payload = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(payload, dict):
@@ -42,6 +50,8 @@ def _build_payload(
     min_purged_cv_sharpe: float,
     min_walk_forward_sharpe: float,
     min_deflated_sharpe: float,
+    min_parameter_stability_score: float,
+    min_regime_robustness_score: float,
     max_expected_alpha_bps: float,
 ) -> Dict[str, Any]:
     validation = report.get("validation", {})
@@ -58,10 +68,30 @@ def _build_payload(
     purged_cv_sharpe = float(_to_float(validation.get("cv_sharpe")) or 0.0)
     walk_forward_sharpe = float(_to_float(validation.get("walk_forward_sharpe")) or 0.0)
     deflated_sharpe = float(_to_float(validation.get("deflated_sharpe")) or 0.0)
+    walk_forward_consistency = float(_to_float(validation.get("walk_forward_consistency")) or 1.0)
+    cv_sharpe_std = float(_to_float(validation.get("cv_sharpe_std")) or 0.0)
+    parameter_stability_score = float(
+        _first_float(
+            validation.get("parameter_stability_score"),
+            validation.get("parameter_stability"),
+            max(min(1.0 / (1.0 + max(cv_sharpe_std, 0.0)), 1.0), 0.0),
+        )
+        or 0.0
+    )
+    regime_robustness_score = float(
+        _first_float(
+            validation.get("regime_robustness_score"),
+            validation.get("regime_robustness"),
+            max(min(walk_forward_consistency, 1.0), 0.0),
+        )
+        or 0.0
+    )
 
     purged_cv_passed = purged_cv_sharpe >= float(min_purged_cv_sharpe)
     walk_forward_passed = walk_forward_sharpe >= float(min_walk_forward_sharpe)
     deflated_sharpe_passed = deflated_sharpe >= float(min_deflated_sharpe)
+    parameter_stability_passed = parameter_stability_score >= float(min_parameter_stability_score)
+    regime_robustness_passed = regime_robustness_score >= float(min_regime_robustness_score)
 
     if "validator" in gate_checks:
         purged_cv_passed = bool(purged_cv_passed and bool(gate_checks.get("validator")))
@@ -72,6 +102,14 @@ def _build_payload(
     if "deflated_sharpe" in gate_checks:
         deflated_sharpe_passed = bool(
             deflated_sharpe_passed and bool(gate_checks.get("deflated_sharpe"))
+        )
+    if "parameter_stability" in gate_checks:
+        parameter_stability_passed = bool(
+            parameter_stability_passed and bool(gate_checks.get("parameter_stability"))
+        )
+    if "regime_robustness" in gate_checks:
+        regime_robustness_passed = bool(
+            regime_robustness_passed and bool(gate_checks.get("regime_robustness"))
         )
 
     extras = report.get("extras", {})
@@ -110,9 +148,13 @@ def _build_payload(
         "purged_cv_sharpe": purged_cv_sharpe,
         "walk_forward_sharpe": walk_forward_sharpe,
         "deflated_sharpe": deflated_sharpe,
+        "parameter_stability_score": parameter_stability_score,
+        "regime_robustness_score": regime_robustness_score,
         "purged_cv_passed": bool(purged_cv_passed),
         "walk_forward_passed": bool(walk_forward_passed),
         "deflated_sharpe_passed": bool(deflated_sharpe_passed),
+        "parameter_stability_passed": bool(parameter_stability_passed),
+        "regime_robustness_passed": bool(regime_robustness_passed),
         "expected_alpha_bps": float(expected_alpha_bps),
     }
 
@@ -122,15 +164,19 @@ def _is_promotable(payload: Dict[str, Any]) -> bool:
         payload.get("purged_cv_passed")
         and payload.get("walk_forward_passed")
         and payload.get("deflated_sharpe_passed")
+        and payload.get("parameter_stability_passed")
+        and payload.get("regime_robustness_passed")
     )
 
 
-def _selection_key(payload: Dict[str, Any]) -> tuple[float, float, float, float]:
+def _selection_key(payload: Dict[str, Any]) -> tuple[float, float, float, float, float, float]:
     return (
         float(payload.get("expected_alpha_bps", 0.0)),
         float(payload.get("deflated_sharpe", 0.0)),
         float(payload.get("walk_forward_sharpe", 0.0)),
         float(payload.get("purged_cv_sharpe", 0.0)),
+        float(payload.get("parameter_stability_score", 0.0)),
+        float(payload.get("regime_robustness_score", 0.0)),
     )
 
 
@@ -140,10 +186,16 @@ def _select_best_report_payload(
     min_purged_cv_sharpe: float,
     min_walk_forward_sharpe: float,
     min_deflated_sharpe: float,
+    min_parameter_stability_score: float,
+    min_regime_robustness_score: float,
     max_expected_alpha_bps: float,
 ) -> tuple[Path, Dict[str, Any], str]:
-    best_promotable: tuple[tuple[float, float, float, float], Path, Dict[str, Any]] | None = None
-    best_fallback: tuple[tuple[float, float, float, float], Path, Dict[str, Any]] | None = None
+    best_promotable: (
+        tuple[tuple[float, float, float, float, float, float], Path, Dict[str, Any]] | None
+    ) = None
+    best_fallback: (
+        tuple[tuple[float, float, float, float, float, float], Path, Dict[str, Any]] | None
+    ) = None
 
     for path in _iter_reports(reports_dir):
         report = _load_json(path)
@@ -153,6 +205,8 @@ def _select_best_report_payload(
             min_purged_cv_sharpe=float(min_purged_cv_sharpe),
             min_walk_forward_sharpe=float(min_walk_forward_sharpe),
             min_deflated_sharpe=float(min_deflated_sharpe),
+            min_parameter_stability_score=float(min_parameter_stability_score),
+            min_regime_robustness_score=float(min_regime_robustness_score),
             max_expected_alpha_bps=float(max_expected_alpha_bps),
         )
         key = _selection_key(payload)
@@ -187,6 +241,8 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--min-purged-cv-sharpe", type=float, default=1.0)
     parser.add_argument("--min-walk-forward-sharpe", type=float, default=1.0)
     parser.add_argument("--min-deflated-sharpe", type=float, default=0.8)
+    parser.add_argument("--min-parameter-stability-score", type=float, default=0.55)
+    parser.add_argument("--min-regime-robustness-score", type=float, default=0.55)
     parser.add_argument("--max-expected-alpha-bps", type=float, default=25.0)
     return parser
 
@@ -202,6 +258,8 @@ def main() -> int:
             min_purged_cv_sharpe=float(args.min_purged_cv_sharpe),
             min_walk_forward_sharpe=float(args.min_walk_forward_sharpe),
             min_deflated_sharpe=float(args.min_deflated_sharpe),
+            min_parameter_stability_score=float(args.min_parameter_stability_score),
+            min_regime_robustness_score=float(args.min_regime_robustness_score),
             max_expected_alpha_bps=float(args.max_expected_alpha_bps),
         )
         selection_mode = "explicit_report"
@@ -211,6 +269,8 @@ def main() -> int:
             min_purged_cv_sharpe=float(args.min_purged_cv_sharpe),
             min_walk_forward_sharpe=float(args.min_walk_forward_sharpe),
             min_deflated_sharpe=float(args.min_deflated_sharpe),
+            min_parameter_stability_score=float(args.min_parameter_stability_score),
+            min_regime_robustness_score=float(args.min_regime_robustness_score),
             max_expected_alpha_bps=float(args.max_expected_alpha_bps),
         )
     payload["selection_mode"] = selection_mode

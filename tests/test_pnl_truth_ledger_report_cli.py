@@ -25,10 +25,16 @@ def test_parser_accepts_disable_thresholds():
             "20",
             "--disable-threshold-net-alpha-usd",
             "-10",
+            "--disable-strategy-venues",
+            "--disable-strategy-symbols",
+            "--disable-strategy-venue-symbols",
             "--strict",
         ]
     )
     assert args.lookback_days == 45
     assert args.min_trades == 20
     assert args.disable_threshold_net_alpha_usd == -10.0
+    assert args.disable_strategy_venues is True
+    assert args.disable_strategy_symbols is True
+    assert args.disable_strategy_venue_symbols is True
     assert args.strict is True

@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import json
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict
 
@@ -12,6 +13,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from execution.risk_aware_router import RiskAwareRouter, VenueClient
 from execution.smart_router import OrderRequest, OrderType
+from execution.tca_feedback import TCATradeRecord
 from risk.kill_switches import RiskLimits
 
 
@@ -63,6 +65,38 @@ def _router(tmp_path: Path, **broker_overrides: Any) -> RiskAwareRouter:
     )
     router.set_capital(100000.0, source="unit_test")
     return router
+
+
+def _seed_tca_row(
+    *,
+    trade_id: str,
+    strategy_id: str,
+    expected_alpha_bps: float,
+    realized_total_bps: float,
+    prediction_profile: str = "unknown",
+) -> TCATradeRecord:
+    return TCATradeRecord(
+        trade_id=trade_id,
+        timestamp=datetime.now(timezone.utc),
+        symbol="BTCUSDT",
+        exchange="binance",
+        side="buy",
+        quantity=1.0,
+        price=100.0,
+        notional=100.0,
+        predicted_slippage_bps=2.0,
+        predicted_commission_bps=1.0,
+        predicted_total_bps=3.0,
+        realized_slippage_bps=max(realized_total_bps - 1.0, 0.0),
+        realized_commission_bps=1.0,
+        realized_total_bps=realized_total_bps,
+        spread_bps=2.0,
+        vol_24h=1_000_000.0,
+        depth_1pct_usd=50_000.0,
+        strategy_id=strategy_id,
+        expected_alpha_bps=expected_alpha_bps,
+        prediction_profile=prediction_profile,
+    )
 
 
 async def _submit(router: RiskAwareRouter, order: OrderRequest):
@@ -320,6 +354,87 @@ def test_router_blocks_strategy_from_disable_list(tmp_path):
     assert "STRATEGY_DISABLED_NEGATIVE_NET_ALPHA" in str(result.rejected_reason)
     stats = router.get_stats()
     assert stats["live_ops_controls"]["strategy_disable_rejects"] == 1
+
+
+def test_router_blocks_strategy_venue_scope_from_disable_list(tmp_path):
+    disable_path = tmp_path / "strategy_disable_list.json"
+    disable_path.write_text(
+        json.dumps(
+            {
+                "disabled_strategies": [],
+                "disabled_strategy_venues": [
+                    {
+                        "scope": "strategy_venue",
+                        "strategy_id": "venue_blocked",
+                        "exchange": "binance",
+                        "net_alpha_usd": -20.0,
+                        "trades": 80,
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    router = _router(
+        tmp_path,
+        strategy_disable_list_path=str(disable_path),
+        strategy_disable_reload_seconds=0.0,
+    )
+    order = OrderRequest(
+        symbol="BTCUSDT",
+        side="buy",
+        quantity=0.01,
+        order_type=OrderType.LIMIT,
+        price=50000.0,
+        strategy_id="venue_blocked",
+        client_order_id="disable-venue-1",
+    )
+
+    result = asyncio.run(_submit(router, order))
+    assert result.success is False
+    assert "[strategy_venue]" in str(result.rejected_reason)
+
+
+def test_router_confidence_allocator_scales_quantity(tmp_path):
+    router = _router(
+        tmp_path,
+        confidence_allocator={
+            "enabled": True,
+            "min_samples": 5,
+            "lookback_days": 30,
+            "min_multiplier": 0.25,
+            "max_multiplier": 1.5,
+            "target_lower_bps": 2.0,
+            "response_slope": 0.5,
+        },
+    )
+    for idx in range(8):
+        router.tca_db.add_record(
+            _seed_tca_row(
+                trade_id=f"conf_{idx}",
+                strategy_id="alloc_alpha",
+                expected_alpha_bps=14.0,
+                realized_total_bps=6.0,
+                prediction_profile=router.prediction_profile,
+            )
+        )
+
+    order = OrderRequest(
+        symbol="BTCUSDT",
+        side="buy",
+        quantity=0.02,
+        order_type=OrderType.LIMIT,
+        price=50000.0,
+        strategy_id="alloc_alpha",
+        client_order_id="confidence-1",
+    )
+    result = asyncio.run(_submit(router, order))
+    assert result.success is True
+    confidence = result.audit_log.get("confidence_allocator", {})
+    assert float(confidence.get("multiplier", 0.0)) > 1.0
+    assert float(confidence.get("approved_quantity", 0.0)) > float(
+        confidence.get("requested_quantity", 0.0)
+    )
 
 
 def test_router_enforces_strategy_allocation_cap(tmp_path):

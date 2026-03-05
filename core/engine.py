@@ -338,6 +338,8 @@ class TradingEngine:
             "allocation_controls": execution_cfg.get("allocation_controls", {}),
             "market_data_resilience": execution_cfg.get("market_data_resilience", {}),
             "tca_calibration": execution_cfg.get("tca_calibration", {}),
+            "confidence_allocator": execution_cfg.get("confidence_allocator", {}),
+            "maker_urgency_ladder": execution_cfg.get("maker_urgency_ladder", {}),
             "paper_prediction_blend": execution_cfg.get("paper_prediction_blend", 1.0),
             "risk_profile": risk_profile_payload(_profile),
             "tenant_plan": self.tenant_entitlements.plan,

@@ -43,6 +43,10 @@ def _args() -> Namespace:
         promotion_min_purged_cv_sharpe=1.0,
         promotion_min_walk_forward_sharpe=1.0,
         promotion_min_deflated_sharpe=0.8,
+        promotion_min_parameter_stability_score=0.55,
+        promotion_min_regime_robustness_score=0.55,
+        promotion_min_realized_net_alpha_bps=0.0,
+        promotion_min_ci95_lower_realized_net_alpha_bps=0.0,
         canary_state_path="data/analytics/canary_ramp_state.json",
         canary_min_days_per_step=14,
         canary_max_slippage_mape_pct=25.0,
@@ -62,6 +66,8 @@ def test_build_campaign_cmd_includes_research_validation_and_thresholds():
     assert "run_paper_campaign.py" in joined
     assert "--research-validation data/reports/research_validation_payload.json" in joined
     assert "--promotion-min-purged-cv-sharpe 1.0" in joined
+    assert "--promotion-min-parameter-stability-score 0.55" in joined
+    assert "--promotion-min-ci95-lower-realized-net-alpha-bps 0.0" in joined
     assert "--symbols BTCUSDT,ETHUSDT" in joined
     assert "--switch tca_calibration_feedback=off" in joined
 

@@ -39,6 +39,8 @@ def test_build_payload_maps_validation_and_gate_checks():
         min_purged_cv_sharpe=1.0,
         min_walk_forward_sharpe=1.0,
         min_deflated_sharpe=0.8,
+        min_parameter_stability_score=0.55,
+        min_regime_robustness_score=0.55,
         max_expected_alpha_bps=25.0,
     )
 
@@ -48,6 +50,8 @@ def test_build_payload_maps_validation_and_gate_checks():
     assert payload["purged_cv_passed"] is True
     assert payload["walk_forward_passed"] is True
     assert payload["deflated_sharpe_passed"] is True
+    assert payload["parameter_stability_passed"] is True
+    assert payload["regime_robustness_passed"] is True
     assert payload["expected_alpha_bps"] == 25.0
 
 
@@ -101,6 +105,8 @@ def test_select_best_report_prefers_promotable_payload(tmp_path):
         min_purged_cv_sharpe=1.0,
         min_walk_forward_sharpe=1.0,
         min_deflated_sharpe=0.8,
+        min_parameter_stability_score=0.55,
+        min_regime_robustness_score=0.55,
         max_expected_alpha_bps=25.0,
     )
 
@@ -130,6 +136,8 @@ def test_build_payload_derives_expected_alpha_from_extras_net_return():
         min_purged_cv_sharpe=1.0,
         min_walk_forward_sharpe=1.0,
         min_deflated_sharpe=0.8,
+        min_parameter_stability_score=0.55,
+        min_regime_robustness_score=0.55,
         max_expected_alpha_bps=50.0,
     )
 

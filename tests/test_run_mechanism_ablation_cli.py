@@ -39,6 +39,8 @@ def _args() -> Namespace:
         min_purged_cv_sharpe=1.0,
         min_walk_forward_sharpe=1.0,
         min_deflated_sharpe=0.8,
+        min_parameter_stability_score=0.55,
+        min_regime_robustness_score=0.55,
         include_agent_off=False,
         switches=[],
     )
@@ -63,4 +65,3 @@ def test_build_campaign_cmd_includes_switches_and_tca_path():
 def test_parse_mechanisms_validates_tokens():
     parsed = MODULE._parse_mechanisms("routing_failover,capacity_curves")
     assert parsed == ["routing_failover", "capacity_curves"]
-

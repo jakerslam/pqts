@@ -25,6 +25,29 @@ class StrategyDisableDecision:
         }
 
 
+@dataclass(frozen=True)
+class ScopeDisableDecision:
+    scope: str
+    strategy_id: str
+    exchange: str
+    symbol: str
+    net_alpha_usd: float
+    trades: int
+
+    def to_dict(self) -> Dict[str, float | int | str]:
+        payload: Dict[str, float | int | str] = {
+            "scope": str(self.scope),
+            "strategy_id": str(self.strategy_id),
+            "net_alpha_usd": float(self.net_alpha_usd),
+            "trades": int(self.trades),
+        }
+        if self.exchange:
+            payload["exchange"] = str(self.exchange)
+        if self.symbol:
+            payload["symbol"] = str(self.symbol)
+        return payload
+
+
 def _recent_frame(tca_db: TCADatabase, lookback_days: int) -> pd.DataFrame:
     frame = tca_db.as_dataframe()
     if frame.empty:
@@ -60,6 +83,7 @@ def build_pnl_truth_ledger(
     out = frame.copy()
     out["strategy_id"] = out["strategy_id"].fillna("unknown").astype(str)
     out["exchange"] = out["exchange"].fillna("unknown").astype(str)
+    out["symbol"] = out["symbol"].fillna("unknown").astype(str)
     out["notional"] = pd.to_numeric(out["notional"], errors="coerce").fillna(0.0)
     out["expected_alpha_bps"] = pd.to_numeric(out["expected_alpha_bps"], errors="coerce").fillna(
         0.0
@@ -79,7 +103,7 @@ def build_pnl_truth_ledger(
     )
 
     grouped = (
-        out.groupby(["strategy_id", "exchange"], as_index=False)
+        out.groupby(["strategy_id", "exchange", "symbol"], as_index=False)
         .agg(
             trades=("trade_id", "count"),
             notional_usd=("notional", "sum"),
@@ -94,6 +118,7 @@ def build_pnl_truth_ledger(
         {
             "strategy_id": str(row["strategy_id"]),
             "exchange": str(row["exchange"]),
+            "symbol": str(row["symbol"]),
             "trades": int(row["trades"]),
             "notional_usd": float(row["notional_usd"]),
             "gross_alpha_usd": float(row["gross_alpha_usd"]),
@@ -151,3 +176,73 @@ def detect_negative_net_alpha_strategies(
                 )
             )
     return decisions
+
+
+def detect_negative_net_alpha_scopes(
+    strategy_venue_symbol_rows: List[Dict[str, float | int | str]],
+    *,
+    min_trades: int = 50,
+    max_net_alpha_usd: float = 0.0,
+    include_strategy_venue: bool = True,
+    include_strategy_symbol: bool = True,
+    include_strategy_venue_symbol: bool = True,
+) -> Dict[str, List[ScopeDisableDecision]]:
+    """
+    Return scoped negative-net-alpha disable decisions for finer-grained quarantine.
+    """
+    out: Dict[str, List[ScopeDisableDecision]] = {
+        "strategy_venues": [],
+        "strategy_symbols": [],
+        "strategy_venue_symbols": [],
+    }
+    rows = [dict(row) for row in strategy_venue_symbol_rows if isinstance(row, dict)]
+    if not rows:
+        return out
+
+    frame = pd.DataFrame(rows)
+    if frame.empty:
+        return out
+    for column in ("strategy_id", "exchange", "symbol"):
+        if column not in frame.columns:
+            frame[column] = "unknown"
+        frame[column] = frame[column].fillna("unknown").astype(str)
+    for column in ("trades", "net_alpha_usd"):
+        if column not in frame.columns:
+            frame[column] = 0.0
+        frame[column] = pd.to_numeric(frame[column], errors="coerce").fillna(0.0)
+
+    def _collect(group_keys: List[str], scope: str) -> List[ScopeDisableDecision]:
+        grouped = (
+            frame.groupby(group_keys, as_index=False)
+            .agg(trades=("trades", "sum"), net_alpha_usd=("net_alpha_usd", "sum"))
+            .sort_values(["net_alpha_usd", "trades"], ascending=[True, False])
+        )
+        decisions: List[ScopeDisableDecision] = []
+        for _, row in grouped.iterrows():
+            trades = int(row["trades"])
+            net_alpha = float(row["net_alpha_usd"])
+            if trades < int(min_trades) or net_alpha > float(max_net_alpha_usd):
+                continue
+            decisions.append(
+                ScopeDisableDecision(
+                    scope=scope,
+                    strategy_id=str(row.get("strategy_id", "unknown")),
+                    exchange=(
+                        str(row.get("exchange", "unknown")) if "exchange" in group_keys else ""
+                    ),
+                    symbol=(str(row.get("symbol", "unknown")) if "symbol" in group_keys else ""),
+                    net_alpha_usd=net_alpha,
+                    trades=trades,
+                )
+            )
+        return decisions
+
+    if include_strategy_venue:
+        out["strategy_venues"] = _collect(["strategy_id", "exchange"], "strategy_venue")
+    if include_strategy_symbol:
+        out["strategy_symbols"] = _collect(["strategy_id", "symbol"], "strategy_symbol")
+    if include_strategy_venue_symbol:
+        out["strategy_venue_symbols"] = _collect(
+            ["strategy_id", "exchange", "symbol"], "strategy_venue_symbol"
+        )
+    return out
