@@ -51,9 +51,7 @@ def _normalize_switch_name(name: str) -> str:
     token = str(name or "").strip().lower().replace("-", "_")
     if token in _ALIASES:
         return _ALIASES[token]
-    raise ValueError(
-        f"Unknown mechanism switch '{name}'. Valid switches: {', '.join(SWITCH_KEYS)}"
-    )
+    raise ValueError(f"Unknown mechanism switch '{name}'. Valid switches: {', '.join(SWITCH_KEYS)}")
 
 
 def _coerce_bool(value: Any) -> bool:
@@ -76,9 +74,7 @@ def parse_switch_overrides(raw_switches: Iterable[str] | None) -> Dict[str, bool
         if not token:
             continue
         if "=" not in token:
-            raise ValueError(
-                f"Invalid --switch '{token}'. Expected format '<mechanism>=on|off'."
-            )
+            raise ValueError(f"Invalid --switch '{token}'. Expected format '<mechanism>=on|off'.")
         name, value = token.split("=", 1)
         overrides[_normalize_switch_name(name)] = _coerce_bool(value)
     return overrides
