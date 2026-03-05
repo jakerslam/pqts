@@ -251,10 +251,43 @@ class TCACalibrator:
         tca_db: TCADatabase,
         min_samples: int = 50,
         alert_threshold_pct: float = 20.0,
+        adaptation_rate: float = 0.75,
+        max_step_pct: float = 0.80,
     ):
         self.tca_db = tca_db
         self.min_samples = min_samples
         self.alert_threshold_pct = alert_threshold_pct
+        self.adaptation_rate = float(np.clip(float(adaptation_rate), 0.0, 1.0))
+        self.max_step_pct = float(max(float(max_step_pct), 0.0))
+
+    @staticmethod
+    def _apply_lookback(frame: pd.DataFrame, *, days: int) -> pd.DataFrame:
+        if frame.empty:
+            return frame
+        cutoff = datetime.now(timezone.utc) - timedelta(days=days)
+        timestamps = pd.to_datetime(frame["timestamp"], utc=True, errors="coerce")
+        return frame[timestamps >= cutoff]
+
+    def _calibration_frame(
+        self,
+        *,
+        symbol: str,
+        exchange: str,
+        days: int,
+    ) -> Tuple[pd.DataFrame, str]:
+        symbol_frame = self.tca_db.get_by_symbol_venue(symbol, exchange, days=days)
+        if len(symbol_frame) >= self.min_samples:
+            return symbol_frame, "symbol_venue"
+
+        venue_frame = self.tca_db.get_by_venue(exchange, days=days)
+        if len(venue_frame) >= self.min_samples:
+            return venue_frame, "venue_fallback"
+
+        global_frame = self._apply_lookback(self.tca_db.as_dataframe(), days=days)
+        if len(global_frame) >= self.min_samples:
+            return global_frame, "global_fallback"
+
+        return symbol_frame, "insufficient_data"
 
     def analyze_symbol_venue(self, symbol: str, exchange: str, days: int = 30) -> Dict[str, Any]:
         frame = self.tca_db.get_by_symbol_venue(symbol, exchange, days=days)
@@ -300,7 +333,11 @@ class TCACalibrator:
     def calibrate_eta(
         self, symbol: str, exchange: str, current_eta: float, days: int = 30
     ) -> Tuple[float, Dict[str, Any]]:
-        frame = self.tca_db.get_by_symbol_venue(symbol, exchange, days=days)
+        frame, calibration_scope = self._calibration_frame(
+            symbol=symbol,
+            exchange=exchange,
+            days=days,
+        )
         if len(frame) < self.min_samples:
             return current_eta, {
                 "symbol": symbol,
@@ -309,6 +346,7 @@ class TCACalibrator:
                 "n_trades": len(frame),
                 "eta_before": current_eta,
                 "eta_after": current_eta,
+                "calibration_scope": calibration_scope,
             }
 
         predicted_avg = float(
@@ -318,15 +356,60 @@ class TCACalibrator:
 
         baseline = max(abs(predicted_avg), float(SLIPPAGE_MAPE_DENOM_FLOOR_BPS))
         ratio = max(realized_avg, 0.0) / baseline
-        new_eta = float(np.clip(current_eta * ratio, MIN_CALIBRATED_ETA, MAX_CALIBRATED_ETA))
+        current_eta_clamped = float(np.clip(current_eta, MIN_CALIBRATED_ETA, MAX_CALIBRATED_ETA))
+        target_eta = float(
+            np.clip(current_eta_clamped * ratio, MIN_CALIBRATED_ETA, MAX_CALIBRATED_ETA)
+        )
+        blended_eta = float(
+            current_eta_clamped + self.adaptation_rate * (target_eta - current_eta_clamped)
+        )
 
-        analysis = self.analyze_symbol_venue(symbol, exchange, days=days)
+        if self.max_step_pct > 0.0:
+            max_delta = abs(current_eta_clamped) * self.max_step_pct
+            lower = max(current_eta_clamped - max_delta, MIN_CALIBRATED_ETA)
+            upper = min(current_eta_clamped + max_delta, MAX_CALIBRATED_ETA)
+            blended_eta = float(np.clip(blended_eta, lower, upper))
+
+        new_eta = float(np.clip(blended_eta, MIN_CALIBRATED_ETA, MAX_CALIBRATED_ETA))
+
+        predicted = pd.to_numeric(frame["predicted_slippage_bps"], errors="coerce").fillna(0.0)
+        realized = pd.to_numeric(frame["realized_slippage_bps"], errors="coerce").fillna(0.0)
+        errors = predicted - realized
+        mape = slippage_mape_pct(
+            predicted_slippage_bps=predicted,
+            realized_slippage_bps=realized,
+        )
+        alerts: List[str] = []
+        status = "ok"
+        if mape > self.alert_threshold_pct:
+            status = "alert"
+            alerts.append(
+                f"MAPE {mape:.2f}% exceeds threshold {self.alert_threshold_pct:.2f}%"
+            )
+        analysis: Dict[str, Any] = {
+            "symbol": symbol,
+            "exchange": exchange,
+            "status": status,
+            "n_trades": len(frame),
+            "slippage": {
+                "predicted_avg": float(predicted.mean()),
+                "realized_avg": float(realized.mean()),
+                "mean_error": float(errors.mean()),
+                "mape": float(mape),
+            },
+            "alerts": alerts,
+        }
         analysis.update(
             {
                 "eta_before": current_eta,
+                "eta_target": target_eta,
                 "eta_after": new_eta,
                 "change_pct": ((new_eta - current_eta) / max(current_eta, 1e-9)) * 100.0,
                 "ratio_realized_to_predicted": ratio,
+                "adaptation_rate": float(self.adaptation_rate),
+                "max_step_pct": float(self.max_step_pct),
+                "calibration_scope": calibration_scope,
+                "calibration_samples": int(len(frame)),
             }
         )
 
@@ -353,6 +436,8 @@ def weekly_calibrate_eta(
     current_eta_by_market: Dict[Tuple[str, str], float],
     min_samples: int = 50,
     alert_threshold_pct: float = 20.0,
+    adaptation_rate: float = 0.75,
+    max_step_pct: float = 0.80,
     days: int = 30,
 ) -> Tuple[Dict[Tuple[str, str], float], List[Dict[str, Any]]]:
     """Callable weekly calibration entrypoint for schedulers/jobs."""
@@ -361,6 +446,8 @@ def weekly_calibrate_eta(
         tca_db=tca_db,
         min_samples=min_samples,
         alert_threshold_pct=alert_threshold_pct,
+        adaptation_rate=adaptation_rate,
+        max_step_pct=max_step_pct,
     )
     return calibrator.run_weekly_calibration_by_market(
         current_eta_by_market=current_eta_by_market,

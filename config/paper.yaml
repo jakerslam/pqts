@@ -177,6 +177,7 @@ execution:
     enable_failover: true
   tca_calibration:
     enabled: true
+  paper_prediction_blend: 1.0
   paper_fill_model:
     reality_stress_mode: true
   market_data_resilience:

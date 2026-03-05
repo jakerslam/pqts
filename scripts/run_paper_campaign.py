@@ -126,7 +126,9 @@ def _build_broker_config(
 ) -> Dict[str, Any]:
     execution_cfg = config.get("execution", {})
     analytics_cfg = config.get("analytics", {})
-    tca_db_path = str(tca_db_path_override or analytics_cfg.get("tca_db_path", "data/tca_records.csv"))
+    tca_db_path = str(
+        tca_db_path_override or analytics_cfg.get("tca_db_path", "data/tca_records.csv")
+    )
     return {
         "enabled": True,
         "live_execution": False,
@@ -161,6 +163,7 @@ def _build_broker_config(
         "allocation_controls": execution_cfg.get("allocation_controls", {}),
         "market_data_resilience": execution_cfg.get("market_data_resilience", {}),
         "tca_calibration": execution_cfg.get("tca_calibration", {}),
+        "paper_prediction_blend": execution_cfg.get("paper_prediction_blend", 1.0),
     }
 
 
@@ -347,6 +350,24 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--min-fills", type=int, default=200)
     parser.add_argument("--max-p95-slippage-bps", type=float, default=20.0)
     parser.add_argument("--max-mape-pct", type=float, default=35.0)
+    parser.add_argument(
+        "--calibration-min-samples",
+        type=int,
+        default=10,
+        help="Minimum fills required before eta calibration updates.",
+    )
+    parser.add_argument(
+        "--calibration-adaptation-rate",
+        type=float,
+        default=0.75,
+        help="Blend factor [0,1] for eta movement toward calibration target.",
+    )
+    parser.add_argument(
+        "--calibration-max-step-pct",
+        type=float,
+        default=0.80,
+        help="Maximum absolute eta step per calibration run (percent of current eta).",
+    )
     parser.add_argument("--paper-base-slippage-bps", type=float, default=3.0)
     parser.add_argument("--paper-min-slippage-bps", type=float, default=0.5)
     parser.add_argument("--paper-stress-multiplier", type=float, default=1.25)
@@ -561,8 +582,10 @@ async def _run(args: argparse.Namespace) -> Dict[str, Any]:
                 eta_map = _current_eta_map(router)
                 updated_eta, calibration = router.run_weekly_tca_calibration(
                     eta_by_symbol_venue=eta_map,
-                    min_samples=25,
+                    min_samples=int(args.calibration_min_samples),
                     alert_threshold_pct=float(args.max_mape_pct),
+                    adaptation_rate=float(args.calibration_adaptation_rate),
+                    max_step_pct=float(args.calibration_max_step_pct),
                     lookback_days=int(args.lookback_days),
                 )
                 readiness = router.evaluate_paper_live_readiness(

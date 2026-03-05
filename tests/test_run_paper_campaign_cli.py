@@ -52,6 +52,12 @@ def test_parser_accepts_alpha_override_and_research_report():
             "data/research_reports/exp/report.json",
             "--tca-db-path",
             "data/tca/ab_on.csv",
+            "--calibration-min-samples",
+            "12",
+            "--calibration-adaptation-rate",
+            "0.6",
+            "--calibration-max-step-pct",
+            "0.5",
             "--switch",
             "capacity_curves=off",
             "--disable-major-bootstrap",
@@ -62,6 +68,9 @@ def test_parser_accepts_alpha_override_and_research_report():
     assert args.campaign_expected_alpha_bps == 7.5
     assert args.research_report == "data/research_reports/exp/report.json"
     assert args.tca_db_path == "data/tca/ab_on.csv"
+    assert args.calibration_min_samples == 12
+    assert args.calibration_adaptation_rate == 0.6
+    assert args.calibration_max_step_pct == 0.5
     assert args.switches == ["capacity_curves=off"]
     assert args.disable_major_bootstrap is True
     assert args.allow_short_probes is True

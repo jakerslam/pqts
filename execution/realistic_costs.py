@@ -228,10 +228,16 @@ class RealisticCostModel:
         commission_rate: float = 0.001,  # 0.1% (maker rebate or taker fee)
         base_volatility: float = 0.50,  # 50% annualized
         impact_constant: float = 0.5,
+        impact_volatility_scale: float | None = None,
     ):  # Empirical constant
         self.commission = commission_rate
         self.base_vol = base_volatility
         self.eta = impact_constant  # Market impact coefficient
+        self.impact_volatility_scale = (
+            float(impact_volatility_scale)
+            if impact_volatility_scale is not None
+            else float(1.0 / np.sqrt(252.0))
+        )
 
         # FIX: Use commission_rate, not undefined 'commission'
         logger.info(f"Cost model: commission_rate={commission_rate:.3%}")
@@ -272,8 +278,11 @@ class RealisticCostModel:
         participation = float(order_size_usd) / float(depth)
         participation = max(participation, 1e-8)  # Prevent div by zero
 
+        # Convert annualized volatility to execution-horizon volatility.
+        horizon_vol = max(float(current_volatility) * self.impact_volatility_scale, 1e-9)
+
         # Temporary impact (what we pay immediately)
-        temp_impact = self.eta * float(current_volatility) * np.sqrt(participation)
+        temp_impact = self.eta * horizon_vol * np.sqrt(participation)
 
         # Permanent impact (long-term price change)
         # Usually 10-20% of temporary

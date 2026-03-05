@@ -8,6 +8,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import numpy as np
+import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
@@ -205,6 +206,125 @@ def test_eta_calibration_ratio_reduces_mape_when_reapplied(tmp_path):
     assert ratio > 1.0
     assert after < before
     assert after <= 5.0
+
+
+def test_eta_calibration_respects_max_step_pct(tmp_path):
+    db = TCADatabase(str(tmp_path / "tca.csv"))
+    for idx in range(20):
+        db.add_record(
+            _record(
+                trade_id=f"cap_{idx}",
+                symbol="BTC-USD",
+                exchange="binance",
+                predicted_slippage_bps=4.0,
+                realized_slippage_bps=40.0,
+            )
+        )
+
+    calibrator = TCACalibrator(
+        db,
+        min_samples=10,
+        alert_threshold_pct=500.0,
+        adaptation_rate=1.0,
+        max_step_pct=0.20,
+    )
+    eta_after, _analysis = calibrator.calibrate_eta("BTC-USD", "binance", current_eta=0.5)
+
+    assert eta_after == pytest.approx(0.6)
+
+
+def test_eta_calibration_uses_venue_fallback_for_sparse_symbol(tmp_path):
+    db = TCADatabase(str(tmp_path / "tca.csv"))
+    for idx in range(2):
+        db.add_record(
+            _record(
+                trade_id=f"sparse_{idx}",
+                symbol="BTC-USD",
+                exchange="binance",
+                predicted_slippage_bps=10.0,
+                realized_slippage_bps=2.0,
+            )
+        )
+    for idx in range(20):
+        db.add_record(
+            _record(
+                trade_id=f"venue_{idx}",
+                symbol=f"ALT-{idx}",
+                exchange="binance",
+                predicted_slippage_bps=10.0,
+                realized_slippage_bps=2.0,
+            )
+        )
+
+    calibrator = TCACalibrator(
+        db,
+        min_samples=10,
+        alert_threshold_pct=500.0,
+        adaptation_rate=1.0,
+        max_step_pct=1.0,
+    )
+    eta_after, analysis = calibrator.calibrate_eta("BTC-USD", "binance", current_eta=0.5)
+
+    assert eta_after < 0.5
+    assert analysis["calibration_scope"] == "venue_fallback"
+    assert analysis["calibration_samples"] == 22
+
+
+def test_router_persists_eta_calibration_across_sessions(tmp_path):
+    eta_store_path = tmp_path / "eta_store.json"
+    tca_db_path = tmp_path / "tca.csv"
+
+    router = RiskAwareRouter(
+        risk_config=RiskLimits(
+            max_daily_loss_pct=0.02,
+            max_drawdown_pct=0.2,
+            max_gross_leverage=2.0,
+        ),
+        broker_config={
+            "enabled": True,
+            "eta_store_path": str(eta_store_path),
+        },
+        tca_db_path=str(tca_db_path),
+    )
+
+    for idx in range(20):
+        router.tca_db.add_record(
+            _record(
+                trade_id=f"persist_{idx}",
+                symbol="BTC-USD",
+                exchange="binance",
+                predicted_slippage_bps=4.0,
+                realized_slippage_bps=8.0,
+            )
+        )
+
+    updated, _analyses = router.run_weekly_tca_calibration(
+        eta_by_symbol_venue={("BTC-USD", "binance"): 0.4},
+        min_samples=10,
+        alert_threshold_pct=500.0,
+        adaptation_rate=1.0,
+        max_step_pct=1.0,
+        lookback_days=30,
+    )
+
+    assert eta_store_path.exists()
+    expected_eta = updated[("BTC-USD", "binance")]
+
+    reloaded = RiskAwareRouter(
+        risk_config=RiskLimits(
+            max_daily_loss_pct=0.02,
+            max_drawdown_pct=0.2,
+            max_gross_leverage=2.0,
+        ),
+        broker_config={
+            "enabled": True,
+            "eta_store_path": str(eta_store_path),
+        },
+        tca_db_path=str(tmp_path / "reloaded_tca.csv"),
+    )
+
+    assert reloaded.eta_by_symbol_venue[("BTC-USD", "binance")] == pytest.approx(expected_eta)
+    assert reloaded.cost_model.eta == pytest.approx(expected_eta)
 
 
 def test_router_records_predicted_vs_realized_slippage(tmp_path):

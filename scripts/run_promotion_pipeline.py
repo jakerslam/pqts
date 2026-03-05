@@ -90,6 +90,12 @@ def _build_campaign_cmd(
         str(float(args.max_p95_slippage_bps)),
         "--max-mape-pct",
         str(float(args.max_mape_pct)),
+        "--calibration-min-samples",
+        str(int(args.calibration_min_samples)),
+        "--calibration-adaptation-rate",
+        str(float(args.calibration_adaptation_rate)),
+        "--calibration-max-step-pct",
+        str(float(args.calibration_max_step_pct)),
         "--max-calibration-alerts",
         str(int(args.max_calibration_alerts)),
         "--promotion-min-days",
@@ -201,6 +207,9 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--min-fills", type=int, default=200)
     parser.add_argument("--max-p95-slippage-bps", type=float, default=20.0)
     parser.add_argument("--max-mape-pct", type=float, default=35.0)
+    parser.add_argument("--calibration-min-samples", type=int, default=10)
+    parser.add_argument("--calibration-adaptation-rate", type=float, default=0.75)
+    parser.add_argument("--calibration-max-step-pct", type=float, default=0.80)
     parser.add_argument("--max-calibration-alerts", type=int, default=0)
     parser.add_argument("--promotion-min-days", type=int, default=30)
     parser.add_argument("--promotion-max-days", type=int, default=90)

@@ -264,6 +264,19 @@ class RiskAwareRouter:
             broker_config.get("order_ledger_path", "data/analytics/order_ledger.jsonl")
         )
         self.eta_by_symbol_venue: Dict[Tuple[str, str], float] = {}
+        self.eta_store_path = Path(
+            str(
+                broker_config.get(
+                    "eta_store_path",
+                    "data/analytics/eta_by_symbol_venue.json",
+                )
+            )
+        )
+        self.eta_by_symbol_venue = self._load_eta_store()
+        if self.eta_by_symbol_venue:
+            self.cost_model.eta = sum(self.eta_by_symbol_venue.values()) / len(
+                self.eta_by_symbol_venue
+            )
         self.market_venues: Dict[str, VenueClient] = {}
         self._markets_config: Dict[str, Any] = {}
         self.regime_overlay = RegimeExposureOverlay(broker_config.get("regime_overlay", {}))
@@ -453,6 +466,50 @@ class RiskAwareRouter:
                     window_seconds=window_seconds,
                 )
         return configs
+
+    def _load_eta_store(self) -> Dict[Tuple[str, str], float]:
+        if not self.eta_store_path.exists():
+            return {}
+        try:
+            payload = json.loads(self.eta_store_path.read_text(encoding="utf-8"))
+        except Exception as exc:  # pragma: no cover - defensive IO handling
+            logger.warning("Could not parse eta store %s: %s", self.eta_store_path, exc)
+            return {}
+        if not isinstance(payload, dict):
+            return {}
+        rows = payload.get("eta_by_symbol_venue", {})
+        if not isinstance(rows, dict):
+            return {}
+
+        out: Dict[Tuple[str, str], float] = {}
+        for key, value in rows.items():
+            token = str(key)
+            if "@" not in token:
+                continue
+            symbol, exchange = token.rsplit("@", 1)
+            symbol = symbol.strip()
+            exchange = exchange.strip()
+            if not symbol or not exchange:
+                continue
+            try:
+                eta = float(value)
+            except (TypeError, ValueError):
+                continue
+            if eta <= 0.0:
+                continue
+            out[(symbol, exchange)] = eta
+        return out
+
+    def _save_eta_store(self) -> None:
+        data = {
+            "updated_at": datetime.now(timezone.utc).isoformat(),
+            "eta_by_symbol_venue": {
+                f"{symbol}@{exchange}": float(eta)
+                for (symbol, exchange), eta in sorted(self.eta_by_symbol_venue.items())
+            },
+        }
+        self.eta_store_path.parent.mkdir(parents=True, exist_ok=True)
+        self.eta_store_path.write_text(json.dumps(data, indent=2, sort_keys=True), encoding="utf-8")
 
     @staticmethod
     def _order_intent_fingerprint(order: OrderRequest) -> str:
@@ -1397,6 +1454,11 @@ class RiskAwareRouter:
                     audit_log=audit_entry,
                 )
 
+        queue_ahead_qty = self._estimate_queue_ahead_qty(
+            side=order.side,
+            route_order_type=route.order_type,
+            market_data=market_data,
+        )
         fill = await self.fill_provider.get_fill(
             order_id=order_id,
             symbol=order.symbol,
@@ -1405,11 +1467,7 @@ class RiskAwareRouter:
             requested_qty=float(order.quantity),
             reference_price=float(price),
             order_book=market_data.get("order_book", {}),
-            queue_ahead_qty=self._estimate_queue_ahead_qty(
-                side=order.side,
-                route_order_type=route.order_type,
-                market_data=market_data,
-            ),
+            queue_ahead_qty=queue_ahead_qty,
         )
         logger.info(
             "Order %s filled: %s %s qty=%.6f @ %.6f on %s",
@@ -1478,6 +1536,8 @@ class RiskAwareRouter:
             depth_1pct_usd=depth_1pct_usd,
             vol_24h=float(market_data.get("vol_24h", self.cost_model.base_vol)),
             expected_alpha_bps=float(expected_alpha_bps),
+            order_book=market_data.get("order_book", {}),
+            queue_ahead_qty=float(queue_ahead_qty),
         )
         requested_qty = float(max(order.quantity, 1e-12))
         fill_ratio = float(fill.executed_qty) / requested_qty
@@ -1550,6 +1610,8 @@ class RiskAwareRouter:
         depth_1pct_usd: float,
         vol_24h: float,
         expected_alpha_bps: float,
+        order_book: Dict[str, Any] | None,
+        queue_ahead_qty: float,
     ) -> Dict[str, float]:
         """Persist predicted vs. realized slippage/costs for TCA calibration."""
         if notional <= 0 or reference_price <= 0:
@@ -1571,6 +1633,30 @@ class RiskAwareRouter:
             predicted_slippage_bps = float(Bps.from_pct(route.expected_slippage / notional))
             predicted_commission_bps = float(Bps.from_pct(self.cost_model.commission))
             predicted_total_bps = predicted_slippage_bps + predicted_commission_bps
+
+        paper_estimator = getattr(self.fill_provider, "estimate_expected_slippage_bps", None)
+        if not bool(self.broker_config.get("live_execution", False)) and callable(paper_estimator):
+            try:
+                paper_expected_slippage_bps = float(
+                    paper_estimator(
+                        symbol=order.symbol,
+                        venue=route.exchange,
+                        side=order.side,
+                        requested_qty=float(order.quantity),
+                        reference_price=float(reference_price),
+                        order_book=order_book,
+                        queue_ahead_qty=float(queue_ahead_qty),
+                    )
+                )
+                blend = float(self.broker_config.get("paper_prediction_blend", 1.0))
+                blend = max(0.0, min(blend, 1.0))
+                predicted_slippage_bps = (
+                    (1.0 - blend) * float(predicted_slippage_bps)
+                    + blend * float(paper_expected_slippage_bps)
+                )
+                predicted_total_bps = predicted_slippage_bps + predicted_commission_bps
+            except Exception as exc:
+                logger.debug("Paper slippage estimate unavailable for %s: %s", order_id, exc)
 
         if order.side == "buy":
             realized_slippage_pct = max(
@@ -2035,11 +2121,32 @@ class RiskAwareRouter:
 
     def _synthetic_order_book(self, mid_price: float) -> Dict[str, List[Tuple[float, float]]]:
         mid = max(float(mid_price), 1e-6)
-        spread = mid * 0.0005
-        return {
-            "bids": [(mid - spread, 100.0), (mid - 2 * spread, 150.0)],
-            "asks": [(mid + spread, 100.0), (mid + 2 * spread, 150.0)],
-        }
+        synthetic_cfg = self.broker_config.get("synthetic_order_book", {})
+        depth_per_side_usd = float(synthetic_cfg.get("depth_1pct_usd_per_side", 250_000.0))
+        spread_bps = float(synthetic_cfg.get("level_spread_bps", 5.0))
+        level_weights = synthetic_cfg.get("level_weights", [0.45, 0.55])
+        weights = [float(w) for w in level_weights if float(w) > 0.0]
+        if not weights:
+            weights = [0.45, 0.55]
+        weight_sum = sum(weights)
+        weights = [w / weight_sum for w in weights]
+
+        # Construct a deterministic USD-depth ladder so low-priced symbols
+        # (forex, penny names) do not get unrealistically thin synthetic books.
+        spread = mid * (spread_bps / 10000.0)
+        bids: List[Tuple[float, float]] = []
+        asks: List[Tuple[float, float]] = []
+        for idx, weight in enumerate(weights):
+            level = float(idx + 1)
+            bid_price = max(mid - (spread * level), 1e-8)
+            ask_price = max(mid + (spread * level), 1e-8)
+            level_notional = depth_per_side_usd * weight
+            bid_qty = level_notional / bid_price
+            ask_qty = level_notional / ask_price
+            bids.append((bid_price, bid_qty))
+            asks.append((ask_price, ask_qty))
+
+        return {"bids": bids, "asks": asks}
 
     def _synthetic_quote(self, *, symbol: str, venue: str) -> Dict[str, Any]:
         key = abs(hash((symbol, venue)))
@@ -2232,6 +2339,8 @@ class RiskAwareRouter:
         eta_by_symbol_venue: Dict[Tuple[str, str], float],
         min_samples: int = 50,
         alert_threshold_pct: float = 20.0,
+        adaptation_rate: float = 0.75,
+        max_step_pct: float = 0.80,
         lookback_days: int = 30,
     ) -> Tuple[Dict[Tuple[str, str], float], List[Dict]]:
         """Update eta parameters by symbol/venue from realized TCA outcomes."""
@@ -2250,12 +2359,15 @@ class RiskAwareRouter:
             current_eta_by_market=eta_by_symbol_venue,
             min_samples=min_samples,
             alert_threshold_pct=alert_threshold_pct,
+            adaptation_rate=adaptation_rate,
+            max_step_pct=max_step_pct,
             days=lookback_days,
         )
         self.eta_by_symbol_venue = updated
 
         if updated:
             self.cost_model.eta = sum(updated.values()) / len(updated)
+            self._save_eta_store()
 
         return updated, analyses
 

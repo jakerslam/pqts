@@ -177,6 +177,119 @@ def test_paper_fill_provider_small_order_faces_less_queue_slippage():
     assert small_slip_bps < large_slip_bps
 
 
+def test_paper_fill_provider_expected_slippage_estimator_scales_with_stress():
+    baseline_provider = MicrostructurePaperFillProvider(
+        config=PaperFillModelConfig(
+            adverse_selection_bps=4.0,
+            min_slippage_bps=0.5,
+            reality_stress_mode=False,
+        )
+    )
+    stress_provider = MicrostructurePaperFillProvider(
+        config=PaperFillModelConfig(
+            adverse_selection_bps=4.0,
+            min_slippage_bps=0.5,
+            reality_stress_mode=True,
+            stress_slippage_multiplier=2.0,
+        )
+    )
+
+    baseline_bps = baseline_provider.estimate_expected_slippage_bps(
+        symbol="BTC-USD",
+        venue="binance",
+        side="buy",
+        requested_qty=0.2,
+        reference_price=50000.0,
+        queue_ahead_qty=0.0,
+    )
+    stress_bps = stress_provider.estimate_expected_slippage_bps(
+        symbol="BTC-USD",
+        venue="binance",
+        side="buy",
+        requested_qty=0.2,
+        reference_price=50000.0,
+        queue_ahead_qty=0.0,
+    )
+
+    assert baseline_bps > 0.0
+    assert stress_bps == pytest.approx(baseline_bps * 2.0)
+
+
+def test_router_blends_predicted_slippage_with_paper_estimator(tmp_path):
+    class _BlendedFillProvider:
+        async def get_fill(
+            self,
+            *,
+            order_id,
+            symbol,
+            venue,
+            side,
+            requested_qty,
+            reference_price,
+            order_book=None,
+            queue_ahead_qty=None,
+        ):
+            _ = (order_id, symbol, venue, side, order_book, queue_ahead_qty)
+            return ExecutionFill(
+                executed_price=float(reference_price),
+                executed_qty=float(requested_qty),
+                timestamp=datetime.now(timezone.utc),
+                venue=str(venue),
+                symbol=str(symbol),
+            )
+
+        def estimate_expected_slippage_bps(self, **kwargs):
+            _ = kwargs
+            return 9.0
+
+    router = RiskAwareRouter(
+        risk_config=RiskLimits(
+            max_daily_loss_pct=0.02,
+            max_drawdown_pct=0.2,
+            max_gross_leverage=2.0,
+        ),
+        broker_config={
+            "enabled": True,
+            "paper_prediction_blend": 1.0,
+        },
+        fill_provider=_BlendedFillProvider(),
+        tca_db_path=str(tmp_path / "blend.csv"),
+    )
+    router.set_capital(100000.0, source="unit_test")
+
+    order = OrderRequest(
+        symbol="BTC-USD",
+        side="buy",
+        quantity=0.1,
+        order_type=OrderType.LIMIT,
+        price=50000.0,
+    )
+    market_data = {
+        "binance": {
+            "BTC-USD": {"price": 50000.0, "spread": 0.0002, "volume_24h": 2_000_000}
+        },
+        "order_book": {
+            "bids": [(49990.0, 2.0), (49980.0, 4.0)],
+            "asks": [(50010.0, 1.5), (50020.0, 3.0)],
+        },
+    }
+    strategy_returns, portfolio_changes = _strategy_inputs()
+
+    result = asyncio.run(
+        router.submit_order(
+            order=order,
+            market_data=market_data,
+            portfolio=_portfolio_snapshot(),
+            strategy_returns=strategy_returns,
+            portfolio_changes=portfolio_changes,
+        )
+    )
+
+    assert result.success
+    tca_payload = result.audit_log.get("tca", {})
+    assert tca_payload["predicted_slippage_bps"] == pytest.approx(9.0)
+
+
 def test_router_rejects_order_when_fill_provider_returns_no_fill(tmp_path):
     fill_provider = MicrostructurePaperFillProvider(
         config=PaperFillModelConfig(hard_reject_notional_usd=100.0)
