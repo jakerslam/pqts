@@ -1,4 +1,4 @@
-"""Execution parity drift analysis from predicted vs realized TCA outcomes."""
+"""Calibration diagnostics for predicted-vs-realized execution slippage."""
 
 from __future__ import annotations
 
@@ -15,98 +15,92 @@ from execution.tca_feedback import SLIPPAGE_MAPE_DENOM_FLOOR_BPS, TCADatabase, s
 
 
 @dataclass(frozen=True)
-class DriftThresholds:
-    """Thresholds that define alerting boundaries for paper/live drift."""
+class CalibrationDiagnosticsThresholds:
+    """Thresholds for calibration diagnostics and alerting."""
 
     min_samples: int = 30
     max_mape_pct: float = 35.0
     min_realized_to_predicted_ratio: float = 0.50
     max_realized_to_predicted_ratio: float = 1.50
-    suppress_warmup_alerts: bool = True
 
 
-def _safe_float(value: Any, default: float = 0.0) -> float:
-    try:
-        return float(value)
-    except (TypeError, ValueError):
-        return float(default)
-
-
-def _summarize_group(
+def _summarize_pair(
     *,
     symbol: str,
     exchange: str,
     frame: pd.DataFrame,
-    thresholds: DriftThresholds,
+    thresholds: CalibrationDiagnosticsThresholds,
 ) -> Dict[str, Any]:
     predicted = pd.to_numeric(frame["predicted_slippage_bps"], errors="coerce").fillna(0.0)
     realized = pd.to_numeric(frame["realized_slippage_bps"], errors="coerce").fillna(0.0)
+    timestamps = pd.to_datetime(frame["timestamp"], utc=True, errors="coerce")
 
     p = predicted.to_numpy(dtype=float)
     r = realized.to_numpy(dtype=float)
+    predicted_avg = float(np.mean(p))
+    realized_avg = float(np.mean(r))
     mape_pct = slippage_mape_pct(
         predicted_slippage_bps=p,
         realized_slippage_bps=r,
         denom_floor_bps=float(SLIPPAGE_MAPE_DENOM_FLOOR_BPS),
     )
-    predicted_avg = float(np.mean(p))
-    realized_avg = float(np.mean(r))
     ratio = float(realized_avg / max(abs(predicted_avg), float(SLIPPAGE_MAPE_DENOM_FLOOR_BPS)))
-
+    bias_bps = float(realized_avg - predicted_avg)
     samples = int(len(frame))
+    trading_days = int(pd.Series(timestamps.dt.date).nunique())
     warmup = samples < int(thresholds.min_samples)
-    alerts: List[str] = []
-    notes: List[str] = []
 
+    reasons: List[str] = []
     if warmup:
-        warmup_note = f"insufficient_samples:{samples}<{int(thresholds.min_samples)}"
-        if bool(thresholds.suppress_warmup_alerts):
-            notes.append(warmup_note)
-        else:
-            alerts.append(warmup_note)
-
-    if (not warmup) and mape_pct > float(thresholds.max_mape_pct):
-        alerts.append(f"mape:{mape_pct:.2f}>{float(thresholds.max_mape_pct):.2f}")
-    if (not warmup) and ratio < float(thresholds.min_realized_to_predicted_ratio):
-        alerts.append(
-            "ratio_low:" f"{ratio:.2f}<{float(thresholds.min_realized_to_predicted_ratio):.2f}"
-        )
-    if (not warmup) and ratio > float(thresholds.max_realized_to_predicted_ratio):
-        alerts.append(
-            "ratio:" f"{ratio:.2f}>{float(thresholds.max_realized_to_predicted_ratio):.2f}"
-        )
-
-    if alerts:
-        status = "alert"
-    elif warmup:
+        reasons.append(f"warmup_insufficient_samples:{samples}<{int(thresholds.min_samples)}")
         status = "warmup"
     else:
-        status = "ok"
+        if mape_pct > float(thresholds.max_mape_pct):
+            reasons.append(f"mape:{mape_pct:.2f}>{float(thresholds.max_mape_pct):.2f}")
+        if ratio < float(thresholds.min_realized_to_predicted_ratio):
+            reasons.append(
+                "ratio_low:" f"{ratio:.2f}<{float(thresholds.min_realized_to_predicted_ratio):.2f}"
+            )
+        if ratio > float(thresholds.max_realized_to_predicted_ratio):
+            reasons.append(
+                "ratio_high:" f"{ratio:.2f}>{float(thresholds.max_realized_to_predicted_ratio):.2f}"
+            )
+        status = "alert" if reasons else "ok"
+
+    eta_multiplier = float(np.clip(ratio, 0.25, 4.0))
+    if eta_multiplier > 1.01:
+        eta_direction = "increase_eta"
+    elif eta_multiplier < 0.99:
+        eta_direction = "decrease_eta"
+    else:
+        eta_direction = "hold_eta"
 
     return {
         "symbol": str(symbol),
         "exchange": str(exchange),
         "samples": samples,
+        "trading_days": trading_days,
         "required_samples": int(thresholds.min_samples),
-        "warmup": bool(warmup),
         "predicted_slippage_bps_avg": predicted_avg,
         "realized_slippage_bps_avg": realized_avg,
         "slippage_mape_pct": mape_pct,
         "realized_to_predicted_ratio": ratio,
+        "bias_bps": bias_bps,
+        "recommended_eta_multiplier": eta_multiplier,
+        "eta_direction": eta_direction,
         "status": status,
-        "alerts": alerts,
-        "notes": notes,
+        "reasons": reasons,
     }
 
 
-def analyze_execution_drift(
+def analyze_calibration_diagnostics(
     *,
     tca_db: TCADatabase,
     lookback_days: int = 30,
-    thresholds: DriftThresholds | None = None,
+    thresholds: CalibrationDiagnosticsThresholds | None = None,
 ) -> Dict[str, Any]:
-    """Analyze symbol/venue drift between predicted and realized execution costs."""
-    cfg = thresholds or DriftThresholds()
+    """Summarize calibration health by symbol/venue over a lookback window."""
+    cfg = thresholds or CalibrationDiagnosticsThresholds()
     frame = tca_db.as_dataframe()
     if frame.empty:
         return {
@@ -116,8 +110,11 @@ def analyze_execution_drift(
             "summary": {
                 "pairs": 0,
                 "alerts": 0,
+                "warmup_pairs": 0,
                 "healthy": True,
                 "samples": 0,
+                "mape_p95_pct": 0.0,
+                "ratio_p95": 0.0,
             },
             "pairs": [],
         }
@@ -133,71 +130,77 @@ def analyze_execution_drift(
             "summary": {
                 "pairs": 0,
                 "alerts": 0,
+                "warmup_pairs": 0,
                 "healthy": True,
                 "samples": 0,
+                "mape_p95_pct": 0.0,
+                "ratio_p95": 0.0,
             },
             "pairs": [],
         }
 
-    pair_rows: List[Dict[str, Any]] = []
+    rows: List[Dict[str, Any]] = []
     for (symbol, exchange), group in scoped.groupby(["symbol", "exchange"], sort=True):
-        pair_rows.append(
-            _summarize_group(
+        rows.append(
+            _summarize_pair(
                 symbol=str(symbol),
                 exchange=str(exchange),
                 frame=group,
                 thresholds=cfg,
             )
         )
+
     status_rank = {
         "alert": 0,
         "warmup": 1,
         "ok": 2,
     }
-    pair_rows.sort(
+    rows.sort(
         key=lambda row: (
             status_rank.get(str(row.get("status", "")).lower(), 3),
-            -_safe_float(row.get("slippage_mape_pct", 0.0)),
+            -float(row.get("slippage_mape_pct", 0.0)),
         )
     )
 
-    alert_count = sum(1 for row in pair_rows if str(row.get("status")) == "alert")
-    warmup_count = sum(1 for row in pair_rows if str(row.get("status")) == "warmup")
+    alert_count = sum(1 for row in rows if str(row.get("status")) == "alert")
+    warmup_count = sum(1 for row in rows if str(row.get("status")) == "warmup")
+
     return {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "lookback_days": int(lookback_days),
         "thresholds": asdict(cfg),
         "summary": {
-            "pairs": len(pair_rows),
+            "pairs": len(rows),
             "alerts": alert_count,
             "warmup_pairs": warmup_count,
             "healthy": alert_count == 0,
             "samples": int(len(scoped)),
-            "mape_p95_pct": float(
-                np.percentile([row["slippage_mape_pct"] for row in pair_rows], 95)
+            "mape_p95_pct": float(np.percentile([row["slippage_mape_pct"] for row in rows], 95)),
+            "ratio_p95": float(
+                np.percentile([row["realized_to_predicted_ratio"] for row in rows], 95)
             ),
         },
-        "pairs": pair_rows,
+        "pairs": rows,
     }
 
 
-def write_execution_drift_report(
+def write_calibration_diagnostics_report(
     *,
     tca_db_path: str,
     out_dir: str = "data/reports",
     lookback_days: int = 30,
-    thresholds: DriftThresholds | None = None,
+    thresholds: CalibrationDiagnosticsThresholds | None = None,
 ) -> Path:
-    """Write execution drift report JSON and return output path."""
+    """Persist calibration diagnostics report and return output path."""
     db = TCADatabase(tca_db_path)
-    payload = analyze_execution_drift(
+    payload = analyze_calibration_diagnostics(
         tca_db=db,
         lookback_days=lookback_days,
         thresholds=thresholds,
     )
-    out = Path(out_dir)
-    out.mkdir(parents=True, exist_ok=True)
+    root = Path(out_dir)
+    root.mkdir(parents=True, exist_ok=True)
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
-    path = out / f"execution_drift_{stamp}.json"
+    path = root / f"calibration_diagnostics_{stamp}.json"
     path.write_text(json.dumps(payload, indent=2, sort_keys=True), encoding="utf-8")
     return path

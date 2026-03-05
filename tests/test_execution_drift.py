@@ -123,3 +123,32 @@ def test_execution_drift_mape_uses_bps_denominator_floor(tmp_path):
     )
 
     assert payload["pairs"][0]["slippage_mape_pct"] == 200.0
+
+
+def test_execution_drift_warmup_suppresses_alerts_below_min_samples(tmp_path):
+    db = TCADatabase(str(tmp_path / "tca.csv"))
+    for idx in range(5):
+        db.add_record(
+            _record(
+                idx=idx,
+                symbol="SOL-USD",
+                exchange="coinbase",
+                predicted=5.0,
+                realized=20.0,
+            )
+        )
+
+    payload = analyze_execution_drift(
+        tca_db=db,
+        lookback_days=30,
+        thresholds=DriftThresholds(
+            min_samples=30,
+            max_mape_pct=5.0,
+            max_realized_to_predicted_ratio=1.01,
+        ),
+    )
+
+    assert payload["summary"]["alerts"] == 0
+    assert payload["summary"]["warmup_pairs"] == 1
+    assert payload["pairs"][0]["status"] == "warmup"
+    assert any("insufficient_samples" in note for note in payload["pairs"][0].get("notes", []))

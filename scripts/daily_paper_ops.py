@@ -102,6 +102,23 @@ def _build_readiness_cmd(args: argparse.Namespace) -> List[str]:
     ]
 
 
+def _build_calibration_cmd(args: argparse.Namespace) -> List[str]:
+    return [
+        sys.executable,
+        str(ROOT / "scripts" / "calibration_diagnostics_report.py"),
+        "--tca-db",
+        args.tca_db,
+        "--out-dir",
+        args.out_dir,
+        "--lookback-days",
+        str(int(args.lookback_days)),
+        "--min-samples",
+        str(int(args.min_fills)),
+        "--max-mape-pct",
+        str(float(args.max_mape_pct)),
+    ]
+
+
 def _run(cmd: List[str]) -> subprocess.CompletedProcess[str]:
     return subprocess.run(cmd, cwd=str(ROOT), check=True, capture_output=True, text=True)
 
@@ -173,10 +190,16 @@ def main() -> int:
     readiness_payload = _parse_json_from_output(readiness_run.stdout)
     print(readiness_run.stdout, end="")
 
+    calibration_cmd = _build_calibration_cmd(args)
+    calibration_run = _run(calibration_cmd)
+    calibration_payload = _parse_json_from_output(calibration_run.stdout)
+    print(calibration_run.stdout, end="")
+
     summary = {
         "timestamp": datetime.now(timezone.utc).isoformat(),
         "campaign": campaign_payload,
         "readiness": readiness_payload,
+        "calibration_diagnostics": calibration_payload,
     }
     summary_path = _write_summary(Path(args.out_dir), summary)
     print(summary_path)

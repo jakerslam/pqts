@@ -132,6 +132,23 @@ def _build_execution_drift_cmd(*, args: argparse.Namespace) -> List[str]:
     ]
 
 
+def _build_calibration_diagnostics_cmd(*, args: argparse.Namespace) -> List[str]:
+    return [
+        sys.executable,
+        str(ROOT / "scripts" / "calibration_diagnostics_report.py"),
+        "--tca-db",
+        args.tca_db,
+        "--out-dir",
+        args.out_dir,
+        "--lookback-days",
+        str(int(args.lookback_days)),
+        "--min-samples",
+        str(int(args.min_fills)),
+        "--max-mape-pct",
+        str(float(args.max_mape_pct)),
+    ]
+
+
 def _build_canary_cmd(*, args: argparse.Namespace) -> List[str]:
     cmd = [
         sys.executable,
@@ -236,6 +253,8 @@ def main() -> int:
 
         drift_run = _run(_build_execution_drift_cmd(args=args))
         drift_payload = _parse_json_from_output(drift_run.stdout)
+        calibration_run = _run(_build_calibration_diagnostics_cmd(args=args))
+        calibration_payload = _parse_json_from_output(calibration_run.stdout)
 
         promotion_gate = (
             campaign_payload.get("promotion_gate", {})
@@ -249,6 +268,7 @@ def main() -> int:
             "research_validation_path": research_validation_path,
             "campaign": campaign_payload,
             "execution_drift": drift_payload,
+            "calibration_diagnostics": calibration_payload,
             "promotion_decision": decision,
             "canary": {},
         }
