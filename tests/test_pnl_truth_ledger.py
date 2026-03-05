@@ -113,3 +113,37 @@ def test_detect_negative_net_alpha_strategies_respects_trade_minimum(tmp_path):
     assert len(decisions) == 1
     assert decisions[0].strategy_id == "bad_strategy"
     assert decisions[0].net_alpha_usd < 0.0
+
+
+def test_net_alpha_declines_monotonically_with_higher_realized_costs(tmp_path):
+    db = TCADatabase(str(tmp_path / "tca.csv"))
+    db.add_record(
+        _record(
+            trade_id="mono_low_cost",
+            strategy_id="low_cost",
+            exchange="binance",
+            expected_alpha_bps=15.0,
+            realized_slippage_bps=2.0,
+            realized_commission_bps=1.0,
+        )
+    )
+    db.add_record(
+        _record(
+            trade_id="mono_high_cost",
+            strategy_id="high_cost",
+            exchange="binance",
+            expected_alpha_bps=15.0,
+            realized_slippage_bps=8.0,
+            realized_commission_bps=1.0,
+        )
+    )
+
+    _summary, rows = build_pnl_truth_ledger(db, lookback_days=30)
+    by_strategy = {row["strategy_id"]: row for row in rows}
+
+    low = by_strategy["low_cost"]
+    high = by_strategy["high_cost"]
+
+    assert abs(float(low["gross_alpha_usd"]) - float(high["gross_alpha_usd"])) < 1e-12
+    assert float(high["slippage_cost_usd"]) > float(low["slippage_cost_usd"])
+    assert float(high["net_alpha_usd"]) < float(low["net_alpha_usd"])

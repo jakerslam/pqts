@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 import asyncio
+import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-import sys
 
 import numpy as np
 
@@ -171,6 +171,40 @@ def test_eta_calibration_can_move_below_legacy_floor(tmp_path):
 
     assert new_eta < 0.05
     assert new_eta >= MIN_CALIBRATED_ETA
+
+
+def test_eta_calibration_ratio_reduces_mape_when_reapplied(tmp_path):
+    db = TCADatabase(str(tmp_path / "tca.csv"))
+    predicted = np.full(24, 4.0)
+    realized = np.full(24, 8.0)
+
+    for idx in range(24):
+        db.add_record(
+            _record(
+                trade_id=f"cal_{idx}",
+                symbol="BTC-USD",
+                exchange="binance",
+                predicted_slippage_bps=float(predicted[idx]),
+                realized_slippage_bps=float(realized[idx]),
+            )
+        )
+
+    before = slippage_mape_pct(
+        predicted_slippage_bps=predicted,
+        realized_slippage_bps=realized,
+    )
+    calibrator = TCACalibrator(db, min_samples=10, alert_threshold_pct=500.0)
+    _eta_after, analysis = calibrator.calibrate_eta("BTC-USD", "binance", current_eta=0.5)
+    ratio = float(analysis["ratio_realized_to_predicted"])
+    adjusted = predicted * ratio
+    after = slippage_mape_pct(
+        predicted_slippage_bps=adjusted,
+        realized_slippage_bps=realized,
+    )
+
+    assert ratio > 1.0
+    assert after < before
+    assert after <= 5.0
 
 
 def test_router_records_predicted_vs_realized_slippage(tmp_path):

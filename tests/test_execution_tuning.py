@@ -604,6 +604,70 @@ def test_paper_fill_reality_stress_mode_applies_higher_slippage_and_lower_fill()
     assert stress_slip_bps == pytest.approx(baseline_slip_bps * 2.5)
 
 
+def test_paper_fill_stress_mode_reduces_risk_adjusted_execution_edge():
+    baseline_provider = MicrostructurePaperFillProvider(
+        config=PaperFillModelConfig(
+            partial_fill_notional_usd=2_000.0,
+            hard_reject_notional_usd=100_000.0,
+            adverse_selection_bps=6.0,
+            reality_stress_mode=False,
+        )
+    )
+    stress_provider = MicrostructurePaperFillProvider(
+        config=PaperFillModelConfig(
+            partial_fill_notional_usd=2_000.0,
+            hard_reject_notional_usd=100_000.0,
+            adverse_selection_bps=6.0,
+            reality_stress_mode=True,
+            stress_slippage_multiplier=2.5,
+            stress_fill_ratio_multiplier=0.70,
+        )
+    )
+
+    expected_alpha_bps = 20.0
+    commission_bps = 1.0
+    reference_price = 1_000.0
+    requested_qty = 4.0  # Force partial fills for both providers.
+    requested_notional = requested_qty * reference_price
+
+    def _per_order_returns(provider: MicrostructurePaperFillProvider) -> np.ndarray:
+        values = []
+        for idx in range(80):
+            side = "buy" if idx % 2 == 0 else "sell"
+            fill = asyncio.run(
+                provider.get_fill(
+                    order_id=f"stress_edge_{idx}",
+                    symbol="BTC-USD",
+                    venue="binance",
+                    side=side,
+                    requested_qty=requested_qty,
+                    reference_price=reference_price,
+                )
+            )
+            executed_notional = fill.executed_qty * fill.executed_price
+            if side == "buy":
+                realized_slippage_bps = ((fill.executed_price / reference_price) - 1.0) * 10000.0
+            else:
+                realized_slippage_bps = (1.0 - (fill.executed_price / reference_price)) * 10000.0
+            realized_total_bps = realized_slippage_bps + commission_bps
+            expected_alpha_usd = executed_notional * expected_alpha_bps / 10000.0
+            realized_cost_usd = executed_notional * realized_total_bps / 10000.0
+            values.append((expected_alpha_usd - realized_cost_usd) / requested_notional)
+        return np.asarray(values, dtype=float)
+
+    baseline_returns = _per_order_returns(baseline_provider)
+    stress_returns = _per_order_returns(stress_provider)
+
+    def _sharpe(returns: np.ndarray) -> float:
+        std = float(np.std(returns))
+        if std <= 1e-12:
+            return 0.0
+        return float(np.mean(returns) / std * np.sqrt(252.0))
+
+    assert float(np.mean(stress_returns)) < float(np.mean(baseline_returns))
+    assert _sharpe(stress_returns) < _sharpe(baseline_returns)
+
+
 def test_router_rejects_post_trade_position_limit_breach(tmp_path):
     router = RiskAwareRouter(
         risk_config=RiskLimits(
