@@ -1,4 +1,4 @@
-name: Publish Simulation Leaderboard
+name: Publish Docs Site
 
 on:
   workflow_dispatch:
@@ -6,6 +6,8 @@ on:
     branches:
       - main
     paths:
+      - "docs/**"
+      - "mkdocs.yml"
       - "data/reports/simulation_leaderboard_*.csv"
       - "scripts/export_simulation_leaderboard_site.py"
       - ".github/workflows/publish-leaderboard.yml"
@@ -16,7 +18,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: leaderboard-pages
+  group: docs-pages
   cancel-in-progress: true
 
 jobs:
@@ -31,11 +33,19 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Build static leaderboard page
+      - name: Install docs toolchain
+        run: |
+          python -m pip install --upgrade pip
+          pip install \"mkdocs==1.6.1\" \"mkdocs-material==9.5.50\" \"mkdocs-mermaid2-plugin==1.2.1\"
+
+      - name: Build leaderboard static page
         run: |
           python3 scripts/export_simulation_leaderboard_site.py \
             --reports-dir data/reports \
-            --output-dir site
+            --output-dir docs/leaderboard
+
+      - name: Build docs site
+        run: mkdocs build --site-dir site
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5

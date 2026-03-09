@@ -2,6 +2,9 @@
 
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![CI](https://github.com/jakerslam/pqts/actions/workflows/ci.yml/badge.svg)](https://github.com/jakerslam/pqts/actions/workflows/ci.yml)
+[![Coverage](https://github.com/jakerslam/pqts/actions/workflows/coverage.yml/badge.svg)](https://github.com/jakerslam/pqts/actions/workflows/coverage.yml)
+[![Docs](https://github.com/jakerslam/pqts/actions/workflows/publish-leaderboard.yml/badge.svg)](https://github.com/jakerslam/pqts/actions/workflows/publish-leaderboard.yml)
+[![Release](https://github.com/jakerslam/pqts/actions/workflows/release.yml/badge.svg)](https://github.com/jakerslam/pqts/actions/workflows/release.yml)
 [![PyPI](https://img.shields.io/pypi/v/pqts.svg)](https://pypi.org/project/pqts/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Status](https://img.shields.io/badge/status-Paper%20Trading-yellow.svg)]()
@@ -18,6 +21,18 @@
 - **Backtesting Framework**: Event-driven backtesting with realistic execution
 - **Real-time Dashboard**: Live P&L and performance metrics
 - **Paper Trading**: Test risk-free before going live
+
+## 🏆 Why PQTS
+
+PQTS is built for operational robustness first, not just strategy scripts.
+
+| Capability | PQTS | Freqtrade | NautilusTrader | Hummingbot |
+|------------|------|-----------|----------------|------------|
+| Institutional-style risk gates | ✅ Native | ⚠️ Partial | ✅ Strong | ⚠️ Partial |
+| Reconciliation + incident telemetry | ✅ Native | ⚠️ Limited | ⚠️ Depends on setup | ⚠️ Limited |
+| Promotion/canary controls | ✅ Native | ❌ No first-class flow | ⚠️ Custom | ❌ No first-class flow |
+| Simulation leaderboard + reporting | ✅ Native | ⚠️ Backtesting focus | ✅ Strong backtesting | ⚠️ Bot metrics focus |
+| Multi-market scope (crypto/equities/forex) | ✅ | ⚠️ Primarily crypto | ✅ | ⚠️ Primarily crypto/market-making |
 
 ## 📊 Quick Start
 
@@ -65,6 +80,7 @@ docker compose up --build
 
 Dashboard: `http://localhost:8501`  
 Grafana (optional): `http://localhost:3000` (`admin` / `admin`)
+Docs site (GitHub Pages): `https://jakerslam.github.io/pqts/`
 
 ## ⚡ One-Command Demo
 
@@ -147,6 +163,12 @@ Static leaderboard export (for GitHub Pages):
 
 ```bash
 python scripts/export_simulation_leaderboard_site.py --reports-dir data/reports --output-dir site
+```
+
+Or publish docs + leaderboard via GitHub Actions:
+
+```bash
+gh workflow run "Publish Docs Site"
 ```
 
 Execution drift report:
@@ -267,6 +289,27 @@ Detailed rules and migration notes: `docs/ARCHITECTURE.md`
 - [X Thread Template](docs/X_THREAD_TEMPLATE.md)
 - [Engineering TODO](docs/TODO.md)
 - [Humans-Only Work](docs/HUMANS_ONLY.md)
+- [5-Minute Quickstart](docs/QUICKSTART_5_MIN.md)
+- [Architecture Diagram](docs/ARCHITECTURE_DIAGRAM.md)
+- [Benchmarks](docs/BENCHMARKS.md)
+- [Release Checklist](docs/RELEASE_CHECKLIST.md)
+- [Branch Protection Guidance](docs/BRANCH_PROTECTION.md)
+- [PyPI Publishing Setup](docs/PYPI_PUBLISHING.md)
+- [Reproducible Results Bundle Guide](results/README.md)
+
+## 🤝 Project Governance
+
+- [Contributing Guide](CONTRIBUTING.md)
+- [Code of Conduct](CODE_OF_CONDUCT.md)
+- [Security Policy](SECURITY.md)
+- [Support](SUPPORT.md)
+- [Changelog](CHANGELOG.md)
+- [Citation](CITATION.cff)
+
+## 📦 Releases
+
+- Create a semantic version tag (for example `v0.1.1`) to trigger release + PyPI publish workflow.
+- Release notes are generated automatically in GitHub Releases.
 
 ## 🛠️ Configuration
 

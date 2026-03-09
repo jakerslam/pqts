@@ -1,0 +1,12 @@
+cff-version: 1.2.0
+title: "PQTS: Protheus Quant Trading System"
+message: "If you use PQTS in research or publications, please cite it."
+type: software
+authors:
+  - family-names: "Contributors"
+    given-names: "PQTS"
+repository-code: "https://github.com/jakerslam/pqts"
+url: "https://github.com/jakerslam/pqts"
+license: "MIT"
+version: "0.1.0"
+date-released: "2026-03-09"

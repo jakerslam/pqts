@@ -1,0 +1,60 @@
+name: Coverage
+
+on:
+  push:
+    branches: [main, prod]
+  pull_request:
+    branches: [main, prod]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest-cov
+
+      - name: Run tests with coverage
+        run: |
+          pytest tests -q \
+            --cov=src \
+            --cov-report=term-missing \
+            --cov-report=xml:coverage.xml
+
+      - name: Build coverage summary
+        run: |
+          python - <<'PY'
+          import xml.etree.ElementTree as ET
+          root = ET.parse("coverage.xml").getroot()
+          rate = float(root.attrib.get("line-rate", "0")) * 100.0
+          text = f"# Coverage Summary\n\n- Line coverage: {rate:.2f}%\n"
+          with open("coverage-summary.md", "w", encoding="utf-8") as fh:
+              fh.write(text)
+          print(text)
+          PY
+
+      - name: Upload coverage artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: |
+            coverage.xml
+            coverage-summary.md
+
+      - name: Add coverage summary to workflow
+        run: cat coverage-summary.md >> "$GITHUB_STEP_SUMMARY"

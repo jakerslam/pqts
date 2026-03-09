@@ -54,6 +54,7 @@ dependencies = [
 Homepage = "https://github.com/jakerslam/pqts"
 Repository = "https://github.com/jakerslam/pqts"
 Issues = "https://github.com/jakerslam/pqts/issues"
+Documentation = "https://jakerslam.github.io/pqts/"
 
 [project.scripts]
 pqts = "app.runtime:cli_main"

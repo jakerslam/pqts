@@ -1,0 +1,31 @@
+site_name: PQTS Documentation
+site_description: Production-oriented quant research and execution platform
+site_url: https://jakerslam.github.io/pqts/
+repo_url: https://github.com/jakerslam/pqts
+repo_name: jakerslam/pqts
+
+theme:
+  name: material
+
+plugins:
+  - search
+  - mermaid2
+
+markdown_extensions:
+  - admonition
+  - toc:
+      permalink: true
+  - tables
+  - fenced_code
+
+nav:
+  - Home: index.md
+  - 5-Minute Quickstart: QUICKSTART_5_MIN.md
+  - Architecture Diagram: ARCHITECTURE_DIAGRAM.md
+  - Architecture: ARCHITECTURE.md
+  - Benchmarks: BENCHMARKS.md
+  - PyPI Publishing: PYPI_PUBLISHING.md
+  - Simulation Telemetry: SIMULATION_TELEMETRY.md
+  - SRS: SRS.md
+  - Engineering TODO: TODO.md
+  - Humans Only: HUMANS_ONLY.md

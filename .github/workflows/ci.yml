@@ -136,3 +136,32 @@ jobs:
       - name: Run mypy strict phase modules (non-gating)
         continue-on-error: true
         run: mypy src/analytics/paper_readiness.py src/execution/paper_campaign.py src/execution/paper_fill_model.py src/execution/tca_feedback.py
+
+  ci_summary:
+    name: CI Summary Artifact
+    if: always()
+    needs: [verify_workflow_raw, verify_dependency_lock, test, lint, static_analysis]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Build summary matrix
+        run: |
+          cat > ci-summary.md <<EOF
+          # PQTS CI Matrix
+
+          | Job | Result |
+          |-----|--------|
+          | verify_workflow_raw | ${{ needs.verify_workflow_raw.result }} |
+          | verify_dependency_lock | ${{ needs.verify_dependency_lock.result }} |
+          | test | ${{ needs.test.result }} |
+          | lint | ${{ needs.lint.result }} |
+          | static_analysis | ${{ needs.static_analysis.result }} |
+          EOF
+
+      - name: Upload summary artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci-summary
+          path: ci-summary.md
+
+      - name: Add summary to workflow UI
+        run: cat ci-summary.md >> "$GITHUB_STEP_SUMMARY"
