@@ -42,6 +42,7 @@ dependencies = [
   "altair==6.0.0",
   "redis==7.2.1",
   "sqlalchemy==2.0.48",
+  "psycopg==3.2.12",
   "alembic==1.18.4",
   "ccxt==4.5.40",
   "optuna==4.7.0",

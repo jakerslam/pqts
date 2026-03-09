@@ -9,6 +9,7 @@ from fastapi import Depends, FastAPI
 
 from .auth import APIIdentity, build_token_store, require_admin, require_identity, require_operator
 from .config import APISettings
+from .persistence import APIPersistence
 from .routes import core_router, ws_router
 from .state import APIRuntimeStore, StreamHub
 
@@ -35,6 +36,11 @@ def create_app(settings: APISettings | None = None) -> FastAPI:
     app.state.token_store = build_token_store(resolved.auth_tokens)
     app.state.store = APIRuntimeStore.bootstrap()
     app.state.stream_hub = StreamHub()
+    app.state.persistence = APIPersistence.connect(resolved.database_url)
+    if app.state.persistence is not None:
+        app.state.persistence.initialize()
+        app.state.persistence.seed_if_empty(app.state.store)
+        app.state.persistence.hydrate_store(app.state.store)
 
     @app.get("/health", tags=["health"])
     def health() -> dict[str, Any]:
@@ -48,10 +54,11 @@ def create_app(settings: APISettings | None = None) -> FastAPI:
 
     @app.get("/ready", tags=["health"])
     def ready() -> dict[str, Any]:
+        database_configured = bool(resolved.database_url)
         dependencies = {
             "database": {
-                "configured": bool(resolved.database_url),
-                "reachable": None,
+                "configured": database_configured,
+                "reachable": bool(app.state.persistence) if database_configured else None,
             },
             "redis": {
                 "configured": bool(resolved.redis_url),

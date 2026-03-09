@@ -24,7 +24,7 @@ Issue-ready split backlog: [docs/ISSUE_BACKLOG.md](/Users/jay/Document%20(Lcl)/C
 - [x] Implement API auth foundation (session/token flow + role model) and protect privileged endpoints.
 - [x] Implement core REST endpoints: account summary, positions, orders, fills, PnL snapshots, risk state.
 - [x] Implement core WebSocket channels: orders, fills, positions, PnL, risk/kill-switch incidents.
-- [ ] Add Postgres-backed persistence layer + migration scripts for API/web entities.
+- [x] Add Postgres-backed persistence layer + migration scripts for API/web entities.
 - [ ] Add Redis-backed cache/session/rate-limit layer for API and stream control.
 - [ ] Add trace/run correlation IDs across API, tools, streams, and UI events.
 

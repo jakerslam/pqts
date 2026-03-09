@@ -16,6 +16,7 @@ from contracts.api import (
     RiskStateSnapshot,
 )
 from services.api.auth import APIIdentity, require_identity, require_operator
+from services.api.persistence import APIPersistence, get_persistence
 from services.api.state import APIRuntimeStore, StreamHub, get_store, get_stream_hub
 
 router = APIRouter(prefix="/v1", tags=["core"])
@@ -37,8 +38,12 @@ def get_account_summary(
     account_id: str,
     _: Annotated[APIIdentity, Depends(require_identity)],
     store: Annotated[APIRuntimeStore, Depends(get_store)],
+    persistence: Annotated[APIPersistence | None, Depends(get_persistence)],
 ) -> dict[str, Any]:
-    account = store.accounts.get(account_id)
+    if persistence is not None:
+        account = persistence.get_account(account_id)
+    else:
+        account = store.accounts.get(account_id)
     if account is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Account not found.")
     return {"account": account.to_dict()}
@@ -51,6 +56,7 @@ async def upsert_account_summary(
     _: Annotated[APIIdentity, Depends(require_operator)],
     store: Annotated[APIRuntimeStore, Depends(get_store)],
     hub: Annotated[StreamHub, Depends(get_stream_hub)],
+    persistence: Annotated[APIPersistence | None, Depends(get_persistence)],
 ) -> dict[str, Any]:
     payload["account_id"] = account_id
     try:
@@ -58,6 +64,8 @@ async def upsert_account_summary(
     except Exception as exc:
         raise _invalid_payload(exc) from exc
     store.accounts[account_id] = snapshot
+    if persistence is not None:
+        persistence.upsert_account(snapshot)
     await hub.broadcast(
         "risk",
         "account_upsert",
@@ -71,8 +79,13 @@ def list_positions(
     account_id: Annotated[str, Query(min_length=1)],
     _: Annotated[APIIdentity, Depends(require_identity)],
     store: Annotated[APIRuntimeStore, Depends(get_store)],
+    persistence: Annotated[APIPersistence | None, Depends(get_persistence)],
 ) -> dict[str, Any]:
-    rows = store.positions.get(account_id, [])
+    rows = (
+        persistence.list_positions(account_id)
+        if persistence is not None
+        else store.positions.get(account_id, [])
+    )
     return {"positions": [item.to_dict() for item in rows]}
 
 
@@ -82,12 +95,15 @@ async def append_position(
     _: Annotated[APIIdentity, Depends(require_operator)],
     store: Annotated[APIRuntimeStore, Depends(get_store)],
     hub: Annotated[StreamHub, Depends(get_stream_hub)],
+    persistence: Annotated[APIPersistence | None, Depends(get_persistence)],
 ) -> dict[str, Any]:
     try:
         snapshot = PositionSnapshot.from_dict(payload)
     except Exception as exc:
         raise _invalid_payload(exc) from exc
     store.positions.setdefault(snapshot.account_id, []).append(snapshot)
+    if persistence is not None:
+        persistence.append_position(snapshot)
     await hub.broadcast(
         "positions",
         "position_appended",
@@ -101,8 +117,11 @@ def list_orders(
     account_id: Annotated[str, Query(min_length=1)],
     _: Annotated[APIIdentity, Depends(require_identity)],
     store: Annotated[APIRuntimeStore, Depends(get_store)],
+    persistence: Annotated[APIPersistence | None, Depends(get_persistence)],
 ) -> dict[str, Any]:
-    rows = store.orders.get(account_id, [])
+    rows = (
+        persistence.list_orders(account_id) if persistence is not None else store.orders.get(account_id, [])
+    )
     return {"orders": [item.to_dict() for item in rows]}
 
 
@@ -112,12 +131,15 @@ async def append_order(
     _: Annotated[APIIdentity, Depends(require_operator)],
     store: Annotated[APIRuntimeStore, Depends(get_store)],
     hub: Annotated[StreamHub, Depends(get_stream_hub)],
+    persistence: Annotated[APIPersistence | None, Depends(get_persistence)],
 ) -> dict[str, Any]:
     try:
         snapshot = OrderSnapshot.from_dict(payload)
     except Exception as exc:
         raise _invalid_payload(exc) from exc
     store.orders.setdefault(snapshot.account_id, []).append(snapshot)
+    if persistence is not None:
+        persistence.append_order(snapshot)
     await hub.broadcast(
         "orders",
         "order_appended",
@@ -131,8 +153,11 @@ def list_fills(
     account_id: Annotated[str, Query(min_length=1)],
     _: Annotated[APIIdentity, Depends(require_identity)],
     store: Annotated[APIRuntimeStore, Depends(get_store)],
+    persistence: Annotated[APIPersistence | None, Depends(get_persistence)],
 ) -> dict[str, Any]:
-    rows = store.fills.get(account_id, [])
+    rows = (
+        persistence.list_fills(account_id) if persistence is not None else store.fills.get(account_id, [])
+    )
     return {"fills": [item.to_dict() for item in rows]}
 
 
@@ -142,12 +167,15 @@ async def append_fill(
     _: Annotated[APIIdentity, Depends(require_operator)],
     store: Annotated[APIRuntimeStore, Depends(get_store)],
     hub: Annotated[StreamHub, Depends(get_stream_hub)],
+    persistence: Annotated[APIPersistence | None, Depends(get_persistence)],
 ) -> dict[str, Any]:
     try:
         snapshot = FillSnapshot.from_dict(payload)
     except Exception as exc:
         raise _invalid_payload(exc) from exc
     store.fills.setdefault(snapshot.account_id, []).append(snapshot)
+    if persistence is not None:
+        persistence.append_fill(snapshot)
     await hub.broadcast(
         "fills",
         "fill_appended",
@@ -161,8 +189,13 @@ def list_pnl_snapshots(
     account_id: Annotated[str, Query(min_length=1)],
     _: Annotated[APIIdentity, Depends(require_identity)],
     store: Annotated[APIRuntimeStore, Depends(get_store)],
+    persistence: Annotated[APIPersistence | None, Depends(get_persistence)],
 ) -> dict[str, Any]:
-    rows = store.pnl_snapshots.get(account_id, [])
+    rows = (
+        persistence.list_pnl_snapshots(account_id)
+        if persistence is not None
+        else store.pnl_snapshots.get(account_id, [])
+    )
     return {"snapshots": [item.to_dict() for item in rows]}
 
 
@@ -172,12 +205,15 @@ async def append_pnl_snapshot(
     _: Annotated[APIIdentity, Depends(require_operator)],
     store: Annotated[APIRuntimeStore, Depends(get_store)],
     hub: Annotated[StreamHub, Depends(get_stream_hub)],
+    persistence: Annotated[APIPersistence | None, Depends(get_persistence)],
 ) -> dict[str, Any]:
     try:
         snapshot = PnLSnapshot.from_dict(payload)
     except Exception as exc:
         raise _invalid_payload(exc) from exc
     store.pnl_snapshots.setdefault(snapshot.account_id, []).append(snapshot)
+    if persistence is not None:
+        persistence.append_pnl_snapshot(snapshot)
     await hub.broadcast(
         "pnl",
         "pnl_snapshot_appended",
@@ -191,8 +227,13 @@ def get_risk_state(
     account_id: str,
     _: Annotated[APIIdentity, Depends(require_identity)],
     store: Annotated[APIRuntimeStore, Depends(get_store)],
+    persistence: Annotated[APIPersistence | None, Depends(get_persistence)],
 ) -> dict[str, Any]:
-    snapshot = store.risk_states.get(account_id)
+    snapshot = (
+        persistence.get_risk_state(account_id)
+        if persistence is not None
+        else store.risk_states.get(account_id)
+    )
     if snapshot is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Risk state not found.")
     return {"risk_state": snapshot.to_dict()}
@@ -205,6 +246,7 @@ async def upsert_risk_state(
     _: Annotated[APIIdentity, Depends(require_operator)],
     store: Annotated[APIRuntimeStore, Depends(get_store)],
     hub: Annotated[StreamHub, Depends(get_stream_hub)],
+    persistence: Annotated[APIPersistence | None, Depends(get_persistence)],
 ) -> dict[str, Any]:
     payload["account_id"] = account_id
     try:
@@ -212,6 +254,8 @@ async def upsert_risk_state(
     except Exception as exc:
         raise _invalid_payload(exc) from exc
     store.risk_states[account_id] = snapshot
+    if persistence is not None:
+        persistence.upsert_risk_state(snapshot)
     await hub.broadcast(
         "risk",
         "risk_state_upserted",
@@ -226,6 +270,7 @@ async def append_risk_incident(
     _: Annotated[APIIdentity, Depends(require_operator)],
     store: Annotated[APIRuntimeStore, Depends(get_store)],
     hub: Annotated[StreamHub, Depends(get_stream_hub)],
+    persistence: Annotated[APIPersistence | None, Depends(get_persistence)],
 ) -> dict[str, Any]:
     account_id = str(payload.get("account_id", "paper-main")).strip() or "paper-main"
     incident = {
@@ -237,6 +282,8 @@ async def append_risk_incident(
         "metadata": dict(payload.get("metadata", {}) or {}),
     }
     store.risk_incidents.setdefault(account_id, []).append(incident)
+    if persistence is not None:
+        persistence.append_risk_incident(incident)
     await hub.broadcast(
         "risk",
         "risk_incident",
