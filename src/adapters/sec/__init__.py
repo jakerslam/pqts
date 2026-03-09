@@ -17,6 +17,11 @@ from adapters.sec.filters import (
 )
 from adapters.sec.issuer_registry import IssuerRecord, ingest_company_tickers, parse_company_tickers
 from adapters.sec.submissions import SubmissionRecord, ingest_submissions, parse_submissions_recent
+from adapters.sec.tabular import (
+    companyconcept_to_table,
+    companyfacts_to_table,
+    submissions_to_table,
+)
 from adapters.sec.utils import normalize_cik
 
 __all__ = [
@@ -26,6 +31,8 @@ __all__ = [
     "SECClient",
     "SECIdentityConfig",
     "SubmissionRecord",
+    "companyconcept_to_table",
+    "companyfacts_to_table",
     "extract_companyconcept_series",
     "extract_companyfacts_series",
     "filter_by_forms",
@@ -39,6 +46,7 @@ __all__ = [
     "parse_submissions_recent",
     "validate_concept",
     "validate_taxonomy",
+    "submissions_to_table",
     "traverse_companyfacts",
     "normalize_cik",
     "validate_sec_user_agent",
