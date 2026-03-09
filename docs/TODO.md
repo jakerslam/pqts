@@ -2,39 +2,101 @@
 
 Last updated: 2026-03-09 (America/Denver)
 
-This file tracks engineering chores/fix items (not net-new product capabilities and not human-only outreach work).
+Execution rule: complete phases top-to-bottom. Do not start a later phase until all blocking items in earlier phases are done.
 
-## Web App SRS Implementation (Ordered by Importance)
+Issue-ready split backlog: [docs/ISSUE_BACKLOG.md](/Users/jay/Document%20(Lcl)/Coding/PQTS/docs/ISSUE_BACKLOG.md)
 
-- [ ] `P0` Create `services/api` FastAPI service scaffold with health/readiness endpoints and OpenAPI generation.
-- [ ] `P0` Implement API auth foundation (session/token flow + role model) and protect privileged endpoints.
-- [ ] `P0` Implement core REST endpoints: account summary, positions, orders, fills, PnL snapshots, risk state.
-- [ ] `P0` Implement core WebSocket channels: orders, fills, positions, PnL, risk/kill-switch incidents.
-- [ ] `P0` Add Postgres-backed persistence layer for web app entities and migration scripts.
-- [ ] `P0` Add Redis-backed cache/session/rate-limit layer for API and stream control.
-- [ ] `P1` Create `apps/web` Next.js + TypeScript app scaffold with API client layer and env wiring.
-- [ ] `P1` Build authenticated dashboard shell (navigation, auth-aware routing, error boundaries).
-- [ ] `P1` Implement first production pages in Next.js: portfolio overview, orders/fills tape, risk/alerts panel.
-- [ ] `P1` Add parity checks between Streamlit and Next.js for key metrics during migration.
-- [ ] `P1` Add end-to-end smoke tests for login, dashboard load, stream subscribe, and risk-state rendering.
-- [ ] `P1` Add frontend unit/integration tests for critical components and data hooks.
-- [ ] `P1` Add API latency/error SLO instrumentation and dashboards for web-specific services.
-- [ ] `P2` Add operator action workflows in web app (pause/resume mechanisms, canary decisions, incident ack).
-- [ ] `P2` Add release gating for web app builds with provenance artifact upload.
-- [ ] `P2` Document migration milestones and deprecation plan for replaced Streamlit surfaces.
+## 00. Foundation Done
 
-## P0
-
-- [x] Add `LICENSE` file with MIT text and ensure repository metadata reflects license choice.
-- [x] Add GitHub Actions CI pipeline coverage for `pytest`, `ruff`, `mypy`, architecture boundary validation, and security scan.
-- [x] Add README badges for CI status and package/release status.
-- [x] Add Docker + docker-compose one-command runtime stack.
-- [x] Add automated simulation leaderboard static export and GitHub Pages publishing workflow.
+- [x] Add `LICENSE` file with MIT text.
+- [x] Add GitHub Actions CI coverage for `pytest`, `ruff`, `mypy`, architecture checks, and security scan.
+- [x] Add README badges for CI and package/release status.
+- [x] Add Docker + `docker-compose` one-command runtime stack.
+- [x] Add automated simulation leaderboard static export + GitHub Pages publish workflow.
 - [x] Add benchmark/results documentation templates for reproducible publication.
-- [x] Finalize PyPI publication workflow (`pip install pqts`) including trusted publishing setup and release credentials documentation.
+- [x] Finalize PyPI publication workflow (`pip install pqts`) and release credential docs.
+- [x] Add release checklist docs and branch protection guidance.
 
-## P1
+## 01. Core Runtime Contracts + API Platform (`P0`)
 
-- [x] Add release checklist doc for version bump, changelog, package build, smoke install, and publish.
-- [x] Add CI branch protection guidance and required-check policy in docs.
-- [ ] Capture first published benchmark baselines in `docs/BENCHMARKS.md` from reproducible runs.
+- [ ] Create canonical schemas for account, positions, orders, fills, PnL snapshots, risk state, tool payloads, and error envelopes.
+- [ ] Create `services/api` FastAPI service scaffold with health/readiness endpoints and OpenAPI generation.
+- [ ] Implement API auth foundation (session/token flow + role model) and protect privileged endpoints.
+- [ ] Implement core REST endpoints: account summary, positions, orders, fills, PnL snapshots, risk state.
+- [ ] Implement core WebSocket channels: orders, fills, positions, PnL, risk/kill-switch incidents.
+- [ ] Add Postgres-backed persistence layer + migration scripts for API/web entities.
+- [ ] Add Redis-backed cache/session/rate-limit layer for API and stream control.
+- [ ] Add trace/run correlation IDs across API, tools, streams, and UI events.
+
+## 02. Market + SEC Data Fabric (`P0`)
+
+- [ ] Implement SEC-compliant request identity config (`User-Agent`) with runtime validation.
+- [ ] Build master ticker→CIK ingestion pipeline from SEC `company_tickers.json`.
+- [ ] Add canonical CIK normalization utility (int and zero-padded 10-digit string forms).
+- [ ] Implement SEC submissions ingestion (`CIK{cik}.json`) with form/date/accession normalization.
+- [ ] Implement SEC `companyfacts` taxonomy traversal (`dei`, `us-gaap`) with missing-tag-safe parsing.
+- [ ] Implement SEC `companyconcept` metric endpoint adapter with taxonomy/concept validation.
+- [ ] Add unit-aware metric extraction (`USD`, `shares`, etc.) and form-scoped filters (10-Q/10-K).
+- [ ] Add tabular normalization layer for SEC payloads with accession/report-date traceability.
+- [ ] Implement multi-source retrieval surface (structured market/financial + web/news) with provenance metadata.
+- [ ] Add provider adapter error envelopes and response-shape normalization for all external connectors.
+
+## 03. Execution + Risk Intelligence (`P1`)
+
+- [ ] Implement Bayesian probability update engine with persisted prior/evidence/posterior metadata.
+- [ ] Implement cross-market dependency graph + logical constraint checks + violation alerts.
+- [ ] Build calibration surface pipeline and mispricing diagnostics (bucket/regime based).
+- [ ] Implement uncertainty-adjusted Kelly sizing with caps and minimum-edge gates.
+- [ ] Implement VWAP/TWAP/depth-aware execution slicing and execution quality telemetry.
+- [ ] Add orderbook sequence-gap detection and deterministic resync/recovery logic.
+- [ ] Implement informed-flow/liquidity indicators (including VPIN-style) and automated quote/size kill switches.
+- [ ] Add portfolio VaR + drawdown guardrails with automatic new-risk gating.
+- [ ] Implement cross-venue dislocation detection and hedged routing planner.
+- [ ] Add on-chain settlement state monitoring and resolution-window risk controls.
+
+## 04. Web App + Generative UI (`P1`)
+
+- [ ] Create `apps/web` Next.js + TypeScript app scaffold with API client/env wiring.
+- [ ] Build authenticated dashboard shell (navigation, auth-aware routing, error boundaries).
+- [ ] Implement first production pages: portfolio overview, orders/fills tape, risk/alerts panel.
+- [ ] Add tool-aware UI registry mapping tool type → loading component + final component + fallback renderer.
+- [ ] Implement stream-event orchestrator for LLM token stream + tool lifecycle events.
+- [ ] Implement optimistic user-turn rendering with rollback/error reconciliation.
+- [ ] Add input UX controls (Enter submit, Shift+Enter newline, duplicate-submit prevention).
+- [ ] Add scroll anchoring + “scroll to latest” behavior for streaming sessions.
+- [ ] Add rich markdown/table/code rendering with safe outbound-link defaults.
+- [ ] Add operator action workflows (pause/resume mechanisms, canary decisions, incident acknowledgment).
+- [ ] Add frontend/unit integration tests for critical components and data hooks.
+- [ ] Add end-to-end smoke tests for login, dashboard load, stream subscribe, and risk-state rendering.
+
+## 05. Research Dataset + Evaluation Pipeline (`P1`)
+
+- [ ] Implement multi-source corpus ingestion (text list, PDF URL, 10-K, 10-Q) with unified normalization.
+- [ ] Add deterministic text cleanup and token-aware chunking (size + overlap) with provenance.
+- [ ] Implement question budget allocator (per-chunk allocation + global cap enforcement).
+- [ ] Implement strict function-call schema output (`question`, `answer`, `context`) with schema validation.
+- [ ] Enforce grounded standalone QA quality policy and reject source-referential leakage phrasing.
+- [ ] Add provider guardrails + bounded retry/backoff for generation calls.
+- [ ] Implement two-stage retrieval→reasoning pipeline with stable evidence IDs (`text_i`, `table_j`).
+- [ ] Add top-k retrieval recall reporting and full-ranked-list persistence for audits.
+- [ ] Implement executable program DSL scoring with dual metrics: execution accuracy + symbolic program equivalence.
+- [ ] Implement blind/private-test evaluation mode and strict submission schema validation.
+- [ ] Add leakage regression tests for preprocessing functions and prompt-output schema integrity.
+
+## 06. Reliability, Security, and Operability (`P2`)
+
+- [ ] Add API/web SLO instrumentation and dashboards (latency, error rate, availability).
+- [ ] Add health endpoints and deployment profiles with explicit concurrency and graceful shutdown controls.
+- [ ] Add event-stream backbone hardening (durable events, replay support for incident forensics).
+- [ ] Add secrets management policy (rotation cadence, environment gating, non-exposure checks).
+- [ ] Add release gating with build provenance artifact upload/verification.
+- [ ] Add frontend/backend contract tests for graph node events and tool renderer mapping completeness.
+- [ ] Add migration parity checks between Streamlit and Next.js outputs for key metrics.
+- [ ] Document Streamlit deprecation milestones once parity is green.
+
+## 07. Benchmarking and Publication (`P2`)
+
+- [ ] Capture first published benchmark baselines in [docs/BENCHMARKS.md](/Users/jay/Document%20(Lcl)/Coding/PQTS/docs/BENCHMARKS.md) from reproducible runs.
+- [ ] Publish at least three reproducible result bundles under `results/` with configs, metrics, and charts.
+- [ ] Add monthly automated report generation (HTML/PDF + equity curve + Sharpe/DD + attribution tables).
+- [ ] Add benchmark provenance log (strategy version, dataset/version, environment hash, run timestamp).
