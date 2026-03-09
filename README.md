@@ -35,6 +35,38 @@ PQTS is built for operational robustness first, not just strategy scripts.
 | Simulation leaderboard + reporting | ✅ Native | ⚠️ Backtesting focus | ✅ Strong backtesting | ⚠️ Bot metrics focus |
 | Multi-market scope (crypto/equities/forex) | ✅ | ⚠️ Primarily crypto | ✅ | ⚠️ Primarily crypto/market-making |
 
+## 🖼️ Visual Tour
+
+### Screenshots
+
+| Dashboard Overview | Simulation Leaderboard |
+| --- | --- |
+| ![Dashboard Overview](docs/media/dashboard_overview.png) | ![Simulation Leaderboard](docs/media/simulation_leaderboard.png) |
+
+| Risk Controls | Canary Progress |
+| --- | --- |
+| ![Risk Controls](docs/media/risk_controls.png) | ![Canary Progress](docs/media/canary_progress.png) |
+
+| Ops Health | Execution Pipeline |
+| --- | --- |
+| ![Ops Health](docs/media/ops_health.png) | ![Execution Pipeline](docs/media/execution_pipeline.png) |
+
+| Architecture Layers | Performance Snapshot |
+| --- | --- |
+| ![Architecture Layers](docs/media/architecture_layers.png) | ![Performance Snapshot](docs/media/performance_snapshot.png) |
+
+### GIF Previews
+
+| Dashboard Pulse | Leaderboard Cycle | Risk Alert Flash |
+| --- | --- | --- |
+| ![Dashboard Pulse](docs/media/dashboard_pulse.gif) | ![Leaderboard Cycle](docs/media/leaderboard_cycle.gif) | ![Risk Alert Flash](docs/media/risk_alert_flash.gif) |
+
+Regenerate media assets with:
+
+```bash
+python scripts/generate_readme_media.py
+```
+
 ## 📊 Quick Start
 
 ```bash
@@ -396,8 +428,8 @@ Any Sharpe/return claim should come from reproducible backtest or paper/live rep
 
 ## 📄 License
 
-Proprietary - Protheus Labs
+MIT (see [LICENSE](LICENSE))
 
 ---
 
-Built with 🔥 by Protheus
+Built by Protheus
