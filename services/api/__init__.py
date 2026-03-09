@@ -1,5 +1,11 @@
 """PQTS FastAPI service package."""
 
-from .app import create_app
+import sys
+from pathlib import Path
 
-__all__ = ["create_app"]
+ROOT = Path(__file__).resolve().parents[2]
+SRC = ROOT / "src"
+if SRC.exists():
+    src_str = str(SRC)
+    if src_str not in sys.path:
+        sys.path.insert(0, src_str)

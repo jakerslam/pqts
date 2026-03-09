@@ -9,6 +9,8 @@ from fastapi import Depends, FastAPI
 
 from .auth import APIIdentity, build_token_store, require_admin, require_identity, require_operator
 from .config import APISettings
+from .routes import core_router
+from .state import APIRuntimeStore
 
 
 def _utc_now_iso() -> str:
@@ -31,6 +33,7 @@ def create_app(settings: APISettings | None = None) -> FastAPI:
     )
     app.state.settings = resolved
     app.state.token_store = build_token_store(resolved.auth_tokens)
+    app.state.store = APIRuntimeStore.bootstrap()
 
     @app.get("/health", tags=["health"])
     def health() -> dict[str, Any]:
@@ -88,6 +91,8 @@ def create_app(settings: APISettings | None = None) -> FastAPI:
             "requested_by": identity.subject,
             "timestamp": _utc_now_iso(),
         }
+
+    app.include_router(core_router)
 
     return app
 
