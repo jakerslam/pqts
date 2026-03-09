@@ -52,7 +52,7 @@ Issue-ready split backlog: [docs/ISSUE_BACKLOG.md](/Users/jay/Document%20(Lcl)/C
 - [x] Implement informed-flow/liquidity indicators (including VPIN-style) and automated quote/size kill switches.
 - [x] Add portfolio VaR + drawdown guardrails with automatic new-risk gating.
 - [x] Implement cross-venue dislocation detection and hedged routing planner.
-- [ ] Add on-chain settlement state monitoring and resolution-window risk controls.
+- [x] Add on-chain settlement state monitoring and resolution-window risk controls.
 
 ## 04. Web App + Generative UI (`P1`)
 
