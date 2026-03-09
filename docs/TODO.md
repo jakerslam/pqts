@@ -72,7 +72,7 @@ Issue-ready split backlog: [docs/ISSUE_BACKLOG.md](/Users/jay/Document%20(Lcl)/C
 ## 05. Research Dataset + Evaluation Pipeline (`P1`)
 
 - [x] Implement multi-source corpus ingestion (text list, PDF URL, 10-K, 10-Q) with unified normalization.
-- [ ] Add deterministic text cleanup and token-aware chunking (size + overlap) with provenance.
+- [x] Add deterministic text cleanup and token-aware chunking (size + overlap) with provenance.
 - [ ] Implement question budget allocator (per-chunk allocation + global cap enforcement).
 - [ ] Implement strict function-call schema output (`question`, `answer`, `context`) with schema validation.
 - [ ] Enforce grounded standalone QA quality policy and reject source-referential leakage phrasing.
