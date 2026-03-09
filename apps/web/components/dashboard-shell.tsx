@@ -14,6 +14,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
             <Link href="/dashboard/portfolio">Portfolio</Link>
             <Link href="/dashboard/execution">Execution</Link>
             <Link href="/dashboard/risk">Risk</Link>
+            <Link href="/dashboard/assistant">Assistant</Link>
             <form action="/api/auth/logout" method="post">
               <button type="submit">Sign Out</button>
             </form>

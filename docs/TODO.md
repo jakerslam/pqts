@@ -61,7 +61,7 @@ Issue-ready split backlog: [docs/ISSUE_BACKLOG.md](/Users/jay/Document%20(Lcl)/C
 - [x] Implement first production pages: portfolio overview, orders/fills tape, risk/alerts panel.
 - [x] Add tool-aware UI registry mapping tool type → loading component + final component + fallback renderer.
 - [x] Implement stream-event orchestrator for LLM token stream + tool lifecycle events.
-- [ ] Implement optimistic user-turn rendering with rollback/error reconciliation.
+- [x] Implement optimistic user-turn rendering with rollback/error reconciliation.
 - [ ] Add input UX controls (Enter submit, Shift+Enter newline, duplicate-submit prevention).
 - [ ] Add scroll anchoring + “scroll to latest” behavior for streaming sessions.
 - [ ] Add rich markdown/table/code rendering with safe outbound-link defaults.
