@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import type { AssistantTurnResponse, ChatTurn } from "@/lib/chat/types";
 
@@ -20,11 +20,21 @@ export function AssistantConsole() {
     text: string;
     timestampMs: number;
   } | null>(null);
+  const [isPinnedToBottom, setIsPinnedToBottom] = useState(true);
+  const historyRef = useRef<HTMLDivElement | null>(null);
 
   const sendingCount = useMemo(
     () => turns.filter((turn) => turn.status === "pending").length,
     [turns],
   );
+
+  useEffect(() => {
+    const history = historyRef.current;
+    if (!history || !isPinnedToBottom) {
+      return;
+    }
+    history.scrollTop = history.scrollHeight;
+  }, [turns, isPinnedToBottom]);
 
   async function submitTurn() {
     const content = input.trim();
@@ -110,6 +120,12 @@ export function AssistantConsole() {
       </p>
 
       <div
+        ref={historyRef}
+        onScroll={(event) => {
+          const target = event.currentTarget;
+          const distanceFromBottom = target.scrollHeight - target.scrollTop - target.clientHeight;
+          setIsPinnedToBottom(distanceFromBottom < 24);
+        }}
         style={{
           border: "1px solid var(--border)",
           borderRadius: 8,
@@ -137,6 +153,19 @@ export function AssistantConsole() {
           ))
         )}
       </div>
+      {!isPinnedToBottom ? (
+        <button
+          type="button"
+          onClick={() => {
+            const history = historyRef.current;
+            if (!history) return;
+            history.scrollTop = history.scrollHeight;
+            setIsPinnedToBottom(true);
+          }}
+        >
+          Scroll to latest
+        </button>
+      ) : null}
 
       <div style={{ display: "grid", gap: 8 }}>
         <textarea
