@@ -66,7 +66,7 @@ Issue-ready split backlog: [docs/ISSUE_BACKLOG.md](/Users/jay/Document%20(Lcl)/C
 - [x] Add scroll anchoring + “scroll to latest” behavior for streaming sessions.
 - [x] Add rich markdown/table/code rendering with safe outbound-link defaults.
 - [x] Add operator action workflows (pause/resume mechanisms, canary decisions, incident acknowledgment).
-- [ ] Add frontend/unit integration tests for critical components and data hooks.
+- [x] Add frontend/unit integration tests for critical components and data hooks.
 - [ ] Add end-to-end smoke tests for login, dashboard load, stream subscribe, and risk-state rendering.
 
 ## 05. Research Dataset + Evaluation Pipeline (`P1`)
