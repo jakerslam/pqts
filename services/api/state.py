@@ -4,8 +4,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
+from typing import Any
 
-from fastapi import Request
+from fastapi import Request, WebSocket
 
 from contracts.api import (
     AccountSummary,
@@ -31,6 +32,7 @@ class APIRuntimeStore:
     fills: dict[str, list[FillSnapshot]] = field(default_factory=dict)
     pnl_snapshots: dict[str, list[PnLSnapshot]] = field(default_factory=dict)
     risk_states: dict[str, RiskStateSnapshot] = field(default_factory=dict)
+    risk_incidents: dict[str, list[dict[str, Any]]] = field(default_factory=dict)
 
     @classmethod
     def bootstrap(cls) -> "APIRuntimeStore":
@@ -84,6 +86,7 @@ class APIRuntimeStore:
             fills={account.account_id: []},
             pnl_snapshots={account.account_id: [pnl]},
             risk_states={account.account_id: risk},
+            risk_incidents={account.account_id: []},
         )
 
 
@@ -93,4 +96,50 @@ def get_store(request: Request) -> APIRuntimeStore:
         return store
     fallback = APIRuntimeStore.bootstrap()
     request.app.state.store = fallback
+    return fallback
+
+
+@dataclass
+class StreamHub:
+    _channels: dict[str, set[WebSocket]] = field(
+        default_factory=lambda: {
+            "orders": set(),
+            "fills": set(),
+            "positions": set(),
+            "pnl": set(),
+            "risk": set(),
+        }
+    )
+
+    async def connect(self, channel: str, websocket: WebSocket) -> None:
+        await websocket.accept()
+        self._channels.setdefault(channel, set()).add(websocket)
+
+    def disconnect(self, channel: str, websocket: WebSocket) -> None:
+        self._channels.setdefault(channel, set()).discard(websocket)
+
+    async def broadcast(self, channel: str, event: str, payload: dict[str, Any]) -> None:
+        listeners = list(self._channels.get(channel, set()))
+        dead: list[WebSocket] = []
+        message = {
+            "channel": channel,
+            "event": event,
+            "payload": payload,
+            "timestamp": _utc_now().isoformat(),
+        }
+        for websocket in listeners:
+            try:
+                await websocket.send_json(message)
+            except Exception:
+                dead.append(websocket)
+        for websocket in dead:
+            self.disconnect(channel, websocket)
+
+
+def get_stream_hub(request: Request) -> StreamHub:
+    hub = getattr(request.app.state, "stream_hub", None)
+    if isinstance(hub, StreamHub):
+        return hub
+    fallback = StreamHub()
+    request.app.state.stream_hub = fallback
     return fallback

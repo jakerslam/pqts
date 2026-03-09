@@ -82,6 +82,26 @@ def get_token_store(request: Request) -> dict[str, APIRole]:
     return build_token_store("")
 
 
+def resolve_identity_for_token(
+    token: str,
+    *,
+    token_store: dict[str, APIRole],
+    auth_scheme: str,
+) -> APIIdentity | None:
+    value = token.strip()
+    if not value:
+        return None
+    role = token_store.get(value)
+    if role is None:
+        return None
+    return APIIdentity(
+        subject=f"user:{value[:8]}",
+        role=role,
+        token=value,
+        auth_scheme=auth_scheme,
+    )
+
+
 _bearer = HTTPBearer(auto_error=False)
 
 
@@ -105,19 +125,17 @@ def require_identity(
             detail="Authentication required.",
         )
 
-    role = token_store.get(token)
-    if role is None:
+    identity = resolve_identity_for_token(
+        token,
+        token_store=token_store,
+        auth_scheme=auth_scheme,
+    )
+    if identity is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid authentication token.",
         )
-
-    return APIIdentity(
-        subject=f"user:{token[:8]}",
-        role=role,
-        token=token,
-        auth_scheme=auth_scheme,
-    )
+    return identity
 
 
 def role_guard(min_role: APIRole) -> Callable[[APIIdentity], APIIdentity]:
