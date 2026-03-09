@@ -75,7 +75,7 @@ Issue-ready split backlog: [docs/ISSUE_BACKLOG.md](/Users/jay/Document%20(Lcl)/C
 - [x] Add deterministic text cleanup and token-aware chunking (size + overlap) with provenance.
 - [x] Implement question budget allocator (per-chunk allocation + global cap enforcement).
 - [x] Implement strict function-call schema output (`question`, `answer`, `context`) with schema validation.
-- [ ] Enforce grounded standalone QA quality policy and reject source-referential leakage phrasing.
+- [x] Enforce grounded standalone QA quality policy and reject source-referential leakage phrasing.
 - [ ] Add provider guardrails + bounded retry/backoff for generation calls.
 - [ ] Implement two-stage retrieval→reasoning pipeline with stable evidence IDs (`text_i`, `table_j`).
 - [ ] Add top-k retrieval recall reporting and full-ranked-list persistence for audits.
