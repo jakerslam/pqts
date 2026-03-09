@@ -177,6 +177,10 @@ gh workflow run "Publish Docs Site"
 Public reproducible result bundles live under `results/`.
 
 - baseline bundle: `results/2026-03-09_sim_suite_baseline/`
+- additional bundles:
+  - `results/2026-03-09_crypto_market_making_short/`
+  - `results/2026-03-09_crypto_funding_arbitrage_short/`
+  - `results/2026-03-09_multi_market_market_making_short/`
 - bundle schema/template: `results/RESULT_TEMPLATE.md`
 
 Each bundle includes the command, inputs, key metrics, and chart artifacts.

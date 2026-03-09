@@ -21,3 +21,6 @@ Example:
 ## Current Public Bundles
 
 - `2026-03-09_sim_suite_baseline/`
+- `2026-03-09_crypto_market_making_short/`
+- `2026-03-09_crypto_funding_arbitrage_short/`
+- `2026-03-09_multi_market_market_making_short/`
