@@ -6,6 +6,7 @@ from dataclasses import asdict, dataclass
 from typing import Any
 
 from adapters.sec.client import SECClient
+from adapters.sec.utils import normalize_cik
 
 
 @dataclass(frozen=True)
@@ -38,12 +39,13 @@ def parse_company_tickers(payload: dict[str, Any]) -> list[IssuerRecord]:
         if not ticker or cik_raw is None:
             continue
         cik = int(cik_raw)
+        cik_str = normalize_cik(cik)
         rows.append(
             IssuerRecord(
                 ticker=ticker,
                 title=title,
                 cik=cik,
-                cik_str=f"{cik:010d}",
+                cik_str=cik_str,
             )
         )
     rows.sort(key=lambda row: (row.ticker, row.cik))

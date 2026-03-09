@@ -32,7 +32,7 @@ Issue-ready split backlog: [docs/ISSUE_BACKLOG.md](/Users/jay/Document%20(Lcl)/C
 
 - [x] Implement SEC-compliant request identity config (`User-Agent`) with runtime validation.
 - [x] Build master ticker→CIK ingestion pipeline from SEC `company_tickers.json`.
-- [ ] Add canonical CIK normalization utility (int and zero-padded 10-digit string forms).
+- [x] Add canonical CIK normalization utility (int and zero-padded 10-digit string forms).
 - [ ] Implement SEC submissions ingestion (`CIK{cik}.json`) with form/date/accession normalization.
 - [ ] Implement SEC `companyfacts` taxonomy traversal (`dei`, `us-gaap`) with missing-tag-safe parsing.
 - [ ] Implement SEC `companyconcept` metric endpoint adapter with taxonomy/concept validation.
