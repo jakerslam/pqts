@@ -12,8 +12,13 @@ from typing import Any, Dict
 import yaml
 
 ROOT = Path(__file__).resolve().parent.parent
+SRC = ROOT / "src"
+if SRC.exists():
+    src_str = str(SRC)
+    if src_str not in sys.path:
+        sys.path[:] = [src_str, *sys.path]
 if str(ROOT) not in sys.path:
-    sys.path.insert(0, str(ROOT))
+    sys.path[:] = [str(ROOT), *sys.path]
 
 from core.secret_manager import hydrate_config_secrets  # noqa: E402
 from core.secrets_policy import validate_live_secrets  # noqa: E402

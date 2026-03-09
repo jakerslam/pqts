@@ -3,6 +3,15 @@
 from __future__ import annotations
 
 import asyncio
+from pathlib import Path
+import sys
+
+ROOT = Path(__file__).resolve().parent
+SRC = ROOT / "src"
+if SRC.exists():
+    src_str = str(SRC)
+    if src_str not in sys.path:
+        sys.path[:] = [src_str, *sys.path]
 
 from app.cli import apply_cli_toggles, build_arg_parser
 from app.runtime import main

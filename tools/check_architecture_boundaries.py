@@ -22,13 +22,18 @@ ALLOWED_IMPORTS: dict[str, set[str]] = {
 }
 
 
-def _module_name_for_file(root: Path, file_path: Path) -> str:
-    relative = file_path.relative_to(root)
+def _source_root(root: Path) -> Path:
+    src_root = root / "src"
+    return src_root if src_root.exists() else root
+
+
+def _module_name_for_file(source_root: Path, file_path: Path) -> str:
+    relative = file_path.relative_to(source_root)
     return ".".join(relative.with_suffix("").parts)
 
 
-def _iter_python_files(root: Path, package: str) -> list[Path]:
-    package_path = root / package
+def _iter_python_files(source_root: Path, package: str) -> list[Path]:
+    package_path = source_root / package
     if not package_path.exists():
         return []
     return sorted(path for path in package_path.rglob("*.py") if path.is_file())
@@ -51,11 +56,12 @@ def _iter_import_targets(file_path: Path) -> list[str]:
 
 def collect_boundary_violations(root: Path) -> list[str]:
     violations: list[str] = []
+    source_root = _source_root(root)
 
     for package in CANONICAL_PACKAGES:
         allowed = ALLOWED_IMPORTS[package]
-        for file_path in _iter_python_files(root, package):
-            module_name = _module_name_for_file(root, file_path)
+        for file_path in _iter_python_files(source_root, package):
+            module_name = _module_name_for_file(source_root, file_path)
             for target in _iter_import_targets(file_path):
                 target_root = target.split(".", 1)[0]
                 if target_root not in CANONICAL_PACKAGES:

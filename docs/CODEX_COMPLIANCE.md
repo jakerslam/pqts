@@ -16,19 +16,19 @@ Before making code changes, review in this order:
 ## Architecture Compliance
 
 - Keep the canonical modular-monolith layout intact:
-  - `app/`
-  - `contracts/`
-  - `modules/`
-  - `adapters/`
+  - `src/app/`
+  - `src/contracts/`
+  - `src/modules/`
+  - `src/adapters/`
 - Enforce layer boundaries with:
   - `python tools/check_architecture_boundaries.py`
-- Keep `main.py` as a compatibility entrypoint delegating to `app.runtime`.
+- Keep `main.py` as a compatibility entrypoint delegating to `src/app/runtime.py` (`app.runtime` module path).
 
 ## Language Compliance
 
 - Use Python as the default implementation language for runtime, orchestration, and strategy logic.
 - Use SQL/DuckDB/Polars-style data operations for heavy analytics where performance needs it.
-- Keep R limited to optional research validation gates (`research/r_analytics_bridge.py` + `scripts/r/validate_experiment.R`).
+- Keep R limited to optional research validation gates (`src/research/r_analytics_bridge.py` + `scripts/r/validate_experiment.R`).
 - Do not make R a hard dependency for core trading runtime paths.
 - Only introduce Rust/C++ after profiling proves Python hot paths cannot meet latency/SLO targets.
 

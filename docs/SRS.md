@@ -1987,3 +1987,64 @@ Observed outbound links:
 
 - Claims from this source chain about traction, participant counts, or verified-revenue totals shall be marked `unverified` unless reproducible from captured datasets and audit logs.
 - Requirements adopted from this source chain shall remain limited to observable mechanics and validated inferred controls.
+
+## 41. Additional Productization + Distribution Requirements (Grok Synthesis, March 9, 2026)
+
+These requirements capture net-new system capabilities focused on adoption, reproducibility, and external visibility.
+
+Source context:
+- User-provided Grok synthesis (March 9, 2026) covering PQTS growth gaps vs public quant OSS competitors.
+
+### GK-1 One-Command Container Runtime
+
+- System shall provide a one-command containerized runtime using `docker-compose` with at least: core app runtime, Streamlit dashboard, Redis, and Postgres services.
+- Container stack shall include deterministic local startup with health checks and documented environment variable mapping.
+- Optional observability services (for example Grafana) shall be supported as opt-in profiles without blocking base startup.
+
+### GK-2 Public Simulation Leaderboard Publication
+
+- System shall support automated export of the latest simulation leaderboard artifact to a static web target.
+- Publication pipeline shall ingest `data/reports/simulation_leaderboard_*.csv`, normalize schema, and render human-readable leaderboard output.
+- Published leaderboard snapshots shall include generation timestamp and source commit reference for traceability.
+
+### GK-3 Operator Notification Integrations (Telegram/Discord)
+
+- System shall provide outbound notification integrations for Telegram and Discord.
+- Notifications shall support at least trade alerts, daily PnL summary, and kill-switch/risk-halt events.
+- Notification delivery shall enforce deduplication and rate limiting controls to prevent alert floods.
+
+### GK-4 Historical Dataset Bootstrap and Seeding
+
+- System shall provide deterministic historical data bootstrap tooling with exchange ingestion support and local cache persistence.
+- Tooling shall support seeded sample datasets spanning configurable date windows (including 2024-2026 campaign windows).
+- Seed pipeline shall produce reproducible manifests (symbols, intervals, date bounds, checksums) for experiment replay.
+
+### GK-5 Hyperparameter + Purged-CV Automation
+
+- System shall support automated hyperparameter search workflows with purged cross-validation appropriate for time-series leakage control.
+- Search runs shall persist parameter sets, fold-level metrics, and selected winner rationale for auditability.
+- Promotion from optimization output to deployable config shall require existing readiness/promotion gates.
+
+### GK-6 Automated Monthly Performance Report Builder
+
+- System shall generate scheduled monthly performance reports in machine-shareable and human-readable formats.
+- Reports shall include at minimum equity curve outputs and risk/return tables (including Sharpe and drawdown metrics).
+- Report jobs shall preserve source run IDs and config references for reproducibility.
+
+### GK-7 Strategy Scaffolding and Plugin Extension Interface
+
+- CLI shall support strategy scaffolding via a command equivalent to `pqts new-strategy`.
+- New strategy templates shall include required contract hooks, registration stubs, and test skeletons.
+- System shall support a plugin registration interface so externally contributed strategies can be loaded without modifying core package internals.
+
+### GK-8 Hybrid Backtesting Execution Modes
+
+- Backtesting subsystem shall support both vectorized fast mode and event-driven high-fidelity mode.
+- Runtime shall expose explicit mode selection and document tradeoffs (speed vs microstructure accuracy).
+- Regression parity checks shall compare key outcomes across modes and flag unacceptable divergence.
+
+### GK-9 Prometheus-Compatible Metrics Surface
+
+- Runtime shall expose a metrics endpoint compatible with Prometheus scraping.
+- Metrics shall cover execution health, risk-state transitions, and strategy-level performance counters.
+- System shall include importable Grafana dashboard templates aligned with exposed metric names.

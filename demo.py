@@ -13,11 +13,16 @@ from typing import Any, Dict, List
 
 import yaml
 
+ROOT = Path(__file__).resolve().parent
+SRC = ROOT / "src"
+if SRC.exists():
+    src_str = str(SRC)
+    if src_str not in sys.path:
+        sys.path[:] = [src_str, *sys.path]
+
 from analytics.attribution import log_event
 from core.operator_tier import resolve_operator_tier, validate_operator_tier_overrides
 from research.handoff_blob import build_handoff_blob
-
-ROOT = Path(__file__).resolve().parent
 
 
 def _parse_json_from_output(output: str) -> Dict[str, Any]:
@@ -140,7 +145,7 @@ def _write_report(
         "## Outputs",
         "",
         f"- Handoff Blob: `{handoff_path}`",
-        "- Dashboard: `python dashboard/start.py` then open `http://localhost:8050`",
+        "- Dashboard: `python src/dashboard/start.py` then open `http://localhost:8050`",
     ]
     report_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
     return report_path

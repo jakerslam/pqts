@@ -75,7 +75,8 @@ def main() -> int:
     provides = [item.strip() for item in args.provides.split(",") if item.strip()]
 
     repo_root = Path(args.root).resolve()
-    module_path = repo_root / "modules" / f"{name}.py"
+    source_root = repo_root / "src" if (repo_root / "src").exists() else repo_root
+    module_path = source_root / "modules" / f"{name}.py"
     if module_path.exists():
         raise FileExistsError(f"module file already exists: {module_path}")
 
@@ -93,7 +94,7 @@ def main() -> int:
     module_path.write_text(content, encoding="utf-8")
 
     print(f"Created module skeleton: {module_path}")
-    print("Next: import and register this module in modules/__init__.py")
+    print("Next: import and register this module in src/modules/__init__.py")
     return 0
 
 

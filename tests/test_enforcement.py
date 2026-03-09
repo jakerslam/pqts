@@ -11,16 +11,17 @@ import pytest
 
 
 ROOT = Path(__file__).resolve().parent.parent
+SOURCE_ROOT = ROOT / "src" if (ROOT / "src").exists() else ROOT
 TESTS_DIR = ROOT / "tests"
 SCRIPTS_DIR = ROOT / "scripts"
-ROUTER_FILE = ROOT / "execution" / "risk_aware_router.py"
+ROUTER_FILE = SOURCE_ROOT / "execution" / "risk_aware_router.py"
 ROUTER_REL = ROUTER_FILE.relative_to(ROOT)
 
 ADAPTER_FILES = {
-    (ROOT / "markets" / "crypto" / "binance_adapter.py").relative_to(ROOT),
-    (ROOT / "markets" / "crypto" / "coinbase_adapter.py").relative_to(ROOT),
-    (ROOT / "markets" / "equities" / "alpaca_adapter.py").relative_to(ROOT),
-    (ROOT / "markets" / "forex" / "oanda_adapter.py").relative_to(ROOT),
+    (SOURCE_ROOT / "markets" / "crypto" / "binance_adapter.py").relative_to(ROOT),
+    (SOURCE_ROOT / "markets" / "crypto" / "coinbase_adapter.py").relative_to(ROOT),
+    (SOURCE_ROOT / "markets" / "equities" / "alpaca_adapter.py").relative_to(ROOT),
+    (SOURCE_ROOT / "markets" / "forex" / "oanda_adapter.py").relative_to(ROOT),
 }
 
 ADAPTER_MODULES = {
@@ -113,7 +114,7 @@ class TestSingleOrderPath:
                         violations.append(f"{rel}:{node.lineno}")
 
         assert not violations, (
-            "VIOLATION: submit_order() exists outside execution/risk_aware_router.py: "
+            "VIOLATION: submit_order() exists outside src/execution/risk_aware_router.py: "
             f"{violations}"
         )
 
@@ -311,7 +312,7 @@ class TestRouterTokenProtection:
 
 class TestCapitalInjectionHardStop:
     def test_no_capital_fallback_constant(self):
-        risk_dir = ROOT / "risk"
+        risk_dir = SOURCE_ROOT / "risk"
         violations: list[str] = []
 
         for path in risk_dir.rglob("*.py"):

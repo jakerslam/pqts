@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict
@@ -12,10 +13,13 @@ from typing import Any, Dict
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parent.parent
-import sys
-
+SRC = ROOT / "src"
+if SRC.exists():
+    src_str = str(SRC)
+    if src_str not in sys.path:
+        sys.path[:] = [src_str, *sys.path]
 if str(ROOT) not in sys.path:
-    sys.path.insert(0, str(ROOT))
+    sys.path[:] = [str(ROOT), *sys.path]
 
 from analytics.revenue_diagnostics import RevenueDiagnostics  # noqa: E402
 from analytics.slo_monitor import load_reconciliation_incidents  # noqa: E402

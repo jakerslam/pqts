@@ -11,8 +11,13 @@ from pathlib import Path
 from typing import List
 
 ROOT = Path(__file__).resolve().parent.parent
+SRC = ROOT / "src"
+if SRC.exists():
+    src_str = str(SRC)
+    if src_str not in sys.path:
+        sys.path[:] = [src_str, *sys.path]
 if str(ROOT) not in sys.path:
-    sys.path.insert(0, str(ROOT))
+    sys.path[:] = [str(ROOT), *sys.path]
 
 from core.mechanism_switches import parse_switch_overrides  # noqa: E402
 from execution.simulation_suite import SimulationSuiteRunner  # noqa: E402

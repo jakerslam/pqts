@@ -40,3 +40,15 @@ def test_collect_boundary_violations_allows_valid_layer_imports(tmp_path):
 
     violations = MODULE.collect_boundary_violations(tmp_path)
     assert violations == []
+
+
+def test_collect_boundary_violations_uses_src_layout_when_present(tmp_path):
+    _write(tmp_path / "src" / "modules" / "bad.py", "import app.runtime\n")
+    _write(tmp_path / "src" / "modules" / "__init__.py", "")
+    _write(tmp_path / "src" / "app" / "runtime.py", "")
+    _write(tmp_path / "src" / "app" / "__init__.py", "")
+    _write(tmp_path / "src" / "contracts" / "__init__.py", "")
+    _write(tmp_path / "src" / "adapters" / "__init__.py", "")
+
+    violations = MODULE.collect_boundary_violations(tmp_path)
+    assert any("forbidden import 'app.runtime'" in item for item in violations)

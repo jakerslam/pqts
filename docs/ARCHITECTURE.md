@@ -16,13 +16,13 @@
 
 ## Canonical Layout
 
-- `app/`: composition root, CLI wiring, runtime startup.
-- `contracts/`: shared typed contracts (`RuntimeContext`, module descriptors, event envelopes).
-- `modules/`: business modules with explicit dependencies and lifecycle hooks.
-- `adapters/`: external I/O adapter descriptors and loading helpers.
+- `src/app/`: composition root, CLI wiring, runtime startup.
+- `src/contracts/`: shared typed contracts (`RuntimeContext`, module descriptors, event envelopes).
+- `src/modules/`: business modules with explicit dependencies and lifecycle hooks.
+- `src/adapters/`: external I/O adapter descriptors and loading helpers.
 
 Legacy domain code remains in place during migration:
-- `core/`, `execution/`, `analytics/`, `risk/`, `strategies/`, `markets/`, etc.
+- `src/core/`, `src/execution/`, `src/analytics/`, `src/risk/`, `src/strategies/`, `src/markets/`, etc.
 
 ## Language Strategy
 
@@ -56,7 +56,7 @@ Canonical layer rules enforced by `tools/check_architecture_boundaries.py`:
 ## R Analytics Boundary
 
 - Optional bridge:
-  - `research/r_analytics_bridge.py`
+  - `src/research/r_analytics_bridge.py`
   - `scripts/r/validate_experiment.R`
 - R validation may gate research promotion when explicitly enabled.
 - Core runtime and execution paths must remain operational without R.
@@ -69,7 +69,7 @@ Canonical layer rules enforced by `tools/check_architecture_boundaries.py`:
 
 ## Adding a New Module
 
-1. Add a module class in `modules/<name>.py` with a `ModuleDescriptor`.
+1. Add a module class in `src/modules/<name>.py` with a `ModuleDescriptor`.
 2. Declare `requires` dependencies explicitly.
-3. Register it in `modules.get_default_modules()`.
+3. Register it in `src/modules/__init__.py` (`get_default_modules()`).
 4. Run boundary and tests.

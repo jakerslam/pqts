@@ -9,8 +9,13 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+SRC = ROOT / "src"
+if SRC.exists():
+    src_str = str(SRC)
+    if src_str not in sys.path:
+        sys.path[:] = [src_str, *sys.path]
 if str(ROOT) not in sys.path:
-    sys.path.insert(0, str(ROOT))
+    sys.path[:] = [str(ROOT), *sys.path]
 
 from analytics.monthly_attribution import summarize_monthly_attribution  # noqa: E402
 from research.database import ResearchDatabase  # noqa: E402

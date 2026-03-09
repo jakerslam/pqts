@@ -55,10 +55,10 @@ test:
 	$(VENV_PY) -m pytest -q
 
 lint:
-	$(VENV_PY) -m black --check core execution risk analytics markets demo.py
-	$(VENV_PY) -m isort --check-only core execution risk analytics markets demo.py
-	$(VENV_PY) -m ruff check core execution risk analytics markets --select E9,F63,F7,F82
-	$(VENV_PY) -m flake8 core execution risk analytics markets --count --select=E9,F63,F7,F82 --show-source --statistics
+	$(VENV_PY) -m black --check src/core src/execution src/risk src/analytics src/markets demo.py
+	$(VENV_PY) -m isort --check-only src/core src/execution src/risk src/analytics src/markets demo.py
+	$(VENV_PY) -m ruff check src/core src/execution src/risk src/analytics src/markets --select E9,F63,F7,F82
+	$(VENV_PY) -m flake8 src/core src/execution src/risk src/analytics src/markets --count --select=E9,F63,F7,F82 --show-source --statistics
 
 clean:
 	rm -rf "$(VENV)"

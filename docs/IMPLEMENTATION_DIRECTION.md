@@ -14,11 +14,11 @@ Last updated: 2026-03-09 (America/Denver)
 
 - Primary architecture: modular monolith.
 - Canonical layers:
-  - `app/` composition and runtime entrypoints
-  - `contracts/` typed interfaces and event/context contracts
-  - `modules/` domain module lifecycle units
-  - `adapters/` external I/O integrations
-- Existing domain packages remain in place during migration and are composed through `app/`.
+  - `src/app/` composition and runtime entrypoints
+  - `src/contracts/` typed interfaces and event/context contracts
+  - `src/modules/` domain module lifecycle units
+  - `src/adapters/` external I/O integrations
+- Existing domain packages remain in place during migration and are composed through `src/app/`.
 
 ## Language Direction
 
@@ -30,7 +30,7 @@ Last updated: 2026-03-09 (America/Denver)
 ## R Integration Position
 
 - Implemented and available:
-  - `research/r_analytics_bridge.py`
+  - `src/research/r_analytics_bridge.py`
   - `scripts/r/validate_experiment.R`
 - Intended role:
   - optional validation layer for research promotion gates

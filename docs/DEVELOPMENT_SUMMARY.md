@@ -6,7 +6,7 @@ Protheus Quant Trading System (PQTS) is now a complete, production-ready algorit
 ## 📊 What Was Built
 
 ### 1. Backtesting Framework ✅
-**File**: `backtesting/engine.py` (15KB)
+**File**: `src/backtesting/engine.py` (15KB)
 
 Features:
 - Event-driven architecture
@@ -41,7 +41,7 @@ print(f"Return: {result.total_return_pct:.2f}%")
 ### 2. Additional Exchange Adapters ✅
 
 #### Coinbase Pro Adapter
-**File**: `markets/crypto/coinbase_adapter.py` (5.7KB)
+**File**: `src/markets/crypto/coinbase_adapter.py` (5.7KB)
 
 Features:
 - Full Coinbase Pro API integration
@@ -52,7 +52,7 @@ Features:
 - Account balance tracking
 
 #### Alpaca Adapter
-**File**: `markets/equities/alpaca_adapter.py` (7.8KB)
+**File**: `src/markets/equities/alpaca_adapter.py` (7.8KB)
 
 Features:
 - Paper and live trading support
@@ -63,7 +63,7 @@ Features:
 - Market clock and calendar
 
 ### 3. Real-Time Dashboard ✅
-**Files**: `dashboard/app.py` (12KB), `dashboard/start.py`
+**Files**: `src/dashboard/app.py` (12KB), `src/dashboard/start.py`
 
 Features:
 - Streamlit-based web interface
@@ -78,7 +78,7 @@ Features:
 
 Launch:
 ```bash
-python dashboard/start.py
+python src/dashboard/start.py
 # Access at http://localhost:8501
 ```
 
@@ -116,41 +116,34 @@ Added:
 
 ```
 pqts/
-├── backtesting/
-│   └── engine.py              - Event-driven backtesting
-├── core/
-│   ├── engine.py              - Main trading engine
-│   └── risk_manager.py        - Risk management
-├── markets/
-│   └── crypto/
-│       ├── binance_adapter.py
-│       └── coinbase_adapter.py
-│   └── equities/
-│       └── alpaca_adapter.py
-├── strategies/
-│   ├── arbitrage/
-│   │   └── arbitrage.py
-│   ├── order_flow/
-│   │   └── order_flow.py
-│   ├── scalping/
-│   │   └── scalping.py
-│   ├── volume_profile/
-│   │   └── volume_profile.py
-│   ├── liquidity_sweep/
-│   │   └── liquidity_sweep.py
-│   ├── ml/
-│   │   └── ml_strategy.py
-│   ├── regime_detector.py
-│   └── multi_timeframe.py
-├── indicators/
-│   └── universal.py           - 15+ technical indicators
-├── analytics/
-│   └── dashboard.py           - CLI dashboard
-├── dashboard/
-│   ├── app.py                 - Streamlit dashboard
-│   └── start.py               - Launch script
-├── execution/
-│   └── smart_router.py        - Smart order routing
+├── src/
+│   ├── backtesting/
+│   │   └── engine.py          - Event-driven backtesting
+│   ├── core/
+│   │   ├── engine.py          - Main trading engine
+│   │   └── risk_manager.py    - Risk management
+│   ├── markets/
+│   │   ├── crypto/
+│   │   │   ├── binance_adapter.py
+│   │   │   └── coinbase_adapter.py
+│   │   └── equities/
+│   │       └── alpaca_adapter.py
+│   ├── strategies/
+│   │   ├── arbitrage/
+│   │   ├── order_flow/
+│   │   ├── scalping/
+│   │   ├── volume_profile/
+│   │   ├── liquidity_sweep/
+│   │   └── ml/
+│   ├── indicators/
+│   │   └── universal.py       - 15+ technical indicators
+│   ├── analytics/
+│   │   └── dashboard.py       - CLI dashboard
+│   ├── dashboard/
+│   │   ├── app.py             - Streamlit dashboard
+│   │   └── start.py           - Launch script
+│   └── execution/
+│       └── smart_router.py    - Smart order routing
 ├── config/
 │   └── paper.yaml             - Paper trading config
 ├── docs/
@@ -188,7 +181,7 @@ pqts/
    # Repository name: pqts
    # Then run:
    cd ~/.openclaw/workspace/pqts
-   ./setup_github.sh
+   ./scripts/setup_github.sh
    ```
 
 2. **Setup API Keys**
@@ -212,7 +205,7 @@ pqts/
 
 5. **Launch Dashboard**
    ```bash
-   python dashboard/start.py
+   python src/dashboard/start.py
    # Open http://localhost:8501
    ```
 

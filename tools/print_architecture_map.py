@@ -22,8 +22,13 @@ LEGACY = (
 TRACKED = set(CANONICAL + LEGACY)
 
 
-def _iter_python_files(root: Path, package: str) -> list[Path]:
-    package_path = root / package
+def _source_root(root: Path) -> Path:
+    src_root = root / "src"
+    return src_root if src_root.exists() else root
+
+
+def _iter_python_files(source_root: Path, package: str) -> list[Path]:
+    package_path = source_root / package
     if not package_path.exists():
         return []
     return sorted(path for path in package_path.rglob("*.py") if path.is_file())
@@ -43,15 +48,16 @@ def _iter_import_targets(file_path: Path) -> list[str]:
     return targets
 
 
-def _count_python_files(root: Path, package: str) -> int:
-    return len(_iter_python_files(root, package))
+def _count_python_files(source_root: Path, package: str) -> int:
+    return len(_iter_python_files(source_root, package))
 
 
 def build_import_graph(root: Path) -> dict[str, set[str]]:
     graph: dict[str, set[str]] = defaultdict(set)
+    source_root = _source_root(root)
 
     for source in CANONICAL:
-        for file_path in _iter_python_files(root, source):
+        for file_path in _iter_python_files(source_root, source):
             for target in _iter_import_targets(file_path):
                 root_name = target.split(".", 1)[0]
                 if root_name in TRACKED and root_name != source:
@@ -66,15 +72,16 @@ def main() -> int:
     args = parser.parse_args()
 
     root = Path(args.root).resolve()
+    source_root = _source_root(root)
     print("PQTS Architecture Map")
     print("=" * 60)
     print("Canonical Layers")
     for package in CANONICAL:
-        print(f"- {package}: {_count_python_files(root, package)} files")
+        print(f"- {package}: {_count_python_files(source_root, package)} files")
 
     print("\nLegacy Domain Packages")
     for package in LEGACY:
-        print(f"- {package}: {_count_python_files(root, package)} files")
+        print(f"- {package}: {_count_python_files(source_root, package)} files")
 
     graph = build_import_graph(root)
     print("\nCanonical Import Edges")

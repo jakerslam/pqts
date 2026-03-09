@@ -35,7 +35,7 @@ cp .env.example .env
 # Edit .env with your API keys
 
 # Start dashboard
-python dashboard/start.py
+python src/dashboard/start.py
 
 # Run paper trading
 python main.py config/paper.yaml
@@ -180,7 +180,7 @@ python scripts/control_plane_report.py
 
 Launch the real-time dashboard:
 ```bash
-python -m streamlit run dashboard/app.py
+python -m streamlit run src/dashboard/app.py
 ```
 
 Access at `http://localhost:8501`
@@ -202,12 +202,12 @@ Access at `http://localhost:8501`
 
 PQTS now uses a canonical **modular monolith** layout:
 
-- `app/`: composition root and runtime entrypoints
-- `contracts/`: module and event contracts
-- `modules/`: module descriptors and lifecycle hooks
-- `adapters/`: external I/O adapter descriptors/loaders
+- `src/app/`: composition root and runtime entrypoints
+- `src/contracts/`: module and event contracts
+- `src/modules/`: module descriptors and lifecycle hooks
+- `src/adapters/`: external I/O adapter descriptors/loaders
 
-Legacy packages (`core/`, `execution/`, `analytics/`, `risk/`, `strategies/`, etc.) remain active during migration and are wired through `app`.
+Legacy packages (`src/core/`, `src/execution/`, `src/analytics/`, `src/risk/`, `src/strategies/`, etc.) remain active during migration and are wired through `src/app/`.
 
 Architecture tooling:
 
@@ -241,6 +241,8 @@ Detailed rules and migration notes: `docs/ARCHITECTURE.md`
 - [Self-Serve Signup Spec](docs/SELF_SERVE_SIGNUP_SPEC.md)
 - [Protheus Toybox Launch](docs/PROTHEUS_TOYBOX.md)
 - [X Thread Template](docs/X_THREAD_TEMPLATE.md)
+- [Engineering TODO](docs/TODO.md)
+- [Humans-Only Work](docs/HUMANS_ONLY.md)
 
 ## 🛠️ Configuration
 
