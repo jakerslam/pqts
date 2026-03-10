@@ -1,8 +1,10 @@
 import { getRiskState } from "@/lib/api/client";
 import { OperatorActionPanel } from "@/components/operator/operator-action-panel";
+import { listBlockReasonEntries } from "@/lib/ops/block-reasons";
 
 export default async function RiskPage() {
   const risk = await getRiskState().catch(() => null);
+  const blockReasons = listBlockReasonEntries();
 
   return (
     <section style={{ display: "grid", gap: 16 }}>
@@ -29,6 +31,20 @@ export default async function RiskPage() {
         <p style={{ marginBottom: 0, color: "var(--muted)" }}>
           This panel is wired to current risk state and will expand with streaming incidents in PQTS-033.
         </p>
+      </article>
+      <article className="card">
+        <h3 style={{ marginTop: 0 }}>Block Reason Explainers</h3>
+        <p style={{ marginTop: 0, color: "var(--muted)" }}>
+          Human-readable gate outcomes for operators and beginner onboarding support.
+        </p>
+        <div className="grid">
+          {blockReasons.map((row) => (
+            <article key={row.code} className="card" style={{ background: "#f8fbff" }}>
+              <p style={{ margin: "0 0 6px", fontWeight: 700 }}>{row.code}</p>
+              <p style={{ margin: 0, color: "var(--muted)" }}>{row.explanation}</p>
+            </article>
+          ))}
+        </div>
       </article>
       <OperatorActionPanel />
     </section>

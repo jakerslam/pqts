@@ -1,10 +1,23 @@
 import { getFills, getOrders } from "@/lib/api/client";
+import Link from "next/link";
 
 export default async function ExecutionPage() {
   const [orders, fills] = await Promise.all([getOrders(), getFills()]).catch(() => [[], []]);
 
   return (
     <section style={{ display: "grid", gap: 16 }}>
+      <article className="card">
+        <h2 style={{ marginTop: 0 }}>Execution Analytics</h2>
+        <p style={{ marginTop: 0, color: "var(--muted)" }}>
+          Deep-dive surfaces for transaction-cost quality and order truth lineage.
+        </p>
+        <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+          <Link href="/dashboard/execution-quality">Execution Quality Dashboard</Link>
+          <Link href="/dashboard/order-truth">Per-Order Truth Drilldown</Link>
+          <Link href="/dashboard/replay">Deterministic Replay Timeline</Link>
+        </div>
+      </article>
+
       <article className="card">
         <h2 style={{ marginTop: 0 }}>Orders</h2>
         {orders.length === 0 ? (

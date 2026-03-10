@@ -24,9 +24,39 @@ export default function DashboardHomePage() {
           <Link href="/dashboard/execution">Open execution view</Link>
         </article>
         <article className="card">
+          <h3>Execution Quality</h3>
+          <p>Reference-bundle slippage, alpha, and venue quality tape.</p>
+          <Link href="/dashboard/execution-quality">Open quality dashboard</Link>
+        </article>
+        <article className="card">
+          <h3>Order Truth</h3>
+          <p>Signal-to-fill lineage and block/execution explanation per order.</p>
+          <Link href="/dashboard/order-truth">Open order truth drilldown</Link>
+        </article>
+        <article className="card">
+          <h3>Replay Timeline</h3>
+          <p>Deterministic event-replay digest with hash and event-type stats.</p>
+          <Link href="/dashboard/replay">Open replay timeline</Link>
+        </article>
+        <article className="card">
           <h3>Risk</h3>
           <p>Kill-switch events, drawdown, and guardrails.</p>
           <Link href="/dashboard/risk">Open risk view</Link>
+        </article>
+        <article className="card">
+          <h3>Promotion</h3>
+          <p>Stage-transition control center with explicit promotion actions.</p>
+          <Link href="/dashboard/promotion">Open promotion control center</Link>
+        </article>
+        <article className="card">
+          <h3>Templates</h3>
+          <p>Generated template-run artifacts, config snapshots, and diffs.</p>
+          <Link href="/dashboard/templates">Open template gallery</Link>
+        </article>
+        <article className="card">
+          <h3>Notifications</h3>
+          <p>Preview and execute stdout/Telegram/Discord channel checks.</p>
+          <Link href="/dashboard/notifications">Open notifications check</Link>
         </article>
       </div>
 

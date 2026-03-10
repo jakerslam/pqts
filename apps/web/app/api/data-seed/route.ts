@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 
 import { runPython } from "@/lib/ops/exec";
 
+export const runtime = "nodejs";
+
 interface SeedBody {
   venue?: "binance" | "coinbase" | "all";
   interval?: string;
