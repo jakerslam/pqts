@@ -2,6 +2,12 @@
 
 Describe what this PR changes and why.
 
+## Ref Coverage
+
+List the requirement IDs covered by this PR.
+
+- Ref: COMP-#, PMKT-#, LANG-#, MOAT-#
+
 ## Checklist
 
 - [ ] Tests added/updated for behavior changes

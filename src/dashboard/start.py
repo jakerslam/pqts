@@ -1,33 +1,16 @@
 #!/usr/bin/env python3
-"""
-Start the PQTS Real-time Dashboard
+"""Start the Dash-based PQTS operator dashboard."""
 
-Usage:
-    python dashboard/start.py
-"""
+from __future__ import annotations
 
-import subprocess
-import sys
-from pathlib import Path
+from dashboard.app import app
 
-def start_dashboard():
-    """Start Streamlit dashboard"""
-    dashboard_path = Path(__file__).parent / "app.py"
-    
-    print("🚀 Starting PQTS Dashboard...")
-    print(f"Dashboard URL: http://localhost:8501")
-    print("\nPress Ctrl+C to stop\n")
-    
-    try:
-        subprocess.run([
-            sys.executable, "-m", "streamlit", "run",
-            str(dashboard_path),
-            "--server.headless", "true",
-            "--server.port", "8501",
-            "--server.enableCORS", "false"
-        ])
-    except KeyboardInterrupt:
-        print("\n✅ Dashboard stopped")
+
+def start_dashboard() -> None:
+    print("Starting PQTS dashboard (Dash)...")
+    print("Dashboard URL: http://localhost:8501")
+    app.run(host="0.0.0.0", port=8501, debug=False)
+
 
 if __name__ == "__main__":
     start_dashboard()

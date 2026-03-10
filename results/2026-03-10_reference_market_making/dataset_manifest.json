@@ -1,0 +1,13 @@
+{
+  "schema_version": "1",
+  "dataset_version": "dataset-2026-03-reference-v1",
+  "generated_at": "2026-03-10T18:00:00+00:00",
+  "sources": [
+    {
+      "name": "pqts_simulation_engine",
+      "type": "synthetic",
+      "config": "config/paper.yaml"
+    }
+  ],
+  "notes": "Reference-quality smoke scenario with non-zero fills and bounded rejects."
+}

@@ -19,6 +19,48 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  pr_description_contract:
+    name: PR Description Contract
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate tests checkbox and Ref coverage in PR body
+        run: |
+          python3 - <<'PYEOF'
+          import json
+          import os
+          import re
+          import sys
+
+          event_name = os.getenv("GITHUB_EVENT_NAME", "")
+          if event_name != "pull_request":
+              print("Not a pull_request event; skipping PR body contract check.")
+              sys.exit(0)
+
+          event_path = os.getenv("GITHUB_EVENT_PATH", "")
+          if not event_path:
+              raise SystemExit("GITHUB_EVENT_PATH not set")
+
+          with open(event_path, "r", encoding="utf-8") as handle:
+              payload = json.load(handle)
+          body = str(payload.get("pull_request", {}).get("body") or "")
+
+          missing = []
+          if not re.search(r"(?mi)^##\\s*Ref Coverage\\s*$", body):
+              missing.append("missing '## Ref Coverage' section")
+          if not re.search(r"(?mi)Ref:\\s*[A-Z]+-\\d+", body):
+              missing.append("missing explicit Ref IDs (e.g., Ref: PMKT-7)")
+          if not re.search(
+              r"(?mi)^-\\s*\\[[xX]\\]\\s*Tests added/updated for behavior changes\\s*$",
+              body,
+          ):
+              missing.append("tests checkbox must be checked")
+
+          if missing:
+              raise SystemExit("PR description contract failed: " + "; ".join(missing))
+
+          print("PR description contract passed.")
+          PYEOF
+
   verify_workflow_raw:
     name: Verify CI YAML on GitHub Raw
     runs-on: ubuntu-latest
@@ -56,7 +98,7 @@ jobs:
 
   test:
     name: Pytest
-    needs: [verify_workflow_raw, verify_dependency_lock]
+    needs: [pr_description_contract, verify_workflow_raw, verify_dependency_lock]
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -82,7 +124,7 @@ jobs:
 
   lint:
     name: Lint
-    needs: [verify_workflow_raw, verify_dependency_lock]
+    needs: [pr_description_contract, verify_workflow_raw, verify_dependency_lock]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -138,7 +180,7 @@ jobs:
 
   static_analysis:
     name: Bandit and Mypy (non-gating)
-    needs: [verify_workflow_raw, verify_dependency_lock]
+    needs: [pr_description_contract, verify_workflow_raw, verify_dependency_lock]
     runs-on: ubuntu-latest
     continue-on-error: true
     steps:
@@ -171,7 +213,7 @@ jobs:
   ci_summary:
     name: CI Summary Artifact
     if: always()
-    needs: [verify_workflow_raw, verify_dependency_lock, test, lint, static_analysis]
+    needs: [pr_description_contract, verify_workflow_raw, verify_dependency_lock, test, lint, static_analysis]
     runs-on: ubuntu-latest
     steps:
       - name: Build summary matrix
@@ -181,6 +223,7 @@ jobs:
 
           | Job | Result |
           |-----|--------|
+          | pr_description_contract | ${{ needs.pr_description_contract.result }} |
           | verify_workflow_raw | ${{ needs.verify_workflow_raw.result }} |
           | verify_dependency_lock | ${{ needs.verify_dependency_lock.result }} |
           | test | ${{ needs.test.result }} |

@@ -1,0 +1,9 @@
+{
+  "artifact_id": "weekly_benchmark",
+  "artifact_type": "benchmark",
+  "cadence_hours": 24,
+  "last_run_at": "",
+  "provenance_ref": "data/reports/provenance/benchmark_provenance.jsonl",
+  "reproducible_command": "make sim-suite",
+  "result_class": "reference"
+}

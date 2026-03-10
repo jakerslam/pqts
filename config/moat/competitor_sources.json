@@ -1,0 +1,19 @@
+{
+  "sources": [
+    {
+      "name": "QuantConnect",
+      "url": "https://www.quantconnect.com/docs/v2/cloud-platform/welcome",
+      "last_validated": "2026-03-10"
+    },
+    {
+      "name": "NautilusTrader",
+      "url": "https://nautilustrader.io/docs/latest/concepts/overview/",
+      "last_validated": "2026-03-10"
+    },
+    {
+      "name": "Freqtrade",
+      "url": "https://docs.freqtrade.io/en/stable/",
+      "last_validated": "2026-03-10"
+    }
+  ]
+}

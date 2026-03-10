@@ -7,6 +7,20 @@ from adapters.prediction_market_client import (
     ClientStateError,
     PredictionMarketClientContract,
 )
+from adapters.prediction_market_settlement import (
+    TypedOrder,
+    evaluate_settlement_invariants,
+    validate_deployment_registry,
+    validate_typed_order,
+    verify_fee_symmetry,
+)
+from adapters.prediction_market_streaming import (
+    BuilderScope,
+    LocalSigner,
+    RemoteSigner,
+    SignRequest,
+    StreamHealthTracker,
+)
 from adapters.provider_contracts import (
     ProviderErrorEnvelope,
     ProviderResponseEnvelope,
@@ -24,7 +38,13 @@ __all__ = [
     "APICredentials",
     "AuthContext",
     "ClientStateError",
+    "BuilderScope",
+    "LocalSigner",
     "MultiSourceRetrievalSurface",
+    "RemoteSigner",
+    "SignRequest",
+    "StreamHealthTracker",
+    "TypedOrder",
     "PredictionMarketClientContract",
     "ProviderErrorEnvelope",
     "ProviderResponseEnvelope",
@@ -32,6 +52,10 @@ __all__ = [
     "adapters_by_kind",
     "call_with_envelope",
     "default_adapter_descriptors",
+    "evaluate_settlement_invariants",
     "load_adapter_module",
     "merge_retrieval_sources",
+    "validate_deployment_registry",
+    "validate_typed_order",
+    "verify_fee_symmetry",
 ]

@@ -24,6 +24,7 @@ Example:
 - `2026-03-09_crypto_market_making_short/`
 - `2026-03-09_crypto_funding_arbitrage_short/`
 - `2026-03-09_multi_market_market_making_short/`
+- `2026-03-10_reference_market_making/`
 
 All current bundles contain:
 - run command in per-bundle `README.md`

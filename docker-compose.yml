@@ -20,14 +20,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command:
-      - python
-      - -m
-      - streamlit
-      - run
-      - src/dashboard/app.py
-      - --server.address=0.0.0.0
-      - --server.port=8501
+    command: ["python", "src/dashboard/start.py"]
     env_file:
       - .env
     depends_on:

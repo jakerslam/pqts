@@ -1,0 +1,6 @@
+mode: paper_trading
+risk_profile: balanced
+markets:
+  - crypto
+strategies:
+  - market_making

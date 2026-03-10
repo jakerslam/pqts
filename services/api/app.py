@@ -173,6 +173,19 @@ def create_app(settings: APISettings | None = None) -> FastAPI:
             "timestamp": _utc_now_iso(),
         })
 
+    @app.post("/v1/stream/start", tags=["stream"])
+    def start_stream_session(
+        request: Request,
+        identity: Annotated[APIIdentity, Depends(require_identity)],
+    ) -> dict[str, Any]:
+        return with_correlation(request, {
+            "status": "accepted",
+            "action": "start_stream_session",
+            "requested_by": identity.subject,
+            "channels": ["/ws/orders", "/ws/fills", "/ws/positions", "/ws/pnl", "/ws/risk"],
+            "timestamp": _utc_now_iso(),
+        })
+
     app.include_router(core_router)
     app.include_router(ws_router)
 

@@ -1,0 +1,22 @@
+{
+  "environments": {
+    "prod": {
+      "polygon": {
+        "exchange_address": "0x4bFb41d5B3570DeFd03C39a9A4D8dE6Bd8B8982E",
+        "version": "ctf-exchange-main",
+        "audits": [
+          "https://github.com/Polymarket/ctf-exchange/blob/main/audit/ChainSecurity_Polymarket_Exchange_audit.pdf"
+        ]
+      }
+    },
+    "staging": {
+      "amoy": {
+        "exchange_address": "0xdFE02Eb6733538f8Ea35D585af8DE5958AD99E40",
+        "version": "ctf-exchange-amoy",
+        "audits": [
+          "https://github.com/Polymarket/ctf-exchange/blob/main/audit/ChainSecurity_Polymarket_Exchange_audit.pdf"
+        ]
+      }
+    }
+  }
+}

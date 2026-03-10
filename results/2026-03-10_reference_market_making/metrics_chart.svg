@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="220" viewBox="0 0 640 220" role="img" aria-label="reference metrics">
+  <rect width="640" height="220" fill="#0f172a"/>
+  <text x="20" y="40" fill="#e2e8f0" font-family="monospace" font-size="16">Reference Scenario Metrics</text>
+  <text x="20" y="80" fill="#22d3ee" font-family="monospace" font-size="14">quality=0.25</text>
+  <text x="20" y="110" fill="#34d399" font-family="monospace" font-size="14">fill=0.80</text>
+  <text x="20" y="140" fill="#fbbf24" font-family="monospace" font-size="14">reject=0.20</text>
+</svg>

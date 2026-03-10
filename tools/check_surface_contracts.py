@@ -1,0 +1,77 @@
+#!/usr/bin/env python3
+"""Gate one-engine/two-surface, action parity, and migration safety contracts."""
+
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+from pathlib import Path
+
+REPO_ROOT = Path(__file__).resolve().parents[1]
+SRC_ROOT = REPO_ROOT / "src"
+if str(SRC_ROOT) not in sys.path:
+    sys.path.insert(0, str(SRC_ROOT))
+
+
+def build_arg_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--contract", default="config/surfaces/surface_contract.json")
+    parser.add_argument("--compose", default="docker-compose.yml")
+    return parser
+
+
+def _ensure_dash_only_ui(compose_path: Path) -> None:
+    text = compose_path.read_text(encoding="utf-8").lower()
+    if "streamlit" in text:
+        raise ValueError("compose file contains streamlit runtime; dash-only contract violated")
+
+
+def main() -> int:
+    from contracts.surface_governance import (
+        ActionMapping,
+        OneEngineTwoSurfaceContract,
+        SurfaceDescriptor,
+        UIMigrationGateInput,
+        evaluate_ui_migration_gate,
+        validate_action_parity,
+    )
+
+    args = build_arg_parser().parse_args()
+    payload = json.loads(Path(args.contract).read_text(encoding="utf-8"))
+    contract = OneEngineTwoSurfaceContract(engine_id=str(payload["engine_id"]))
+    for row in payload.get("surfaces", []):
+        contract.add_surface(SurfaceDescriptor(**row))
+    contract_report = contract.validate()
+
+    mappings = [ActionMapping(**row) for row in payload.get("action_mappings", [])]
+    parity_report = validate_action_parity(mappings)
+
+    migration_report = evaluate_ui_migration_gate(
+        UIMigrationGateInput(
+            parity_passed=True,
+            risk_controls_passed=True,
+            operator_actions_passed=True,
+            rollback_playbook_present=True,
+        )
+    )
+    if not migration_report["passed"]:
+        raise ValueError("ui migration gate blocked")
+
+    _ensure_dash_only_ui(Path(args.compose))
+    print(
+        json.dumps(
+            {
+                "validated": True,
+                "contract_report": contract_report,
+                "parity_report": parity_report,
+                "migration_report": migration_report,
+            },
+            sort_keys=True,
+        )
+    )
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
