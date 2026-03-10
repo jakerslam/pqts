@@ -37,7 +37,8 @@ def _load_native_module() -> Any | None:
         import pqts_hotpath as module  # type: ignore
     except Exception:
         return None
-    if not hasattr(module, "sum_notional"):
+    required_symbols = ("sum_notional", "fill_metrics", "sequence_transition")
+    if any(not hasattr(module, symbol) for symbol in required_symbols):
         return None
     return module
 

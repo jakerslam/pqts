@@ -111,6 +111,15 @@ Legend:
 - [x] Enforce source-reliability taxonomy for external claims and trust labels (`ROI: high`, `Type: engineering`, `Track: moat`, `Ref: LANG-12, PMKT-15, MOAT-13`)
 - [x] Enforce moat-vs-parity governance and quarterly review freshness gates (`ROI: high`, `Type: engineering`, `Track: moat`, `Ref: MOAT-15`)
 
+## 02c. Visibility Polish (Open, High ROI)
+
+- [ ] Fix README Visual Tour media paths so screenshots/GIFs render correctly in GitHub and package contexts (`ROI: high`, `Type: engineering`, `Track: parity`, `Ref: COMP-11, COMP-13`)
+- [ ] Add one highlighted performance callout sourced from latest reference result bundle (for example Sharpe and max drawdown) with explicit bundle link (`ROI: high`, `Type: engineering`, `Track: parity`, `Ref: COMP-3, COMP-5, COMP-13`)
+- [ ] Add a README architecture/performance paragraph that documents Rust hot-path kernels and links [docs/NATIVE_HOTPATH.md](/Users/jay/Document%20(Lcl)/Coding/PQTS/docs/NATIVE_HOTPATH.md) (`ROI: high`, `Type: engineering`, `Track: parity`, `Ref: LANG-2, LANG-10, COMP-13`)
+- [ ] Publish a quick native-vs-python benchmark artifact under `results/` (for example `sum_notional` throughput multiplier) with reproducible command + environment metadata (`ROI: high`, `Type: engineering`, `Track: parity`, `Ref: LANG-3, LANG-10, COMP-13`)
+- [ ] Add `make native` target to expose maturin-based local native build/install workflow (`ROI: medium`, `Type: engineering`, `Track: parity`, `Ref: LANG-2, LANG-10`)
+- [ ] Trigger first public PyPI release and GitHub Pages leaderboard export, then publish both links in README/docs (`ROI: very_high`, `Type: human_only`, `Track: parity`, `Ref: COMP-2, COMP-5, MOAT-12`)
+
 ## 03. Human-Only Parallel Lane
 
 - [ ] Finalize and sign blocking decisions in [docs/HUMAN_DECISIONS_LOG.md](/Users/jay/Document%20(Lcl)/Coding/PQTS/docs/HUMAN_DECISIONS_LOG.md) (`ROI: very_high`, `Type: human_only`, `Track: parity`, `Ref: COMP-10, LANG-6, LANG-3, COMP-14`)

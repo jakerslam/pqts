@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import sys
+
 import pytest
 
 from core import hotpath_runtime
@@ -31,6 +33,14 @@ class _NativeStub:
         _ = allow_auto_recover
         _ = snapshot_sequence
         return "native_mode", 42, 3, True, 100, 101
+
+
+class _IncompleteNativeStub:
+    @staticmethod
+    def sum_notional(levels, max_levels):
+        _ = levels
+        _ = max_levels
+        return 0.0
 
 
 def test_sum_notional_uses_python_fallback_when_native_missing(monkeypatch) -> None:
@@ -111,3 +121,10 @@ def test_sequence_transition_uses_native_module_when_available(monkeypatch) -> N
     assert recovered is True
     assert snap_seq == 100
     assert next_expected == 101
+
+
+def test_loader_rejects_native_module_missing_required_symbols(monkeypatch) -> None:
+    hotpath_runtime._load_native_module.cache_clear()
+    monkeypatch.delenv("PQTS_NATIVE_HOTPATH", raising=False)
+    monkeypatch.setitem(sys.modules, "pqts_hotpath", _IncompleteNativeStub())
+    assert hotpath_runtime._load_native_module() is None
