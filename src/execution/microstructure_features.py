@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
-from typing import Any, Dict, Iterable, Tuple
+from typing import Any, Dict, Tuple
+
+from core.hotpath_runtime import sum_notional
 
 
 def _safe_level(level: Any) -> Tuple[float, float]:
@@ -14,18 +16,6 @@ def _safe_level(level: Any) -> Tuple[float, float]:
     except (TypeError, ValueError):
         return 0.0, 0.0
     return max(price, 0.0), max(size, 0.0)
-
-
-def _sum_notional(levels: Iterable[Any], *, max_levels: int = 5) -> float:
-    total = 0.0
-    count = 0
-    for level in levels:
-        if count >= max(int(max_levels), 1):
-            break
-        price, size = _safe_level(level)
-        total += price * size
-        count += 1
-    return float(total)
 
 
 def extract_microstructure_features(
@@ -54,8 +44,8 @@ def extract_microstructure_features(
     if best_bid > 0.0 and best_ask > 0.0:
         spread_bps = ((best_ask - best_bid) / mid) * 10000.0
 
-    bid_depth_usd = _sum_notional(bids, max_levels=max_levels)
-    ask_depth_usd = _sum_notional(asks, max_levels=max_levels)
+    bid_depth_usd = sum_notional(bids, max_levels=max_levels)
+    ask_depth_usd = sum_notional(asks, max_levels=max_levels)
     total_depth = max(bid_depth_usd + ask_depth_usd, 1e-9)
     imbalance = (bid_depth_usd - ask_depth_usd) / total_depth
 

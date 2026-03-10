@@ -41,7 +41,29 @@ def main() -> int:
         raise SystemExit(
             f"release matrix mismatch: expected {len(expected)} rows, found {len(actual_rows)}"
         )
-    print(json.dumps({"validated": True, "rows": len(actual_rows), "module": args.module}, sort_keys=True))
+
+    lib_text = lib.read_text(encoding="utf-8")
+    required_snippets = [
+        "fn sum_notional(",
+        "wrap_pyfunction!(sum_notional, m)",
+        "fn version()",
+        "wrap_pyfunction!(version, m)",
+    ]
+    missing = [snippet for snippet in required_snippets if snippet not in lib_text]
+    if missing:
+        raise SystemExit(f"native lib is missing required symbols: {missing}")
+
+    print(
+        json.dumps(
+            {
+                "validated": True,
+                "rows": len(actual_rows),
+                "module": args.module,
+                "required_symbols": ["sum_notional", "version"],
+            },
+            sort_keys=True,
+        )
+    )
     return 0
 
 
