@@ -47,6 +47,7 @@ def _load_native_module() -> Any | None:
         "paper_fill_metrics",
         "smart_router_score",
         "quote_state",
+        "profitability_net_alpha_bps",
     )
     if any(not hasattr(module, symbol) for symbol in required_symbols):
         return None
@@ -338,3 +339,44 @@ def quote_state(*, price: float, age_seconds: float, stale_after_seconds: float)
         age_token = float("inf")
     stale = max(age_token, 0.0) > stale_after
     return bool(stale), bool(valid_price and not stale)
+
+
+def profitability_net_alpha_bps(
+    *,
+    expected_alpha_bps: float,
+    expected_cost_usd: float,
+    expected_slippage_usd: float,
+    notional_usd: float,
+    min_edge_bps: float,
+) -> tuple[float, float, float]:
+    """
+    Return `(predicted_total_router_bps, predicted_net_alpha_bps, required_alpha_bps)`.
+    """
+    expected_alpha = float(expected_alpha_bps)
+    cost_usd = float(expected_cost_usd)
+    slip_usd = float(expected_slippage_usd)
+    notional = max(float(notional_usd), 1e-12)
+    min_edge = max(float(min_edge_bps), 0.0)
+
+    module = _load_native_module()
+    if module is not None and hasattr(module, "profitability_net_alpha_bps"):
+        try:
+            out = module.profitability_net_alpha_bps(
+                expected_alpha,
+                cost_usd,
+                slip_usd,
+                notional,
+                min_edge,
+            )
+            return float(out[0]), float(out[1]), float(out[2])
+        except Exception:
+            pass
+
+    predicted_total_router_bps = ((cost_usd + slip_usd) / notional) * 10000.0
+    predicted_net_alpha_bps = expected_alpha - predicted_total_router_bps
+    required_alpha_bps = predicted_total_router_bps + min_edge
+    return (
+        float(predicted_total_router_bps),
+        float(predicted_net_alpha_bps),
+        float(required_alpha_bps),
+    )

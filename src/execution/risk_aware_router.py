@@ -34,8 +34,10 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Protocol, Tuple
 
-from core.hotpath_runtime import fill_metrics
 from analytics.paper_readiness import PaperTrackRecordEvaluator
+from contracts.execution_flow import ExecutionOutcome, OrderIntent, RoutePreview
+from core.hotpath_runtime import fill_metrics
+from core.trace_context import ensure_trace_fields
 from execution.capacity_curves import StrategyCapacityCurveModel
 from execution.confidence_allocator import ConfidenceWeightedAllocator
 from execution.distributed_ops_state import DistributedOpsState, DistributedStateConfig
@@ -50,6 +52,7 @@ from execution.market_data_resilience import (
 )
 from execution.microstructure_features import extract_microstructure_features
 from execution.order_ledger import ImmutableOrderLedger
+from execution.profitability_math import build_profitability_preview
 from execution.realistic_costs import (
     Bps,
     NotionalUSD,
@@ -73,6 +76,8 @@ from risk.kill_switches import (
     RiskDecision,
     RiskLimits,
     RiskState,
+)
+from risk.kill_switches import (
     TradingEngine as RiskEngine,
 )
 from risk.regime_overlay import RegimeExposureOverlay
@@ -1044,6 +1049,52 @@ class RiskAwareRouter:
                 "expected_alpha_bps": float(getattr(order, "expected_alpha_bps", 0.0) or 0.0),
             },
         }
+        trace_id = ensure_trace_fields(
+            audit_entry,
+            trace_id=str(getattr(order, "trace_id", "") or ""),
+        )
+        intent = OrderIntent(
+            order_id=str(audit_entry["order_id"]),
+            strategy_id=str(order.strategy_id),
+            symbol=str(order.symbol),
+            side=str(order.side),
+            quantity=float(order.quantity),
+            order_type=str(order.order_type.value),
+            requested_price=float(order.price or market_data.get("last_price", 0.0) or 0.0),
+            expected_alpha_bps=float(getattr(order, "expected_alpha_bps", 0.0) or 0.0),
+        )
+        audit_entry["order_intent"] = intent.to_dict()
+        audit_entry["trace_id"] = trace_id
+
+        def _result(
+            *,
+            success: bool,
+            decision_value: RiskDecision,
+            risk_state_value: RiskState | None,
+            order_id_value: str | None,
+            exchange_value: str | None,
+            rejected_reason_value: str | None,
+            latency_ms: float | None = None,
+            fill_ratio: float | None = None,
+        ) -> OrderResult:
+            audit_entry["execution_outcome"] = ExecutionOutcome(
+                success=bool(success),
+                decision=str(decision_value.value),
+                order_id=order_id_value,
+                venue=exchange_value,
+                rejected_reason=rejected_reason_value,
+                latency_ms=latency_ms,
+                fill_ratio=fill_ratio,
+            ).to_dict()
+            return OrderResult(
+                success=bool(success),
+                decision=decision_value,
+                risk_state=risk_state_value,
+                order_id=order_id_value,
+                exchange=exchange_value,
+                rejected_reason=rejected_reason_value,
+                audit_log=audit_entry,
+            )
 
         # =========================================================================
         # STEP 1: MANDATORY PRE-TRADE RISK CHECK
@@ -1058,14 +1109,13 @@ class RiskAwareRouter:
             self.audit_log.append(audit_entry)
             self.reject_count += 1
 
-            return OrderResult(
+            return _result(
                 success=False,
-                decision=RiskDecision.HALT,
-                risk_state=None,
-                order_id=None,
-                exchange=None,
-                rejected_reason=str(e),
-                audit_log=audit_entry,
+                decision_value=RiskDecision.HALT,
+                risk_state_value=None,
+                order_id_value=None,
+                exchange_value=None,
+                rejected_reason_value=str(e),
             )
 
         emergency_state = self._active_emergency_state()
@@ -1075,14 +1125,13 @@ class RiskAwareRouter:
             audit_entry["rejected"] = True
             audit_entry["reject_reason"] = f"{decision.value.upper()}: {reason}"
             self.audit_log.append(audit_entry)
-            return OrderResult(
+            return _result(
                 success=False,
-                decision=decision,
-                risk_state=None,
-                order_id=None,
-                exchange=None,
-                rejected_reason=audit_entry["reject_reason"],
-                audit_log=audit_entry,
+                decision_value=decision,
+                risk_state_value=None,
+                order_id_value=None,
+                exchange_value=None,
+                rejected_reason_value=str(audit_entry["reject_reason"]),
             )
 
         self._load_strategy_disable_list()
@@ -1101,14 +1150,13 @@ class RiskAwareRouter:
             )
             audit_entry["strategy_disable"] = details
             self.audit_log.append(audit_entry)
-            return OrderResult(
+            return _result(
                 success=False,
-                decision=RiskDecision.HALT,
-                risk_state=None,
-                order_id=None,
-                exchange=None,
-                rejected_reason=audit_entry["reject_reason"],
-                audit_log=audit_entry,
+                decision_value=RiskDecision.HALT,
+                risk_state_value=None,
+                order_id_value=None,
+                exchange_value=None,
+                rejected_reason_value=str(audit_entry["reject_reason"]),
             )
 
         client_order_id = str(getattr(order, "client_order_id", "") or "").strip()
@@ -1129,14 +1177,13 @@ class RiskAwareRouter:
             audit_entry["reject_reason"] = "LIVE_REQUIRES_CLIENT_ORDER_ID"
             audit_entry["idempotency"]["decision"] = "rejected_missing_client_order_id"
             self.audit_log.append(audit_entry)
-            return OrderResult(
+            return _result(
                 success=False,
-                decision=RiskDecision.HALT,
-                risk_state=None,
-                order_id=None,
-                exchange=None,
-                rejected_reason=audit_entry["reject_reason"],
-                audit_log=audit_entry,
+                decision_value=RiskDecision.HALT,
+                risk_state_value=None,
+                order_id_value=None,
+                exchange_value=None,
+                rejected_reason_value=str(audit_entry["reject_reason"]),
             )
 
         if client_order_id:
@@ -1153,14 +1200,13 @@ class RiskAwareRouter:
                 )
                 audit_entry["idempotency"]["decision"] = "rejected_duplicate"
                 self.audit_log.append(audit_entry)
-                return OrderResult(
+                return _result(
                     success=False,
-                    decision=RiskDecision.HALT,
-                    risk_state=None,
-                    order_id=None,
-                    exchange=None,
-                    rejected_reason=audit_entry["reject_reason"],
-                    audit_log=audit_entry,
+                    decision_value=RiskDecision.HALT,
+                    risk_state_value=None,
+                    order_id_value=None,
+                    exchange_value=None,
+                    rejected_reason_value=str(audit_entry["reject_reason"]),
                 )
             self.idempotency_guard.register(client_order_id, intent_fingerprint)
             self.distributed_ops_state.put(
@@ -1196,14 +1242,13 @@ class RiskAwareRouter:
             audit_entry["rejected"] = True
             audit_entry["reject_reason"] = "REGIME_OVERLAY: quantity throttled to zero"
             self.audit_log.append(audit_entry)
-            return OrderResult(
+            return _result(
                 success=False,
-                decision=RiskDecision.HALT,
-                risk_state=None,
-                order_id=None,
-                exchange=None,
-                rejected_reason=audit_entry["reject_reason"],
-                audit_log=audit_entry,
+                decision_value=RiskDecision.HALT,
+                risk_state_value=None,
+                order_id_value=None,
+                exchange_value=None,
+                rejected_reason_value=str(audit_entry["reject_reason"]),
             )
 
         confidence_decision = self.confidence_allocator.evaluate(
@@ -1223,14 +1268,13 @@ class RiskAwareRouter:
             audit_entry["rejected"] = True
             audit_entry["reject_reason"] = "CONFIDENCE_ALLOCATOR: quantity throttled to zero"
             self.audit_log.append(audit_entry)
-            return OrderResult(
+            return _result(
                 success=False,
-                decision=RiskDecision.HALT,
-                risk_state=None,
-                order_id=None,
-                exchange=None,
-                rejected_reason=audit_entry["reject_reason"],
-                audit_log=audit_entry,
+                decision_value=RiskDecision.HALT,
+                risk_state_value=None,
+                order_id_value=None,
+                exchange_value=None,
+                rejected_reason_value=str(audit_entry["reject_reason"]),
             )
 
         # Calculate notional
@@ -1292,14 +1336,13 @@ class RiskAwareRouter:
             # Cancel any existing orders
             self.risk_engine._initiate_flatten(portfolio_state)
 
-            return OrderResult(
+            return _result(
                 success=False,
-                decision=decision,
-                risk_state=risk_state,
-                order_id=None,
-                exchange=None,
-                rejected_reason=f"FLATTEN: {risk_state.reason}",
-                audit_log=audit_entry,
+                decision_value=decision,
+                risk_state_value=risk_state,
+                order_id_value=None,
+                exchange_value=None,
+                rejected_reason_value=f"FLATTEN: {risk_state.reason}",
             )
 
         if decision == RiskDecision.HALT:
@@ -1309,14 +1352,13 @@ class RiskAwareRouter:
             audit_entry["reject_reason"] = f"HALT: {risk_state.reason}"
             self.audit_log.append(audit_entry)
 
-            return OrderResult(
+            return _result(
                 success=False,
-                decision=decision,
-                risk_state=risk_state,
-                order_id=None,
-                exchange=None,
-                rejected_reason=f"HALT: {risk_state.reason}",
-                audit_log=audit_entry,
+                decision_value=decision,
+                risk_state_value=risk_state,
+                order_id_value=None,
+                exchange_value=None,
+                rejected_reason_value=f"HALT: {risk_state.reason}",
             )
 
         if decision == RiskDecision.REDUCE:
@@ -1346,14 +1388,13 @@ class RiskAwareRouter:
             )
             self.audit_log.append(audit_entry)
 
-            return OrderResult(
+            return _result(
                 success=False,
-                decision=decision,
-                risk_state=risk_state,
-                order_id=None,
-                exchange=None,
-                rejected_reason="Order size exceeds risk limit",
-                audit_log=audit_entry,
+                decision_value=decision,
+                risk_state_value=risk_state,
+                order_id_value=None,
+                exchange_value=None,
+                rejected_reason_value="Order size exceeds risk limit",
             )
 
         post_trade_position_pct = self._post_trade_position_pct(
@@ -1374,14 +1415,13 @@ class RiskAwareRouter:
                 f"{post_trade_position_pct:.4f} > {float(self.risk_limits.max_single_position_pct):.4f}"
             )
             self.audit_log.append(audit_entry)
-            return OrderResult(
+            return _result(
                 success=False,
-                decision=RiskDecision.HALT,
-                risk_state=risk_state,
-                order_id=None,
-                exchange=None,
-                rejected_reason=audit_entry["reject_reason"],
-                audit_log=audit_entry,
+                decision_value=RiskDecision.HALT,
+                risk_state_value=risk_state,
+                order_id_value=None,
+                exchange_value=None,
+                rejected_reason_value=str(audit_entry["reject_reason"]),
             )
 
         # Capacity controls (capital/capacity realism)
@@ -1392,14 +1432,13 @@ class RiskAwareRouter:
             audit_entry["rejected"] = True
             audit_entry["reject_reason"] = f"SYMBOL_CAP: {notional:.2f} > {float(symbol_cap):.2f}"
             self.audit_log.append(audit_entry)
-            return OrderResult(
+            return _result(
                 success=False,
-                decision=RiskDecision.HALT,
-                risk_state=risk_state,
-                order_id=None,
-                exchange=None,
-                rejected_reason=audit_entry["reject_reason"],
-                audit_log=audit_entry,
+                decision_value=RiskDecision.HALT,
+                risk_state_value=risk_state,
+                order_id_value=None,
+                exchange_value=None,
+                rejected_reason_value=str(audit_entry["reject_reason"]),
             )
 
         # =========================================================================
@@ -1428,14 +1467,13 @@ class RiskAwareRouter:
             audit_entry["rejected"] = True
             audit_entry["reject_reason"] = f"DEGRADED_VENUE_NO_FAILOVER: {route.exchange}"
             self.audit_log.append(audit_entry)
-            return OrderResult(
+            return _result(
                 success=False,
-                decision=RiskDecision.HALT,
-                risk_state=risk_state,
-                order_id=None,
-                exchange=route.exchange,
-                rejected_reason=audit_entry["reject_reason"],
-                audit_log=audit_entry,
+                decision_value=RiskDecision.HALT,
+                risk_state_value=risk_state,
+                order_id_value=None,
+                exchange_value=route.exchange,
+                rejected_reason_value=str(audit_entry["reject_reason"]),
             )
 
         scoped_disable = self._find_disable_scope(
@@ -1454,14 +1492,13 @@ class RiskAwareRouter:
             )
             audit_entry["strategy_disable"] = details
             self.audit_log.append(audit_entry)
-            return OrderResult(
+            return _result(
                 success=False,
-                decision=RiskDecision.HALT,
-                risk_state=risk_state,
-                order_id=None,
-                exchange=route.exchange,
-                rejected_reason=audit_entry["reject_reason"],
-                audit_log=audit_entry,
+                decision_value=RiskDecision.HALT,
+                risk_state_value=risk_state,
+                order_id_value=None,
+                exchange_value=route.exchange,
+                rejected_reason_value=str(audit_entry["reject_reason"]),
             )
 
         audit_entry["routing"] = {
@@ -1472,13 +1509,26 @@ class RiskAwareRouter:
             "ranked_exchanges": ranked_exchanges,
         }
         expected_alpha_bps = self._resolve_expected_alpha_bps(order)
-        predicted_total_router_bps = float(
-            Bps.from_pct(
-                (float(route.expected_cost) + float(route.expected_slippage)) / max(notional, 1e-12)
-            )
+        profitability_preview = build_profitability_preview(
+            expected_alpha_bps=float(expected_alpha_bps),
+            expected_cost_usd=float(route.expected_cost),
+            expected_slippage_usd=float(route.expected_slippage),
+            notional_usd=float(notional),
+            min_edge_bps=float(self.profitability_min_edge_bps),
         )
-        predicted_net_alpha_bps = float(expected_alpha_bps - predicted_total_router_bps)
-        required_alpha_bps = float(predicted_total_router_bps + self.profitability_min_edge_bps)
+        predicted_total_router_bps = float(profitability_preview.predicted_total_router_bps)
+        predicted_net_alpha_bps = float(profitability_preview.predicted_net_alpha_bps)
+        required_alpha_bps = float(profitability_preview.required_alpha_bps)
+        route_preview = RoutePreview(
+            venue=str(route.exchange),
+            ranked_venues=[str(candidate) for candidate in ranked_exchanges],
+            order_type=str(route.order_type.value),
+            expected_cost_usd=float(route.expected_cost),
+            expected_slippage_usd=float(route.expected_slippage),
+            predicted_total_router_bps=float(predicted_total_router_bps),
+            predicted_net_alpha_bps=float(predicted_net_alpha_bps),
+        )
+        audit_entry["route_preview"] = route_preview.to_dict()
         audit_entry["profitability_gate"] = {
             "enabled": bool(self.profitability_gate_enabled),
             "block_non_positive_expected_alpha": bool(
@@ -1509,14 +1559,13 @@ class RiskAwareRouter:
                     "PROFITABILITY_GATE: campaign expected_alpha_bps <= 0"
                 )
                 self.audit_log.append(audit_entry)
-                return OrderResult(
+                return _result(
                     success=False,
-                    decision=RiskDecision.HALT,
-                    risk_state=risk_state,
-                    order_id=None,
-                    exchange=route.exchange,
-                    rejected_reason=audit_entry["reject_reason"],
-                    audit_log=audit_entry,
+                    decision_value=RiskDecision.HALT,
+                    risk_state_value=risk_state,
+                    order_id_value=None,
+                    exchange_value=route.exchange,
+                    rejected_reason_value=str(audit_entry["reject_reason"]),
                 )
             if (
                 self.profitability_block_non_positive_expected_alpha
@@ -1529,14 +1578,13 @@ class RiskAwareRouter:
                     "PROFITABILITY_GATE: expected_alpha_bps <= 0"
                 )
                 self.audit_log.append(audit_entry)
-                return OrderResult(
+                return _result(
                     success=False,
-                    decision=RiskDecision.HALT,
-                    risk_state=risk_state,
-                    order_id=None,
-                    exchange=route.exchange,
-                    rejected_reason=audit_entry["reject_reason"],
-                    audit_log=audit_entry,
+                    decision_value=RiskDecision.HALT,
+                    risk_state_value=risk_state,
+                    order_id_value=None,
+                    exchange_value=route.exchange,
+                    rejected_reason_value=str(audit_entry["reject_reason"]),
                 )
             if float(expected_alpha_bps) + 1e-9 < float(required_alpha_bps):
                 self.reject_count += 1
@@ -1549,14 +1597,13 @@ class RiskAwareRouter:
                     f"min_edge_bps {self.profitability_min_edge_bps:.4f}"
                 )
                 self.audit_log.append(audit_entry)
-                return OrderResult(
+                return _result(
                     success=False,
-                    decision=RiskDecision.HALT,
-                    risk_state=risk_state,
-                    order_id=None,
-                    exchange=route.exchange,
-                    rejected_reason=audit_entry["reject_reason"],
-                    audit_log=audit_entry,
+                    decision_value=RiskDecision.HALT,
+                    risk_state_value=risk_state,
+                    order_id_value=None,
+                    exchange_value=route.exchange,
+                    rejected_reason_value=str(audit_entry["reject_reason"]),
                 )
 
         capacity_decision = self.capacity_model.evaluate_order(
@@ -1585,14 +1632,13 @@ class RiskAwareRouter:
             audit_entry["rejected"] = True
             audit_entry["reject_reason"] = f"CAPACITY_CURVE_BLOCK: {capacity_decision.reason}"
             self.audit_log.append(audit_entry)
-            return OrderResult(
+            return _result(
                 success=False,
-                decision=RiskDecision.HALT,
-                risk_state=risk_state,
-                order_id=None,
-                exchange=route.exchange,
-                rejected_reason=audit_entry["reject_reason"],
-                audit_log=audit_entry,
+                decision_value=RiskDecision.HALT,
+                risk_state_value=risk_state,
+                order_id_value=None,
+                exchange_value=route.exchange,
+                rejected_reason_value=str(audit_entry["reject_reason"]),
             )
 
         approved_notional = float(capacity_decision.approved_notional_usd)
@@ -1611,14 +1657,13 @@ class RiskAwareRouter:
                 audit_entry["rejected"] = True
                 audit_entry["reject_reason"] = "CAPACITY_CURVE: quantity throttled to zero"
                 self.audit_log.append(audit_entry)
-                return OrderResult(
+                return _result(
                     success=False,
-                    decision=RiskDecision.HALT,
-                    risk_state=risk_state,
-                    order_id=None,
-                    exchange=route.exchange,
-                    rejected_reason=audit_entry["reject_reason"],
-                    audit_log=audit_entry,
+                    decision_value=RiskDecision.HALT,
+                    risk_state_value=risk_state,
+                    order_id_value=None,
+                    exchange_value=route.exchange,
+                    rejected_reason_value=str(audit_entry["reject_reason"]),
                 )
 
         venue_caps = self.broker_config.get("max_venue_notional", {})
@@ -1628,14 +1673,13 @@ class RiskAwareRouter:
             audit_entry["rejected"] = True
             audit_entry["reject_reason"] = f"VENUE_CAP: {notional:.2f} > {float(venue_cap):.2f}"
             self.audit_log.append(audit_entry)
-            return OrderResult(
+            return _result(
                 success=False,
-                decision=RiskDecision.HALT,
-                risk_state=risk_state,
-                order_id=None,
-                exchange=route.exchange,
-                rejected_reason=audit_entry["reject_reason"],
-                audit_log=audit_entry,
+                decision_value=RiskDecision.HALT,
+                risk_state_value=risk_state,
+                order_id_value=None,
+                exchange_value=route.exchange,
+                rejected_reason_value=str(audit_entry["reject_reason"]),
             )
 
         shorting_decision = self.shorting_overlay.evaluate(
@@ -1653,14 +1697,13 @@ class RiskAwareRouter:
             audit_entry["rejected"] = True
             audit_entry["reject_reason"] = f"SHORTING_CONTROL: {shorting_decision.reason}"
             self.audit_log.append(audit_entry)
-            return OrderResult(
+            return _result(
                 success=False,
-                decision=RiskDecision.HALT,
-                risk_state=risk_state,
-                order_id=None,
-                exchange=route.exchange,
-                rejected_reason=audit_entry["reject_reason"],
-                audit_log=audit_entry,
+                decision_value=RiskDecision.HALT,
+                risk_state_value=risk_state,
+                order_id_value=None,
+                exchange_value=route.exchange,
+                rejected_reason_value=str(audit_entry["reject_reason"]),
             )
 
         if self.allocation_controls_enabled:
@@ -1703,14 +1746,13 @@ class RiskAwareRouter:
                     f"{strategy_used + float(notional):.2f} > {strategy_cap_usd:.2f}"
                 )
                 self.audit_log.append(audit_entry)
-                return OrderResult(
+                return _result(
                     success=False,
-                    decision=RiskDecision.HALT,
-                    risk_state=risk_state,
-                    order_id=None,
-                    exchange=route.exchange,
-                    rejected_reason=audit_entry["reject_reason"],
-                    audit_log=audit_entry,
+                    decision_value=RiskDecision.HALT,
+                    risk_state_value=risk_state,
+                    order_id_value=None,
+                    exchange_value=route.exchange,
+                    rejected_reason_value=str(audit_entry["reject_reason"]),
                 )
             if venue_used + float(notional) > float(venue_cap_usd) + 1e-9:
                 self.reject_count += 1
@@ -1720,14 +1762,13 @@ class RiskAwareRouter:
                     f"{venue_used + float(notional):.2f} > {venue_cap_usd:.2f}"
                 )
                 self.audit_log.append(audit_entry)
-                return OrderResult(
+                return _result(
                     success=False,
-                    decision=RiskDecision.HALT,
-                    risk_state=risk_state,
-                    order_id=None,
-                    exchange=route.exchange,
-                    rejected_reason=audit_entry["reject_reason"],
-                    audit_log=audit_entry,
+                    decision_value=RiskDecision.HALT,
+                    risk_state_value=risk_state,
+                    order_id_value=None,
+                    exchange_value=route.exchange,
+                    rejected_reason_value=str(audit_entry["reject_reason"]),
                 )
 
         # =========================================================================
@@ -1792,14 +1833,14 @@ class RiskAwareRouter:
                     "failed": True,
                 }
                 self.audit_log.append(audit_entry)
-                return OrderResult(
+                return _result(
                     success=False,
-                    decision=RiskDecision.HALT,
-                    risk_state=risk_state,
-                    order_id=None,
-                    exchange=route.exchange,
-                    rejected_reason=audit_entry["reject_reason"],
-                    audit_log=audit_entry,
+                    decision_value=RiskDecision.HALT,
+                    risk_state_value=risk_state,
+                    order_id_value=None,
+                    exchange_value=route.exchange,
+                    rejected_reason_value=str(audit_entry["reject_reason"]),
+                    latency_ms=float(latency_ms),
                 )
 
         queue_ahead_qty = self._estimate_queue_ahead_qty(
@@ -1842,14 +1883,14 @@ class RiskAwareRouter:
                 "failed": True,
             }
             self.audit_log.append(audit_entry)
-            return OrderResult(
+            return _result(
                 success=False,
-                decision=RiskDecision.HALT,
-                risk_state=risk_state,
-                order_id=None,
-                exchange=route.exchange,
-                rejected_reason=audit_entry["reject_reason"],
-                audit_log=audit_entry,
+                decision_value=RiskDecision.HALT,
+                risk_state_value=risk_state,
+                order_id_value=None,
+                exchange_value=route.exchange,
+                rejected_reason_value=str(audit_entry["reject_reason"]),
+                latency_ms=float(execution_latency_ms),
             )
 
         audit_entry["executed"] = True
@@ -1938,14 +1979,15 @@ class RiskAwareRouter:
             "reliability_degraded": self.reliability_monitor.is_degraded(route.exchange),
         }
 
-        return OrderResult(
+        return _result(
             success=True,
-            decision=decision,
-            risk_state=risk_state,
-            order_id=order_id,
-            exchange=route.exchange,
-            rejected_reason=None,
-            audit_log=audit_entry,
+            decision_value=decision,
+            risk_state_value=risk_state,
+            order_id_value=order_id,
+            exchange_value=route.exchange,
+            rejected_reason_value=None,
+            latency_ms=float(execution_latency_ms),
+            fill_ratio=float(fill_ratio),
         )
 
     def _update_tca(
@@ -2077,6 +2119,7 @@ class RiskAwareRouter:
         realized_net_alpha_bps = float(expected_alpha_bps) - realized_total_bps
 
         audit_entry["tca"] = {
+            "trace_id": str(audit_entry.get("trace_id", "")),
             "predicted_slippage_bps": predicted_slippage_bps,
             "realized_slippage_bps": realized_slippage_bps,
             "predicted_total_bps": predicted_total_bps,

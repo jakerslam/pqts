@@ -253,6 +253,23 @@ fn quote_state(price: f64, age_seconds: f64, stale_after_seconds: f64) -> (bool,
     (stale, valid_price && !stale)
 }
 
+#[pyfunction]
+fn profitability_net_alpha_bps(
+    expected_alpha_bps: f64,
+    expected_cost_usd: f64,
+    expected_slippage_usd: f64,
+    notional_usd: f64,
+    min_edge_bps: f64,
+) -> (f64, f64, f64) {
+    let notional = clamp_lower(notional_usd, 1e-12);
+    let total_router_bps = ((clamp_lower(expected_cost_usd, 0.0) + clamp_lower(expected_slippage_usd, 0.0))
+        / notional)
+        * 10000.0;
+    let net_alpha_bps = expected_alpha_bps - total_router_bps;
+    let required_alpha_bps = total_router_bps + clamp_lower(min_edge_bps, 0.0);
+    (total_router_bps, net_alpha_bps, required_alpha_bps)
+}
+
 #[pymodule]
 fn pqts_hotpath(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(version, m)?)?;
@@ -264,5 +281,6 @@ fn pqts_hotpath(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(paper_fill_metrics, m)?)?;
     m.add_function(wrap_pyfunction!(smart_router_score, m)?)?;
     m.add_function(wrap_pyfunction!(quote_state, m)?)?;
+    m.add_function(wrap_pyfunction!(profitability_net_alpha_bps, m)?)?;
     Ok(())
 }

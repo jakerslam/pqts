@@ -5,20 +5,19 @@ from __future__ import annotations
 import argparse
 import csv
 import hashlib
-import io
 import json
 import os
 import platform
 import shutil
 import subprocess
 import sys
-from contextlib import redirect_stdout
 from datetime import datetime, timezone
 from difflib import unified_diff
 from pathlib import Path
 from typing import Sequence
 
 from analytics.notifications import NotificationChannels, NotificationDispatcher
+from app.cli_output import run_handler
 from app.operator_experience import (
     explain_block_reason,
     explain_strategy,
@@ -27,6 +26,8 @@ from app.operator_experience import (
     list_strategy_catalog,
     recommend_risk_profile,
 )
+from app.script_jobs import build_paper_campaign_job, build_simulation_suite_job
+from contracts.template_run_artifact import TemplateRunArtifact
 from strategies.plugin_sdk import scaffold_strategy_plugin
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -197,17 +198,15 @@ def _write_template_run_artifacts(
     out_dir.mkdir(parents=True, exist_ok=True)
     stamp = _utc_stamp()
     artifact_path = out_dir / f"template_run_{stamp}.json"
-    payload: dict[str, object] = {
-        "generated_at": datetime.now(timezone.utc).isoformat(),
-        "mode": str(mode),
-        "template": str(template_name),
-        "resolved_strategy": str(strategy),
-        "config_path": str(config_path),
-        "config_sha256": _config_fingerprint(config_path),
-        "command": list(command),
-    }
-    if extra:
-        payload.update(extra)
+    payload = TemplateRunArtifact(
+        mode=str(mode),
+        template=str(template_name),
+        resolved_strategy=str(strategy),
+        config_path=str(config_path),
+        config_sha256=_config_fingerprint(config_path),
+        command=tuple(str(token) for token in command),
+        extra=dict(extra or {}),
+    ).to_dict()
     artifact_path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
     diff_path = out_dir / f"template_run_diff_{stamp}.diff"
@@ -274,35 +273,23 @@ def _run_init(args: argparse.Namespace) -> int:
 def _run_demo(args: argparse.Namespace) -> int:
     out_dir = Path(args.out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
-    command = [
-        _python(),
-        str(REPO_ROOT / "scripts" / "run_simulation_suite.py"),
-        "--config",
-        str(args.config),
-        "--markets",
-        str(args.markets),
-        "--strategies",
-        str(args.strategies),
-        "--cycles-per-scenario",
-        str(args.cycles),
-        "--readiness-every",
-        str(args.readiness_every),
-        "--symbols-per-market",
-        str(args.symbols_per_market),
-        "--sleep-seconds",
-        "0.0",
-        "--out-dir",
-        str(out_dir),
-        "--telemetry-log",
-        str(Path(args.telemetry_log)),
-        "--tca-dir",
-        str(Path(args.tca_dir)),
-    ]
-    if str(args.risk_profile).strip():
-        command.extend(["--risk-profile", str(args.risk_profile).strip()])
+    job = build_simulation_suite_job(
+        repo_root=REPO_ROOT,
+        config=str(args.config),
+        markets=str(args.markets),
+        strategies=str(args.strategies),
+        cycles=int(args.cycles),
+        readiness_every=int(args.readiness_every),
+        symbols_per_market=int(args.symbols_per_market),
+        out_dir=str(out_dir),
+        telemetry_log=str(Path(args.telemetry_log)),
+        tca_dir=str(Path(args.tca_dir)),
+        risk_profile=str(args.risk_profile),
+    )
+    command = job.command(_python())
 
     print("Running demo simulation...")
-    rc = _run_command(command, cwd=REPO_ROOT)
+    rc = _run_command(command, cwd=job.cwd)
     if rc != 0:
         return rc
     _print_next_steps(
@@ -324,35 +311,23 @@ def _run_backtest(args: argparse.Namespace) -> int:
     strategy = _resolve_template_strategy(args.template)
     out_dir = Path(args.out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
-    command = [
-        _python(),
-        str(REPO_ROOT / "scripts" / "run_simulation_suite.py"),
-        "--config",
-        str(args.config),
-        "--markets",
-        str(args.market),
-        "--strategies",
-        strategy,
-        "--cycles-per-scenario",
-        str(args.cycles),
-        "--readiness-every",
-        str(args.readiness_every),
-        "--symbols-per-market",
-        str(args.symbols_per_market),
-        "--sleep-seconds",
-        "0.0",
-        "--out-dir",
-        str(out_dir),
-        "--telemetry-log",
-        str(Path(args.telemetry_log)),
-        "--tca-dir",
-        str(Path(args.tca_dir)),
-    ]
-    if str(args.risk_profile).strip():
-        command.extend(["--risk-profile", str(args.risk_profile).strip()])
+    job = build_simulation_suite_job(
+        repo_root=REPO_ROOT,
+        config=str(args.config),
+        markets=str(args.market),
+        strategies=str(strategy),
+        cycles=int(args.cycles),
+        readiness_every=int(args.readiness_every),
+        symbols_per_market=int(args.symbols_per_market),
+        out_dir=str(out_dir),
+        telemetry_log=str(Path(args.telemetry_log)),
+        tca_dir=str(Path(args.tca_dir)),
+        risk_profile=str(args.risk_profile),
+    )
+    command = job.command(_python())
 
     print(f"Running backtest template '{args.template}' (strategy: {strategy})...")
-    rc = _run_command(command, cwd=REPO_ROOT)
+    rc = _run_command(command, cwd=job.cwd)
     if rc != 0:
         return rc
     artifact_refs = _write_template_run_artifacts(
@@ -383,29 +358,21 @@ def _run_backtest(args: argparse.Namespace) -> int:
 def _run_paper_start(args: argparse.Namespace) -> int:
     out_dir = Path(args.out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
-    command = [
-        _python(),
-        str(REPO_ROOT / "scripts" / "run_paper_campaign.py"),
-        "--config",
-        str(args.config),
-        "--cycles",
-        str(args.cycles),
-        "--sleep-seconds",
-        str(args.sleep_seconds),
-        "--notional-usd",
-        str(args.notional_usd),
-        "--readiness-every",
-        str(args.readiness_every),
-        "--out-dir",
-        str(out_dir),
-    ]
-    if str(args.symbols).strip():
-        command.extend(["--symbols", str(args.symbols).strip()])
-    if str(args.risk_profile).strip():
-        command.extend(["--risk-profile", str(args.risk_profile).strip()])
+    job = build_paper_campaign_job(
+        repo_root=REPO_ROOT,
+        config=str(args.config),
+        cycles=int(args.cycles),
+        sleep_seconds=float(args.sleep_seconds),
+        notional_usd=float(args.notional_usd),
+        readiness_every=int(args.readiness_every),
+        out_dir=str(out_dir),
+        symbols=str(args.symbols),
+        risk_profile=str(args.risk_profile),
+    )
+    command = job.command(_python())
 
     print("Starting paper campaign (bounded quick run)...")
-    rc = _run_command(command, cwd=REPO_ROOT)
+    rc = _run_command(command, cwd=job.cwd)
     if rc != 0:
         return rc
     artifact_refs = _write_template_run_artifacts(
@@ -1002,31 +969,8 @@ def run_first_success_cli(argv: Sequence[str]) -> int:
     if handler is None:
         parser.print_help()
         return 2
-    output_mode = str(getattr(args, "output", "table")).strip().lower()
-    if output_mode != "json":
-        return int(handler(args))
-
-    stdout_buffer = io.StringIO()
-    try:
-        with redirect_stdout(stdout_buffer):
-            return_code = int(handler(args))
-        payload = {
-            "ok": return_code == 0,
-            "command": str(getattr(args, "command", "")),
-            "return_code": int(return_code),
-            "stdout": [line for line in stdout_buffer.getvalue().splitlines() if line.strip()],
-        }
-        if return_code != 0:
-            payload["error"] = "command_failed"
-        print(json.dumps(payload, sort_keys=True))
-        return return_code
-    except Exception as exc:
-        payload = {
-            "ok": False,
-            "command": str(getattr(args, "command", "")),
-            "return_code": 2,
-            "error": str(exc),
-            "stdout": [line for line in stdout_buffer.getvalue().splitlines() if line.strip()],
-        }
-        print(json.dumps(payload, sort_keys=True))
-        return 2
+    return run_handler(
+        command_name=str(getattr(args, "command", "")),
+        handler=lambda: int(handler(args)),
+        output_mode=str(getattr(args, "output", "table")),
+    )
