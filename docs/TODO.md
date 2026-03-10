@@ -97,6 +97,6 @@ Issue-ready split backlog: [docs/ISSUE_BACKLOG.md](/Users/jay/Document%20(Lcl)/C
 ## 07. Benchmarking and Publication (`P2`)
 
 - [x] Capture first published benchmark baselines in [docs/BENCHMARKS.md](/Users/jay/Document%20(Lcl)/Coding/PQTS/docs/BENCHMARKS.md) from reproducible runs.
-- [ ] Publish at least three reproducible result bundles under `results/` with configs, metrics, and charts.
+- [x] Publish at least three reproducible result bundles under `results/` with configs, metrics, and charts.
 - [ ] Add monthly automated report generation (HTML/PDF + equity curve + Sharpe/DD + attribution tables).
 - [ ] Add benchmark provenance log (strategy version, dataset/version, environment hash, run timestamp).

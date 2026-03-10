@@ -17,7 +17,9 @@ python3 scripts/run_simulation_suite.py \
   --strategies market_making \
   --cycles-per-scenario 8 \
   --readiness-every 4 \
-  --out-dir data/reports \
+  --out-dir /Users/jay/Document (Lcl)/Coding/PQTS/results/2026-03-09_sim_suite_baseline \
+  --telemetry-log /Users/jay/Document (Lcl)/Coding/PQTS/results/2026-03-09_sim_suite_baseline/simulation_events.jsonl \
+  --tca-dir /Users/jay/Document (Lcl)/Coding/PQTS/results/2026-03-09_sim_suite_baseline/tca \
   --sleep-seconds 0.0 \
   --symbols-per-market 1 \
   --risk-profile balanced
@@ -28,6 +30,7 @@ python3 scripts/run_simulation_suite.py \
 - `simulation_suite_20260309T175723522900Z.json`
 - `simulation_leaderboard_20260309T175723522900Z.csv`
 - `quality_reject_chart.svg`
+- `config_paper_snapshot.yaml`
 
 ## Key Metrics
 

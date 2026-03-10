@@ -24,3 +24,9 @@ Example:
 - `2026-03-09_crypto_market_making_short/`
 - `2026-03-09_crypto_funding_arbitrage_short/`
 - `2026-03-09_multi_market_market_making_short/`
+
+All current bundles contain:
+- run command in per-bundle `README.md`
+- config snapshot (`config_paper_snapshot.yaml`)
+- metrics outputs (`simulation_suite_*.json`, `simulation_leaderboard_*.csv`)
+- at least one chart artifact (`metrics_chart.svg` or `quality_reject_chart.svg`)

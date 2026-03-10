@@ -5,6 +5,7 @@
 - Date (UTC): 2026-03-09T18:07:50.585697+00:00
 - Risk profile: balanced
 - Scenario count: 3
+- Config snapshot: `config_paper_snapshot.yaml`
 
 ## Command
 
@@ -17,6 +18,7 @@ python3 scripts/run_simulation_suite.py --markets crypto,equities,forex --strate
 - `simulation_suite_20260309T180750584558Z.json`
 - `simulation_leaderboard_20260309T180750584558Z.csv`
 - `metrics_chart.svg`
+- `config_paper_snapshot.yaml`
 - `simulation_events.jsonl`
 - `tca/` (per-run execution telemetry)
 
