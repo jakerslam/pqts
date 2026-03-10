@@ -93,4 +93,6 @@ lint:
 	$(VENV_PY) -m flake8 src/core src/execution src/risk src/analytics src/markets --count --select=E9,F63,F7,F82 --show-source --statistics
 
 clean:
-	rm -rf "$(VENV)"
+	rm -rf "$(VENV)" .pytest_cache .mypy_cache .ruff_cache build dist site
+	find src tests scripts tools -type d -name "__pycache__" -prune -exec rm -rf {} +
+	find src -maxdepth 2 -type d -name "*.egg-info" -prune -exec rm -rf {} +

@@ -135,6 +135,7 @@ Legend:
 - [x] Implement short-cycle binary scanner primitives: bundle-edge detection, legging/unhedged safety checks, universe and interval controls, rolling micro-edge throughput accounting, optional asymmetric single-leg mode, security-hardening gate checks, and source-confidence classification (`ROI: high`, `Type: engineering`, `Track: parity`, `Ref: XR-1, XR-2, XR-3, XR-4, XR-5, XR-6, XR-7`)
 - [x] Implement split-plane analysis-to-execution payload contract, HFT latency/throughput SLO monitor, Kelly-constrained short-cycle sizing, high-frequency governance checks, cross-market expansion controls, exogenous-data freshness/quality validation, and fail-closed external claim handling (`ROI: high`, `Type: engineering`, `Track: parity`, `Ref: ZQ-1, ZQ-2, ZQ-3, ZQ-4, ZQ-5, ZQ-6, ZQ-7, ZQ-8, NFR-1, NFR-2`)
 - [x] Explicitly map and preserve baseline runtime/execution/security regression contracts already validated by the baseline matrix and required test suites (`ROI: high`, `Type: engineering`, `Track: parity`, `Ref: BF-1, BF-2, BF-3, BF-4, BF-5, BF-6, RV-1, RV-2, RV-3, RV-4`)
+- [x] Consolidate overlapping math/runtime modules into primitive base + compatibility facades (shared Kelly core, funding-arb adapter, regime-detector adapter, artifact cleanup target) to reduce duplicate logic while preserving import stability (`ROI: high`, `Type: engineering`, `Track: parity`, `Ref: LANG-5, LANG-6, COMP-6, COMP-9`)
 
 ## 03. Human-Only Parallel Lane
 

@@ -7,6 +7,8 @@ from dataclasses import dataclass, field
 from statistics import fmean
 from typing import Iterable, Mapping
 
+from portfolio.kelly_core import kelly_fraction_from_probability
+
 
 @dataclass(frozen=True)
 class ShortCycleQuote:
@@ -223,10 +225,13 @@ class ShortCycleBinaryEngine:
         kelly_fraction_cap: float,
         hard_risk_cap: float,
     ) -> dict[str, float]:
-        b = max(float(payout_multiple), 0.0001)
-        p = max(min(float(win_probability), 1.0), 0.0)
-        q = 1.0 - p
-        full_kelly = max(((b * p) - q) / b, 0.0)
+        full_kelly = max(
+            kelly_fraction_from_probability(
+                posterior_probability=float(win_probability),
+                payout_multiple=max(float(payout_multiple), 0.0001),
+            ),
+            0.0,
+        )
         requested = min(full_kelly, float(kelly_fraction_cap))
         approved = min(requested, float(hard_risk_cap))
         return {

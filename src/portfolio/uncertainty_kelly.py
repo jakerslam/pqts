@@ -5,6 +5,13 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass
 from typing import Any
 
+from portfolio.kelly_core import (
+    bounded_fraction,
+    clip_unit,
+    implied_probability_from_payout,
+    kelly_fraction_from_probability,
+)
+
 
 @dataclass(frozen=True)
 class UncertaintyKellyConfig:
@@ -30,25 +37,11 @@ class KellySizingDecision:
         return asdict(self)
 
 
-def _clip(value: float, low: float, high: float) -> float:
-    return min(max(float(value), low), high)
-
-
-def implied_probability_from_payout(payout_multiple: float) -> float:
-    """Convert payout multiple `b` (net odds) to implied probability 1/(1+b)."""
-    b = float(payout_multiple)
-    if b <= 0:
-        raise ValueError("payout_multiple must be > 0.")
-    return 1.0 / (1.0 + b)
-
-
 def full_kelly_fraction(*, posterior_probability: float, payout_multiple: float) -> float:
-    p = _clip(float(posterior_probability), 0.0, 1.0)
-    q = 1.0 - p
-    b = float(payout_multiple)
-    if b <= 0:
-        raise ValueError("payout_multiple must be > 0.")
-    return (p * b - q) / b
+    return kelly_fraction_from_probability(
+        posterior_probability=float(posterior_probability),
+        payout_multiple=float(payout_multiple),
+    )
 
 
 def uncertainty_adjusted_kelly(
@@ -60,7 +53,7 @@ def uncertainty_adjusted_kelly(
     config: UncertaintyKellyConfig | None = None,
 ) -> KellySizingDecision:
     cfg = config or UncertaintyKellyConfig()
-    posterior = _clip(float(posterior_probability), 0.0, 1.0)
+    posterior = clip_unit(float(posterior_probability))
     implied = implied_probability_from_payout(payout_multiple)
     edge = posterior - implied
     if edge < float(cfg.min_edge):
@@ -83,7 +76,7 @@ def uncertainty_adjusted_kelly(
     full_kelly = max(full_kelly, 0.0)
     penalty_scalar = max(0.0, 1.0 - (float(cfg.uncertainty_penalty) * max(float(uncertainty), 0.0)))
     adjusted = full_kelly * float(cfg.base_fraction) * penalty_scalar
-    final = _clip(adjusted, 0.0, float(cfg.max_fraction))
+    final = bounded_fraction(requested=adjusted, low=0.0, high=float(cfg.max_fraction))
     return KellySizingDecision(
         market_id=str(market_id),
         posterior_probability=posterior,

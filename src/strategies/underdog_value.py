@@ -6,6 +6,8 @@ from dataclasses import asdict, dataclass
 from math import exp
 from typing import Mapping
 
+from portfolio.kelly_core import kelly_fraction_from_probability
+
 
 @dataclass(frozen=True)
 class QuoteSnapshot:
@@ -142,10 +144,13 @@ class UnderdogValueStrategy:
         if rolling_realized_edge < self.config.disable_rolling_edge_floor:
             return PositionSizingDecision(0.0, 0.0, True, "rolling_edge_disable")
 
-        b = max(float(payout_multiple), 0.0001)
-        p = decision.p_model
-        q = 1.0 - p
-        full_kelly = max(((b * p) - q) / b, 0.0)
+        full_kelly = max(
+            kelly_fraction_from_probability(
+                posterior_probability=float(decision.p_model),
+                payout_multiple=max(float(payout_multiple), 0.0001),
+            ),
+            0.0,
+        )
         requested = full_kelly * self.config.kelly_fraction
 
         risk_cap = min(

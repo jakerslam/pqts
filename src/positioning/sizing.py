@@ -5,6 +5,8 @@ import pandas as pd
 from typing import Dict, Optional
 from enum import Enum
 
+from portfolio.kelly_core import kelly_fraction_from_win_loss
+
 logger = logging.getLogger(__name__)
 
 class SizingMethod(Enum):
@@ -113,12 +115,11 @@ class PositionSizer:
         avg_win = signal.get('avg_win', 0.02)  # 2%
         avg_loss = signal.get('avg_loss', 0.01)  # 1%
         
-        p = win_rate
-        q = 1 - p
-        b = avg_win / avg_loss if avg_loss > 0 else 1.0
-        
-        # Kelly fraction
-        kelly = (p * b - q) / b if b > 0 else 0
+        kelly = kelly_fraction_from_win_loss(
+            win_rate=float(win_rate),
+            avg_win=float(avg_win),
+            avg_loss=float(avg_loss),
+        )
         
         # Apply fraction (half Kelly for safety)
         fraction = 1.0 if full_kelly else self.kelly_fraction
