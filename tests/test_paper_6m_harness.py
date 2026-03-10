@@ -50,3 +50,16 @@ def test_aggregate_computes_pass_state() -> None:
     assert aggregate["total_filled"] == 18
     assert aggregate["ready_months"] == 1
     assert aggregate["passed"] is True
+
+
+def test_summarize_month_falls_back_when_no_promotion_snapshot(tmp_path: Path) -> None:
+    summary = MODULE._summarize_month(  # noqa: SLF001
+        index=1,
+        window=(date(2025, 1, 1), date(2025, 2, 1)),
+        payload={"submitted": 2, "filled": 1, "rejected": 1, "reject_rate": 0.5},
+        out_dir=tmp_path,
+        stdout_path=tmp_path / "out.log",
+        stderr_path=tmp_path / "err.log",
+        payload_path=tmp_path / "payload.json",
+    )
+    assert summary["promotion_decision"] == "insufficient_snapshot"

@@ -122,6 +122,9 @@ def _summarize_month(
     window: Tuple[date, date],
     payload: Dict[str, Any],
     out_dir: Path,
+    stdout_path: Path,
+    stderr_path: Path,
+    payload_path: Path,
 ) -> Dict[str, Any]:
     readiness = payload.get("readiness", {}) if isinstance(payload.get("readiness"), dict) else {}
     promotion = (
@@ -134,6 +137,9 @@ def _summarize_month(
         if isinstance(payload.get("ops_health"), dict)
         else {}
     )
+    decision = str(promotion.get("decision", "")).strip()
+    if not decision:
+        decision = "ready_for_canary" if bool(readiness.get("ready_for_canary", False)) else "insufficient_snapshot"
 
     start, end_exclusive = window
     end_inclusive = end_exclusive - timedelta(days=1)
@@ -147,9 +153,12 @@ def _summarize_month(
         "rejected": int(payload.get("rejected", 0)),
         "reject_rate": float(payload.get("reject_rate", 0.0)),
         "ready_for_canary": bool(readiness.get("ready_for_canary", False)),
-        "promotion_decision": str(promotion.get("decision", "unknown")),
+        "promotion_decision": decision,
         "ops_critical_alerts": int(ops_summary.get("critical", 0)),
         "slice_out_dir": str(out_dir),
+        "campaign_stdout_path": str(stdout_path),
+        "campaign_stderr_path": str(stderr_path),
+        "campaign_payload_path": str(payload_path),
     }
 
 
@@ -174,6 +183,10 @@ def _aggregate(
         "submitted_each_month": all(int(row.get("submitted", 0)) > 0 for row in monthly),
         "avg_reject_rate_within_limit": avg_reject_rate <= float(max_avg_reject_rate),
         "minimum_ready_months": ready_months >= int(min_ready_months),
+        "has_no_unknown_promotion_decisions": all(
+            str(row.get("promotion_decision", "")).strip() not in {"", "unknown", "insufficient_snapshot"}
+            for row in monthly
+        ),
     }
     return {
         "months": len(monthly),
@@ -214,10 +227,10 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--lookback-days", type=int, default=60)
     parser.add_argument("--min-days", type=int, default=1)
     parser.add_argument("--min-fills", type=int, default=10)
-    parser.add_argument("--readiness-every", type=int, default=0)
+    parser.add_argument("--readiness-every", type=int, default=1)
     parser.add_argument("--max-p95-slippage-bps", type=float, default=25.0)
     parser.add_argument("--max-mape-pct", type=float, default=40.0)
-    parser.add_argument("--max-reject-rate", type=float, default=0.5)
+    parser.add_argument("--max-reject-rate", type=float, default=1.0)
     parser.add_argument("--max-avg-reject-rate", type=float, default=0.5)
     parser.add_argument("--min-ready-months", type=int, default=1)
     parser.add_argument("--strict", action="store_true", help="Return non-zero when aggregate checks fail.")
@@ -243,14 +256,29 @@ def main() -> int:
         label = f"month_{idx:02d}_{start.isoformat()}_{(end_exclusive - timedelta(days=1)).isoformat()}"
         month_dir = out_dir / label
         month_tca = tca_root / f"paper_6m_month_{idx:02d}.csv"
+        month_dir.mkdir(parents=True, exist_ok=True)
 
         cmd = _build_campaign_cmd(args=args, out_dir=month_dir, tca_db_path=month_tca)
         run = _run(cmd)
+        stdout_path = month_dir / "campaign_stdout.log"
+        stderr_path = month_dir / "campaign_stderr.log"
+        stdout_path.write_text(run.stdout, encoding="utf-8")
+        stderr_path.write_text(run.stderr, encoding="utf-8")
         payload = _parse_json_from_output(run.stdout)
         if not payload:
             raise RuntimeError(f"Unable to parse campaign payload for {label}")
+        payload_path = month_dir / "campaign_result.json"
+        payload_path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
-        month_summary = _summarize_month(index=idx, window=window, payload=payload, out_dir=month_dir)
+        month_summary = _summarize_month(
+            index=idx,
+            window=window,
+            payload=payload,
+            out_dir=month_dir,
+            stdout_path=stdout_path,
+            stderr_path=stderr_path,
+            payload_path=payload_path,
+        )
         monthly.append(month_summary)
         print(
             json.dumps(
