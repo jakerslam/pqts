@@ -439,8 +439,11 @@ class RiskAwareRouter:
                 },
             )
         )
-        # Order admission gate to prevent race-condition bypass across state changes.
-        self._submit_order_lock = asyncio.Lock()
+        # Partitioned order admission locks keyed by venue+symbol.
+        # This preserves serialization for competing orders while allowing
+        # parallel submissions across independent symbols/venues.
+        self._submit_order_locks: Dict[str, asyncio.Lock] = {}
+        self._submit_order_locks_guard = asyncio.Lock()
 
         # Audit logging (Step 5)
         self.audit_log: List[Dict] = []
@@ -852,6 +855,45 @@ class RiskAwareRouter:
             "retry_after_seconds": float(decision.retry_after_seconds),
         }
 
+    @staticmethod
+    def _infer_submit_venue_hint(order: OrderRequest, market_data: Dict[str, Any]) -> str:
+        symbol = str(order.symbol or "").strip()
+        if not symbol:
+            return "unknown"
+
+        candidates: List[Tuple[str, float]] = []
+        for venue, payload in market_data.items():
+            if venue in {"order_book", "last_price", "vol_24h", "resilience"}:
+                continue
+            if not isinstance(payload, dict):
+                continue
+            quote = payload.get(symbol)
+            if not isinstance(quote, dict):
+                continue
+            volume = float(quote.get("volume_24h", 0.0) or 0.0)
+            candidates.append((str(venue), volume))
+
+        if not candidates:
+            return "unknown"
+        candidates.sort(key=lambda row: row[1], reverse=True)
+        return str(candidates[0][0]).strip().lower() or "unknown"
+
+    def _submit_partition_key(self, order: OrderRequest, market_data: Dict[str, Any]) -> str:
+        venue_hint = self._infer_submit_venue_hint(order, market_data)
+        symbol = str(order.symbol or "").strip().upper() or "UNKNOWN"
+        return f"{venue_hint}:{symbol}"
+
+    async def _partition_lock_for(self, partition_key: str) -> asyncio.Lock:
+        lock = self._submit_order_locks.get(partition_key)
+        if lock is not None:
+            return lock
+        async with self._submit_order_locks_guard:
+            lock = self._submit_order_locks.get(partition_key)
+            if lock is None:
+                lock = asyncio.Lock()
+                self._submit_order_locks[partition_key] = lock
+            return lock
+
     async def submit_order(
         self,
         order: OrderRequest,
@@ -860,8 +902,10 @@ class RiskAwareRouter:
         strategy_returns: Dict[str, Any],
         portfolio_changes: List[float],
     ) -> OrderResult:
-        """Serialized order-admission wrapper that prevents race-condition bypass."""
-        async with self._submit_order_lock:
+        """Partitioned order-admission wrapper for concurrent independent routes."""
+        partition_key = self._submit_partition_key(order, market_data)
+        partition_lock = await self._partition_lock_for(partition_key)
+        async with partition_lock:
             result = await self._submit_order_unlocked(
                 order=order,
                 market_data=market_data,
@@ -869,6 +913,9 @@ class RiskAwareRouter:
                 strategy_returns=strategy_returns,
                 portfolio_changes=portfolio_changes,
             )
+            if isinstance(result.audit_log, dict):
+                result.audit_log.setdefault("admission", {})
+                result.audit_log["admission"]["partition_key"] = partition_key
             self._record_order_ledger(order=order, result=result)
             return result
 
@@ -2691,6 +2738,9 @@ class RiskAwareRouter:
                     self.default_strategy_allocation_cap_pct
                 ),
                 "default_max_venue_allocation_pct": float(self.default_venue_allocation_cap_pct),
+            },
+            "admission_locks": {
+                "partition_count": int(len(self._submit_order_locks)),
             },
             "confidence_allocator": {
                 "enabled": bool(self.confidence_allocator.enabled),

@@ -833,7 +833,7 @@ def test_router_rejects_post_trade_position_limit_breach(tmp_path):
     assert "POSITION_LIMIT" in (result.rejected_reason or "")
 
 
-def test_router_submit_order_serializes_concurrent_admissions(tmp_path):
+def test_router_submit_order_serializes_same_partition_admissions(tmp_path):
     class BlockingFillProvider:
         def __init__(self):
             self.active = 0
@@ -915,6 +915,96 @@ def test_router_submit_order_serializes_concurrent_admissions(tmp_path):
     assert first.success is True
     assert second.success is True
     assert fill_provider.max_active == 1
+    assert first.audit_log["admission"]["partition_key"] == second.audit_log["admission"]["partition_key"]
+
+
+def test_router_submit_order_allows_parallel_cross_partition_admissions(tmp_path):
+    class BlockingFillProvider:
+        def __init__(self):
+            self.active = 0
+            self.max_active = 0
+
+        async def get_fill(
+            self,
+            *,
+            order_id,
+            symbol,
+            venue,
+            side,
+            requested_qty,
+            reference_price,
+            order_book=None,
+            queue_ahead_qty=None,
+        ):
+            _ = order_id, side, order_book, queue_ahead_qty
+            self.active += 1
+            self.max_active = max(self.max_active, self.active)
+            await asyncio.sleep(0.02)
+            self.active -= 1
+            return ExecutionFill(
+                executed_price=float(reference_price),
+                executed_qty=float(requested_qty),
+                timestamp=datetime.now(timezone.utc),
+                venue=venue,
+                symbol=symbol,
+            )
+
+    fill_provider = BlockingFillProvider()
+    router = RiskAwareRouter(
+        risk_config=RiskLimits(
+            max_daily_loss_pct=0.02,
+            max_drawdown_pct=0.2,
+            max_gross_leverage=2.0,
+        ),
+        broker_config={"enabled": True},
+        fill_provider=fill_provider,
+        tca_db_path=str(tmp_path / "partitioned_submit.csv"),
+    )
+    router.set_capital(100000.0, source="unit_test")
+    market_data = {
+        "binance": {
+            "BTC-USD": {
+                "price": 50000.0,
+                "spread": 0.0002,
+                "volume_24h": 2_000_000,
+            },
+            "ETH-USD": {
+                "price": 3000.0,
+                "spread": 0.0003,
+                "volume_24h": 1_500_000,
+            },
+        },
+        "order_book": {
+            "bids": [(49990.0, 2.0), (49980.0, 4.0)],
+            "asks": [(50010.0, 1.5), (50020.0, 3.0)],
+        },
+    }
+    strategy_returns, portfolio_changes = _strategy_inputs()
+
+    async def submit_once(symbol: str):
+        order = OrderRequest(
+            symbol=symbol,
+            side="buy",
+            quantity=0.1,
+            order_type=OrderType.LIMIT,
+            price=50000.0 if symbol == "BTC-USD" else 3000.0,
+        )
+        return await router.submit_order(
+            order=order,
+            market_data=market_data,
+            portfolio=_portfolio_snapshot(),
+            strategy_returns=strategy_returns,
+            portfolio_changes=portfolio_changes,
+        )
+
+    async def run_pair():
+        return await asyncio.gather(submit_once("BTC-USD"), submit_once("ETH-USD"))
+
+    first, second = asyncio.run(run_pair())
+    assert first.success is True
+    assert second.success is True
+    assert fill_provider.max_active >= 2
+    assert first.audit_log["admission"]["partition_key"] != second.audit_log["admission"]["partition_key"]
 
 
 def test_router_rejects_when_emergency_state_already_active(tmp_path):

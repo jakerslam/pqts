@@ -1,5 +1,6 @@
 # Core Trading Engine
 import asyncio
+import hashlib
 import json
 import logging
 from dataclasses import dataclass, field
@@ -160,10 +161,47 @@ class TradingEngine:
         self._risk_profile_override: Optional[str] = None
         self.state_path = Path(runtime_cfg.get("state_path", "data/engine_state.json"))
         self.state_version = 1
+        loop_cfg = runtime_cfg.get("loop", {}) if isinstance(runtime_cfg, dict) else {}
+        if not isinstance(loop_cfg, dict):
+            loop_cfg = {}
+        self.loop_mode = str(
+            loop_cfg.get("mode", runtime_cfg.get("loop_mode", "event_driven"))
+        ).strip().lower()
+        if self.loop_mode not in {"event_driven", "tick"}:
+            self.loop_mode = "event_driven"
+        self.loop_tick_interval_seconds = max(
+            float(loop_cfg.get("tick_interval_seconds", runtime_cfg.get("tick_interval_seconds", 1.0))),
+            0.01,
+        )
+        self.loop_poll_interval_seconds = max(
+            float(loop_cfg.get("poll_interval_seconds", runtime_cfg.get("poll_interval_seconds", 0.05))),
+            0.01,
+        )
+        self.loop_idle_sleep_seconds = max(
+            float(loop_cfg.get("idle_sleep_seconds", runtime_cfg.get("idle_sleep_seconds", 0.10))),
+            0.01,
+        )
+        self.loop_error_backoff_seconds = max(
+            float(
+                loop_cfg.get(
+                    "error_backoff_seconds",
+                    runtime_cfg.get("error_backoff_seconds", 5.0),
+                )
+            ),
+            0.01,
+        )
+        self._market_signature = ""
         self.running = False
         self._load_persisted_state()
 
         logger.info(f"TradingEngine initialized in {self.mode} mode")
+        logger.info(
+            "Engine loop mode: %s (tick=%.3fs poll=%.3fs idle=%.3fs)",
+            self.loop_mode,
+            self.loop_tick_interval_seconds,
+            self.loop_poll_interval_seconds,
+            self.loop_idle_sleep_seconds,
+        )
         logger.info("Toggle state: %s", self.toggle_manager.snapshot())
         _, profile = self._effective_risk_config()
         logger.info("Risk tolerance profile: %s", profile.name)
@@ -427,6 +465,10 @@ class TradingEngine:
 
     async def _main_loop(self):
         """Main trading loop"""
+        if self.loop_mode == "event_driven":
+            await self._main_loop_event_driven()
+            return
+
         while self.running:
             try:
                 # Update market data
@@ -439,16 +481,56 @@ class TradingEngine:
                 await self._check_risk_limits()
 
                 # Sleep for tick interval
-                await asyncio.sleep(1)
+                await asyncio.sleep(self.loop_tick_interval_seconds)
 
             except Exception as e:
                 logger.error(f"Error in main loop: {e}")
-                await asyncio.sleep(5)
+                await asyncio.sleep(self.loop_error_backoff_seconds)
+
+    async def _main_loop_event_driven(self) -> None:
+        """
+        Event-driven execution loop.
+
+        Market snapshots are polled at a short interval, but strategy/risk execution
+        is triggered only when snapshot signatures change.
+        """
+        while self.running:
+            try:
+                changed = await self._update_market_data()
+                if changed:
+                    await self._run_strategies()
+                    await self._check_risk_limits()
+                    await asyncio.sleep(self.loop_poll_interval_seconds)
+                else:
+                    await asyncio.sleep(self.loop_idle_sleep_seconds)
+            except Exception as e:
+                logger.error(f"Error in event-driven main loop: {e}")
+                await asyncio.sleep(self.loop_error_backoff_seconds)
+
+    @staticmethod
+    def _market_data_signature(rows: Dict[str, MarketData]) -> str:
+        if not rows:
+            return "empty"
+        payload_rows: List[str] = []
+        for symbol, row in sorted(rows.items()):
+            payload_rows.append(
+                "|".join(
+                    [
+                        str(symbol),
+                        f"{float(row.close):.10f}",
+                        f"{float(row.volume):.10f}",
+                        f"{float(row.bid or 0.0):.10f}",
+                        f"{float(row.ask or 0.0):.10f}",
+                    ]
+                )
+            )
+        payload = "\n".join(payload_rows).encode("utf-8")
+        return hashlib.sha256(payload).hexdigest()
 
     async def _update_market_data(self):
         """Fetch latest market data"""
         if self.router is None:
-            return
+            return False
 
         snapshot = await self.router.fetch_market_snapshot()
         self.latest_router_snapshot = snapshot
@@ -497,6 +579,10 @@ class TradingEngine:
 
         if report.passed:
             self.market_data = updated
+            signature = self._market_data_signature(updated)
+            changed = signature != self._market_signature
+            self._market_signature = signature
+            return bool(changed)
         else:
             logger.warning(
                 "Market data quality gate failed: completeness=%.3f drift_ms=%.1f parity=%.3f",
@@ -504,6 +590,7 @@ class TradingEngine:
                 report.max_timestamp_drift_ms,
                 report.feature_parity,
             )
+        return False
 
     async def _run_strategies(self):
         """Execute trading strategies"""
