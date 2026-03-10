@@ -34,6 +34,7 @@ This file tracks tasks that cannot be reliably automated and require direct huma
 - Make and document the wedge-market decision (for example crypto-first) and approve the market-expansion gate criteria before broadening scope.
 - Review and sign off benchmark-report commentary before publication so public claims match reproducible evidence.
 - Define the external trust posture: what metrics are labeled `reference`, `diagnostic_only`, or `unverified` in public-facing copy.
+- Record decision outcomes and sign-off in `docs/HUMAN_DECISIONS_LOG.md`.
 
 ## P1 Packaging, Pricing, and Onboarding Narrative
 
