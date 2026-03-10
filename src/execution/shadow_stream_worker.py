@@ -3,13 +3,13 @@
 from __future__ import annotations
 
 import asyncio
-import hashlib
 import json
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List
 
+from core.hotpath_runtime import event_id as hotpath_event_id
 from execution.risk_aware_router import RiskAwareRouter
 
 
@@ -18,9 +18,7 @@ def _utc_now_iso() -> str:
 
 
 def _event_id(*parts: object) -> str:
-    payload = "|".join(str(part) for part in parts)
-    token = hashlib.sha256(payload.encode("utf-8")).hexdigest()[:16]
-    return f"stream_{token}"
+    return hotpath_event_id("stream", parts, hex_len=16)
 
 
 @dataclass(frozen=True)

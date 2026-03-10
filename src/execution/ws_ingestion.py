@@ -14,6 +14,7 @@ from typing import Any, Awaitable, Callable, Dict, List, Optional
 import aiohttp
 from aiohttp import WSMsgType
 
+from core.hotpath_runtime import event_id as hotpath_event_id
 from execution.live_ops_controls import WebSocketConnectionManager
 from execution.risk_aware_router import RiskAwareRouter
 from research.data_lake_pipeline import (
@@ -452,9 +453,7 @@ class WebSocketIngestionService:
 
     @staticmethod
     def _event_id(*parts: object) -> str:
-        payload = "|".join(str(part) for part in parts)
-        token = hashlib.sha256(payload.encode("utf-8")).hexdigest()[:20]
-        return f"ws_{token}"
+        return hotpath_event_id("ws", parts, hex_len=20)
 
     @staticmethod
     async def _default_fetcher(

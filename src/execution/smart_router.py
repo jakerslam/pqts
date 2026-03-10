@@ -7,6 +7,7 @@ from datetime import datetime, timezone
 from enum import Enum
 from typing import Dict, List, Optional, Tuple
 
+from core.hotpath_runtime import smart_router_score
 from execution.fee_optimizer import FeeRebateOptimizer
 
 logger = logging.getLogger(__name__)
@@ -205,9 +206,7 @@ class SmartOrderRouter:
 
             symbol_data = data[symbol]
             spread = float(symbol_data.get("spread", 0.01) or 0.01)
-            spread_score = 1 / (1 + spread * 100)
             volume = float(symbol_data.get("volume_24h", 0) or 0)
-            volume_score = min(volume / 1_000_000, 1.0)
             monthly_volume = float(
                 self.monthly_volume_by_venue.get(exchange, self.default_monthly_volume_usd)
             )
@@ -216,10 +215,14 @@ class SmartOrderRouter:
                 is_maker=bool(prefer_maker),
                 monthly_volume_usd=monthly_volume,
             )
-            fee_score = 1 / (1 + max(fee_bps, -5.0) / 10.0)
-            quality_score = self._venue_quality_score(exchange)
-            score = (
-                spread_score * 0.30 + volume_score * 0.30 + fee_score * 0.20 + quality_score * 0.20
+            venue_stats = self.venue_quality.get(str(exchange), {})
+            score = smart_router_score(
+                spread=float(spread),
+                volume_24h=float(volume),
+                fee_bps=float(fee_bps),
+                slippage_ratio=float(venue_stats.get("slippage_ratio", 1.0)),
+                fill_ratio=float(venue_stats.get("fill_ratio", 1.0)),
+                latency_ms=float(venue_stats.get("latency_ms", 0.0)),
             )
             scored.append((exchange, score))
 

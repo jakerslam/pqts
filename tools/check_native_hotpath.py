@@ -58,6 +58,16 @@ def main() -> int:
         "wrap_pyfunction!(fill_metrics, m)",
         "fn sequence_transition(",
         "wrap_pyfunction!(sequence_transition, m)",
+        "fn uniform_from_seed(",
+        "wrap_pyfunction!(uniform_from_seed, m)",
+        "fn event_id_hash(",
+        "wrap_pyfunction!(event_id_hash, m)",
+        "fn paper_fill_metrics(",
+        "wrap_pyfunction!(paper_fill_metrics, m)",
+        "fn smart_router_score(",
+        "wrap_pyfunction!(smart_router_score, m)",
+        "fn quote_state(",
+        "wrap_pyfunction!(quote_state, m)",
         "fn version()",
         "wrap_pyfunction!(version, m)",
     ]
@@ -72,16 +82,21 @@ def main() -> int:
                     "rows": len(actual_rows),
                     "module": args.module,
                     "policy": str(policy_path),
-                    "required_symbols": [
-                        "sum_notional",
-                        "fill_metrics",
-                        "sequence_transition",
-                        "version",
-                    ],
-                },
-                sort_keys=True,
-            )
+                "required_symbols": [
+                    "sum_notional",
+                    "fill_metrics",
+                    "sequence_transition",
+                    "uniform_from_seed",
+                    "event_id_hash",
+                    "paper_fill_metrics",
+                    "smart_router_score",
+                    "quote_state",
+                    "version",
+                ],
+            },
+            sort_keys=True,
         )
+    )
     return 0
 
 

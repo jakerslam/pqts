@@ -1,4 +1,24 @@
 use pyo3::prelude::*;
+use sha2::{Digest, Sha256};
+
+fn clamp_lower(value: f64, floor: f64) -> f64 {
+    if value.is_finite() {
+        value.max(floor)
+    } else {
+        floor
+    }
+}
+
+fn sha256_hex(seed: &str) -> String {
+    let mut hasher = Sha256::new();
+    hasher.update(seed.as_bytes());
+    let digest = hasher.finalize();
+    let mut out = String::with_capacity(64);
+    for byte in digest {
+        out.push_str(&format!("{:02x}", byte));
+    }
+    out
+}
 
 #[pyfunction]
 fn version() -> String {
@@ -106,11 +126,143 @@ fn sequence_transition(
     }
 }
 
+#[pyfunction]
+fn uniform_from_seed(seed: &str) -> f64 {
+    let hex = sha256_hex(seed);
+    let prefix = &hex[..8];
+    let value = u32::from_str_radix(prefix, 16).unwrap_or(0);
+    (value as f64) / 4294967295.0
+}
+
+#[pyfunction]
+fn event_id_hash(prefix: &str, payload: &str, hex_len: usize) -> String {
+    let mut token = sha256_hex(payload);
+    let take = hex_len.clamp(1, 64);
+    token.truncate(take);
+    format!("{}_{}", prefix, token)
+}
+
+#[pyfunction]
+fn paper_fill_metrics(
+    side: &str,
+    requested_qty: f64,
+    reference_price: f64,
+    queue_qty: f64,
+    partial_fill_notional_usd: f64,
+    min_partial_fill_ratio: f64,
+    queue_penalty_floor: f64,
+    adverse_selection_bps: f64,
+    min_slippage_bps: f64,
+    queue_slippage_bps_per_turnover: f64,
+    reality_stress_mode: bool,
+    stress_fill_ratio_multiplier: f64,
+    stress_slippage_multiplier: f64,
+    fill_uniform: f64,
+    slippage_uniform: f64,
+) -> (f64, f64, f64, f64, f64) {
+    let req_qty = clamp_lower(requested_qty, 0.0);
+    let ref_price = clamp_lower(reference_price, 0.0);
+    let queue = clamp_lower(queue_qty, 0.0);
+    let partial = clamp_lower(partial_fill_notional_usd, 1e-9);
+    let min_fill = clamp_lower(min_partial_fill_ratio, 0.0).min(1.0);
+
+    let notional = req_qty * ref_price;
+    let base_fill_ratio = if notional <= partial {
+        1.0
+    } else {
+        let capacity_ratio = (partial / clamp_lower(notional, 1e-9)).clamp(min_fill, 1.0);
+        let jitter = 0.9 + (0.2 * fill_uniform);
+        (capacity_ratio * jitter).clamp(min_fill, 1.0)
+    };
+
+    let queue_notional = queue * ref_price;
+    let order_notional = (req_qty * ref_price).max(1e-9);
+    let queue_turnover = if queue_notional <= 0.0 {
+        0.0
+    } else {
+        order_notional / queue_notional
+    };
+    let queue_penalty = clamp_lower(queue_penalty_floor, 0.0).max(1.0 / (1.0 + queue_turnover.max(0.0)));
+
+    let mut fill_ratio = base_fill_ratio * queue_penalty;
+    if reality_stress_mode {
+        fill_ratio = (fill_ratio * clamp_lower(stress_fill_ratio_multiplier, 0.0)).clamp(0.0, 1.0);
+    }
+
+    let impact_scale = ((notional / partial) - 1.0).max(0.0);
+    let stochastic_component = (slippage_uniform - 0.5) * 0.6;
+    let mut slip_bps = clamp_lower(adverse_selection_bps, 0.0) * (0.5 + impact_scale) + stochastic_component;
+    slip_bps += clamp_lower(queue_slippage_bps_per_turnover, 0.0) * queue_turnover.max(0.0);
+    slip_bps = slip_bps.max(clamp_lower(min_slippage_bps, 0.0));
+    if reality_stress_mode {
+        slip_bps *= clamp_lower(stress_slippage_multiplier, 0.0);
+    }
+
+    let executed_qty = req_qty * fill_ratio;
+    let side_token = side.to_ascii_lowercase();
+    let executed_price = if side_token == "buy" {
+        ref_price * (1.0 + (slip_bps / 10000.0))
+    } else {
+        ref_price * (1.0 - (slip_bps / 10000.0))
+    };
+    (
+        fill_ratio,
+        slip_bps,
+        executed_qty,
+        executed_price,
+        queue_turnover.max(0.0),
+    )
+}
+
+#[pyfunction]
+fn smart_router_score(
+    spread: f64,
+    volume_24h: f64,
+    fee_bps: f64,
+    slippage_ratio: f64,
+    fill_ratio: f64,
+    latency_ms: f64,
+) -> f64 {
+    let spread_score = 1.0 / (1.0 + clamp_lower(spread, 0.0) * 100.0);
+    let volume_score = (clamp_lower(volume_24h, 0.0) / 1_000_000.0).min(1.0);
+    let fee_score = 1.0 / (1.0 + fee_bps.max(-5.0) / 10.0);
+
+    let slippage = clamp_lower(slippage_ratio, 0.25);
+    let fill = clamp_lower(fill_ratio, 0.0).min(1.0);
+    let latency = clamp_lower(latency_ms, 0.0);
+    let quality_score =
+        (1.0 / slippage) * 0.5 + fill * 0.3 + (1.0 / (1.0 + latency / 500.0)) * 0.2;
+
+    spread_score * 0.30 + volume_score * 0.30 + fee_score * 0.20 + quality_score * 0.20
+}
+
+#[pyfunction]
+fn quote_state(price: f64, age_seconds: f64, stale_after_seconds: f64) -> (bool, bool) {
+    let valid_price = price.is_finite() && price > 0.0;
+    let age = if age_seconds.is_finite() {
+        age_seconds.max(0.0)
+    } else {
+        f64::INFINITY
+    };
+    let stale_after = if stale_after_seconds.is_finite() {
+        stale_after_seconds.max(0.0)
+    } else {
+        0.0
+    };
+    let stale = age > stale_after;
+    (stale, valid_price && !stale)
+}
+
 #[pymodule]
 fn pqts_hotpath(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(version, m)?)?;
     m.add_function(wrap_pyfunction!(sum_notional, m)?)?;
     m.add_function(wrap_pyfunction!(fill_metrics, m)?)?;
     m.add_function(wrap_pyfunction!(sequence_transition, m)?)?;
+    m.add_function(wrap_pyfunction!(uniform_from_seed, m)?)?;
+    m.add_function(wrap_pyfunction!(event_id_hash, m)?)?;
+    m.add_function(wrap_pyfunction!(paper_fill_metrics, m)?)?;
+    m.add_function(wrap_pyfunction!(smart_router_score, m)?)?;
+    m.add_function(wrap_pyfunction!(quote_state, m)?)?;
     Ok(())
 }

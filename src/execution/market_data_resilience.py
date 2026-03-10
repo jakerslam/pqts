@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass, field
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from typing import Any, Dict, List, Mapping, Optional, Tuple
+
+from core.hotpath_runtime import quote_state
 
 
 def _utc_now() -> datetime:
@@ -56,21 +58,29 @@ class MarketDataResilienceManager:
             "replay_quotes": 0,
         }
 
-    def _is_stale(self, quote: Mapping[str, Any], *, now: datetime) -> bool:
+    def _quote_state(self, quote: Mapping[str, Any], *, now: datetime) -> tuple[bool, bool]:
+        try:
+            price = float(quote.get("price", 0.0) or 0.0)
+        except (TypeError, ValueError):
+            return False, False
         ts = _parse_ts(quote.get("timestamp"), fallback=now)
-        age = (now - ts).total_seconds()
-        return age > float(self.policy.stale_after_seconds)
+        age_seconds = max((now - ts).total_seconds(), 0.0)
+        stale, usable = quote_state(
+            price=float(price),
+            age_seconds=float(age_seconds),
+            stale_after_seconds=float(self.policy.stale_after_seconds),
+        )
+        return bool(stale), bool(usable)
+
+    def _is_stale(self, quote: Mapping[str, Any], *, now: datetime) -> bool:
+        stale, _usable = self._quote_state(quote, now=now)
+        return bool(stale)
 
     def _is_usable(self, quote: Optional[Mapping[str, Any]], *, now: datetime) -> bool:
         if quote is None:
             return False
-        try:
-            price = float(quote.get("price", 0.0) or 0.0)
-        except (TypeError, ValueError):
-            return False
-        if price <= 0:
-            return False
-        return not self._is_stale(quote, now=now)
+        _stale, usable = self._quote_state(quote, now=now)
+        return bool(usable)
 
     @staticmethod
     def _copy_quote(quote: Mapping[str, Any]) -> Dict[str, Any]:

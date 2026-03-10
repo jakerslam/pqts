@@ -34,6 +34,64 @@ class _NativeStub:
         _ = snapshot_sequence
         return "native_mode", 42, 3, True, 100, 101
 
+    @staticmethod
+    def uniform_from_seed(seed):
+        _ = seed
+        return 0.123
+
+    @staticmethod
+    def event_id_hash(prefix, payload, hex_len):
+        _ = payload
+        _ = hex_len
+        return f"{prefix}_nativehash"
+
+    @staticmethod
+    def paper_fill_metrics(
+        side,
+        requested_qty,
+        reference_price,
+        queue_qty,
+        partial_fill_notional_usd,
+        min_partial_fill_ratio,
+        queue_penalty_floor,
+        adverse_selection_bps,
+        min_slippage_bps,
+        queue_slippage_bps_per_turnover,
+        reality_stress_mode,
+        stress_fill_ratio_multiplier,
+        stress_slippage_multiplier,
+        fill_uniform,
+        slippage_uniform,
+    ):
+        _ = (
+            side,
+            requested_qty,
+            reference_price,
+            queue_qty,
+            partial_fill_notional_usd,
+            min_partial_fill_ratio,
+            queue_penalty_floor,
+            adverse_selection_bps,
+            min_slippage_bps,
+            queue_slippage_bps_per_turnover,
+            reality_stress_mode,
+            stress_fill_ratio_multiplier,
+            stress_slippage_multiplier,
+            fill_uniform,
+            slippage_uniform,
+        )
+        return 0.5, 2.5, 1.0, 101.0, 0.2
+
+    @staticmethod
+    def smart_router_score(spread, volume_24h, fee_bps, slippage_ratio, fill_ratio, latency_ms):
+        _ = (spread, volume_24h, fee_bps, slippage_ratio, fill_ratio, latency_ms)
+        return 0.88
+
+    @staticmethod
+    def quote_state(price, age_seconds, stale_after_seconds):
+        _ = (price, age_seconds, stale_after_seconds)
+        return True, False
+
 
 class _IncompleteNativeStub:
     @staticmethod
@@ -128,3 +186,81 @@ def test_loader_rejects_native_module_missing_required_symbols(monkeypatch) -> N
     monkeypatch.delenv("PQTS_NATIVE_HOTPATH", raising=False)
     monkeypatch.setitem(sys.modules, "pqts_hotpath", _IncompleteNativeStub())
     assert hotpath_runtime._load_native_module() is None
+
+
+def test_uniform_from_seed_uses_python_fallback_when_native_missing(monkeypatch) -> None:
+    hotpath_runtime._load_native_module.cache_clear()
+    monkeypatch.setattr(hotpath_runtime, "_load_native_module", lambda: None)
+    value = hotpath_runtime.uniform_from_seed("seed")
+    assert 0.0 <= value <= 1.0
+
+
+def test_uniform_from_seed_uses_native_module_when_available(monkeypatch) -> None:
+    hotpath_runtime._load_native_module.cache_clear()
+    monkeypatch.setattr(hotpath_runtime, "_load_native_module", lambda: _NativeStub())
+    assert hotpath_runtime.uniform_from_seed("seed") == 0.123
+
+
+def test_event_id_uses_python_fallback_when_native_missing(monkeypatch) -> None:
+    hotpath_runtime._load_native_module.cache_clear()
+    monkeypatch.setattr(hotpath_runtime, "_load_native_module", lambda: None)
+    event_id = hotpath_runtime.event_id("ws", ("a", 1), hex_len=12)
+    assert event_id.startswith("ws_")
+    assert len(event_id.split("_", maxsplit=1)[1]) == 12
+
+
+def test_event_id_uses_native_module_when_available(monkeypatch) -> None:
+    hotpath_runtime._load_native_module.cache_clear()
+    monkeypatch.setattr(hotpath_runtime, "_load_native_module", lambda: _NativeStub())
+    assert hotpath_runtime.event_id("ws", ("a", 1), hex_len=12) == "ws_nativehash"
+
+
+def test_paper_fill_metrics_uses_native_module_when_available(monkeypatch) -> None:
+    hotpath_runtime._load_native_module.cache_clear()
+    monkeypatch.setattr(hotpath_runtime, "_load_native_module", lambda: _NativeStub())
+    fill_ratio, slip_bps, executed_qty, executed_price, queue_turnover = hotpath_runtime.paper_fill_metrics(
+        side="buy",
+        requested_qty=2.0,
+        reference_price=100.0,
+        queue_qty=1.0,
+        partial_fill_notional_usd=1000.0,
+        min_partial_fill_ratio=0.5,
+        queue_penalty_floor=0.2,
+        adverse_selection_bps=2.0,
+        min_slippage_bps=1.0,
+        queue_slippage_bps_per_turnover=0.1,
+        reality_stress_mode=False,
+        stress_fill_ratio_multiplier=0.7,
+        stress_slippage_multiplier=2.5,
+        fill_uniform=0.5,
+        slippage_uniform=0.5,
+    )
+    assert (fill_ratio, slip_bps, executed_qty, executed_price, queue_turnover) == (
+        0.5,
+        2.5,
+        1.0,
+        101.0,
+        0.2,
+    )
+
+
+def test_smart_router_score_uses_native_module_when_available(monkeypatch) -> None:
+    hotpath_runtime._load_native_module.cache_clear()
+    monkeypatch.setattr(hotpath_runtime, "_load_native_module", lambda: _NativeStub())
+    score = hotpath_runtime.smart_router_score(
+        spread=0.001,
+        volume_24h=1_000_000.0,
+        fee_bps=5.0,
+        slippage_ratio=1.1,
+        fill_ratio=0.9,
+        latency_ms=20.0,
+    )
+    assert score == 0.88
+
+
+def test_quote_state_uses_native_module_when_available(monkeypatch) -> None:
+    hotpath_runtime._load_native_module.cache_clear()
+    monkeypatch.setattr(hotpath_runtime, "_load_native_module", lambda: _NativeStub())
+    stale, usable = hotpath_runtime.quote_state(price=100.0, age_seconds=3.0, stale_after_seconds=1.0)
+    assert stale is True
+    assert usable is False
