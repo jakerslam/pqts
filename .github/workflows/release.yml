@@ -34,6 +34,20 @@ jobs:
           python -m build
           twine check dist/*
 
+      - name: Validate semantic release metadata and checksums
+        env:
+          RELEASE_REF: ${{ github.ref_name }}
+        run: |
+          version="${RELEASE_REF#v}"
+          python3 tools/prepare_release_artifacts.py \
+            --dist-dir dist \
+            --version "$version" \
+            --git-sha "${GITHUB_SHA}" \
+            --pyproject pyproject.toml \
+            --changelog CHANGELOG.md \
+            --checksums dist/SHA256SUMS.txt \
+            --metadata dist/release_metadata.json
+
       - name: Upload dist artifacts
         uses: actions/upload-artifact@v4
         with:
