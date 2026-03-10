@@ -289,7 +289,7 @@ python scripts/control_plane_report.py
 
 Launch the real-time dashboard:
 ```bash
-python -m streamlit run src/dashboard/app.py
+python src/dashboard/start.py
 ```
 
 Access at `http://localhost:8501`

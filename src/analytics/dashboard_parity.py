@@ -1,4 +1,4 @@
-"""Streamlit↔Next parity checks for key dashboard metrics."""
+"""Studio↔Web parity checks for key dashboard metrics."""
 
 from __future__ import annotations
 
@@ -16,7 +16,7 @@ def _as_float(value: Any) -> float:
 @dataclass(frozen=True)
 class MetricParityResult:
     key: str
-    streamlit_value: float
+    studio_value: float
     web_value: float
     delta: float
     tolerance: float
@@ -41,20 +41,23 @@ class ParityCheckReport:
 
 def compare_dashboard_metrics(
     *,
-    streamlit_metrics: Mapping[str, Any],
+    studio_metrics: Mapping[str, Any] | None = None,
+    streamlit_metrics: Mapping[str, Any] | None = None,
     web_metrics: Mapping[str, Any],
     metric_keys: Sequence[str],
     default_tolerance: float = 1e-6,
     tolerance_overrides: Mapping[str, float] | None = None,
 ) -> ParityCheckReport:
+    # `streamlit_metrics` kept as a backward-compatible alias during migration.
+    source_metrics = dict(studio_metrics or streamlit_metrics or {})
     overrides = {str(k): float(v) for k, v in dict(tolerance_overrides or {}).items()}
     rows: list[MetricParityResult] = []
     mismatch_count = 0
     for key in metric_keys:
         token = str(key)
-        streamlit_value = _as_float(streamlit_metrics.get(token))
+        studio_value = _as_float(source_metrics.get(token))
         web_value = _as_float(web_metrics.get(token))
-        delta = abs(streamlit_value - web_value)
+        delta = abs(studio_value - web_value)
         tolerance = max(float(overrides.get(token, default_tolerance)), 0.0)
         within = delta <= tolerance
         if not within:
@@ -62,7 +65,7 @@ def compare_dashboard_metrics(
         rows.append(
             MetricParityResult(
                 key=token,
-                streamlit_value=streamlit_value,
+                studio_value=studio_value,
                 web_value=web_value,
                 delta=delta,
                 tolerance=tolerance,

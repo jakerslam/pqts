@@ -23,9 +23,11 @@ Last updated: 2026-03-09 (America/Denver)
 ## Language Direction
 
 - Python remains the system default for runtime, execution logic, risk gating, and orchestration.
-- SQL/DuckDB/Polars-style processing should be used for large analytical scans and aggregation-heavy workloads.
+- The product target is Python-first (not Python-only): user-facing surface remains mostly Python, while hot-path kernels migrate to Rust when profiling triggers are met.
+- FastAPI is the canonical control plane; all active surfaces consume API contracts.
+- Dash is the current Python-native operator UI. Next.js (`apps/web`) is the customer-facing web surface trajectory.
+- DuckDB/Polars/PyArrow remain the preferred analytical data-plane stack for heavy scan/aggregation paths.
 - R remains supported as an optional research validator bridge for experiment gate metrics.
-- Rust/C++ is deferred unless profiling proves hard latency limits cannot be met with Python + optimized data paths.
 
 ## R Integration Position
 
@@ -42,9 +44,12 @@ Last updated: 2026-03-09 (America/Denver)
 
 - Incremental migration only; no destabilizing rewrites.
 - Preserve CLI/script compatibility while moving logic into canonical layers.
+- Keep one primary runtime path per release phase (no mixed Streamlit/Dash runtime ambiguity).
+- Enforce typed boundaries (Pydantic models) for runtime config, API payloads, and strategy manifests.
 - Every structural change should include:
   - boundary validation (`tools/check_architecture_boundaries.py`)
   - architecture map check (`tools/print_architecture_map.py`)
+  - stack-direction validation (`tools/check_stack_direction.py`)
   - focused tests for new contracts/tooling.
 
 ## Compliance References
