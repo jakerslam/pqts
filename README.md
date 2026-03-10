@@ -103,19 +103,42 @@ python main.py config/paper.yaml \
 
 ## 🐳 Docker Compose
 
-One-command local stack (app + dashboard + Redis + Postgres, optional Grafana profile):
+One-command local stack (app + dashboard + Redis + Postgres):
 
 ```bash
 docker compose up --build
 # optional observability profile:
 # docker compose --profile observability up --build
+# or:
+# make observability-up
 ```
 
 Dashboard: `http://localhost:8501`  
-Grafana (optional): `http://localhost:3000` (`admin` / `admin`)
+API metrics (observability profile): `http://localhost:8000/metrics`  
+Prometheus (observability profile): `http://localhost:9090`  
+Grafana (observability profile): `http://localhost:3000` (`admin` / `admin`)
 Docs site (GitHub Pages): [https://jakerslam.github.io/pqts/](https://jakerslam.github.io/pqts/) (requires Pages enablement in repo settings)
 Leaderboard fallback in-repo page: [docs/leaderboard/index.html](docs/leaderboard/index.html)
 Latest release: [v0.1.1](https://github.com/jakerslam/PQTS/releases/tag/v0.1.1)
+
+## 🌐 Web App Dashboard (Next.js)
+
+The authenticated web surface lives in `apps/web` and now includes:
+
+- Promotion Control Center (`/dashboard/promotion`)
+- Execution Quality (`/dashboard/execution-quality`)
+- Per-Order Truth Drilldown (`/dashboard/order-truth`)
+- Deterministic Replay Timeline (`/dashboard/replay`)
+- Template Gallery (`/dashboard/templates`)
+- Notifications Channel Check (`/dashboard/notifications`)
+
+Run locally:
+
+```bash
+cd apps/web
+npm install
+npm run dev
+```
 
 ## 📋 Deployment Considerations
 
@@ -124,7 +147,7 @@ When deploying Protheus to production-like environments:
 - **Environment Variables**: Always copy `.env.example` to `.env` and populate with production credentials
 - **Configuration Files**: Start with `config/paper.yaml` for testing, then modify for live trading with appropriate risk limits
 - **Data Directories**: Ensure `data/` and `logs/` directories have sufficient disk space and appropriate backups
-- **Port Configuration**: The dashboard defaults to port 8050; ensure this is exposed appropriately in your environment
+- **Port Configuration**: The dashboard defaults to port 8501; ensure this is exposed appropriately in your environment
 - **Secret Management**: Use a secrets manager (AWS Secrets Manager, Vault, etc.) rather than storing credentials in config files for production
 
 ## ⚡ One-Command Demo

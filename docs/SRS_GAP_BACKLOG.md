@@ -18,7 +18,7 @@ Count: **0**
 
 ## P2
 
-Count: **348**
+Count: **347**
 
 | ID | Prefix | Status | Requirement |
 |---|---|---|---|
@@ -146,7 +146,6 @@ Count: **348**
 | GK-6 | GK | unmapped | Automated Monthly Performance Report Builder |
 | GK-7 | GK | unmapped | Strategy Scaffolding and Plugin Extension Interface |
 | GK-8 | GK | unmapped | Hybrid Backtesting Execution Modes |
-| GK-9 | GK | unmapped | Prometheus-Compatible Metrics Surface |
 | HD-1 | HD | unmapped | Hyperbolic Discount Valuation Path |
 | HD-10 | HD | unmapped | Source Reliability and Claim Handling |
 | HD-2 | HD | unmapped | Deterministic Pre-Trade Rule Gate |

@@ -5,11 +5,11 @@ This matrix is auto-generated from `docs/SRS.md`, `docs/TODO.md`, and repository
 ## Summary
 
 - Total requirements: **451**
-- implemented: **103**
+- implemented: **104**
 - partial: **0**
 - planned: **0**
 - traced: **0**
-- unmapped: **348**
+- unmapped: **347**
 
 ## Prefix Summary
 
@@ -32,7 +32,7 @@ This matrix is auto-generated from `docs/SRS.md`, `docs/TODO.md`, and repository
 | FINGEN | 0 | 0 | 0 | 0 | 12 | 12 |
 | FINQA | 0 | 0 | 0 | 0 | 10 | 10 |
 | FR | 8 | 0 | 0 | 0 | 0 | 8 |
-| GK | 0 | 0 | 0 | 0 | 9 | 9 |
+| GK | 1 | 0 | 0 | 0 | 8 | 9 |
 | HD | 0 | 0 | 0 | 0 | 10 | 10 |
 | HK | 0 | 0 | 0 | 0 | 10 | 10 |
 | HL | 0 | 0 | 0 | 0 | 7 | 7 |
@@ -326,7 +326,7 @@ This matrix is auto-generated from `docs/SRS.md`, `docs/TODO.md`, and repository
 | GK-6 | Automated Monthly Performance Report Builder | unmapped | none | - |
 | GK-7 | Strategy Scaffolding and Plugin Extension Interface | unmapped | none | - |
 | GK-8 | Hybrid Backtesting Execution Modes | unmapped | none | - |
-| GK-9 | Prometheus-Compatible Metrics Surface | unmapped | none | - |
+| GK-9 | Prometheus-Compatible Metrics Surface | implemented | done | docs/TODO.md |
 | WA-1 | Primary Backend Framework | unmapped | none | - |
 | WA-2 | Primary Frontend Framework | unmapped | none | - |
 | WA-3 | Streamlit Role Boundary | unmapped | none | - |

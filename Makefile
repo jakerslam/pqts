@@ -4,7 +4,7 @@ VENV ?= .venv
 VENV_PY := $(VENV)/bin/python
 PY_RUN := $(if $(wildcard $(VENV_PY)),$(VENV_PY),$(PYTHON))
 
-.PHONY: setup setup-lock demo sim-suite stream-worker ws-ingestion tournament canary-ramp reconcile slo-report error-budget control-plane arch-check arch-map scaffold-module leaderboard-site governance-check paper-6m nightly-review run-mode native bench-exec reference-bundles reference-performance docker-up doctor onboard status test lint clean
+.PHONY: setup setup-lock demo sim-suite stream-worker ws-ingestion tournament canary-ramp reconcile slo-report error-budget control-plane arch-check arch-map scaffold-module leaderboard-site governance-check paper-6m nightly-review run-mode native bench-exec reference-bundles reference-performance docker-up observability-up doctor onboard status test lint clean
 
 setup:
 	bash scripts/bootstrap_env.sh --python "$(PYTHON)" --venv "$(VENV)"
@@ -100,6 +100,9 @@ reference-performance:
 
 docker-up:
 	docker compose up --build
+
+observability-up:
+	docker compose --profile observability up --build
 
 test:
 	$(VENV_PY) -m pytest -q

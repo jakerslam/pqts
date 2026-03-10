@@ -147,6 +147,16 @@ Legend:
 - [x] Add automated reference performance renderer that syncs README callout + docs report from machine-readable summary (`ROI: high`, `Type: engineering`, `Track: parity`, `Ref: COMP-5, COMP-13, MOAT-12`)
 - [x] Add beginner-first web onboarding wizard (`/onboarding`) backed by code-visible CLI plan generation and typed tests (`ROI: high`, `Type: engineering`, `Track: parity`, `Ref: COMP-7, COMP-9, COMP-11, LANG-7`)
 
+## 02h. Operator Web + Observability Closure (2026-03-10)
+
+- [x] Add promotion control-center web surface with explicit advance/hold/rollback/halt actions (`ROI: high`, `Type: engineering`, `Track: moat`, `Ref: MOAT-3, MOAT-4, MOAT-5`)
+- [x] Add per-order truth drilldown web surface and API for signal-to-fill lineage explanation (`ROI: high`, `Type: engineering`, `Track: moat`, `Ref: MOAT-1, MOAT-2, COMP-9`)
+- [x] Add deterministic replay timeline web/API surface with replay hash and event-type summaries (`ROI: high`, `Type: engineering`, `Track: moat`, `Ref: NFR-3, MOAT-12`)
+- [x] Add execution-quality web/API dashboard with slippage and realized alpha summaries from reference bundles (`ROI: high`, `Type: engineering`, `Track: parity`, `Ref: COMP-3, COMP-5, COMP-13`)
+- [x] Add template gallery web/API for reproducible onboarding artifacts and config diffs (`ROI: high`, `Type: engineering`, `Track: parity`, `Ref: COMP-12, COMP-9, MOAT-12`)
+- [x] Add notifications channel-check web flow (stdout/Telegram/Discord) with dry-run and bounded execution modes (`ROI: high`, `Type: engineering`, `Track: parity`, `Ref: LANG-7, COMP-7, COMP-8`)
+- [x] Add Prometheus/Grafana observability stack provisioning (compose profile, datasource, dashboard template) tied to FastAPI `/metrics` endpoint (`ROI: high`, `Type: engineering`, `Track: parity`, `Ref: GK-9, COMP-13`)
+
 ## 03. Human-Only Parallel Lane
 
 - [x] Finalize and sign blocking decisions in [docs/HUMAN_DECISIONS_LOG.md](/Users/jay/Document%20(Lcl)/Coding/PQTS/docs/HUMAN_DECISIONS_LOG.md) (`ROI: very_high`, `Type: human_only`, `Track: parity`, `Ref: COMP-10, LANG-6, LANG-3, COMP-14`)
