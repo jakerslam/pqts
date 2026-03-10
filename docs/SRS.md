@@ -3122,3 +3122,210 @@ Observed source links:
 
 - Public stack-performance claims (for example sub-millisecond or “institutional speed”) shall be labeled `unverified` unless backed by reproducible benchmark artifacts.
 - Requirements adopted from comparative stack commentary shall emphasize measurable system contracts, not language-brand claims.
+
+## 57. Additional Requirements from Polymarket Official Repo Stack (March 10, 2026)
+
+These requirements are derived from the referenced post and attached Polymarket repository set describing official SDK, CLI, example, and exchange-contract workflows for prediction-market automation.
+
+Observed source links:
+- `https://x.com/helicerat0x/status/2031092588648804706?s=20`
+- `https://github.com/Polymarket`
+- `https://github.com/Polymarket/py-clob-client`
+- `https://github.com/Polymarket/rs-clob-client`
+- `https://github.com/Polymarket/polymarket-cli`
+- `https://github.com/Polymarket/examples`
+- `https://github.com/Polymarket/ctf-exchange`
+- `https://github.com/Polymarket/ctf-exchange/blob/main/docs/Overview.md`
+
+### PMKT-1 Official Integration Index
+
+- System shall maintain a machine-readable index of officially supported venue SDK/CLI/integration modules, including version, maturity status, and owner.
+- Integration index updates shall be validated in CI to prevent stale repository links and broken onboarding references.
+
+### PMKT-2 Auth State Segmentation for Venue Clients
+
+- Venue clients shall implement explicit read-only and authenticated operating states with guardrails that block trading endpoints before authentication.
+- Authentication transitions shall emit audit events containing actor, venue, timestamp, and auth method.
+
+### PMKT-3 Signature-Type and Funder Address Contract
+
+- Venue adapters shall support explicit signature-type selection (`eoa`, `proxy`, `safe` or venue-equivalent).
+- For delegated/proxy wallet modes, adapter contracts shall require a funder wallet binding and prevent order submission when funder context is unresolved.
+- Where deterministic funder derivation is supported by venue rules, adapters shall provide deterministic derivation plus explicit override path.
+
+### PMKT-4 API Credential Lifecycle and Rotation
+
+- Authenticated venue clients shall support create/derive API credential workflows with scoped key usage for trading endpoints.
+- Credential rotation and revocation actions shall be exposed through CLI/API and tracked in immutable audit logs.
+
+### PMKT-5 Allowance and Approval Preflight Controls
+
+- Trading adapters for approval-based venues shall run pre-trade allowance checks for required collateral/outcome assets and block orders when approvals are missing.
+- System shall provide an explicit approval setup workflow and an approval status check command suitable for automation.
+- Approval checks shall distinguish wallet modes that require manual approvals from wallet modes that do not.
+
+### PMKT-6 Canonical Order Lifecycle and Batch Operations
+
+- Order lifecycle shall expose canonical create/sign/post/cancel actions for both market-style and limit-style orders.
+- Batch order post/cancel operations shall return per-order success/failure details with stable machine-readable schemas.
+- Order time-in-force options supported by venue contracts shall be represented as typed enums in adapters and surfaced in CLI/API.
+
+### PMKT-7 Streaming Coverage and Disconnect Safety
+
+- Venue adapters shall support real-time subscriptions for orderbook, price/midpoint, user orders, and user trades where available.
+- Streaming adapters shall implement reconnect/backoff with explicit stream health telemetry and gap-recovery signaling.
+- If enabled by policy for a venue, disconnect heartbeats shall trigger protective cancellation of open orders.
+
+### PMKT-8 Remote Signer and Builder-Mode Support
+
+- Authentication layer shall support local signers and remote signer backends (for example KMS/HSM or signing service) behind one signer interface.
+- System shall support a promoted builder/institutional auth mode with isolated credentials and explicit scope controls.
+- Signing-path latency and failure metrics shall be captured for operational monitoring.
+
+### PMKT-9 CLI Automation Contract
+
+- CLI shall provide both human-readable and machine-readable output modes for all operational commands.
+- Machine-readable mode shall emit structured errors with stable schema and non-zero process exits on failures.
+- Credential-source precedence (flag, env, config file) shall be deterministic and documented.
+
+### PMKT-10 Read-Only First and Guided Setup UX
+
+- Market discovery, metadata, and read-only analytics commands shall be usable without wallet initialization.
+- System shall provide a guided setup path from zero-config state to first authenticated trade in the minimum number of steps.
+- Quickstart docs shall include copy-run paths for both read-only and authenticated workflows.
+
+### PMKT-11 Wallet-Mode Example Packs and Smoke Tests
+
+- Repository shall include runnable example packs for each supported wallet mode, including environment-variable templates.
+- CI shall execute smoke tests for example packs to detect onboarding drift.
+- Example packs shall be versioned alongside adapter contract changes.
+
+### PMKT-12 Hybrid Matching and Non-Custodial Settlement Invariants
+
+- Prediction-market execution model shall support hybrid architecture where matching may occur off-engine/off-chain while settlement remains non-custodial and verifiable.
+- Signed order messages shall use typed structured data with domain separation and chain binding equivalent to EIP-712 semantics.
+- Settlement logic for complementary outcomes shall support normal fill, mint-cross, and merge-cross matching scenarios with invariant tests.
+
+### PMKT-13 Complementary-Outcome Fee Symmetry
+
+- Fee model for complementary binary outcomes shall enforce economic symmetry between equivalent complementary trades.
+- Fee formulas, rounding rules, and inputs shall be versioned and covered by deterministic tests across edge prices.
+- Trade-cost analytics shall report fee decomposition to allow verification of symmetry assumptions.
+
+### PMKT-14 Deployment Registry and Audit Artifact Governance
+
+- System shall maintain chain/environment-specific registries of approved settlement contract addresses and versions.
+- Live trading startup shall fail closed when configured settlement addresses are not present in approved registries.
+- External smart-contract audit artifacts and internal risk-acceptance statuses shall be linked to each approved contract version.
+
+### PMKT-15 Source Reliability and Claim Handling
+
+- Requirements adopted from social-post discovery shall be grounded in repository-documented capabilities and not profitability claims.
+- Any performance or profitability claims from social context shall be labeled `unverified` unless reproduced with PQTS benchmark artifacts.
+
+## 58. Additional Requirements from Competitive Moat Assessment (March 10, 2026)
+
+These requirements are derived from a competitive-gap assessment focused on what moves PQTS from parity to durable leadership.
+
+Observed source links:
+- `https://www.quantconnect.com/docs/v2/cloud-platform/welcome`
+- `https://www.quantconnect.com/docs/v2/writing-algorithms/live-trading/reconciliation`
+- `https://nautilustrader.io/docs/latest/concepts/overview/`
+- `https://docs.freqtrade.io/en/stable/`
+- `https://hummingbot.org/hummingbot-api/`
+- `https://www.quantrocket.com/docs/`
+
+### MOAT-1 Per-Order Truth Graph
+
+- System shall persist an end-to-end order truth graph linking research assumptions, signal emission, risk decision, router decision, venue acknowledgment, fill events, and realized attribution.
+- Every node and edge in the truth graph shall carry stable identifiers and timestamps for deterministic replay and audit.
+- Order-level graph data shall be queryable by strategy, venue, run ID, and incident ID.
+
+### MOAT-2 Live Divergence Diagnosis and Prescriptive Actions
+
+- System shall automatically classify live-vs-expected divergence at order level using a standardized reason taxonomy (for example price drift, liquidity miss, venue reject, latency breach, policy block).
+- Divergence outputs shall include prescriptive next actions (`resize`, `reroute`, `hold_canary`, `rollback`) with confidence scores.
+- Diagnosis artifacts shall be attached to incident timelines and promotion decisions.
+
+### MOAT-3 Promotion OS State Machine
+
+- Promotion lifecycle shall be implemented as an explicit state machine: `backtest -> paper -> shadow -> canary -> live`.
+- State transitions shall be policy-gated and blocked unless required quantitative and risk thresholds pass.
+- Transition records shall be signed, immutable, and linked to evidence artifacts used for the decision.
+
+### MOAT-4 Promotion Memo and Rollback Contract
+
+- Each promotion transition shall auto-generate a machine-readable and human-readable promotion memo containing metrics, risk deltas, approval lineage, and capital limits.
+- Every transition shall define measurable rollback criteria before activation.
+- Rollback execution shall preserve pre-transition state snapshots and emit post-rollback verification artifacts.
+
+### MOAT-5 Stage-Aware Capital Allocation
+
+- Capital allocation policy shall be stage-aware, with explicit exposure envelopes by lifecycle stage and strategy risk tier.
+- Automatic capital expansion shall require sustained policy compliance windows; contraction shall trigger immediately on threshold breaches.
+- Allocation policy changes shall require auditable approval events.
+
+### MOAT-6 Execution Intelligence Data Model
+
+- System shall continuously collect venue-specific execution intelligence including rejects, slippage, cancel/replace latency, queue behavior, and outage signatures.
+- Execution intelligence features shall be versioned and retained for model training and post-trade analytics.
+- Missing or degraded telemetry coverage for required features shall trigger quality alerts.
+
+### MOAT-7 Adaptive Routing and Throttling from Execution Intelligence
+
+- Router shall consume execution-intelligence signals to adapt venue selection, order sizing, and throttle behavior.
+- Adaptive routing decisions shall remain bounded by explicit risk and policy constraints.
+- Routing-policy changes shall be replayable and attributable to model/version IDs.
+
+### MOAT-8 Single Strategy Object Across Casual and Pro Surfaces
+
+- Studio templates and Core code workflows shall map to one canonical strategy object and one canonical config contract.
+- Any UI mutation shall produce a diffable config/code artifact that can be executed identically via CLI/API.
+- Strategy promotion history shall remain continuous when moving from guided mode to professional mode.
+
+### MOAT-9 Bidirectional Transparency and Parity
+
+- UI actions shall reveal equivalent CLI/API commands and config deltas.
+- CLI/API changes shall be visible in UI without semantic drift.
+- Cross-surface parity tests shall fail release gates when behavior diverges for equivalent actions.
+
+### MOAT-10 Policy-Constrained Autonomous Operator
+
+- Autonomous operator capabilities shall be split into `propose`, `simulate`, and `execute` permissions with least-privilege enforcement.
+- Execute permissions for capital-impacting actions shall require policy checks and approval workflows.
+- All operator actions and blocked actions shall be logged with rationale and policy references.
+
+### MOAT-11 Incident Co-Pilot and Safe Rollback Assist
+
+- Incident assistant workflows shall produce structured incident classifications, candidate mitigations, and rollback plans based on truth-graph evidence.
+- Automated mitigations shall be limited to policy-approved safe actions; higher-risk actions require human approval.
+- Post-incident reports shall include action timelines, evidence links, and prevention follow-ups.
+
+### MOAT-12 Proof-as-Product Artifact Pipeline
+
+- System shall publish scheduled benchmark bundles, drift reports, venue certification status, and incident postmortems as first-class product artifacts.
+- Published artifacts shall include reproducible commands, dataset/version provenance, and machine-readable metric manifests.
+- Artifact publication shall be blocked when required provenance or evidence fields are missing.
+
+### MOAT-13 Public Trust Classifications and Evidence Gates
+
+- Public-facing metrics shall be classified as `verified`, `diagnostic_only`, or `unverified` with explicit definitions.
+- Any claim without required reproducible evidence shall be automatically downgraded to `unverified`.
+- Trust classification policy shall be enforced in CI for docs, reports, and benchmark pages.
+
+### MOAT-14 Team Governance and Capital Controls
+
+- Team workflows shall include review/approve/promote/kill actions with role-based controls and immutable audit trails.
+- Per-strategy and per-venue capital envelopes shall be enforced by policy engine with emergency override governance.
+- Governance controls shall support separation-of-duties constraints for model authoring, approval, and live activation.
+
+### MOAT-15 Moat-vs-Parity Roadmap Governance
+
+- Roadmap items shall be tagged `parity` or `moat` with explicit expected advantage horizon.
+- Capacity planning shall enforce a configurable minimum delivery share for moat work after parity baseline gates are satisfied.
+- Quarterly reviews shall evaluate moat efficacy using adoption, retention, incident reduction, and execution-quality deltas.
+
+### MOAT-16 Source Reliability and Claim Handling
+
+- Requirements adopted from comparative commentary shall encode measurable system contracts and not rely on vendor marketing claims.
+- Competitive feature references shall be periodically revalidated against current public documentation before roadmap commitments.

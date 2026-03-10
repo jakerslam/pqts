@@ -1,95 +1,112 @@
-# PQTS Priority TODO (ROI + Dependency Ordered)
+# PQTS Execution TODO (Parity vs Moat)
 
 Last updated: 2026-03-10 (America/Denver)
 
-Execution rule: complete sections top-to-bottom. Items in the same section can run in parallel only if dependencies are satisfied.
+Execution policy:
+- Run sections top-to-bottom by default.
+- `Parity` items are admission-fee work and block most `Moat` items.
+- Once `Parity P0` is complete, enforce capacity split target: 60% `moat`, 40% remaining `parity`.
 
 Legend:
 - `ROI`: `very_high`, `high`, `medium`
 - `Type`: `engineering` or `human_only`
+- `Track`: `parity` or `moat`
 - `Ref`: SRS requirement IDs
 
-## 00. Already Completed (Pinned)
+## 00. Completed Foundation (Pinned)
 
-- [x] `COMP-1` docs/metadata URL gate in CI + release (`ROI: very_high`, `Type: engineering`)
-- [x] `COMP-2` semantic release integrity + changelog/version + artifact checksums/metadata (`ROI: very_high`, `Type: engineering`)
-- [x] `COMP-3` benchmark quality classification (`reference` vs `diagnostic_only`) (`ROI: very_high`, `Type: engineering`)
-- [x] `COMP-11` first-success CLI path (`pqts init/demo/backtest/paper`) (`ROI: very_high`, `Type: engineering`)
-- [x] Monthly report + benchmark provenance pipeline (`ROI: high`, `Type: engineering`)
-- [x] Streamlit deprecation milestone doc baseline (`ROI: medium`, `Type: engineering`)
+- [x] Docs/metadata link gate in CI and release (`ROI: very_high`, `Type: engineering`, `Track: parity`, `Ref: COMP-1`)
+- [x] Semantic release integrity baseline (`ROI: very_high`, `Type: engineering`, `Track: parity`, `Ref: COMP-2`)
+- [x] Benchmark classification baseline (`ROI: very_high`, `Type: engineering`, `Track: parity`, `Ref: COMP-3`)
+- [x] First-success CLI baseline (`ROI: very_high`, `Type: engineering`, `Track: parity`, `Ref: COMP-11`)
+- [x] Monthly report pipeline baseline (`ROI: high`, `Type: engineering`, `Track: parity`, `Ref: COMP-5`)
 
-## 01. Immediate Blockers (Do Next)
+## 01. Parity Track (Admission Fee, Dependency Ordered)
 
-- [ ] Finalize and sign human decisions in [docs/HUMAN_DECISIONS_LOG.md](/Users/jay/Document%20(Lcl)/Coding/PQTS/docs/HUMAN_DECISIONS_LOG.md):
-  - `Decision 001` wedge market
-  - `Decision 002` trust label policy
-  - `Decision 003` primary UI path
-  - `Decision 004` native migration triggers
-  - (`ROI: very_high`, `Type: human_only`, `Ref: COMP-10, COMP-13, LANG-6, LANG-3`)
-- [ ] Create `COMP-1..COMP-14` GitHub issue set using [scripts/create_comp_issues.sh](/Users/jay/Document%20(Lcl)/Coding/PQTS/scripts/create_comp_issues.sh) once token has `issues:write`.
-  - (`ROI: very_high`, `Type: engineering`, `Ref: COMP-*`)
+### P0 Trust and Reproducibility Baseline
 
-## 02. Credibility Gap Closure (Public Trust)
+- [ ] Implement golden dataset/version governance checks (`ROI: very_high`, `Type: engineering`, `Track: parity`, `Ref: COMP-4`)
+- [ ] Implement reference strategy pack standard and baseline diffing (`ROI: very_high`, `Type: engineering`, `Track: parity`, `Ref: COMP-5`, `Depends: COMP-4`)
+- [ ] Enforce claim-evidence linting in docs/reports/benchmark pages (`ROI: very_high`, `Type: engineering`, `Track: parity`, `Ref: COMP-13`, `Depends: COMP-4, COMP-5`)
+- [ ] Add official integration index and CI freshness validation (`ROI: high`, `Type: engineering`, `Track: parity`, `Ref: PMKT-1`)
+- [ ] Standardize CLI machine output/error contracts and exit-code behavior (`ROI: high`, `Type: engineering`, `Track: parity`, `Ref: PMKT-9`)
+- [ ] Ship read-only-first + guided authenticated setup docs flow (`ROI: high`, `Type: engineering`, `Track: parity`, `Ref: PMKT-10`)
+- [ ] Add wallet-mode example packs + CI smoke tests (`ROI: high`, `Type: engineering`, `Track: parity`, `Ref: PMKT-11`, `Depends: PMKT-10`)
+- [ ] Promote at least one benchmark scenario from `diagnostic_only` to `reference` (`ROI: very_high`, `Type: engineering`, `Track: parity`, `Ref: COMP-3`, `Depends: COMP-4, COMP-5`)
 
-- [ ] Implement `COMP-4` golden dataset/version governance checks in benchmark pipeline.
-  - (`ROI: very_high`, `Type: engineering`, `Ref: COMP-4`)
-- [ ] Implement `COMP-5` reference strategy pack standard (3+ packs + diff-against-prior).
-  - (`ROI: very_high`, `Type: engineering`, `Ref: COMP-5`, depends on `COMP-4`)
-- [ ] Implement `COMP-13` claim evidence policy linting/enforcement for public docs/reports.
-  - (`ROI: very_high`, `Type: engineering`, `Ref: COMP-13`, depends on `COMP-3`, `COMP-4`)
-- [ ] Lift at least one benchmark suite from `diagnostic_only` to `reference` class by improving fill/reject outcomes.
-  - (`ROI: very_high`, `Type: engineering`, `Ref: COMP-3`, depends on execution-quality improvements)
+### P1 Product Coherence and Surface Contracts
 
-## 03. Product Coherence (One Engine, Clear Surfaces)
+- [ ] Enforce one engine / two surface contract (`ROI: very_high`, `Type: engineering`, `Track: parity`, `Ref: COMP-6`)
+- [ ] Remove mixed runtime ambiguity and lock one UI execution path per release phase (`ROI: high`, `Type: engineering`, `Track: parity`, `Ref: LANG-6`, `Depends: COMP-6`)
+- [ ] Complete FastAPI-centered control-plane contract for active UIs (`ROI: high`, `Type: engineering`, `Track: parity`, `Ref: LANG-7`, `Depends: COMP-6, LANG-6`)
+- [ ] Add Studio/Core action parity and traceability tests (`ROI: high`, `Type: engineering`, `Track: parity`, `Ref: COMP-9`, `Depends: COMP-6, LANG-7`)
+- [ ] Add UI migration cutover gates and rollback tests (`ROI: medium`, `Type: engineering`, `Track: parity`, `Ref: LANG-11`, `Depends: COMP-9`)
 
-- [ ] Implement `COMP-6` one-engine/two-surface architecture contract and guardrails.
-  - (`ROI: high`, `Type: engineering`, `Ref: COMP-6`)
-- [ ] Implement `COMP-9` Studio↔Core traceability/parity tests for mapped actions.
-  - (`ROI: high`, `Type: engineering`, `Ref: COMP-9`, depends on `COMP-6`)
-- [ ] Implement `LANG-6` UI surface coherence in runtime/deploy flows (no mixed-framework ambiguity).
-  - (`ROI: high`, `Type: engineering`, `Ref: LANG-6`, depends on `Decision 003`)
-- [ ] Implement `LANG-7` FastAPI-centered control-plane contract across active UI.
-  - (`ROI: high`, `Type: engineering`, `Ref: LANG-7`, depends on `COMP-6`, `LANG-6`)
-- [ ] Implement `LANG-11` staged UI migration safety gates and rollback checks.
-  - (`ROI: high`, `Type: engineering`, `Ref: LANG-11`, depends on `LANG-6`, `COMP-9`)
+### P2 Venue Adapter Hardening
 
-## 04. Studio/Core Product Lanes
+- [ ] Implement explicit read-only vs authenticated client states (`ROI: high`, `Type: engineering`, `Track: parity`, `Ref: PMKT-2`)
+- [ ] Implement signature-type + funder binding contracts (`ROI: high`, `Type: engineering`, `Track: parity`, `Ref: PMKT-3`, `Depends: PMKT-2`)
+- [ ] Implement API credential lifecycle and audit logging (`ROI: high`, `Type: engineering`, `Track: parity`, `Ref: PMKT-4`, `Depends: PMKT-2`)
+- [ ] Add approval/allowance preflight blocking controls (`ROI: high`, `Type: engineering`, `Track: parity`, `Ref: PMKT-5`, `Depends: PMKT-3`)
+- [ ] Standardize canonical order lifecycle and batch operation schema (`ROI: high`, `Type: engineering`, `Track: parity`, `Ref: PMKT-6`, `Depends: PMKT-2`)
+- [ ] Harden websocket coverage, reconnect, and disconnect safety controls (`ROI: high`, `Type: engineering`, `Track: parity`, `Ref: PMKT-7`, `Depends: PMKT-6`)
+- [ ] Add local/remote signer interface + builder-mode scopes (`ROI: medium`, `Type: engineering`, `Track: parity`, `Ref: PMKT-8`, `Depends: PMKT-4`)
+- [ ] Add non-custodial hybrid settlement invariants and typed-signature checks (`ROI: medium`, `Type: engineering`, `Track: parity`, `Ref: PMKT-12`)
+- [ ] Add complementary-outcome fee symmetry tests and reporting (`ROI: medium`, `Type: engineering`, `Track: parity`, `Ref: PMKT-13`, `Depends: PMKT-12`)
+- [ ] Enforce contract deployment registry and audit artifact gates (`ROI: high`, `Type: engineering`, `Track: parity`, `Ref: PMKT-14`, `Depends: PMKT-12`)
 
-- [ ] Implement `COMP-7` Studio casual UX contract (paper-first guided path + explanations + one-click paper campaign).
-  - (`ROI: high`, `Type: engineering`, `Ref: COMP-7`, depends on `COMP-6`, `COMP-11`, `COMP-12`)
-- [ ] Implement `COMP-8` Core pro UX contract (CLI/API/notebook parity + replay/TCA/shortfall/reconciliation path).
-  - (`ROI: high`, `Type: engineering`, `Ref: COMP-8`, depends on `COMP-6`, `COMP-9`)
-- [ ] Implement `COMP-12` template-first/code-visible workflow with diffable artifacts.
-  - (`ROI: high`, `Type: engineering`, `Ref: COMP-12`, depends on `COMP-11`)
-- [ ] Implement `COMP-14` entitlement policy baseline with paper-first/live-gate invariants.
-  - (`ROI: high`, `Type: engineering`, `Ref: COMP-14`, depends on packaging decisions from humans)
+### P3 Runtime and Data Plane Hardening
 
-## 05. Language + Runtime Evolution (Python-First / Native-Selective)
+- [ ] Harden typed config/API/manifest boundaries (`ROI: high`, `Type: engineering`, `Track: parity`, `Ref: LANG-5`)
+- [ ] Implement local analytical data-plane standard (`ROI: high`, `Type: engineering`, `Track: parity`, `Ref: LANG-4`)
+- [ ] Enforce storage-tier boundary policy checks (`ROI: medium`, `Type: engineering`, `Track: parity`, `Ref: LANG-8`, `Depends: LANG-4`)
+- [ ] Add mode-specific cycle/refresh SLO telemetry and reports (`ROI: high`, `Type: engineering`, `Track: parity`, `Ref: LANG-9`)
+- [ ] Ship native hot-path extension boundary skeleton (`ROI: medium`, `Type: engineering`, `Track: parity`, `Ref: LANG-2`)
+- [ ] Add trigger instrumentation for JIT-first vs native migration (`ROI: medium`, `Type: engineering`, `Track: parity`, `Ref: LANG-3`, `Depends: LANG-2, LANG-9`)
+- [ ] Add native artifact release matrix and metadata (`ROI: medium`, `Type: engineering`, `Track: parity`, `Ref: LANG-10`, `Depends: LANG-2`)
 
-- [ ] Implement `LANG-5` Pydantic-first contract hardening for config/payload/manifest boundaries.
-  - (`ROI: high`, `Type: engineering`, `Ref: LANG-5`)
-- [ ] Implement `LANG-4` research data plane baseline (Arrow-native schema path + local analytical storage integration).
-  - (`ROI: high`, `Type: engineering`, `Ref: LANG-4`)
-- [ ] Implement `LANG-8` storage-tier policy checks (local analytics vs operational state boundaries).
-  - (`ROI: medium`, `Type: engineering`, `Ref: LANG-8`)
-- [ ] Implement `LANG-9` mode-specific cycle/refresh SLO telemetry and reporting.
-  - (`ROI: high`, `Type: engineering`, `Ref: LANG-9`)
-- [ ] Implement `LANG-2` native hot-path boundary skeleton (packaging/build/tests for extension boundary).
-  - (`ROI: medium`, `Type: engineering`, `Ref: LANG-2`, depends on `Decision 004`)
-- [ ] Implement `LANG-3` migration trigger instrumentation (JIT-first evidence, native promotion thresholds).
-  - (`ROI: medium`, `Type: engineering`, `Ref: LANG-3`, depends on `LANG-9`, `Decision 004`)
-- [ ] Implement `LANG-10` native artifact distribution matrix in release pipeline.
-  - (`ROI: medium`, `Type: engineering`, `Ref: LANG-10`, depends on `LANG-2`)
-- [ ] Enforce `LANG-12` stack/performance claim labeling in public outputs.
-  - (`ROI: medium`, `Type: engineering`, `Ref: LANG-12`, depends on `COMP-13`)
+## 02. Moat Track (Dominance, Dependency Ordered)
 
-## 06. Human-Only Commercial and Positioning Work (Parallel Lane)
+### M0 Deployment Trust Operating System
 
-- [ ] Finalize packaging/pricing narrative and lane definitions (Community/Solo Pro/Team/Enterprise).
-  - (`ROI: high`, `Type: human_only`, `Ref: COMP-14`)
-- [ ] Maintain dated public competitor comparison narrative with evidence.
-  - (`ROI: high`, `Type: human_only`, `Ref: COMP-13`)
-- [ ] Sign off benchmark commentary each cycle (reference/diagnostic/unverified correctness).
-  - (`ROI: high`, `Type: human_only`, `Ref: COMP-13`, `Decision 002`)
-- [ ] Run user interviews (casual + pro cohorts) and feed outcomes into roadmap priorities.
-  - (`ROI: high`, `Type: human_only`, `Ref: COMP-7`, `COMP-8`)
+- [ ] Build per-order truth graph (`ROI: very_high`, `Type: engineering`, `Track: moat`, `Ref: MOAT-1`)
+- [ ] Build divergence diagnosis engine with prescriptive actions (`ROI: very_high`, `Type: engineering`, `Track: moat`, `Ref: MOAT-2`, `Depends: MOAT-1`)
+- [ ] Implement promotion state machine (`backtest->paper->shadow->canary->live`) (`ROI: very_high`, `Type: engineering`, `Track: moat`, `Ref: MOAT-3`, `Depends: COMP-6, COMP-8`)
+- [ ] Auto-generate promotion memos + rollback contracts (`ROI: high`, `Type: engineering`, `Track: moat`, `Ref: MOAT-4`, `Depends: MOAT-3`)
+- [ ] Enforce stage-aware capital allocation policies (`ROI: very_high`, `Type: engineering`, `Track: moat`, `Ref: MOAT-5`, `Depends: MOAT-3`)
+
+### M1 Execution Intelligence Network
+
+- [ ] Build venue execution-intelligence feature pipeline (`ROI: very_high`, `Type: engineering`, `Track: moat`, `Ref: MOAT-6`, `Depends: PMKT-7`)
+- [ ] Integrate adaptive routing/sizing/throttling from execution intelligence (`ROI: very_high`, `Type: engineering`, `Track: moat`, `Ref: MOAT-7`, `Depends: MOAT-6`)
+
+### M2 Unified Casual-Pro Product Surface
+
+- [ ] Implement one canonical strategy object across Studio/Core (`ROI: high`, `Type: engineering`, `Track: moat`, `Ref: MOAT-8`, `Depends: COMP-7, COMP-8, COMP-12`)
+- [ ] Enforce bidirectional UI<->CLI transparency and parity gates (`ROI: high`, `Type: engineering`, `Track: moat`, `Ref: MOAT-9`, `Depends: MOAT-8, COMP-9`)
+
+### M3 Policy-Constrained AI and Incident Operations
+
+- [ ] Implement constrained autonomous operator permissions (`propose/simulate/execute`) (`ROI: high`, `Type: engineering`, `Track: moat`, `Ref: MOAT-10`, `Depends: COMP-14, LANG-7`)
+- [ ] Implement incident copilot with safe rollback assist (`ROI: high`, `Type: engineering`, `Track: moat`, `Ref: MOAT-11`, `Depends: MOAT-1, MOAT-10`)
+
+### M4 Proof and Governance Flywheel
+
+- [ ] Ship scheduled proof-as-product artifact pipeline (`ROI: very_high`, `Type: engineering`, `Track: moat`, `Ref: MOAT-12`, `Depends: COMP-4, COMP-5, COMP-13, MOAT-1`)
+- [ ] Enforce trust classification gates for all public metrics (`ROI: high`, `Type: engineering`, `Track: moat`, `Ref: MOAT-13`, `Depends: COMP-13, MOAT-12`)
+- [ ] Implement team governance workflows and capital controls (`ROI: very_high`, `Type: engineering`, `Track: moat`, `Ref: MOAT-14`, `Depends: MOAT-3, COMP-14`)
+- [ ] Add roadmap governance for parity/moat allocation and quarterly efficacy review (`ROI: high`, `Type: engineering`, `Track: moat`, `Ref: MOAT-15`)
+- [ ] Add periodic competitor-source revalidation workflow (`ROI: medium`, `Type: engineering`, `Track: moat`, `Ref: MOAT-16`)
+
+## 03. Human-Only Parallel Lane
+
+- [ ] Finalize and sign blocking decisions in [docs/HUMAN_DECISIONS_LOG.md](/Users/jay/Document%20(Lcl)/Coding/PQTS/docs/HUMAN_DECISIONS_LOG.md) (`ROI: very_high`, `Type: human_only`, `Track: parity`, `Ref: COMP-10, LANG-6, LANG-3, COMP-14`)
+- [ ] Finalize packaging and pricing narrative for Community/Solo Pro/Team/Enterprise (`ROI: high`, `Type: human_only`, `Track: parity`, `Ref: COMP-14`)
+- [ ] Approve trust-label policy language for public artifacts (`ROI: high`, `Type: human_only`, `Track: moat`, `Ref: MOAT-13`)
+- [ ] Run monthly user interviews for casual and professional cohorts and feed roadmap deltas (`ROI: high`, `Type: human_only`, `Track: moat`, `Ref: COMP-7, COMP-8, MOAT-8`)
+- [ ] Publish quarterly moat efficacy review and adjust parity/moat capacity target (`ROI: high`, `Type: human_only`, `Track: moat`, `Ref: MOAT-15`)
+
+## 04. Tracking and Issue Hygiene
+
+- [ ] Create or refresh GitHub issues for all open `PMKT-*` and `MOAT-*` requirements with SRS links (`ROI: high`, `Type: engineering`, `Track: parity`)
+- [ ] Close issues only when merged code includes tests and explicit `Ref` coverage in PR description (`ROI: high`, `Type: engineering`, `Track: parity`)
