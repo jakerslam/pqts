@@ -14,7 +14,7 @@ from .cache import APICache, get_cache
 from .config import APISettings
 from .correlation import RUN_HEADER, TRACE_HEADER, build_run_id, build_trace_id, with_correlation
 from .persistence import APIPersistence
-from .routes import core_router, ws_router
+from .routes import core_router, sse_router, ws_router
 from .state import APIRuntimeStore, StreamHub
 
 
@@ -187,6 +187,7 @@ def create_app(settings: APISettings | None = None) -> FastAPI:
         })
 
     app.include_router(core_router)
+    app.include_router(sse_router)
     app.include_router(ws_router)
 
     return app

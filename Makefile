@@ -3,7 +3,7 @@ PYTHON ?= python3
 VENV ?= .venv
 VENV_PY := $(VENV)/bin/python
 
-.PHONY: setup setup-lock demo sim-suite stream-worker ws-ingestion tournament canary-ramp reconcile slo-report error-budget control-plane arch-check arch-map scaffold-module leaderboard-site governance-check paper-6m docker-up test lint clean
+.PHONY: setup setup-lock demo sim-suite stream-worker ws-ingestion tournament canary-ramp reconcile slo-report error-budget control-plane arch-check arch-map scaffold-module leaderboard-site governance-check paper-6m nightly-review docker-up test lint clean
 
 setup:
 	bash scripts/bootstrap_env.sh --python "$(PYTHON)" --venv "$(VENV)"
@@ -64,6 +64,9 @@ governance-check:
 
 paper-6m:
 	$(VENV_PY) scripts/run_paper_6m_harness.py --months 6 --cycles-per-month 12 --sleep-seconds 0 --risk-profile balanced
+
+nightly-review:
+	$(VENV_PY) scripts/run_nightly_strategy_review.py --snapshot auto --output table
 
 docker-up:
 	docker compose up --build

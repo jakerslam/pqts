@@ -6,6 +6,7 @@ import argparse
 import hashlib
 import io
 import json
+import os
 import shutil
 import subprocess
 import sys
@@ -16,7 +17,7 @@ from pathlib import Path
 from typing import Sequence
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-FIRST_SUCCESS_COMMANDS = {"init", "demo", "backtest", "paper"}
+FIRST_SUCCESS_COMMANDS = {"init", "demo", "backtest", "paper", "skills"}
 
 BACKTEST_TEMPLATE_STRATEGY_MAP = {
     "momentum": "trend_following",
@@ -28,6 +29,86 @@ BACKTEST_TEMPLATE_STRATEGY_MAP = {
     "funding_arb": "funding_arbitrage",
     "funding-arb": "funding_arbitrage",
 }
+
+
+def _default_repo_base_url() -> str:
+    env_value = str(os.getenv("PQTS_REPO_HTTP_URL", "")).strip()
+    if env_value:
+        return env_value.rstrip("/")
+    fallback = "https://raw.githubusercontent.com/jakerslam/PQTS/main"
+    try:
+        remote = (
+            subprocess.check_output(  # noqa: S603
+                ["git", "config", "--get", "remote.origin.url"],
+                cwd=str(REPO_ROOT),
+                text=True,
+                stderr=subprocess.DEVNULL,
+            )
+            .strip()
+            .rstrip("/")
+        )
+    except Exception:
+        return fallback
+
+    owner_repo = ""
+    if remote.startswith("https://github.com/"):
+        owner_repo = remote.removeprefix("https://github.com/").removesuffix(".git")
+    elif remote.startswith("git@github.com:"):
+        owner_repo = remote.removeprefix("git@github.com:").removesuffix(".git")
+    if "/" not in owner_repo:
+        return fallback
+    return f"https://raw.githubusercontent.com/{owner_repo}/main"
+
+
+def _discover_skill_files(skills_dir: Path) -> list[Path]:
+    if not skills_dir.exists():
+        return []
+    return sorted(path for path in skills_dir.glob("*/SKILL.md") if path.is_file())
+
+
+def _skill_title(path: Path) -> str:
+    for line in path.read_text(encoding="utf-8").splitlines():
+        token = line.strip()
+        if token.startswith("#"):
+            return token.lstrip("#").strip() or path.parent.name
+    return path.parent.name
+
+
+def _skill_relative_path(path: Path, *, skills_dir: Path) -> Path:
+    try:
+        return path.resolve().relative_to(REPO_ROOT.resolve())
+    except Exception:
+        try:
+            return path.resolve().relative_to(skills_dir.resolve().parent)
+        except Exception:
+            return Path(path.name)
+
+
+def _run_skills_list(args: argparse.Namespace) -> int:
+    skills_dir = Path(args.skills_dir).expanduser().resolve()
+    files = _discover_skill_files(skills_dir)
+    if not files:
+        print(f"No skills found in: {skills_dir}")
+        return 0
+    print(f"Discovered {len(files)} skills in {skills_dir}:")
+    for path in files:
+        rel = _skill_relative_path(path, skills_dir=skills_dir)
+        print(f"  - {path.parent.name}: {_skill_title(path)} ({rel.as_posix()})")
+    return 0
+
+
+def _run_skills_urls(args: argparse.Namespace) -> int:
+    skills_dir = Path(args.skills_dir).expanduser().resolve()
+    repo_base_url = str(args.repo_base_url).strip().rstrip("/")
+    files = _discover_skill_files(skills_dir)
+    if not files:
+        print(f"No skills found in: {skills_dir}")
+        return 0
+    print(f"Skill raw URLs ({len(files)}):")
+    for path in files:
+        rel = _skill_relative_path(path, skills_dir=skills_dir)
+        print(f"  {repo_base_url}/{rel.as_posix()}")
+    return 0
 
 
 def should_use_first_success_cli(argv: Sequence[str]) -> bool:
@@ -386,6 +467,26 @@ def build_first_success_parser() -> argparse.ArgumentParser:
     paper_parser.add_argument("--out-dir", default="data/reports/paper")
     paper_parser.add_argument("--output", choices=["table", "json"], default="table")
     paper_parser.set_defaults(handler=_run_paper_start)
+
+    skills_parser = subparsers.add_parser(
+        "skills",
+        help="Discover SKILL.md packages and generate raw install URLs.",
+    )
+    skills_subparsers = skills_parser.add_subparsers(dest="skills_action", required=True)
+
+    skills_list_parser = skills_subparsers.add_parser("list", help="List local skill packages.")
+    skills_list_parser.add_argument("--skills-dir", default=str(REPO_ROOT / "skills"))
+    skills_list_parser.add_argument("--output", choices=["table", "json"], default="table")
+    skills_list_parser.set_defaults(handler=_run_skills_list)
+
+    skills_urls_parser = skills_subparsers.add_parser(
+        "urls",
+        help="Emit raw GitHub URLs for skill package installs.",
+    )
+    skills_urls_parser.add_argument("--skills-dir", default=str(REPO_ROOT / "skills"))
+    skills_urls_parser.add_argument("--repo-base-url", default=_default_repo_base_url())
+    skills_urls_parser.add_argument("--output", choices=["table", "json"], default="table")
+    skills_urls_parser.set_defaults(handler=_run_skills_urls)
 
     return parser
 

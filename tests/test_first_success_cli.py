@@ -12,6 +12,7 @@ def test_should_use_first_success_cli_routing() -> None:
     assert first_success_cli.should_use_first_success_cli([]) is True
     assert first_success_cli.should_use_first_success_cli(["--help"]) is True
     assert first_success_cli.should_use_first_success_cli(["demo"]) is True
+    assert first_success_cli.should_use_first_success_cli(["skills"]) is True
     assert first_success_cli.should_use_first_success_cli(["config/paper.yaml"]) is False
 
 
@@ -138,3 +139,41 @@ def test_first_success_cli_json_output_failure(
     assert payload["command"] == "demo"
     assert int(payload["return_code"]) == 9
     assert payload["error"] == "command_failed"
+
+
+def test_skills_list_command_discovers_skill_packages(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    skill_path = tmp_path / "skills" / "alpha"
+    skill_path.mkdir(parents=True, exist_ok=True)
+    (skill_path / "SKILL.md").write_text("# Alpha Skill\n\nbody\n", encoding="utf-8")
+    rc = first_success_cli.run_first_success_cli(
+        ["skills", "list", "--skills-dir", str(tmp_path / "skills")]
+    )
+    assert rc == 0
+    output = capsys.readouterr().out
+    assert "alpha" in output
+    assert "Alpha Skill" in output
+
+
+def test_skills_urls_command_emits_raw_urls(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    skill_path = tmp_path / "skills" / "beta"
+    skill_path.mkdir(parents=True, exist_ok=True)
+    (skill_path / "SKILL.md").write_text("# Beta Skill\n", encoding="utf-8")
+    rc = first_success_cli.run_first_success_cli(
+        [
+            "skills",
+            "urls",
+            "--skills-dir",
+            str(tmp_path / "skills"),
+            "--repo-base-url",
+            "https://raw.githubusercontent.com/example/repo/main",
+        ]
+    )
+    assert rc == 0
+    output = capsys.readouterr().out
+    assert "https://raw.githubusercontent.com/example/repo/main/skills/beta/SKILL.md" in output

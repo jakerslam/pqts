@@ -120,6 +120,14 @@ Legend:
 - [ ] Add `make native` target to expose maturin-based local native build/install workflow (`ROI: medium`, `Type: engineering`, `Track: parity`, `Ref: LANG-2, LANG-10`)
 - [ ] Trigger first public PyPI release and GitHub Pages leaderboard export, then publish both links in README/docs (`ROI: very_high`, `Type: human_only`, `Track: parity`, `Ref: COMP-2, COMP-5, MOAT-12`)
 
+## 02d. Nunchi Agent-CLI Assimilation Sprint (2026-03-10)
+
+- [x] Implement authenticated SSE channel surface with heartbeat and account scoping (`ROI: high`, `Type: engineering`, `Track: parity`, `Ref: NCLI-1, AHF-5`)
+- [x] Add skill package discovery + raw URL export commands and seed `skills/*/SKILL.md` packages (`ROI: high`, `Type: engineering`, `Track: parity`, `Ref: NCLI-2, DXR-6`)
+- [x] Implement nightly bounded self-improvement review runner with reversible override generation (`ROI: high`, `Type: engineering`, `Track: moat`, `Ref: NCLI-3, MOAT-12`)
+- [ ] Add deployment run-mode environment contract and validation gates (`ROI: medium`, `Type: engineering`, `Track: parity`, `Ref: NCLI-4`)
+- [ ] Standardize autonomous memory/journal/judge artifacts and promotion linkage (`ROI: medium`, `Type: engineering`, `Track: moat`, `Ref: NCLI-5`)
+
 ## 03. Human-Only Parallel Lane
 
 - [ ] Finalize and sign blocking decisions in [docs/HUMAN_DECISIONS_LOG.md](/Users/jay/Document%20(Lcl)/Coding/PQTS/docs/HUMAN_DECISIONS_LOG.md) (`ROI: very_high`, `Type: human_only`, `Track: parity`, `Ref: COMP-10, LANG-6, LANG-3, COMP-14`)

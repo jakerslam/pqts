@@ -3329,3 +3329,47 @@ Observed source links:
 
 - Requirements adopted from comparative commentary shall encode measurable system contracts and not rely on vendor marketing claims.
 - Competitive feature references shall be periodically revalidated against current public documentation before roadmap commitments.
+
+## 59. Additional Requirements from External Repo (Nunchi agent-cli, March 10, 2026)
+
+These requirements are derived from features observed in `Nunchi-trade/agent-cli` and adapted to PQTS architecture/safety constraints.
+
+Observed source links:
+- `https://github.com/Nunchi-trade/agent-cli`
+- `https://github.com/Nunchi-trade/agent-cli/blob/main/README.md`
+- `https://github.com/Nunchi-trade/agent-cli/blob/main/docs/api-reference.md`
+
+### NCLI-1 Authenticated SSE Stream Surface
+
+- API layer shall expose authenticated Server-Sent Event channels for `orders`, `fills`, `positions`, `pnl`, and `risk`.
+- SSE channels shall include correlation IDs, account-scoped filtering, and heartbeat events for resilient dashboard/integration consumers.
+- SSE transport shall coexist with existing websocket channels and share canonical event envelope contracts.
+
+### NCLI-2 Skill Package Discovery and Distribution Contract
+
+- System shall support workflow skills as local `skills/<name>/SKILL.md` packages discoverable via CLI.
+- CLI shall provide deterministic skill discovery output and machine-readable modes.
+- CLI shall emit raw URL distribution links for skill packages to support agent-install workflows.
+
+### NCLI-3 Nightly Bounded Self-Improvement Review Loop
+
+- System shall provide a nightly review runner over latest paper campaign snapshots to evaluate reject-rate, slippage quality, realized net alpha, and critical alerts.
+- Review engine shall generate bounded, reversible parameter-adjustment proposals with explicit before/after deltas.
+- Auto-apply mode shall require explicit operator confirmation and preserve pre-change config backups.
+
+### NCLI-4 Deployment Run-Mode Contract
+
+- Deployment entrypoints shall support explicit run modes (for example `engine`, `api`, `stream`) via environment variables without editing code.
+- Each run mode shall have declared required environment variables and health/readiness behavior.
+- Runtime shall fail closed with explicit diagnostics when run-mode prerequisites are missing.
+
+### NCLI-5 Agent Memory/Journal/Judge Artifact Contract
+
+- System shall standardize operator-facing memory, trade-journal, and judgment-report artifacts for autonomous loops.
+- Artifacts shall be timestamped, versioned, and linked to strategy/run identifiers for auditability.
+- Promotion and incident workflows shall reference these artifacts when generating operator recommendations.
+
+### NCLI-6 Source Reliability and Claim Handling
+
+- External strategy/runtime claims from repository marketing copy shall be treated as design hypotheses until reproduced under PQTS benchmarks.
+- Imported requirements from this source shall be encoded as testable system contracts rather than profitability assertions.

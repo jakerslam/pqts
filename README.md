@@ -161,6 +161,21 @@ These commands now emit template artifacts and config diffs under the selected o
 - `template_run_<timestamp>.json`
 - `template_run_diff_<timestamp>.diff`
 
+Skill package discovery + install URL export:
+
+```bash
+pqts skills list
+pqts skills urls
+```
+
+Nightly bounded review + tuning proposals:
+
+```bash
+python3 scripts/run_nightly_strategy_review.py --snapshot auto
+# optional: write override patch
+python3 scripts/run_nightly_strategy_review.py --snapshot auto --write-overrides data/reports/nightly_review/overrides.yaml
+```
+
 Ops certification + retention:
 
 ```bash
@@ -195,6 +210,14 @@ Live secret validation:
 
 ```bash
 python scripts/validate_live_secrets.py --config config/live_canary.yaml --strict
+```
+
+FastAPI SSE stream surface (authenticated):
+
+```bash
+curl -N \
+  -H "Authorization: Bearer <viewer-token>" \
+  "http://localhost:8000/v1/stream/sse/orders?account_id=paper-main"
 ```
 
 PnL truth ledger + strategy auto-disable list:
