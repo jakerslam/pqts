@@ -83,6 +83,8 @@ def test_build_monthly_report_aggregates_metrics(tmp_path: Path) -> None:
     assert row.strategy == "market_making"
     assert row.runs == 2
     assert row.total_pnl == 20.0
+    assert report.result_class == "diagnostic_only"
+    assert report.include_in_reference_summary is False
 
 
 def test_generate_monthly_report_artifacts_writes_json_html_pdf(tmp_path: Path) -> None:
@@ -138,3 +140,34 @@ def test_generate_monthly_report_artifacts_writes_json_html_pdf(tmp_path: Path) 
     assert payload["month"] == "2026-03"
     assert payload["bundle_count"] == 1
     assert payload["scenario_count"] == 1
+    assert payload["result_class"] == "diagnostic_only"
+    assert payload["include_in_reference_summary"] is False
+
+
+def test_build_monthly_report_reference_class_when_quality_passes(tmp_path: Path) -> None:
+    results = tmp_path / "results"
+    results.mkdir()
+
+    payload = {
+        "created_at": "2026-03-10T02:00:00+00:00",
+        "results": [
+            {
+                "quality_score": 0.25,
+                "filled": 8,
+                "submitted": 10,
+                "reject_rate": 0.20,
+                "scenario": {
+                    "market": "crypto",
+                    "strategy": "market_making",
+                    "notional_usd": 100.0,
+                },
+            }
+        ],
+    }
+    _write_bundle(results, "2026-03-11_bundle_reference", payload)
+
+    report = build_monthly_report(results_dir=results, month="2026-03", starting_equity=5_000.0)
+
+    assert report.result_class == "reference"
+    assert report.include_in_reference_summary is True
+    assert report.quality_gate["passed"] is True

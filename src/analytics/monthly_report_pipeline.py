@@ -11,6 +11,8 @@ import re
 import statistics
 from typing import Any, Dict, List, Mapping, Sequence, Tuple
 
+from analytics.benchmark_quality_gate import evaluate_benchmark_quality
+
 
 _MONTH_PATTERN = re.compile(r"^\d{4}-\d{2}$")
 
@@ -45,6 +47,9 @@ class MonthlyReport:
     max_drawdown: float
     equity_curve: List[float]
     attribution_rows: List[AttributionRow]
+    result_class: str
+    include_in_reference_summary: bool
+    quality_gate: Dict[str, Any]
 
     def to_dict(self) -> Dict[str, Any]:
         payload = asdict(self)
@@ -264,6 +269,11 @@ def build_monthly_report(
 
     ending_equity = float(equity_curve[-1]) if equity_curve else float(starting_equity)
     total_pnl = ending_equity - float(starting_equity)
+    quality = evaluate_benchmark_quality(
+        attribution_rows=[asdict(row) for row in attribution_rows],
+        scenario_count=int(scenario_count),
+        bundle_count=len(bundles),
+    )
 
     return MonthlyReport(
         month=month,
@@ -281,6 +291,9 @@ def build_monthly_report(
             key=lambda row: (row.total_pnl, row.avg_quality_score),
             reverse=True,
         ),
+        result_class=str(quality.result_class),
+        include_in_reference_summary=bool(quality.include_in_reference_summary),
+        quality_gate=quality.to_dict(),
     )
 
 
@@ -432,6 +445,7 @@ def render_monthly_report_html(
       <div class=\"kpi\"><div class=\"label\">Total PnL</div><div class=\"value\">{report.total_pnl:.2f}</div></div>
       <div class=\"kpi\"><div class=\"label\">Sharpe</div><div class=\"value\">{report.sharpe:.4f}</div></div>
       <div class=\"kpi\"><div class=\"label\">Max Drawdown</div><div class=\"value\">{report.max_drawdown:.4f}</div></div>
+      <div class=\"kpi\"><div class=\"label\">Result Class</div><div class=\"value\">{_escape_html(report.result_class)}</div></div>
     </section>
 
     <section>

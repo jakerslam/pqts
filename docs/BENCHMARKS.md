@@ -43,6 +43,11 @@ Generated artifacts:
 - `data/reports/monthly/2026-03/monthly_report_2026-03.pdf`
 - `data/reports/monthly/2026-03/monthly_report_2026-03_equity_curve.svg`
 
+Quality classification policy:
+- `reference`: non-zero fill rate and reject rate <= `0.40` across evaluated attribution rows.
+- `diagnostic_only`: any quality gate failure (for example zero fill or reject rate above threshold).
+- `diagnostic_only` results are excluded from reference benchmark summaries.
+
 ## Benchmark Provenance Standard
 
 Update and maintain the canonical benchmark provenance log:

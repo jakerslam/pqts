@@ -60,6 +60,8 @@ def main() -> int:
         "month": artifacts.report.month,
         "bundle_count": artifacts.report.bundle_count,
         "scenario_count": artifacts.report.scenario_count,
+        "result_class": artifacts.report.result_class,
+        "include_in_reference_summary": bool(artifacts.report.include_in_reference_summary),
         "json_path": str(artifacts.json_path),
         "html_path": str(artifacts.html_path),
         "pdf_path": str(artifacts.pdf_path),
