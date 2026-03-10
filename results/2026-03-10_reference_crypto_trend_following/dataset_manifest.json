@@ -1,0 +1,22 @@
+{
+  "artifacts": {
+    "leaderboard_csv": "simulation_leaderboard_20260310T195908561273Z.csv",
+    "leaderboard_sha256": "c810901f13e99f8b92ec6ccd856810b1ffa5b5d5c326c1c8369988834bf979a1",
+    "report_json": "simulation_suite_20260310T195908561273Z.json",
+    "report_sha256": "3ec5a0eaa88e4a45c6ac0fd31a5dcd3aa9737a18e76e2ee135648a8ef66c4855"
+  },
+  "commands": [
+    "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3 scripts/run_simulation_suite.py --config config/paper.yaml --markets crypto --strategies trend_following --cycles-per-scenario 36 --symbols-per-market 1 --readiness-every 12 --risk-profile balanced --sleep-seconds 0.0 --out-dir results/2026-03-10_reference_crypto_trend_following --telemetry-log results/2026-03-10_reference_crypto_trend_following/simulation_events.jsonl --tca-dir results/2026-03-10_reference_crypto_trend_following/tca"
+  ],
+  "dataset_version": "dataset-20260310-reference-v2",
+  "generated_at": "2026-03-10T19:59:08.647352+00:00",
+  "notes": "Reference bundle with non-zero fills and reproducible command surface.",
+  "schema_version": "1",
+  "sources": [
+    {
+      "config": "config/paper.yaml",
+      "name": "pqts_simulation_engine",
+      "type": "synthetic"
+    }
+  ]
+}

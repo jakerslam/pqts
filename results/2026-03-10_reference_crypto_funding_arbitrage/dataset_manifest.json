@@ -1,0 +1,22 @@
+{
+  "artifacts": {
+    "leaderboard_csv": "simulation_leaderboard_20260310T195909288775Z.csv",
+    "leaderboard_sha256": "e780641b97dbc97e51b05ce83766c5b825f9035017c0ce3627be2f0721e8eaf5",
+    "report_json": "simulation_suite_20260310T195909288775Z.json",
+    "report_sha256": "1c347073f841e270eaff77d81a267a77cac6845523bcc279c5407e263601ca12"
+  },
+  "commands": [
+    "/Library/Frameworks/Python.framework/Versions/3.13/bin/python3 scripts/run_simulation_suite.py --config config/paper.yaml --markets crypto --strategies funding_arbitrage --cycles-per-scenario 36 --symbols-per-market 1 --readiness-every 12 --risk-profile balanced --sleep-seconds 0.0 --out-dir results/2026-03-10_reference_crypto_funding_arbitrage --telemetry-log results/2026-03-10_reference_crypto_funding_arbitrage/simulation_events.jsonl --tca-dir results/2026-03-10_reference_crypto_funding_arbitrage/tca"
+  ],
+  "dataset_version": "dataset-20260310-reference-v2",
+  "generated_at": "2026-03-10T19:59:09.359455+00:00",
+  "notes": "Reference bundle with non-zero fills and reproducible command surface.",
+  "schema_version": "1",
+  "sources": [
+    {
+      "config": "config/paper.yaml",
+      "name": "pqts_simulation_engine",
+      "type": "synthetic"
+    }
+  ]
+}

@@ -24,7 +24,10 @@ Example:
 - `2026-03-09_crypto_market_making_short/`
 - `2026-03-09_crypto_funding_arbitrage_short/`
 - `2026-03-09_multi_market_market_making_short/`
-- `2026-03-10_reference_market_making/`
+- `2026-03-10_reference_crypto_trend_following/`
+- `2026-03-10_reference_crypto_funding_arbitrage/`
+- `2026-03-10_reference_multi_market_making/`
+- `reference_performance_latest.json` (machine-readable summary of latest reference bundles)
 - `native_benchmarks/` (execution-latency benchmark artifacts for Python fallback vs native hotpath)
 
 All current bundles contain:

@@ -188,6 +188,18 @@ class SimulationSuiteRunner:
             "risk_profile": risk_profile_payload(self._risk_profile),
         }
 
+    def _expected_alpha_bps(self, strategy: str) -> float:
+        execution_cfg = self.config.get("execution", {}) or {}
+        expected_map = execution_cfg.get("expected_alpha_bps_by_strategy", {}) or {}
+        if not isinstance(expected_map, dict):
+            return 0.0
+        key = str(strategy or "").strip()
+        if key in expected_map:
+            return float(expected_map.get(key, 0.0) or 0.0)
+        if "campaign" in expected_map:
+            return float(expected_map.get("campaign", 0.0) or 0.0)
+        return 0.0
+
     def _symbols_for_market(self, market: str) -> List[str]:
         market_cfg = self.config.get("markets", {}).get(market, {})
         symbols: List[str] = []
@@ -387,6 +399,8 @@ class SimulationSuiteRunner:
                     notional_usd=float(scenario.notional_usd),
                     price=float(price),
                     order_type=OrderType.LIMIT,
+                    strategy_id=str(scenario.strategy or "campaign"),
+                    expected_alpha_bps=float(self._expected_alpha_bps(scenario.strategy)),
                 )
                 portfolio = build_portfolio_snapshot(
                     positions=positions,

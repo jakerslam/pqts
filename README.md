@@ -307,9 +307,19 @@ Public reproducible result bundles live under `results/`.
   - `results/2026-03-09_crypto_market_making_short/`
   - `results/2026-03-09_crypto_funding_arbitrage_short/`
   - `results/2026-03-09_multi_market_market_making_short/`
+  - `results/2026-03-10_reference_crypto_trend_following/`
+  - `results/2026-03-10_reference_crypto_funding_arbitrage/`
+  - `results/2026-03-10_reference_multi_market_making/`
 - bundle schema/template: `results/RESULT_TEMPLATE.md`
+- generated latest-reference summary: `results/reference_performance_latest.json`
 
 Each bundle includes the command, inputs, key metrics, and chart artifacts.
+
+Regenerate published reference bundles and sync README/docs callouts:
+
+```bash
+make reference-bundles
+```
 
 ## 🔔 Notifications (Telegram/Discord)
 
@@ -390,13 +400,22 @@ Access at `http://localhost:8501`
 
 ## 📈 Strategy Performance
 
-Reference callout from latest `reference` bundle:
+Reference callout from latest `reference` bundle (auto-generated from `results/reference_performance_latest.json`):
+<!-- REFERENCE_PERFORMANCE:START -->
+_Last generated (UTC): 2026-03-10 19:59:10_
 
-- `results/2026-03-10_reference_market_making` ([bundle](results/2026-03-10_reference_market_making/README.md), [csv](results/2026-03-10_reference_market_making/simulation_leaderboard_20260310T180000000000Z.csv))
-  - `avg_quality_score=0.25`
-  - `avg_fill_rate=0.80`
-  - `avg_reject_rate=0.20`
-  - classification: `reference`
+- `2026-03-10_reference_crypto_trend_following` ([bundle](results/2026-03-10_reference_crypto_trend_following/README.md), [csv](results/2026-03-10_reference_crypto_trend_following/simulation_leaderboard_20260310T195908561273Z.csv), [report](results/2026-03-10_reference_crypto_trend_following/simulation_suite_20260310T195908561273Z.json))
+  - `avg_quality_score=0.8336`
+  - `avg_fill_rate=1.0000`
+  - `avg_reject_rate=0.0000`
+  - `total_filled=36` / `total_submitted=36`
+
+| Bundle | Markets | Strategy | Quality | Fill | Reject |
+|---|---|---|---:|---:|---:|
+| `2026-03-10_reference_crypto_funding_arbitrage` | `crypto` | `funding_arbitrage` | `0.8221` | `1.0000` | `0.0000` |
+| `2026-03-10_reference_crypto_trend_following` | `crypto` | `trend_following` | `0.8336` | `1.0000` | `0.0000` |
+| `2026-03-10_reference_multi_market_making` | `crypto,equities,forex` | `market_making` | `0.8246` | `1.0000` | `0.0000` |
+<!-- REFERENCE_PERFORMANCE:END -->
 
 | Strategy | Timeframe | Edge |
 |----------|-----------|------|
@@ -477,6 +496,7 @@ Repository layout guide: `docs/REPO_STRUCTURE.md`
 - [5-Minute Quickstart](docs/QUICKSTART_5_MIN.md)
 - [Architecture Diagram](docs/ARCHITECTURE_DIAGRAM.md)
 - [Benchmarks](docs/BENCHMARKS.md)
+- [Reference Performance](docs/REFERENCE_PERFORMANCE.md)
 - [Release Checklist](docs/RELEASE_CHECKLIST.md)
 - [Branch Protection Guidance](docs/BRANCH_PROTECTION.md)
 - [PyPI Publishing Setup](docs/PYPI_PUBLISHING.md)

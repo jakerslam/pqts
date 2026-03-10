@@ -4,7 +4,7 @@ VENV ?= .venv
 VENV_PY := $(VENV)/bin/python
 PY_RUN := $(if $(wildcard $(VENV_PY)),$(VENV_PY),$(PYTHON))
 
-.PHONY: setup setup-lock demo sim-suite stream-worker ws-ingestion tournament canary-ramp reconcile slo-report error-budget control-plane arch-check arch-map scaffold-module leaderboard-site governance-check paper-6m nightly-review run-mode native bench-exec docker-up doctor onboard status test lint clean
+.PHONY: setup setup-lock demo sim-suite stream-worker ws-ingestion tournament canary-ramp reconcile slo-report error-budget control-plane arch-check arch-map scaffold-module leaderboard-site governance-check paper-6m nightly-review run-mode native bench-exec reference-bundles reference-performance docker-up doctor onboard status test lint clean
 
 setup:
 	bash scripts/bootstrap_env.sh --python "$(PYTHON)" --venv "$(VENV)"
@@ -90,6 +90,13 @@ native:
 
 bench-exec:
 	$(PY_RUN) scripts/benchmark_execution_latency.py --orders 500 --target-p95-ms 200 --out-dir results/native_benchmarks
+
+reference-bundles:
+	$(PY_RUN) scripts/publish_reference_bundles.py --config config/paper.yaml --out-root results
+	$(PY_RUN) scripts/render_reference_performance.py
+
+reference-performance:
+	$(PY_RUN) scripts/render_reference_performance.py
 
 docker-up:
 	docker compose up --build
