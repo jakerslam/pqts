@@ -125,8 +125,8 @@ Legend:
 - [x] Implement authenticated SSE channel surface with heartbeat and account scoping (`ROI: high`, `Type: engineering`, `Track: parity`, `Ref: NCLI-1, AHF-5`)
 - [x] Add skill package discovery + raw URL export commands and seed `skills/*/SKILL.md` packages (`ROI: high`, `Type: engineering`, `Track: parity`, `Ref: NCLI-2, DXR-6`)
 - [x] Implement nightly bounded self-improvement review runner with reversible override generation (`ROI: high`, `Type: engineering`, `Track: moat`, `Ref: NCLI-3, MOAT-12`)
-- [ ] Add deployment run-mode environment contract and validation gates (`ROI: medium`, `Type: engineering`, `Track: parity`, `Ref: NCLI-4`)
-- [ ] Standardize autonomous memory/journal/judge artifacts and promotion linkage (`ROI: medium`, `Type: engineering`, `Track: moat`, `Ref: NCLI-5`)
+- [x] Add deployment run-mode environment contract and validation gates (`ROI: medium`, `Type: engineering`, `Track: parity`, `Ref: NCLI-4`)
+- [x] Standardize autonomous memory/journal/judge artifacts and promotion linkage (`ROI: medium`, `Type: engineering`, `Track: moat`, `Ref: NCLI-5`)
 
 ## 03. Human-Only Parallel Lane
 

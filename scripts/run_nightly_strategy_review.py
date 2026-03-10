@@ -22,6 +22,7 @@ if SRC.exists():
 if str(ROOT) not in sys.path:
     sys.path[:] = [str(ROOT), *sys.path]
 
+from analytics.autonomous_artifacts import write_autonomous_review_artifacts
 from analytics.nightly_strategy_review import (
     NightlyReviewThresholds,
     apply_overrides_to_config,
@@ -50,6 +51,11 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--reports-dir", default="data/reports")
     parser.add_argument("--config", default="config/paper.yaml")
     parser.add_argument("--out-dir", default="data/reports/nightly_review")
+    parser.add_argument(
+        "--artifact-dir",
+        default="data/analytics/autonomous",
+        help="Directory for memory/journal/judge artifacts.",
+    )
     parser.add_argument("--write-overrides", default="", help="Optional YAML path for proposed overrides.")
     parser.add_argument(
         "--apply-config",
@@ -83,6 +89,9 @@ def _print_table(payload: Dict[str, Any]) -> None:
         print(f"  overrides:{payload.get('overrides_path')}")
     if payload.get("applied_config_path"):
         print(f"  applied:  {payload.get('applied_config_path')}")
+    artifact_paths = payload.get("artifact_paths", {}) if isinstance(payload, dict) else {}
+    if artifact_paths:
+        print(f"  artifacts:{artifact_paths.get('base_dir')}")
     print(
         "  metrics:  "
         f"reject_rate={float(metrics.get('reject_rate', 0.0)):.3f}, "
@@ -125,6 +134,14 @@ def main() -> int:
     stamp = _utc_stamp()
     review_path = out_dir / f"nightly_strategy_review_{stamp}.json"
     review_path.write_text(json.dumps(review, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    run_id = f"nightly_review_{stamp}"
+    artifact_paths = write_autonomous_review_artifacts(
+        base_dir=args.artifact_dir,
+        run_id=run_id,
+        review=review,
+        snapshot_path=str(snapshot_path),
+        review_path=str(review_path),
+    )
 
     overrides = review.get("proposed_overrides", {})
     overrides_path = ""
@@ -150,12 +167,14 @@ def main() -> int:
 
     payload: Dict[str, Any] = {
         "timestamp": datetime.now(timezone.utc).isoformat(),
+        "run_id": run_id,
         "snapshot_path": str(snapshot_path),
         "config_path": str(config_path),
         "review_path": str(review_path),
         "overrides_path": overrides_path,
         "applied_config_path": applied_config_path,
         "backup_config_path": backup_config_path,
+        "artifact_paths": artifact_paths,
         "review": review,
     }
     if args.output == "json":

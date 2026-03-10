@@ -174,7 +174,12 @@ Nightly bounded review + tuning proposals:
 python3 scripts/run_nightly_strategy_review.py --snapshot auto
 # optional: write override patch
 python3 scripts/run_nightly_strategy_review.py --snapshot auto --write-overrides data/reports/nightly_review/overrides.yaml
+# make target
+make nightly-review
 ```
+
+The nightly review also writes standardized autonomous artifacts under `data/analytics/autonomous/`:
+`memory.jsonl`, `trade_journal.jsonl`, and `judge_report.jsonl`.
 
 Ops certification + retention:
 
@@ -218,6 +223,14 @@ FastAPI SSE stream surface (authenticated):
 curl -N \
   -H "Authorization: Bearer <viewer-token>" \
   "http://localhost:8000/v1/stream/sse/orders?account_id=paper-main"
+```
+
+Deployment run-mode entrypoint (environment-driven):
+
+```bash
+PQTS_RUN_MODE=engine python3 scripts/run_mode_entrypoint.py --print-plan
+PQTS_RUN_MODE=api PQTS_API_TOKENS="viewer-token:viewer" python3 scripts/run_mode_entrypoint.py --print-plan
+PQTS_RUN_MODE=stream python3 scripts/run_mode_entrypoint.py --print-plan
 ```
 
 PnL truth ledger + strategy auto-disable list:
