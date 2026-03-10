@@ -1,250 +1,364 @@
 #!/usr/bin/env python3
-"""Generate deterministic README visual assets (PNG + GIF) in docs/media."""
+"""Capture real dashboard screenshots and GIF previews using headless Chrome CDP."""
 
 from __future__ import annotations
 
-import csv
+import argparse
+import base64
+import contextlib
+import io
+import json
+import os
+import signal
+import subprocess
+import sys
+import time
+import urllib.error
+import urllib.request
 from pathlib import Path
-from typing import Iterable
 
-from PIL import Image, ImageDraw
+import requests
+from PIL import Image, ImageOps
+from websocket import create_connection
 
 
 ROOT = Path(__file__).resolve().parent.parent
 MEDIA_DIR = ROOT / "docs" / "media"
-RESULTS_DIR = ROOT / "results"
+TARGET_SIZE = (1280, 720)
+DEFAULT_DASHBOARD_URL = "http://127.0.0.1:8050"
+DEFAULT_CHROME_BINARY = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 
 
-BG = (12, 18, 34)
-CARD = (24, 34, 58)
-ACCENT = (84, 214, 174)
-TEXT = (230, 236, 246)
-MUTED = (152, 168, 196)
-RED = (239, 68, 68)
-BLUE = (96, 165, 250)
-GREEN = (34, 197, 94)
+class CdpClient:
+    def __init__(self, ws_url: str) -> None:
+        self.ws = create_connection(ws_url, timeout=30)
+        self._next_id = 0
+
+    def close(self) -> None:
+        self.ws.close()
+
+    def call(self, method: str, params: dict | None = None) -> dict:
+        self._next_id += 1
+        payload = {"id": self._next_id, "method": method, "params": params or {}}
+        self.ws.send(json.dumps(payload))
+        while True:
+            response = json.loads(self.ws.recv())
+            if response.get("id") != self._next_id:
+                continue
+            if "error" in response:
+                raise RuntimeError(f"CDP error for {method}: {response['error']}")
+            return response.get("result", {})
+
+    def eval(self, expression: str):
+        result = self.call(
+            "Runtime.evaluate",
+            {
+                "expression": expression,
+                "returnByValue": True,
+                "awaitPromise": True,
+            },
+        )
+        return result.get("result", {}).get("value")
 
 
-def _canvas(title: str, subtitle: str = "") -> tuple[Image.Image, ImageDraw.ImageDraw]:
-    img = Image.new("RGB", (1280, 720), BG)
-    draw = ImageDraw.Draw(img)
-    draw.rectangle((40, 30, 1240, 690), outline=(44, 62, 96), width=2)
-    draw.text((70, 60), title, fill=TEXT)
-    if subtitle:
-        draw.text((70, 90), subtitle, fill=MUTED)
-    return img, draw
+def _wait_for_http(url: str, timeout_seconds: float = 60.0) -> bool:
+    start = time.time()
+    while time.time() - start < timeout_seconds:
+        try:
+            with urllib.request.urlopen(url, timeout=2.0) as response:
+                if response.status < 500:
+                    return True
+        except (OSError, urllib.error.URLError):
+            pass
+        time.sleep(0.5)
+    return False
 
 
-def _bundles() -> list[Path]:
-    rows = sorted(path for path in RESULTS_DIR.glob("2026-03-09_*") if path.is_dir())
-    return rows
-
-
-def _first_csv_row(csv_path: Path) -> dict[str, str]:
-    with csv_path.open("r", encoding="utf-8", newline="") as handle:
-        row = next(csv.DictReader(handle), None)
-    return dict(row or {})
-
-
-def _latest_bundle_metric_rows() -> list[dict[str, str]]:
-    bundles = _bundles()
-    if not bundles:
-        return []
-    latest = bundles[-1]
-    csv_files = sorted(latest.glob("simulation_leaderboard_*.csv"))
-    if not csv_files:
-        return []
-    with csv_files[-1].open("r", encoding="utf-8", newline="") as handle:
-        return [dict(item) for item in csv.DictReader(handle)]
-
-
-def _save(img: Image.Image, name: str) -> None:
-    MEDIA_DIR.mkdir(parents=True, exist_ok=True)
-    img.save(MEDIA_DIR / name)
-
-
-def _draw_metric_box(draw: ImageDraw.ImageDraw, x: int, y: int, label: str, value: str, color: tuple[int, int, int]) -> None:
-    draw.rounded_rectangle((x, y, x + 340, y + 120), radius=14, fill=CARD, outline=(48, 70, 110), width=2)
-    draw.text((x + 18, y + 20), label, fill=MUTED)
-    draw.text((x + 18, y + 56), value, fill=color)
-
-
-def make_dashboard_overview() -> None:
-    img, draw = _canvas("PQTS Dashboard Overview", "Operational posture and live controls")
-    _draw_metric_box(draw, 80, 160, "Mode", "Paper Trading", BLUE)
-    _draw_metric_box(draw, 450, 160, "Risk State", "Healthy", GREEN)
-    _draw_metric_box(draw, 820, 160, "Active Markets", "crypto / equities / forex", ACCENT)
-    _draw_metric_box(draw, 80, 320, "Canary Decision", "hold", BLUE)
-    _draw_metric_box(draw, 450, 320, "Critical Alerts", "0", GREEN)
-    _draw_metric_box(draw, 820, 320, "Promotion Gate", "unknown", MUTED)
-    _draw_metric_box(draw, 80, 480, "Automation", "enabled", ACCENT)
-    _draw_metric_box(draw, 450, 480, "CI Status", "passing", GREEN)
-    _draw_metric_box(draw, 820, 480, "Coverage", "workflow enabled", BLUE)
-    _save(img, "dashboard_overview.png")
-
-
-def make_simulation_leaderboard() -> None:
-    rows = _latest_bundle_metric_rows()
-    img, draw = _canvas("Simulation Leaderboard", "Top strategy rows from reproducible bundle")
-    draw.rounded_rectangle((70, 140, 1210, 650), radius=16, fill=CARD, outline=(48, 70, 110), width=2)
-    headers = ["market", "strategy", "runs", "quality", "fill", "reject"]
-    x_cols = [100, 260, 520, 650, 820, 980]
-    for x, header in zip(x_cols, headers):
-        draw.text((x, 170), header.upper(), fill=MUTED)
-    y = 220
-    for row in rows[:8]:
-        draw.text((x_cols[0], y), str(row.get("market", "")), fill=TEXT)
-        draw.text((x_cols[1], y), str(row.get("strategy", "")), fill=TEXT)
-        draw.text((x_cols[2], y), str(row.get("runs", "")), fill=TEXT)
-        draw.text((x_cols[3], y), f"{float(row.get('avg_quality_score', 0.0)):.2f}", fill=ACCENT)
-        draw.text((x_cols[4], y), f"{float(row.get('avg_fill_rate', 0.0)):.2f}", fill=BLUE)
-        draw.text((x_cols[5], y), f"{float(row.get('avg_reject_rate', 0.0)):.2f}", fill=RED)
-        y += 52
-    _save(img, "simulation_leaderboard.png")
-
-
-def make_risk_controls() -> None:
-    img, draw = _canvas("Risk Control Surface", "Kill-switch, limits, and guardrails")
-    cards = [
-        ("Kill Switch", "armed", GREEN),
-        ("Max Drawdown", "15%", BLUE),
-        ("Max Daily Loss", "2%", BLUE),
-        ("Leverage Cap", "2.0x", BLUE),
-        ("Critical Alerts", "0", GREEN),
-        ("Router Gate", "strict", ACCENT),
-    ]
-    x, y = 90, 170
-    for i, (name, val, color) in enumerate(cards):
-        _draw_metric_box(draw, x, y, name, val, color)
-        x += 380
-        if (i + 1) % 3 == 0:
-            x = 90
-            y += 170
-    _save(img, "risk_controls.png")
-
-
-def make_canary_progress() -> None:
-    img, draw = _canvas("Canary Ramp Progress", "Policy-driven capital progression states")
-    draw.rounded_rectangle((120, 220, 1160, 320), radius=50, fill=CARD, outline=(48, 70, 110), width=2)
-    steps = [0.05, 0.10, 0.15, 0.25, 0.40]
-    x = 180
-    for idx, step in enumerate(steps):
-        color = GREEN if idx < 2 else MUTED
-        draw.ellipse((x - 18, 252, x + 18, 288), fill=color)
-        draw.text((x - 22, 300), f"{int(step*100)}%", fill=TEXT)
-        if idx < len(steps) - 1:
-            draw.line((x + 20, 270, x + 180, 270), fill=(52, 82, 130), width=6)
-        x += 200
-    draw.text((140, 380), "Current state: HOLD at 10% allocation (ops/risk gates enforced)", fill=ACCENT)
-    _save(img, "canary_progress.png")
-
-
-def make_ops_health() -> None:
-    img, draw = _canvas("Ops Health Summary", "SLO, reconciliation, and incident posture")
-    _draw_metric_box(draw, 100, 180, "SLO Breaches", "0 critical / 0 warning", GREEN)
-    _draw_metric_box(draw, 500, 180, "Reconciliation Mismatch", "0", GREEN)
-    _draw_metric_box(draw, 900, 180, "Incidents (60m)", "0", GREEN)
-    _draw_metric_box(draw, 100, 360, "Stream Health", "healthy", BLUE)
-    _draw_metric_box(draw, 500, 360, "TCA Drift Alerts", "0", GREEN)
-    _draw_metric_box(draw, 900, 360, "Error Budget", "within threshold", ACCENT)
-    _save(img, "ops_health.png")
-
-
-def make_execution_pipeline() -> None:
-    img, draw = _canvas("Execution Pipeline", "Signal -> Router -> Adapter -> Ledger -> Telemetry")
-    stages = ["Signals", "Risk Router", "Exchange Adapter", "Order Ledger", "Telemetry"]
-    x = 120
-    for stage in stages:
-        draw.rounded_rectangle((x, 290, x + 190, 390), radius=14, fill=CARD, outline=(48, 70, 110), width=2)
-        draw.text((x + 20, 332), stage, fill=TEXT)
-        if stage != stages[-1]:
-            draw.polygon([(x + 202, 340), (x + 230, 322), (x + 230, 358)], fill=ACCENT)
-        x += 220
-    _save(img, "execution_pipeline.png")
-
-
-def make_architecture_layers() -> None:
-    img, draw = _canvas("Architecture Layers", "FastAPI backend + Next.js frontend + Streamlit internal ops")
-    layers = [
-        ("Next.js Web App", 120, 170, BLUE),
-        ("FastAPI Service", 120, 290, ACCENT),
-        ("PQTS Core (src/*)", 120, 410, GREEN),
-        ("Postgres + Redis", 120, 530, MUTED),
-    ]
-    for text, x, y, color in layers:
-        draw.rounded_rectangle((x, y, 1160, y + 90), radius=14, fill=CARD, outline=(48, 70, 110), width=2)
-        draw.text((160, y + 34), text, fill=color)
-    _save(img, "architecture_layers.png")
-
-
-def make_performance_snapshot() -> None:
-    row = {}
-    bundles = _bundles()
-    if bundles:
-        csv_files = sorted(bundles[0].glob("simulation_leaderboard_*.csv"))
-        if csv_files:
-            row = _first_csv_row(csv_files[0])
-    quality = float(row.get("avg_quality_score", 0.0) or 0.0)
-    fill = float(row.get("avg_fill_rate", 0.0) or 0.0)
-    reject = float(row.get("avg_reject_rate", 0.0) or 0.0)
-
-    img, draw = _canvas("Performance Snapshot", "Public reproducible baseline metrics")
-    draw.line((150, 580, 1100, 580), fill=(60, 86, 132), width=3)
-    bars = [("Quality", quality, GREEN), ("Fill", fill, BLUE), ("Reject", reject, RED)]
-    x = 280
-    for label, value, color in bars:
-        h = int(max(0.0, min(1.0, value)) * 340)
-        draw.rectangle((x, 580 - h, x + 120, 580), fill=color)
-        draw.text((x + 18, 595), label, fill=TEXT)
-        draw.text((x + 32, 580 - h - 30), f"{value:.2f}", fill=TEXT)
-        x += 220
-    _save(img, "performance_snapshot.png")
-
-
-def _gif_frames(label: str, color: tuple[int, int, int]) -> list[Image.Image]:
-    frames: list[Image.Image] = []
-    for i in range(12):
-        img, draw = _canvas(label, "Generated preview animation")
-        alpha = 60 + (i % 6) * 30
-        pulse = (min(255, color[0] + alpha), min(255, color[1] + alpha), min(255, color[2] + alpha))
-        draw.rounded_rectangle((220, 240, 1060, 500), radius=24, fill=CARD, outline=(48, 70, 110), width=2)
-        draw.ellipse((500 - i * 4, 300 - i * 4, 780 + i * 4, 580 + i * 4), outline=pulse, width=8)
-        draw.text((520, 360), "LIVE", fill=pulse)
-        draw.text((520, 410), f"frame {i+1}", fill=TEXT)
-        frames.append(img)
-    return frames
-
-
-def _save_gif(frames: Iterable[Image.Image], name: str) -> None:
-    frames = list(frames)
-    MEDIA_DIR.mkdir(parents=True, exist_ok=True)
-    frames[0].save(
-        MEDIA_DIR / name,
-        save_all=True,
-        append_images=frames[1:],
-        duration=120,
-        loop=0,
+def _start_dashboard_process(port: int) -> subprocess.Popen[bytes]:
+    env = os.environ.copy()
+    src_path = str(ROOT / "src")
+    env["PYTHONPATH"] = (
+        f"{src_path}{os.pathsep}{env['PYTHONPATH']}" if env.get("PYTHONPATH") else src_path
+    )
+    runner = (
+        "from dashboard.app import app; "
+        f"app.run_server(debug=False, host='127.0.0.1', port={port})"
+    )
+    return subprocess.Popen(
+        [sys.executable, "-c", runner],
+        cwd=ROOT,
+        env=env,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
     )
 
 
-def make_gifs() -> None:
-    _save_gif(_gif_frames("Dashboard Pulse", BLUE), "dashboard_pulse.gif")
-    _save_gif(_gif_frames("Leaderboard Cycle", ACCENT), "leaderboard_cycle.gif")
-    _save_gif(_gif_frames("Risk Alert Flash", RED), "risk_alert_flash.gif")
+def _start_chrome_process(chrome_binary: str, debug_port: int) -> subprocess.Popen[bytes]:
+    chrome_profile = ROOT / ".tmp" / "chrome_profile"
+    chrome_profile.mkdir(parents=True, exist_ok=True)
+    cmd = [
+        chrome_binary,
+        "--headless=new",
+        "--disable-gpu",
+        "--no-first-run",
+        "--no-default-browser-check",
+        f"--remote-debugging-port={debug_port}",
+        "--window-size=1600,1000",
+        f"--user-data-dir={chrome_profile}",
+        "about:blank",
+    ]
+    return subprocess.Popen(cmd, cwd=ROOT, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+
+def _stop_process(proc: subprocess.Popen[bytes] | None) -> None:
+    if proc is None or proc.poll() is not None:
+        return
+    proc.terminate()
+    try:
+        proc.wait(timeout=5)
+    except subprocess.TimeoutExpired:
+        proc.send_signal(signal.SIGKILL)
+        proc.wait(timeout=2)
+
+
+def _fit_image(png_bytes: bytes) -> Image.Image:
+    with Image.open(io.BytesIO(png_bytes)) as img:
+        rgb = img.convert("RGB")
+    return ImageOps.fit(rgb, TARGET_SIZE, method=Image.Resampling.LANCZOS)
+
+
+def _save_png(path: Path, png_bytes: bytes) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fitted = _fit_image(png_bytes)
+    fitted.save(path, format="PNG", optimize=True)
+
+
+def _save_gif(path: Path, frames: list[Image.Image], duration_ms: int = 160) -> None:
+    if not frames:
+        raise ValueError("No GIF frames provided")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    first = frames[0].convert("P", palette=Image.Palette.ADAPTIVE)
+    rest = [frame.convert("P", palette=Image.Palette.ADAPTIVE) for frame in frames[1:]]
+    first.save(path, format="GIF", save_all=True, append_images=rest, duration=duration_ms, loop=0)
+
+
+def _cdp_png(client: CdpClient, *, full_page: bool = False, clip: dict | None = None) -> bytes:
+    params: dict = {"format": "png", "fromSurface": True}
+    if full_page:
+        params["captureBeyondViewport"] = True
+    if clip:
+        params["clip"] = clip
+    result = client.call("Page.captureScreenshot", params)
+    return base64.b64decode(result["data"])
+
+
+def _wait_for_selector(client: CdpClient, selector: str, timeout_seconds: float = 60.0) -> None:
+    selector_json = json.dumps(selector)
+    script = f"Boolean(document.querySelector({selector_json}))"
+    deadline = time.time() + timeout_seconds
+    while time.time() < deadline:
+        if client.eval(script):
+            return
+        time.sleep(0.4)
+    raise TimeoutError(f"Selector not found: {selector}")
+
+
+def _get_bbox(client: CdpClient, selector: str) -> dict[str, float] | None:
+    selector_json = json.dumps(selector)
+    script = (
+        "(() => {"
+        f"  const el = document.querySelector({selector_json});"
+        "  if (!el) return null;"
+        "  const r = el.getBoundingClientRect();"
+        "  return {"
+        "    x: r.left + window.scrollX,"
+        "    y: r.top + window.scrollY,"
+        "    width: Math.max(1, r.width),"
+        "    height: Math.max(1, r.height)"
+        "  };"
+        "})()"
+    )
+    value = client.eval(script)
+    if not value:
+        return None
+    return {
+        "x": float(value["x"]),
+        "y": float(value["y"]),
+        "width": float(value["width"]),
+        "height": float(value["height"]),
+    }
+
+
+def _crop_box(image: Image.Image, bbox: dict[str, float], pad: int = 18) -> Image.Image:
+    x0 = max(0, int(bbox["x"]) - pad)
+    y0 = max(0, int(bbox["y"]) - pad)
+    x1 = min(image.width, int(bbox["x"] + bbox["width"]) + pad)
+    y1 = min(image.height, int(bbox["y"] + bbox["height"]) + pad)
+    if x1 <= x0 or y1 <= y0:
+        return image.copy()
+    return image.crop((x0, y0, x1, y1))
+
+
+def _capture_stills(client: CdpClient) -> None:
+    client.eval("window.scrollTo(0, 0)")
+    time.sleep(1.0)
+
+    full_png = _cdp_png(client, full_page=True)
+    with Image.open(io.BytesIO(full_png)) as full:
+        full_rgb = full.convert("RGB")
+
+    overview_crop = full_rgb.crop((0, 0, min(1600, full_rgb.width), min(1020, full_rgb.height)))
+    ImageOps.fit(overview_crop, TARGET_SIZE, method=Image.Resampling.LANCZOS).save(
+        MEDIA_DIR / "dashboard_overview.png", format="PNG", optimize=True
+    )
+
+    selector_map = {
+        "risk_controls.png": ".summary-row",
+        "performance_snapshot.png": "#equity-chart",
+        "architecture_layers.png": "#price-chart",
+        "canary_progress.png": "#positions-table",
+        "execution_pipeline.png": "#trades-table",
+        "ops_health.png": "#strategy-table",
+        "simulation_leaderboard.png": "#simulation-leaderboard-table",
+    }
+
+    for filename, selector in selector_map.items():
+        bbox = _get_bbox(client, selector)
+        if not bbox:
+            _save_png(MEDIA_DIR / filename, full_png)
+            continue
+        cropped = _crop_box(full_rgb, bbox)
+        fitted = ImageOps.fit(cropped, TARGET_SIZE, method=Image.Resampling.LANCZOS)
+        fitted.save(MEDIA_DIR / filename, format="PNG", optimize=True)
+
+
+def _capture_gif(client: CdpClient, name: str, positions: list[int], duration_ms: int) -> None:
+    frames: list[Image.Image] = []
+    for pos in positions:
+        client.eval(f"window.scrollTo(0, {pos})")
+        time.sleep(0.6)
+        viewport_png = _cdp_png(client)
+        frames.append(_fit_image(viewport_png))
+    _save_gif(MEDIA_DIR / name, frames, duration_ms=duration_ms)
+
+
+def _connect_cdp(debug_port: int, target_url: str) -> CdpClient:
+    base = f"http://127.0.0.1:{debug_port}"
+    for _ in range(80):
+        try:
+            requests.get(f"{base}/json/version", timeout=1.0)
+            break
+        except requests.RequestException:
+            time.sleep(0.25)
+    else:
+        raise RuntimeError("Chrome remote debugging endpoint did not become ready")
+
+    try:
+        response = requests.put(f"{base}/json/new?{target_url}", timeout=3.0)
+        if response.status_code >= 400:
+            response = requests.get(f"{base}/json/new?{target_url}", timeout=3.0)
+    except requests.RequestException as exc:
+        raise RuntimeError(f"Unable to create CDP target: {exc}") from exc
+
+    target = response.json()
+    ws_url = target.get("webSocketDebuggerUrl")
+    if not ws_url:
+        raise RuntimeError("CDP target did not return webSocketDebuggerUrl")
+    return CdpClient(ws_url)
+
+
+def _capture_media(base_url: str, chrome_binary: str, debug_port: int) -> None:
+    chrome_proc = _start_chrome_process(chrome_binary=chrome_binary, debug_port=debug_port)
+    client: CdpClient | None = None
+    try:
+        print("Connecting to Chrome DevTools...")
+        client = _connect_cdp(debug_port=debug_port, target_url=base_url)
+        client.call("Page.enable")
+        client.call("Runtime.enable")
+        client.call(
+            "Emulation.setDeviceMetricsOverride",
+            {
+                "mobile": False,
+                "width": 1600,
+                "height": 1000,
+                "deviceScaleFactor": 1,
+            },
+        )
+        time.sleep(2.0)
+        _wait_for_selector(client, "#equity-chart", timeout_seconds=60.0)
+        _wait_for_selector(client, "#price-chart", timeout_seconds=60.0)
+        _wait_for_selector(client, "#simulation-leaderboard-table", timeout_seconds=60.0)
+        time.sleep(1.5)
+
+        print("Capturing screenshots...")
+        _capture_stills(client)
+
+        print("Capturing GIF previews...")
+        _capture_gif(
+            client,
+            name="dashboard_pulse.gif",
+            positions=[0, 0, 0, 0, 0, 0, 80, 0, 80, 0, 0, 0],
+            duration_ms=180,
+        )
+        _capture_gif(
+            client,
+            name="leaderboard_cycle.gif",
+            positions=[850, 1050, 1250, 1450, 1650, 1450, 1250, 1050, 850],
+            duration_ms=180,
+        )
+        _capture_gif(
+            client,
+            name="risk_alert_flash.gif",
+            positions=[500, 700, 900, 1100, 900, 700, 500, 300],
+            duration_ms=160,
+        )
+    finally:
+        if client:
+            with contextlib.suppress(Exception):
+                client.close()
+        _stop_process(chrome_proc)
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--url", default=DEFAULT_DASHBOARD_URL, help="Dashboard URL to capture.")
+    parser.add_argument("--port", type=int, default=8050, help="Dashboard port when launching locally.")
+    parser.add_argument(
+        "--chrome-binary",
+        default=DEFAULT_CHROME_BINARY,
+        help="Chrome binary path for headless capture.",
+    )
+    parser.add_argument(
+        "--debug-port",
+        type=int,
+        default=9222,
+        help="Chrome remote debugging port.",
+    )
+    parser.add_argument(
+        "--no-launch",
+        action="store_true",
+        help="Assume dashboard is already running and do not launch it.",
+    )
+    return parser.parse_args()
 
 
 def main() -> int:
-    make_dashboard_overview()
-    make_simulation_leaderboard()
-    make_risk_controls()
-    make_canary_progress()
-    make_ops_health()
-    make_execution_pipeline()
-    make_architecture_layers()
-    make_performance_snapshot()
-    make_gifs()
-    print(f"Generated media in {MEDIA_DIR}")
-    return 0
+    args = parse_args()
+    dashboard_proc: subprocess.Popen[bytes] | None = None
+    try:
+        if not args.no_launch:
+            print("Starting dashboard process...")
+            dashboard_proc = _start_dashboard_process(args.port)
+
+        print(f"Waiting for dashboard at {args.url} ...")
+        if not _wait_for_http(args.url):
+            raise RuntimeError(f"Dashboard did not become ready at {args.url}")
+
+        _capture_media(base_url=args.url, chrome_binary=args.chrome_binary, debug_port=args.debug_port)
+        print(f"Generated real dashboard media in {MEDIA_DIR}")
+        return 0
+    finally:
+        _stop_process(dashboard_proc)
 
 
 if __name__ == "__main__":
