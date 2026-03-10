@@ -43,6 +43,20 @@ Generated artifacts:
 - `data/reports/monthly/2026-03/monthly_report_2026-03.pdf`
 - `data/reports/monthly/2026-03/monthly_report_2026-03_equity_curve.svg`
 
+## Benchmark Provenance Standard
+
+Update and maintain the canonical benchmark provenance log:
+
+```bash
+python3 scripts/update_benchmark_provenance_log.py --month 2026-03 --results-dir results --out data/reports/provenance/benchmark_provenance.jsonl
+```
+
+Each provenance row records:
+- `strategy_version` (git SHA used for benchmark publication)
+- `dataset_version` (explicit dataset/version tag or config-derived fallback)
+- `environment_hash` (deterministic hash of runtime+artifact fingerprint)
+- `run_timestamp` (benchmark run timestamp from bundle metadata)
+
 ## Notes
 
 - These are deterministic smoke baselines for reproducibility and regression detection.

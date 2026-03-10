@@ -18,6 +18,7 @@ if SRC.exists():
 if str(ROOT) not in sys.path:
     sys.path[:] = [str(ROOT), *sys.path]
 
+from analytics.benchmark_provenance import update_monthly_benchmark_provenance_log  # noqa: E402
 from analytics.monthly_report_pipeline import generate_monthly_report_artifacts  # noqa: E402
 
 
@@ -31,6 +32,11 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--out-dir", default="data/reports/monthly")
     parser.add_argument("--month", default=_default_month(), help="Target month in YYYY-MM format")
     parser.add_argument("--starting-equity", type=float, default=10_000.0)
+    parser.add_argument("--dataset-version", default=None)
+    parser.add_argument(
+        "--provenance-log-path",
+        default="data/reports/provenance/benchmark_provenance.jsonl",
+    )
     return parser
 
 
@@ -42,6 +48,13 @@ def main() -> int:
         month=str(args.month),
         starting_equity=float(args.starting_equity),
     )
+    provenance_log_path = update_monthly_benchmark_provenance_log(
+        results_dir=str(args.results_dir),
+        month=str(args.month),
+        output_path=str(args.provenance_log_path),
+        repo_root=str(ROOT),
+        dataset_version=args.dataset_version,
+    )
 
     payload = {
         "month": artifacts.report.month,
@@ -51,6 +64,7 @@ def main() -> int:
         "html_path": str(artifacts.html_path),
         "pdf_path": str(artifacts.pdf_path),
         "equity_curve_svg_path": str(artifacts.equity_curve_svg_path),
+        "provenance_log_path": str(provenance_log_path),
     }
     print(json.dumps(payload, sort_keys=True))
     return 0
