@@ -36,3 +36,22 @@ In GitHub repo settings, create environment `pypi` and optionally add:
 pip install pqts==X.Y.Z
 pqts --help
 ```
+
+## 6) First Release Attempt Notes (2026-03-10)
+
+Release pipeline for tag `v0.1.0` succeeded through build + GitHub release, but PyPI publish failed with:
+
+- `invalid-publisher`: valid token, but no corresponding publisher
+
+Observed OIDC claims from the failed run:
+
+- `repository`: `jakerslam/PQTS`
+- `workflow_ref`: `jakerslam/PQTS/.github/workflows/release.yml@refs/tags/v0.1.0`
+- `environment`: `pypi`
+
+Required fix on PyPI side:
+
+1. Ensure trusted publisher is configured for **repository `jakerslam/PQTS`** (exact casing).
+2. Ensure workflow path is `.github/workflows/release.yml`.
+3. Ensure environment is `pypi`.
+4. Re-tag next patch version (`v0.1.1`) after configuration and push the tag.
