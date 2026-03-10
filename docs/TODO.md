@@ -81,7 +81,7 @@ Issue-ready split backlog: [docs/ISSUE_BACKLOG.md](/Users/jay/Document%20(Lcl)/C
 - [x] Add top-k retrieval recall reporting and full-ranked-list persistence for audits.
 - [x] Implement executable program DSL scoring with dual metrics: execution accuracy + symbolic program equivalence.
 - [x] Implement blind/private-test evaluation mode and strict submission schema validation.
-- [ ] Add leakage regression tests for preprocessing functions and prompt-output schema integrity.
+- [x] Add leakage regression tests for preprocessing functions and prompt-output schema integrity.
 
 ## 06. Reliability, Security, and Operability (`P2`)
 
