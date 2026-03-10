@@ -34,6 +34,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Protocol, Tuple
 
+from core.hotpath_runtime import fill_metrics
 from analytics.paper_readiness import PaperTrackRecordEvaluator
 from execution.capacity_curves import StrategyCapacityCurveModel
 from execution.confidence_allocator import ConfidenceWeightedAllocator
@@ -1839,8 +1840,13 @@ class RiskAwareRouter:
             order_book=market_data.get("order_book", {}),
             queue_ahead_qty=float(queue_ahead_qty),
         )
-        requested_qty = float(max(order.quantity, 1e-12))
-        fill_ratio = float(fill.executed_qty) / requested_qty
+        _, fill_ratio = fill_metrics(
+            side=str(order.side),
+            reference_price=float(price),
+            executed_price=float(fill.executed_price),
+            requested_qty=float(order.quantity),
+            executed_qty=float(fill.executed_qty),
+        )
         realized_notional = float(fill.executed_price) * float(fill.executed_qty)
         self.smart_router.record_executed_notional(
             route.exchange,
@@ -1957,16 +1963,13 @@ class RiskAwareRouter:
             except Exception as exc:
                 logger.debug("Paper slippage estimate unavailable for %s: %s", order_id, exc)
 
-        if order.side == "buy":
-            realized_slippage_pct = max(
-                (fill.executed_price - reference_price) / reference_price, 0.0
-            )
-        else:
-            realized_slippage_pct = max(
-                (reference_price - fill.executed_price) / reference_price, 0.0
-            )
-
-        realized_slippage_bps = float(Bps.from_pct(realized_slippage_pct))
+        realized_slippage_bps, _ = fill_metrics(
+            side=str(order.side),
+            reference_price=float(reference_price),
+            executed_price=float(fill.executed_price),
+            requested_qty=float(order.quantity),
+            executed_qty=float(fill.executed_qty),
+        )
         realized_commission_bps = float(Bps.from_pct(self.cost_model.commission))
         realized_total_bps = realized_slippage_bps + realized_commission_bps
 

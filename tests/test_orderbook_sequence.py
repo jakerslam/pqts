@@ -42,3 +42,13 @@ def test_sequence_tracker_keeps_gap_open_without_snapshot_recovery() -> None:
     sync = tracker.apply_snapshot(stream_id="kraken:SOLUSD", snapshot_sequence=20)
     assert sync.mode == "snapshot_sync"
     assert tracker.expected_next("kraken:SOLUSD") == 21
+
+
+def test_sequence_tracker_stale_drop_does_not_close_existing_gap() -> None:
+    tracker = OrderBookSequenceTracker(allow_auto_recover=False)
+    _ = tracker.process_update(stream_id="okx:BTCUSDT", sequence=100)
+    _ = tracker.process_update(stream_id="okx:BTCUSDT", sequence=103)
+    stale = tracker.process_update(stream_id="okx:BTCUSDT", sequence=99)
+
+    assert stale.mode == "stale_drop"
+    assert tracker.has_open_gap("okx:BTCUSDT") is True

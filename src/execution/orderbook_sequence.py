@@ -6,6 +6,8 @@ from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from typing import Any
 
+from core.hotpath_runtime import sequence_transition
+
 
 def _utc_now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
@@ -65,71 +67,27 @@ class OrderBookSequenceTracker:
     ) -> SequenceEvent:
         key = str(stream_id)
         seq = int(sequence)
-        expected = self._expected_next.get(key)
         info = dict(metadata or {})
+        mode, event_expected, gap_size, recovered, snap_seq, next_expected = sequence_transition(
+            expected_sequence=self._expected_next.get(key),
+            received_sequence=seq,
+            allow_auto_recover=self.allow_auto_recover,
+            snapshot_sequence=snapshot_sequence,
+        )
 
-        if expected is None:
-            self._expected_next[key] = seq + 1
+        if mode in {"seed", "in_order", "gap_recovered_snapshot"}:
+            self._expected_next[key] = int(next_expected)
             self._gap_open[key] = False
-            return SequenceEvent(
-                stream_id=key,
-                expected_sequence=seq + 1,
-                received_sequence=seq,
-                mode="seed",
-                gap_size=0,
-                recovered=False,
-                snapshot_sequence=None,
-                timestamp=_utc_now_iso(),
-                metadata=info,
-            )
-
-        if seq < expected:
-            return SequenceEvent(
-                stream_id=key,
-                expected_sequence=expected,
-                received_sequence=seq,
-                mode="stale_drop",
-                gap_size=0,
-                recovered=False,
-                snapshot_sequence=None,
-                timestamp=_utc_now_iso(),
-                metadata=info,
-            )
-
-        if seq == expected:
-            self._expected_next[key] = seq + 1
-            self._gap_open[key] = False
-            return SequenceEvent(
-                stream_id=key,
-                expected_sequence=expected,
-                received_sequence=seq,
-                mode="in_order",
-                gap_size=0,
-                recovered=False,
-                snapshot_sequence=None,
-                timestamp=_utc_now_iso(),
-                metadata=info,
-            )
-
-        gap_size = seq - expected
-        self._gap_open[key] = True
-        recovered = False
-        mode = "gap_detected"
-        snap_seq: int | None = None
-        if self.allow_auto_recover and snapshot_sequence is not None:
-            snap_seq = int(snapshot_sequence)
-            self._expected_next[key] = snap_seq + 1
-            self._gap_open[key] = False
-            recovered = True
-            mode = "gap_recovered_snapshot"
+        elif mode == "gap_detected":
+            self._gap_open[key] = True
 
         return SequenceEvent(
             stream_id=key,
-            expected_sequence=expected,
+            expected_sequence=int(event_expected),
             received_sequence=seq,
             mode=mode,
-            gap_size=gap_size,
-            recovered=recovered,
+            gap_size=int(gap_size),
+            recovered=bool(recovered),
             snapshot_sequence=snap_seq,
             timestamp=_utc_now_iso(),
             metadata=info,

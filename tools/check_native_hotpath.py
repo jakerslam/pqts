@@ -54,6 +54,10 @@ def main() -> int:
     required_snippets = [
         "fn sum_notional(",
         "wrap_pyfunction!(sum_notional, m)",
+        "fn fill_metrics(",
+        "wrap_pyfunction!(fill_metrics, m)",
+        "fn sequence_transition(",
+        "wrap_pyfunction!(sequence_transition, m)",
         "fn version()",
         "wrap_pyfunction!(version, m)",
     ]
@@ -63,16 +67,21 @@ def main() -> int:
 
     print(
         json.dumps(
-            {
-                "validated": True,
-                "rows": len(actual_rows),
-                "module": args.module,
-                "policy": str(policy_path),
-                "required_symbols": ["sum_notional", "version"],
-            },
-            sort_keys=True,
+                {
+                    "validated": True,
+                    "rows": len(actual_rows),
+                    "module": args.module,
+                    "policy": str(policy_path),
+                    "required_symbols": [
+                        "sum_notional",
+                        "fill_metrics",
+                        "sequence_transition",
+                        "version",
+                    ],
+                },
+                sort_keys=True,
+            )
         )
-    )
     return 0
 
 

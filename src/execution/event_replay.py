@@ -7,6 +7,7 @@ from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
+from core.hotpath_runtime import fill_metrics
 from execution.paper_fill_model import MicrostructurePaperFillProvider, PaperFillModelConfig
 
 
@@ -59,20 +60,13 @@ class EventReplaySimulator:
                 order_book=dict(event.order_book or {}),
                 queue_ahead_qty=float(event.queue_ahead_qty),
             )
-            if str(event.side).lower() == "buy":
-                slip_pct = max(
-                    (float(fill.executed_price) - float(event.reference_price))
-                    / max(float(event.reference_price), 1e-12),
-                    0.0,
-                )
-            else:
-                slip_pct = max(
-                    (float(event.reference_price) - float(fill.executed_price))
-                    / max(float(event.reference_price), 1e-12),
-                    0.0,
-                )
-            slippage_bps = float(slip_pct * 10000.0)
-            fill_ratio = float(fill.executed_qty) / max(float(event.requested_qty), 1e-12)
+            slippage_bps, fill_ratio = fill_metrics(
+                side=str(event.side),
+                reference_price=float(event.reference_price),
+                executed_price=float(fill.executed_price),
+                requested_qty=float(event.requested_qty),
+                executed_qty=float(fill.executed_qty),
+            )
             fills.append(
                 ReplayFill(
                     order_id=str(event.order_id),

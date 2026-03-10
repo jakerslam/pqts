@@ -13,8 +13,14 @@ Keep PQTS Python-first while moving compute-critical kernels to Rust when JIT-fi
 - Exported functions:
   - `version()`
   - `sum_notional(levels, max_levels)`
+  - `fill_metrics(side, reference_price, executed_price, requested_qty, executed_qty)`
+  - `sequence_transition(expected_sequence, received_sequence, allow_auto_recover, snapshot_sequence)`
 
-`sum_notional` is integrated into `src/execution/microstructure_features.py` via `src/core/hotpath_runtime.py`.
+Integrated call sites via `src/core/hotpath_runtime.py`:
+
+- `sum_notional` -> `src/execution/microstructure_features.py`
+- `sequence_transition` -> `src/execution/orderbook_sequence.py`
+- `fill_metrics` -> `src/execution/event_replay.py` and `src/execution/risk_aware_router.py`
 
 ## Runtime Behavior
 
@@ -35,7 +41,7 @@ maturin develop --manifest-path native/hotpath/Cargo.toml
 ## Verification
 
 - Contract check: `python3 tools/check_native_hotpath.py`
-- Runtime check: `pytest -q tests/test_hotpath_runtime.py tests/test_microstructure_features.py`
+- Runtime check: `pytest -q tests/test_hotpath_runtime.py tests/test_microstructure_features.py tests/test_orderbook_sequence.py tests/test_event_replay.py`
 
 ## Release Matrix
 
