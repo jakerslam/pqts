@@ -7,6 +7,29 @@ Semantic Versioning.
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-03-10
+
+### Added
+- Full SRS assimilation closure registry and validation layer:
+  - `config/srs/assimilation_registry.json`
+  - `src/srs/assimilation_registry.py`
+  - `tools/generate_srs_assimilation_registry.py`
+  - `tests/test_srs_assimilation_registry.py`
+- Full-gap closure tooling and TODO synchronization:
+  - `tools/close_srs_gaps_in_todo.py`
+  - `docs/SRS_ASSIMILATION.md`
+- Web operator surface extensions:
+  - Strategy Lab, Benchmarks, Alerts, and Settings dashboard routes
+  - Trust/status shell components and stream status indicators
+  - Command palette and guided/pro density shell controls
+- Short-cycle RCG strategy primitives and contract tests:
+  - `src/strategies/short_cycle_rcg.py`
+  - `tests/test_short_cycle_rcg.py`
+
+### Changed
+- Closed remaining SRS backlog mapping to 497/497 implemented in the generated coverage matrix.
+- Resolved web lint/type strictness issues in ops execution/provenance helpers.
+
 ## [0.1.1] - 2026-03-10
 
 ### Added
