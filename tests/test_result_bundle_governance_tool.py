@@ -20,16 +20,18 @@ def _write_bundle(
     submitted: int,
     reject_rate: float,
     dataset_version: str,
+    write_leaderboard: bool = True,
 ) -> Path:
     bundle = root / name
     bundle.mkdir(parents=True, exist_ok=True)
     (bundle / "README.md").write_text("# Bundle\n\n## Command\n```bash\nrun\n```\n", encoding="utf-8")
     (bundle / "config_paper_snapshot.yaml").write_text("mode: paper_trading\n", encoding="utf-8")
-    (bundle / "simulation_leaderboard_20260310T000000000000Z.csv").write_text(
-        "market,strategy,runs,avg_quality_score,avg_fill_rate,avg_reject_rate\n"
-        f"{market},{strategy},1,{quality},{(filled / max(1, submitted))},{reject_rate}\n",
-        encoding="utf-8",
-    )
+    if write_leaderboard:
+        (bundle / "simulation_leaderboard_20260310T000000000000Z.csv").write_text(
+            "market,strategy,runs,avg_quality_score,avg_fill_rate,avg_reject_rate\n"
+            f"{market},{strategy},1,{quality},{(filled / max(1, submitted))},{reject_rate}\n",
+            encoding="utf-8",
+        )
     suite_payload = {
         "created_at": "2026-03-10T00:00:00+00:00",
         "results": [
@@ -138,3 +140,29 @@ def test_validate_and_build_reference_artifacts_missing_manifest(tmp_path: Path)
         min_reference_packs=1,
     )
     assert any("missing required artifact 'dataset_manifest'" in item for item in errors)
+
+
+def test_validate_and_build_reference_artifacts_without_leaderboard_csv(tmp_path: Path) -> None:
+    results = tmp_path / "results"
+    results.mkdir()
+    _write_bundle(
+        results,
+        name="2026-03-10_pack_no_csv",
+        market="crypto",
+        strategy="market_making",
+        quality=0.11,
+        filled=8,
+        submitted=10,
+        reject_rate=0.20,
+        dataset_version="dataset-2026-03-v1",
+        write_leaderboard=False,
+    )
+
+    errors, index_rows, diffs = validate_and_build_reference_artifacts(
+        results_dir=results,
+        min_reference_packs=1,
+    )
+
+    assert errors == []
+    assert len(index_rows) == 1
+    assert diffs == []

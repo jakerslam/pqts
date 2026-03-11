@@ -29,7 +29,6 @@ def _required_bundle_paths(bundle: Path) -> dict[str, Path | None]:
         "config_snapshot": bundle / "config_paper_snapshot.yaml",
         "dataset_manifest": bundle / "dataset_manifest.json",
         "suite": _latest(list(bundle.glob("simulation_suite_*.json"))),
-        "leaderboard": _latest(list(bundle.glob("simulation_leaderboard_*.csv"))),
     }
 
 
