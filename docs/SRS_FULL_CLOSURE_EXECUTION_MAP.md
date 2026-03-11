@@ -9,6 +9,12 @@ contracts for every remaining SRS family-assimilation block.
 2. Validate full-family closure with `tools/check_full_srs_closure.py`.
 3. Run `make dod-audit` to refresh coverage and DoD status.
 
+## AEG Family
+
+- Refs: `AEG-1, AEG-2, AEG-3, AEG-4, AEG-5, AEG-6`
+- Baseline hook: `srs_baseline.aeg`
+- Contract: fail-closed, provenance-required, evidence-logged
+
 ## AHF Family
 
 - Refs: `AHF-1, AHF-2, AHF-3, AHF-4, AHF-6, AHF-7, AHF-8, AHF-9, AHF-10, AHF-11, AHF-12`

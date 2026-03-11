@@ -2,6 +2,26 @@
   "version": "2026-03-11",
   "scope": "Full SRS family closure defaults",
   "families": {
+    "AEG": {
+      "refs": [
+        "AEG-1",
+        "AEG-2",
+        "AEG-3",
+        "AEG-4",
+        "AEG-5",
+        "AEG-6"
+      ],
+      "controls": {
+        "policy_hook": "srs_baseline.aeg",
+        "fail_closed": true,
+        "provenance_required": true
+      },
+      "acceptance_evidence": [
+        "baseline contract configuration entry",
+        "execution map linkage",
+        "closure checker pass"
+      ]
+    },
     "AHF": {
       "refs": [
         "AHF-1",

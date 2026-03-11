@@ -4563,3 +4563,51 @@ Observed source links:
 - Version, release, package, and API runtime identifiers shall remain synchronized across `pyproject`, tags/releases, package index, and API service metadata.
 - Release gates shall validate distribution truth consistency before publish steps execute.
 - Any truth-layer contradiction (version mismatch, stale release pointers, invalid install/doc claims) shall block promotion until resolved.
+
+## 78. Additional Delta Requirements from External Post Chain (AlterEgo weather-bot v2, March 11, 2026)
+
+These requirements capture net-new, applicable deltas from the referenced post chain without duplicating existing weather/EV/Kelly baseline contracts already present in AX/PL/QF families.
+
+Observed source links:
+- `https://x.com/AlterEgo_eth/status/2031719370431615010?s=20`
+- `https://x.com/i/article/2030169969804333057` (quoted-link target, login-gated)
+
+### AEG-1 In-Position Forecast Drift Exit Contract
+
+- Weather-market strategies shall continuously monitor forecast updates for open positions and compute post-entry forecast drift against the entry snapshot.
+- Material adverse drift beyond configured thresholds shall trigger deterministic protective actions (`reduce`, `close`, or `halt`) with explicit reason codes.
+- Drift-triggered exits shall be replayable with archived entry forecast, updated forecast, and computed drift metrics.
+
+### AEG-2 Minute-Cadence Monitoring Contract
+
+- Weather strategy runtime shall support a configurable high-frequency monitoring cadence (default 60 seconds) while positions are open.
+- Missed monitor cycles, stale forecast payloads, or update-fetch failures shall fail closed to safe-position actions and incident logging.
+- Monitoring cadence, skipped cycles, and stale-duration metrics shall be exposed in execution/risk telemetry.
+
+### AEG-3 City-Month-Bucket Self-Calibration Contract
+
+- Calibration subsystem shall maintain residual/error surfaces keyed by at least city, calendar month, and market bucket.
+- Strategy probability outputs shall apply these residual adjustments when sufficient local sample support exists and confidence criteria are met.
+- Calibration adjustments shall be versioned and rollback-capable; low-sample segments shall fall back to global calibration policies.
+
+### AEG-4 Trade-Outcome Feedback Dataset Contract
+
+- For each weather trade, system shall persist calibration feedback fields including:
+  - city/market location key,
+  - month/season key,
+  - bucket/contract key,
+  - forecast probability at entry,
+  - realized outcome.
+- Feedback records shall be appended in an immutable, provenance-tagged dataset suitable for deterministic recalibration replay.
+- Missing feedback fields shall block inclusion of that trade in calibration update passes.
+
+### AEG-5 Calibrated-Probability EV Gate Contract
+
+- EV-gate decisions shall require calibrated probability inputs with explicit provenance (source(s), calibration version, timestamp).
+- If calibrated probability provenance is missing or stale, order candidates shall be blocked rather than evaluated on uncalibrated estimates.
+- Decision artifacts shall include both raw and calibrated probability values used by EV/Kelly stages.
+
+### AEG-6 Source Reliability and Claim Handling
+
+- Public claims about rapid intraday bankroll growth from weather bots shall be marked `unverified` unless backed by reproducible, trade-level artifacts with bounded evaluation windows.
+- Requirements adopted from this source chain shall remain limited to observable mechanics and validated inferred controls.
