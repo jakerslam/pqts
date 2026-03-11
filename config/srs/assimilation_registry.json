@@ -1,9 +1,13 @@
 {
-  "generated_at": "2026-03-11T21:57:53.967439+00:00",
+  "generated_at": "2026-03-11T23:01:53.493711+00:00",
   "prefix_summary": {
     "AC": {
       "baseline_contract": 0,
       "core_delivery": 3
+    },
+    "AEG": {
+      "baseline_contract": 6,
+      "core_delivery": 0
     },
     "AHF": {
       "baseline_contract": 0,
@@ -5418,13 +5422,61 @@
       "prefix": "CGPT",
       "source_status": "implemented",
       "title": "Distribution Truth and Version Cohesion Contract"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.aeg",
+      "id": "AEG-1",
+      "prefix": "AEG",
+      "source_status": "unmapped",
+      "title": "In-Position Forecast Drift Exit Contract"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.aeg",
+      "id": "AEG-2",
+      "prefix": "AEG",
+      "source_status": "unmapped",
+      "title": "Minute-Cadence Monitoring Contract"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.aeg",
+      "id": "AEG-3",
+      "prefix": "AEG",
+      "source_status": "unmapped",
+      "title": "City-Month-Bucket Self-Calibration Contract"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.aeg",
+      "id": "AEG-4",
+      "prefix": "AEG",
+      "source_status": "unmapped",
+      "title": "Trade-Outcome Feedback Dataset Contract"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.aeg",
+      "id": "AEG-5",
+      "prefix": "AEG",
+      "source_status": "unmapped",
+      "title": "Calibrated-Probability EV Gate Contract"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.aeg",
+      "id": "AEG-6",
+      "prefix": "AEG",
+      "source_status": "unmapped",
+      "title": "Source Reliability and Claim Handling"
     }
   ],
   "summary": {
     "tier_counts": {
-      "baseline_contract": 85,
+      "baseline_contract": 91,
       "core_delivery": 555
     },
-    "total_requirements": 640
+    "total_requirements": 646
   }
 }

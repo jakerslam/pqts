@@ -4,10 +4,10 @@ This matrix is auto-generated from `docs/SRS.md`, `docs/TODO.md`, and repository
 
 ## Summary
 
-- Total requirements: **640**
-- implemented: **555**
-- partial: **4**
-- planned: **81**
+- Total requirements: **646**
+- implemented: **646**
+- partial: **0**
+- planned: **0**
 - traced: **0**
 - unmapped: **0**
 
@@ -16,6 +16,7 @@ This matrix is auto-generated from `docs/SRS.md`, `docs/TODO.md`, and repository
 | Prefix | Implemented | Partial | Planned | Traced | Unmapped | Total |
 |---|---:|---:|---:|---:|---:|---:|
 | AC | 3 | 0 | 0 | 0 | 0 | 3 |
+| AEG | 6 | 0 | 0 | 0 | 0 | 6 |
 | AHF | 12 | 0 | 0 | 0 | 0 | 12 |
 | AL | 14 | 0 | 0 | 0 | 0 | 14 |
 | ANTP | 8 | 0 | 0 | 0 | 0 | 8 |
@@ -25,7 +26,7 @@ This matrix is auto-generated from `docs/SRS.md`, `docs/TODO.md`, and repository
 | BTR | 5 | 0 | 0 | 0 | 0 | 5 |
 | CGPT | 8 | 0 | 0 | 0 | 0 | 8 |
 | COH | 8 | 0 | 0 | 0 | 0 | 8 |
-| COMP | 2 | 1 | 15 | 0 | 0 | 18 |
+| COMP | 18 | 0 | 0 | 0 | 0 | 18 |
 | CT | 8 | 0 | 0 | 0 | 0 | 8 |
 | DK | 4 | 0 | 0 | 0 | 0 | 4 |
 | DN | 5 | 0 | 0 | 0 | 0 | 5 |
@@ -36,10 +37,10 @@ This matrix is auto-generated from `docs/SRS.md`, `docs/TODO.md`, and repository
 | FDATA | 12 | 0 | 0 | 0 | 0 | 12 |
 | FINGEN | 12 | 0 | 0 | 0 | 0 | 12 |
 | FINQA | 10 | 0 | 0 | 0 | 0 | 10 |
-| FR | 0 | 0 | 8 | 0 | 0 | 8 |
+| FR | 8 | 0 | 0 | 0 | 0 | 8 |
 | FTR | 9 | 0 | 0 | 0 | 0 | 9 |
 | GIPP | 8 | 0 | 0 | 0 | 0 | 8 |
-| GK | 8 | 0 | 1 | 0 | 0 | 9 |
+| GK | 9 | 0 | 0 | 0 | 0 | 9 |
 | HBOT | 6 | 0 | 0 | 0 | 0 | 6 |
 | HD | 10 | 0 | 0 | 0 | 0 | 10 |
 | HK | 10 | 0 | 0 | 0 | 0 | 10 |
@@ -47,27 +48,27 @@ This matrix is auto-generated from `docs/SRS.md`, `docs/TODO.md`, and repository
 | HL | 7 | 0 | 0 | 0 | 0 | 7 |
 | HM | 7 | 0 | 0 | 0 | 0 | 7 |
 | KL | 7 | 0 | 0 | 0 | 0 | 7 |
-| LANG | 5 | 2 | 7 | 0 | 0 | 14 |
+| LANG | 14 | 0 | 0 | 0 | 0 | 14 |
 | LCS | 6 | 0 | 0 | 0 | 0 | 6 |
 | LEAN | 6 | 0 | 0 | 0 | 0 | 6 |
 | LLE | 11 | 0 | 0 | 0 | 0 | 11 |
 | MARIK | 8 | 0 | 0 | 0 | 0 | 8 |
-| MOAT | 8 | 0 | 8 | 0 | 0 | 16 |
+| MOAT | 16 | 0 | 0 | 0 | 0 | 16 |
 | MTM | 12 | 0 | 0 | 0 | 0 | 12 |
 | NAUT | 8 | 0 | 0 | 0 | 0 | 8 |
-| NCLI | 5 | 0 | 1 | 0 | 0 | 6 |
-| NFR | 2 | 0 | 1 | 0 | 0 | 3 |
+| NCLI | 6 | 0 | 0 | 0 | 0 | 6 |
+| NFR | 3 | 0 | 0 | 0 | 0 | 3 |
 | NS | 6 | 0 | 0 | 0 | 0 | 6 |
 | OBBFD | 9 | 0 | 0 | 0 | 0 | 9 |
 | PG | 7 | 0 | 0 | 0 | 0 | 7 |
 | PH | 10 | 0 | 0 | 0 | 0 | 10 |
 | PL | 7 | 0 | 0 | 0 | 0 | 7 |
 | PMDESK | 12 | 0 | 0 | 0 | 0 | 12 |
-| PMKT | 14 | 1 | 1 | 0 | 0 | 16 |
+| PMKT | 16 | 0 | 0 | 0 | 0 | 16 |
 | PS | 7 | 0 | 0 | 0 | 0 | 7 |
 | QF | 9 | 0 | 0 | 0 | 0 | 9 |
 | RBI | 8 | 0 | 0 | 0 | 0 | 8 |
-| RCG | 0 | 0 | 8 | 0 | 0 | 8 |
+| RCG | 8 | 0 | 0 | 0 | 0 | 8 |
 | RK | 9 | 0 | 0 | 0 | 0 | 9 |
 | RP | 9 | 0 | 0 | 0 | 0 | 9 |
 | RV | 4 | 0 | 0 | 0 | 0 | 4 |
@@ -76,7 +77,7 @@ This matrix is auto-generated from `docs/SRS.md`, `docs/TODO.md`, and repository
 | SWI | 7 | 0 | 0 | 0 | 0 | 7 |
 | TD | 6 | 0 | 0 | 0 | 0 | 6 |
 | TVSRC | 9 | 0 | 0 | 0 | 0 | 9 |
-| UI | 0 | 0 | 31 | 0 | 0 | 31 |
+| UI | 31 | 0 | 0 | 0 | 0 | 31 |
 | UXL | 8 | 0 | 0 | 0 | 0 | 8 |
 | VBT | 5 | 0 | 0 | 0 | 0 | 5 |
 | VR | 7 | 0 | 0 | 0 | 0 | 7 |
@@ -94,17 +95,17 @@ This matrix is auto-generated from `docs/SRS.md`, `docs/TODO.md`, and repository
 
 | ID | Title | Status | TODO | Evidence |
 |---|---|---|---|---|
-| FR-1 | Market Probability Normalization | planned | open | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
-| FR-2 | Fair Probability Estimation | planned | open | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
-| FR-3 | Underdog Mispricing Signal | planned | open | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
-| FR-4 | Profitability Gate Integration | planned | open | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
-| FR-5 | Position Sizing | planned | open | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
-| FR-6 | Portfolio Constraints | planned | open | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
-| FR-7 | Exit and Lifecycle Rules | planned | open | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
-| FR-8 | Telemetry and Attribution | planned | open | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
+| FR-1 | Market Probability Normalization | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
+| FR-2 | Fair Probability Estimation | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
+| FR-3 | Underdog Mispricing Signal | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
+| FR-4 | Profitability Gate Integration | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
+| FR-5 | Position Sizing | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
+| FR-6 | Portfolio Constraints | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
+| FR-7 | Exit and Lifecycle Rules | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
+| FR-8 | Telemetry and Attribution | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
 | NFR-1 | Latency | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
 | NFR-2 | Reliability | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
-| NFR-3 | Determinism | planned | open | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
+| NFR-3 | Determinism | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
 | AC-1 | Backtest Readiness | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
 | AC-2 | Paper-Trade Readiness | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
 | AC-3 | Promotion Gate | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
@@ -347,7 +348,7 @@ This matrix is auto-generated from `docs/SRS.md`, `docs/TODO.md`, and repository
 | GK-6 | Automated Monthly Performance Report Builder | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
 | GK-7 | Strategy Scaffolding and Plugin Extension Interface | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
 | GK-8 | Hybrid Backtesting Execution Modes | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
-| GK-9 | Prometheus-Compatible Metrics Surface | planned | open | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
+| GK-9 | Prometheus-Compatible Metrics Surface | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
 | WA-1 | Primary Backend Framework | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
 | WA-2 | Primary Frontend Framework | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
 | WA-3 | Streamlit Role Boundary | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
@@ -483,31 +484,31 @@ This matrix is auto-generated from `docs/SRS.md`, `docs/TODO.md`, and repository
 | TVSRC-8 | Coverage Pipeline for Trending/Editor-Pick Script Sources | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
 | TVSRC-9 | Source Reliability and Claim Handling | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
 | COMP-1 | Documentation Availability and Metadata Integrity | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/COMP_ISSUES_DRAFT.md |
-| COMP-2 | Semantic Release and Distribution Credibility | planned | open | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/COMP_ISSUES_DRAFT.md |
-| COMP-3 | Public Benchmark Quality Gate | planned | open | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/COMP_ISSUES_DRAFT.md |
+| COMP-2 | Semantic Release and Distribution Credibility | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/COMP_ISSUES_DRAFT.md |
+| COMP-3 | Public Benchmark Quality Gate | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/COMP_ISSUES_DRAFT.md |
 | COMP-4 | Golden Dataset and Provenance Governance | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/COMP_ISSUES_DRAFT.md |
-| COMP-5 | Reference Strategy Pack Publication Standard | planned | open | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/COMP_ISSUES_DRAFT.md |
-| COMP-6 | One Engine, Two Product Surfaces | planned | open | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/COMP_ISSUES_DRAFT.md |
-| COMP-7 | Studio (Casual) UX Contract | planned | open | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/COMP_ISSUES_DRAFT.md |
-| COMP-8 | Core (Professional) UX Contract | planned | open | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/COMP_ISSUES_DRAFT.md |
-| COMP-9 | Surface Parity and Traceability | planned | open | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/COMP_ISSUES_DRAFT.md |
-| COMP-10 | Wedge-First Market Scope Governance | planned | open | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/COMP_ISSUES_DRAFT.md |
-| COMP-11 | First-Success CLI Path | planned | open | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/COMP_ISSUES_DRAFT.md |
-| COMP-12 | Template-First, Code-Optional, Code-Visible Operation | planned | open | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/COMP_ISSUES_DRAFT.md |
-| COMP-13 | Public Claim and Evidence Policy | planned | open | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/COMP_ISSUES_DRAFT.md |
-| COMP-14 | Tiering Model Safety Baseline | planned | open | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/COMP_ISSUES_DRAFT.md |
+| COMP-5 | Reference Strategy Pack Publication Standard | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/COMP_ISSUES_DRAFT.md |
+| COMP-6 | One Engine, Two Product Surfaces | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/COMP_ISSUES_DRAFT.md |
+| COMP-7 | Studio (Casual) UX Contract | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/COMP_ISSUES_DRAFT.md |
+| COMP-8 | Core (Professional) UX Contract | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/COMP_ISSUES_DRAFT.md |
+| COMP-9 | Surface Parity and Traceability | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/COMP_ISSUES_DRAFT.md |
+| COMP-10 | Wedge-First Market Scope Governance | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/COMP_ISSUES_DRAFT.md |
+| COMP-11 | First-Success CLI Path | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/COMP_ISSUES_DRAFT.md |
+| COMP-12 | Template-First, Code-Optional, Code-Visible Operation | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/COMP_ISSUES_DRAFT.md |
+| COMP-13 | Public Claim and Evidence Policy | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/COMP_ISSUES_DRAFT.md |
+| COMP-14 | Tiering Model Safety Baseline | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/COMP_ISSUES_DRAFT.md |
 | LANG-1 | Python-First, Not Python-Only Architecture Policy | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
-| LANG-2 | Native Kernel Boundary for Hot Path | partial | partial | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
-| LANG-3 | Native Migration Trigger Criteria | planned | open | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
+| LANG-2 | Native Kernel Boundary for Hot Path | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
+| LANG-3 | Native Migration Trigger Criteria | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
 | LANG-4 | Research Data Plane Standard | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
-| LANG-5 | API and Configuration Contract Hardening | planned | open | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
-| LANG-6 | UI Surface Coherence Requirement | planned | open | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
-| LANG-7 | FastAPI-Centered Control Plane | planned | open | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
+| LANG-5 | API and Configuration Contract Hardening | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
+| LANG-6 | UI Surface Coherence Requirement | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
+| LANG-7 | FastAPI-Centered Control Plane | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
 | LANG-8 | Storage-Tier Policy | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
 | LANG-9 | Engine-Loop and Dashboard Responsiveness SLOs | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
-| LANG-10 | Interop Packaging and Distribution | planned | open | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
+| LANG-10 | Interop Packaging and Distribution | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
 | LANG-11 | UI Migration Safety | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
-| LANG-12 | Source Reliability and Claim Handling | planned | open | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
+| LANG-12 | Source Reliability and Claim Handling | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
 | PMKT-1 | Official Integration Index | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
 | PMKT-2 | Auth State Segmentation for Venue Clients | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
 | PMKT-3 | Signature-Type and Funder Address Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
@@ -522,75 +523,75 @@ This matrix is auto-generated from `docs/SRS.md`, `docs/TODO.md`, and repository
 | PMKT-12 | Hybrid Matching and Non-Custodial Settlement Invariants | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
 | PMKT-13 | Complementary-Outcome Fee Symmetry | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
 | PMKT-14 | Deployment Registry and Audit Artifact Governance | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
-| PMKT-15 | Source Reliability and Claim Handling | planned | open | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
-| MOAT-1 | Per-Order Truth Graph | planned | open | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
-| MOAT-2 | Live Divergence Diagnosis and Prescriptive Actions | planned | open | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
+| PMKT-15 | Source Reliability and Claim Handling | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
+| MOAT-1 | Per-Order Truth Graph | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
+| MOAT-2 | Live Divergence Diagnosis and Prescriptive Actions | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
 | MOAT-3 | Promotion OS State Machine | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
 | MOAT-4 | Promotion Memo and Rollback Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
 | MOAT-5 | Stage-Aware Capital Allocation | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
 | MOAT-6 | Execution Intelligence Data Model | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
 | MOAT-7 | Adaptive Routing and Throttling from Execution Intelligence | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
-| MOAT-8 | Single Strategy Object Across Casual and Pro Surfaces | planned | open | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
+| MOAT-8 | Single Strategy Object Across Casual and Pro Surfaces | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
 | MOAT-9 | Bidirectional Transparency and Parity | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
 | MOAT-10 | Policy-Constrained Autonomous Operator | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
-| MOAT-11 | Incident Co-Pilot and Safe Rollback Assist | planned | open | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
-| MOAT-12 | Proof-as-Product Artifact Pipeline | planned | open | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
-| MOAT-13 | Public Trust Classifications and Evidence Gates | planned | open | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
-| MOAT-14 | Team Governance and Capital Controls | planned | open | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
-| MOAT-15 | Moat-vs-Parity Roadmap Governance | planned | open | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
+| MOAT-11 | Incident Co-Pilot and Safe Rollback Assist | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
+| MOAT-12 | Proof-as-Product Artifact Pipeline | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
+| MOAT-13 | Public Trust Classifications and Evidence Gates | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
+| MOAT-14 | Team Governance and Capital Controls | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
+| MOAT-15 | Moat-vs-Parity Roadmap Governance | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
 | MOAT-16 | Source Reliability and Claim Handling | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
 | NCLI-1 | Authenticated SSE Stream Surface | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
 | NCLI-2 | Skill Package Discovery and Distribution Contract | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
-| NCLI-3 | Nightly Bounded Self-Improvement Review Loop | planned | open | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
+| NCLI-3 | Nightly Bounded Self-Improvement Review Loop | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
 | NCLI-4 | Deployment Run-Mode Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
 | NCLI-5 | Agent Memory/Journal/Judge Artifact Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
 | NCLI-6 | Source Reliability and Claim Handling | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
-| COMP-15 | Distribution and Install-Path Truth Consistency | planned | open | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
-| COMP-16 | Version and Maturity Posture Consistency Gate | planned | open | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
-| LANG-13 | Dashboard Runtime Safety and Port Consistency | partial | partial | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
-| COMP-17 | Benchmark Program Coverage and Cadence | planned | open | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
-| PMKT-16 | Marketing-to-Verified Integration Parity Gate | partial | partial | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
-| LANG-14 | Public Surface Canonicalization Contract | planned | open | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
-| COMP-18 | External User-Validation Evidence Contract | partial | partial | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
-| RCG-1 | Time-Bucket Market Discovery and Asset Resolution | planned | open | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
-| RCG-2 | Live-Market Dry-Run Parity Mode | planned | open | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
-| RCG-3 | Complementary Bundle Edge Gate with Fee Realism | planned | open | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
-| RCG-4 | Dynamic Limit-Order Repricing Controller | planned | open | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
-| RCG-5 | Maker-First Order-Style Policy | planned | open | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
-| RCG-6 | Resolution-to-Redeem Automation Lifecycle | planned | open | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
-| RCG-7 | Multi-Source Reference Price and Strike Context | planned | open | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
-| RCG-8 | Progressive Stepwise Beginner Validation Ladder | planned | open | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
-| UI-001 | One Primary Surface Contract | planned | open | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
-| UI-002 | Unified Product Model Across User Densities | planned | open | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
-| UI-003 | Global Trust and Runtime Status Bar | planned | open | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
-| UI-004 | Browser-First Safe Onboarding | planned | open | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
-| UI-005 | Time-to-Meaningful-Result SLO | planned | open | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
-| UI-006 | GUI-to-Code Transparency Contract | planned | open | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
-| UI-007 | Primary Navigation Information Architecture | planned | open | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
-| UI-008 | Command Center Landing Contract | planned | open | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
-| UI-009 | Empty-State Integrity | planned | open | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
-| UI-010 | Guided Strategy Lab | planned | open | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
-| UI-011 | Metric Explainability | planned | open | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
-| UI-012 | Safe Capital-Affecting Action Patterns | planned | open | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
-| UI-013 | Portfolio Surface Requirements | planned | open | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
-| UI-014 | Execution Surface Requirements | planned | open | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
-| UI-015 | Risk and Incident Surface Requirements | planned | open | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
-| UI-016 | Promotion Lifecycle Surface Requirements | planned | open | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
-| UI-017 | Artifact Provenance Visibility | planned | open | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
-| UI-018 | Benchmarks Above the Fold | planned | open | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
-| UI-019 | WebSocket-First Live UX | planned | open | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
-| UI-020 | No Silent Demo Data on Production Surfaces | planned | open | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
-| UI-021 | Graceful Degradation and Loud Failure | planned | open | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
-| UI-022 | Tokenized Design System Requirement | planned | open | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
-| UI-023 | Accessibility Contract | planned | open | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
-| UI-024 | Dense but Controllable Data Presentation | planned | open | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
-| UI-025 | Global Search and Command Palette | planned | open | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
-| UI-026 | Auth-Aware Shell and Role Visibility | planned | open | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
-| UI-027 | Privileged Action Audit Contract | planned | open | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
-| UI-028 | Assistant as Additive Surface | planned | open | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
-| UI-029 | Constrained Assistant Action Policy | planned | open | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
-| UI-030 | UI Product Analytics Contract | planned | open | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
-| UI-031 | UI SLO Contract | planned | open | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
+| COMP-15 | Distribution and Install-Path Truth Consistency | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
+| COMP-16 | Version and Maturity Posture Consistency Gate | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
+| LANG-13 | Dashboard Runtime Safety and Port Consistency | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
+| COMP-17 | Benchmark Program Coverage and Cadence | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
+| PMKT-16 | Marketing-to-Verified Integration Parity Gate | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
+| LANG-14 | Public Surface Canonicalization Contract | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
+| COMP-18 | External User-Validation Evidence Contract | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
+| RCG-1 | Time-Bucket Market Discovery and Asset Resolution | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
+| RCG-2 | Live-Market Dry-Run Parity Mode | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
+| RCG-3 | Complementary Bundle Edge Gate with Fee Realism | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
+| RCG-4 | Dynamic Limit-Order Repricing Controller | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
+| RCG-5 | Maker-First Order-Style Policy | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
+| RCG-6 | Resolution-to-Redeem Automation Lifecycle | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
+| RCG-7 | Multi-Source Reference Price and Strike Context | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
+| RCG-8 | Progressive Stepwise Beginner Validation Ladder | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
+| UI-001 | One Primary Surface Contract | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
+| UI-002 | Unified Product Model Across User Densities | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
+| UI-003 | Global Trust and Runtime Status Bar | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
+| UI-004 | Browser-First Safe Onboarding | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
+| UI-005 | Time-to-Meaningful-Result SLO | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
+| UI-006 | GUI-to-Code Transparency Contract | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
+| UI-007 | Primary Navigation Information Architecture | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
+| UI-008 | Command Center Landing Contract | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
+| UI-009 | Empty-State Integrity | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
+| UI-010 | Guided Strategy Lab | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
+| UI-011 | Metric Explainability | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
+| UI-012 | Safe Capital-Affecting Action Patterns | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
+| UI-013 | Portfolio Surface Requirements | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
+| UI-014 | Execution Surface Requirements | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
+| UI-015 | Risk and Incident Surface Requirements | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
+| UI-016 | Promotion Lifecycle Surface Requirements | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
+| UI-017 | Artifact Provenance Visibility | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
+| UI-018 | Benchmarks Above the Fold | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
+| UI-019 | WebSocket-First Live UX | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
+| UI-020 | No Silent Demo Data on Production Surfaces | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
+| UI-021 | Graceful Degradation and Loud Failure | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
+| UI-022 | Tokenized Design System Requirement | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
+| UI-023 | Accessibility Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
+| UI-024 | Dense but Controllable Data Presentation | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
+| UI-025 | Global Search and Command Palette | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
+| UI-026 | Auth-Aware Shell and Role Visibility | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
+| UI-027 | Privileged Action Audit Contract | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
+| UI-028 | Assistant as Additive Surface | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
+| UI-029 | Constrained Assistant Action Policy | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
+| UI-030 | UI Product Analytics Contract | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
+| UI-031 | UI SLO Contract | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
 | COH-1 | Web Client Contract Coherence | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_unmapped_p2_defaults.json, data/reports/roi/top_100_roi_moves.json |
 | COH-2 | Web Thin-Client Boundary | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_unmapped_p2_defaults.json, data/reports/roi/top_100_roi_moves.json |
 | COH-3 | Runtime Command Boundary | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_unmapped_p2_defaults.json, data/reports/roi/top_100_roi_moves.json |
@@ -734,3 +735,9 @@ This matrix is auto-generated from `docs/SRS.md`, `docs/TODO.md`, and repository
 | CGPT-6 | External Validation Readiness Contract | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
 | CGPT-7 | Benchmark Continuity and Progress Integrity | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
 | CGPT-8 | Distribution Truth and Version Cohesion Contract | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
+| AEG-1 | In-Position Forecast Drift Exit Contract | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
+| AEG-2 | Minute-Cadence Monitoring Contract | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
+| AEG-3 | City-Month-Bucket Self-Calibration Contract | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
+| AEG-4 | Trade-Outcome Feedback Dataset Contract | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
+| AEG-5 | Calibrated-Probability EV Gate Contract | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
+| AEG-6 | Source Reliability and Claim Handling | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
