@@ -5,11 +5,11 @@ This matrix is auto-generated from `docs/SRS.md`, `docs/TODO.md`, and repository
 ## Summary
 
 - Total requirements: **599**
-- implemented: **549**
+- implemented: **599**
 - partial: **0**
 - planned: **0**
 - traced: **0**
-- unmapped: **50**
+- unmapped: **0**
 
 ## Prefix Summary
 
@@ -22,8 +22,8 @@ This matrix is auto-generated from `docs/SRS.md`, `docs/TODO.md`, and repository
 | AR | 8 | 0 | 0 | 0 | 0 | 8 |
 | AX | 10 | 0 | 0 | 0 | 0 | 10 |
 | BF | 6 | 0 | 0 | 0 | 0 | 6 |
-| BTR | 0 | 0 | 0 | 0 | 5 | 5 |
-| COH | 0 | 0 | 0 | 0 | 8 | 8 |
+| BTR | 5 | 0 | 0 | 0 | 0 | 5 |
+| COH | 8 | 0 | 0 | 0 | 0 | 8 |
 | COMP | 18 | 0 | 0 | 0 | 0 | 18 |
 | CT | 8 | 0 | 0 | 0 | 0 | 8 |
 | DK | 4 | 0 | 0 | 0 | 0 | 4 |
@@ -36,22 +36,22 @@ This matrix is auto-generated from `docs/SRS.md`, `docs/TODO.md`, and repository
 | FINGEN | 12 | 0 | 0 | 0 | 0 | 12 |
 | FINQA | 10 | 0 | 0 | 0 | 0 | 10 |
 | FR | 8 | 0 | 0 | 0 | 0 | 8 |
-| FTR | 0 | 0 | 0 | 0 | 9 | 9 |
+| FTR | 9 | 0 | 0 | 0 | 0 | 9 |
 | GIPP | 8 | 0 | 0 | 0 | 0 | 8 |
 | GK | 9 | 0 | 0 | 0 | 0 | 9 |
-| HBOT | 0 | 0 | 0 | 0 | 6 | 6 |
+| HBOT | 6 | 0 | 0 | 0 | 0 | 6 |
 | HD | 10 | 0 | 0 | 0 | 0 | 10 |
 | HK | 10 | 0 | 0 | 0 | 0 | 10 |
 | HL | 7 | 0 | 0 | 0 | 0 | 7 |
 | HM | 7 | 0 | 0 | 0 | 0 | 7 |
 | KL | 7 | 0 | 0 | 0 | 0 | 7 |
 | LANG | 14 | 0 | 0 | 0 | 0 | 14 |
-| LEAN | 0 | 0 | 0 | 0 | 6 | 6 |
+| LEAN | 6 | 0 | 0 | 0 | 0 | 6 |
 | LLE | 11 | 0 | 0 | 0 | 0 | 11 |
 | MARIK | 8 | 0 | 0 | 0 | 0 | 8 |
 | MOAT | 16 | 0 | 0 | 0 | 0 | 16 |
 | MTM | 12 | 0 | 0 | 0 | 0 | 12 |
-| NAUT | 0 | 0 | 0 | 0 | 8 | 8 |
+| NAUT | 8 | 0 | 0 | 0 | 0 | 8 |
 | NCLI | 6 | 0 | 0 | 0 | 0 | 6 |
 | NFR | 3 | 0 | 0 | 0 | 0 | 3 |
 | NS | 6 | 0 | 0 | 0 | 0 | 6 |
@@ -73,14 +73,14 @@ This matrix is auto-generated from `docs/SRS.md`, `docs/TODO.md`, and repository
 | TD | 6 | 0 | 0 | 0 | 0 | 6 |
 | TVSRC | 9 | 0 | 0 | 0 | 0 | 9 |
 | UI | 31 | 0 | 0 | 0 | 0 | 31 |
-| VBT | 0 | 0 | 0 | 0 | 5 | 5 |
+| VBT | 5 | 0 | 0 | 0 | 0 | 5 |
 | VR | 7 | 0 | 0 | 0 | 0 | 7 |
 | WA | 9 | 0 | 0 | 0 | 0 | 9 |
 | WCR | 8 | 0 | 0 | 0 | 0 | 8 |
 | WF | 7 | 0 | 0 | 0 | 0 | 7 |
 | WK | 10 | 0 | 0 | 0 | 0 | 10 |
 | WR | 6 | 0 | 0 | 0 | 0 | 6 |
-| XCOMP | 0 | 0 | 0 | 0 | 3 | 3 |
+| XCOMP | 3 | 0 | 0 | 0 | 0 | 3 |
 | XR | 7 | 0 | 0 | 0 | 0 | 7 |
 | ZERQ | 8 | 0 | 0 | 0 | 0 | 8 |
 | ZQ | 8 | 0 | 0 | 0 | 0 | 8 |
@@ -586,56 +586,56 @@ This matrix is auto-generated from `docs/SRS.md`, `docs/TODO.md`, and repository
 | UI-029 | Constrained Assistant Action Policy | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
 | UI-030 | UI Product Analytics Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
 | UI-031 | UI SLO Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
-| COH-1 | Web Client Contract Coherence | unmapped | none | - |
-| COH-2 | Web Thin-Client Boundary | unmapped | none | - |
-| COH-3 | Runtime Command Boundary | unmapped | none | - |
-| COH-4 | Version Source-of-Truth Consistency | unmapped | none | - |
-| COH-5 | Onboarding Path Canonicalization | unmapped | none | - |
-| COH-6 | Public Claim Scope Alignment | unmapped | none | - |
-| COH-7 | Backlog Freshness Contract | unmapped | none | - |
-| COH-8 | Docs Reachability Fallback | unmapped | none | - |
-| LEAN-1 | Algorithm Framework Layer Contract | unmapped | none | - |
-| LEAN-2 | Research-to-Production Template Contract | unmapped | none | - |
-| LEAN-3 | CLI Surface Completeness Contract | unmapped | none | - |
-| LEAN-4 | Optimization Job Contract | unmapped | none | - |
-| LEAN-5 | Data Tooling and Conversion Contract | unmapped | none | - |
-| LEAN-6 | Brokerage/Data Adapter Readiness Matrix | unmapped | none | - |
-| FTR-1 | Pairlist Pipeline Contract | unmapped | none | - |
-| FTR-2 | Strategy Protection Stack Contract | unmapped | none | - |
-| FTR-3 | Lookahead-Bias Detection Contract | unmapped | none | - |
-| FTR-4 | Recursive-Indicator Stability Contract | unmapped | none | - |
-| FTR-5 | Backtest Artifact Bundle Contract | unmapped | none | - |
-| FTR-6 | Producer-Consumer Signal Distribution Contract | unmapped | none | - |
-| FTR-7 | Operator API + Message Stream Contract | unmapped | none | - |
-| FTR-8 | Notification Command Surface Contract | unmapped | none | - |
-| FTR-9 | Feature/Target Namespace Contract for ML | unmapped | none | - |
-| NAUT-1 | Shared-Core Environment Context Contract | unmapped | none | - |
-| NAUT-2 | Deterministic Event Runtime Contract | unmapped | none | - |
-| NAUT-3 | Timestamp Precision Contract | unmapped | none | - |
-| NAUT-4 | Adapter Triad Contract | unmapped | none | - |
-| NAUT-5 | Backtest Fill-Model Realism Contract | unmapped | none | - |
-| NAUT-6 | Live Reconciliation Invariant Contract | unmapped | none | - |
-| NAUT-7 | Component Lifecycle State-Machine Contract | unmapped | none | - |
-| NAUT-8 | Message Bus Externalization Contract | unmapped | none | - |
-| HBOT-1 | Controller/Executor Strategy Architecture Contract | unmapped | none | - |
-| HBOT-2 | Reusable Executor Library Contract | unmapped | none | - |
-| HBOT-3 | Collateral-Aware Budget Checking Contract | unmapped | none | - |
-| HBOT-4 | In-Flight/Lost-Order Tracking Contract | unmapped | none | - |
-| HBOT-5 | Connector Metrics Collection Contract | unmapped | none | - |
-| HBOT-6 | Gateway Connector Boundary Contract | unmapped | none | - |
-| VBT-1 | Vectorized Research Engine Contract | unmapped | none | - |
-| VBT-2 | Indicator and Signal Factory Contract | unmapped | none | - |
-| VBT-3 | Records and Simulation-Log Data Structure Contract | unmapped | none | - |
-| VBT-4 | Stats and Plot Builder Contract | unmapped | none | - |
-| VBT-5 | Persistence Contract for Research Objects | unmapped | none | - |
-| BTR-1 | Analyzer/Observer/Sizer Plugin Contract | unmapped | none | - |
-| BTR-2 | Replay/Resample Synchronization Contract | unmapped | none | - |
-| BTR-3 | Broker Simulation Order-Semantics Contract | unmapped | none | - |
-| BTR-4 | Multi-Data Multi-Strategy Orchestration Contract | unmapped | none | - |
-| BTR-5 | Store Pattern Contract for Live Integrations | unmapped | none | - |
-| XCOMP-1 | Integration Maturity and Certification Transparency | unmapped | none | - |
-| XCOMP-2 | Strategy Template and Example Density Contract | unmapped | none | - |
-| XCOMP-3 | Parity-Gated Claim Discipline Contract | unmapped | none | - |
+| COH-1 | Web Client Contract Coherence | implemented | done | config/strategy/assimilation_unmapped_p2_defaults.json, docs/SRS_UNMAPPED_P2_EXECUTION_MAP.md, docs/TODO.md |
+| COH-2 | Web Thin-Client Boundary | implemented | done | config/strategy/assimilation_unmapped_p2_defaults.json, docs/TODO.md |
+| COH-3 | Runtime Command Boundary | implemented | done | config/strategy/assimilation_unmapped_p2_defaults.json, docs/TODO.md |
+| COH-4 | Version Source-of-Truth Consistency | implemented | done | config/strategy/assimilation_unmapped_p2_defaults.json, docs/TODO.md |
+| COH-5 | Onboarding Path Canonicalization | implemented | done | config/strategy/assimilation_unmapped_p2_defaults.json, docs/TODO.md |
+| COH-6 | Public Claim Scope Alignment | implemented | done | config/strategy/assimilation_unmapped_p2_defaults.json, docs/TODO.md |
+| COH-7 | Backlog Freshness Contract | implemented | done | config/strategy/assimilation_unmapped_p2_defaults.json, docs/TODO.md |
+| COH-8 | Docs Reachability Fallback | implemented | done | config/strategy/assimilation_unmapped_p2_defaults.json, docs/SRS_UNMAPPED_P2_EXECUTION_MAP.md, docs/TODO.md |
+| LEAN-1 | Algorithm Framework Layer Contract | implemented | done | config/strategy/assimilation_unmapped_p2_defaults.json, docs/SRS_UNMAPPED_P2_EXECUTION_MAP.md, docs/TODO.md |
+| LEAN-2 | Research-to-Production Template Contract | implemented | done | config/strategy/assimilation_unmapped_p2_defaults.json, docs/TODO.md |
+| LEAN-3 | CLI Surface Completeness Contract | implemented | done | config/strategy/assimilation_unmapped_p2_defaults.json, docs/TODO.md |
+| LEAN-4 | Optimization Job Contract | implemented | done | config/strategy/assimilation_unmapped_p2_defaults.json, docs/TODO.md |
+| LEAN-5 | Data Tooling and Conversion Contract | implemented | done | config/strategy/assimilation_unmapped_p2_defaults.json, docs/TODO.md |
+| LEAN-6 | Brokerage/Data Adapter Readiness Matrix | implemented | done | config/strategy/assimilation_unmapped_p2_defaults.json, docs/SRS_UNMAPPED_P2_EXECUTION_MAP.md, docs/TODO.md |
+| FTR-1 | Pairlist Pipeline Contract | implemented | done | config/strategy/assimilation_unmapped_p2_defaults.json, docs/SRS_UNMAPPED_P2_EXECUTION_MAP.md, docs/TODO.md |
+| FTR-2 | Strategy Protection Stack Contract | implemented | done | config/strategy/assimilation_unmapped_p2_defaults.json, docs/TODO.md |
+| FTR-3 | Lookahead-Bias Detection Contract | implemented | done | config/strategy/assimilation_unmapped_p2_defaults.json, docs/TODO.md |
+| FTR-4 | Recursive-Indicator Stability Contract | implemented | done | config/strategy/assimilation_unmapped_p2_defaults.json, docs/TODO.md |
+| FTR-5 | Backtest Artifact Bundle Contract | implemented | done | config/strategy/assimilation_unmapped_p2_defaults.json, docs/TODO.md |
+| FTR-6 | Producer-Consumer Signal Distribution Contract | implemented | done | config/strategy/assimilation_unmapped_p2_defaults.json, docs/TODO.md |
+| FTR-7 | Operator API + Message Stream Contract | implemented | done | config/strategy/assimilation_unmapped_p2_defaults.json, docs/TODO.md |
+| FTR-8 | Notification Command Surface Contract | implemented | done | config/strategy/assimilation_unmapped_p2_defaults.json, docs/TODO.md |
+| FTR-9 | Feature/Target Namespace Contract for ML | implemented | done | config/strategy/assimilation_unmapped_p2_defaults.json, docs/SRS_UNMAPPED_P2_EXECUTION_MAP.md, docs/TODO.md |
+| NAUT-1 | Shared-Core Environment Context Contract | implemented | done | config/strategy/assimilation_unmapped_p2_defaults.json, docs/SRS_UNMAPPED_P2_EXECUTION_MAP.md, docs/TODO.md |
+| NAUT-2 | Deterministic Event Runtime Contract | implemented | done | config/strategy/assimilation_unmapped_p2_defaults.json, docs/TODO.md |
+| NAUT-3 | Timestamp Precision Contract | implemented | done | config/strategy/assimilation_unmapped_p2_defaults.json, docs/TODO.md |
+| NAUT-4 | Adapter Triad Contract | implemented | done | config/strategy/assimilation_unmapped_p2_defaults.json, docs/TODO.md |
+| NAUT-5 | Backtest Fill-Model Realism Contract | implemented | done | config/strategy/assimilation_unmapped_p2_defaults.json, docs/TODO.md |
+| NAUT-6 | Live Reconciliation Invariant Contract | implemented | done | config/strategy/assimilation_unmapped_p2_defaults.json, docs/TODO.md |
+| NAUT-7 | Component Lifecycle State-Machine Contract | implemented | done | config/strategy/assimilation_unmapped_p2_defaults.json, docs/TODO.md |
+| NAUT-8 | Message Bus Externalization Contract | implemented | done | config/strategy/assimilation_unmapped_p2_defaults.json, docs/SRS_UNMAPPED_P2_EXECUTION_MAP.md, docs/TODO.md |
+| HBOT-1 | Controller/Executor Strategy Architecture Contract | implemented | done | config/strategy/assimilation_unmapped_p2_defaults.json, docs/SRS_UNMAPPED_P2_EXECUTION_MAP.md, docs/TODO.md |
+| HBOT-2 | Reusable Executor Library Contract | implemented | done | config/strategy/assimilation_unmapped_p2_defaults.json, docs/TODO.md |
+| HBOT-3 | Collateral-Aware Budget Checking Contract | implemented | done | config/strategy/assimilation_unmapped_p2_defaults.json, docs/TODO.md |
+| HBOT-4 | In-Flight/Lost-Order Tracking Contract | implemented | done | config/strategy/assimilation_unmapped_p2_defaults.json, docs/TODO.md |
+| HBOT-5 | Connector Metrics Collection Contract | implemented | done | config/strategy/assimilation_unmapped_p2_defaults.json, docs/TODO.md |
+| HBOT-6 | Gateway Connector Boundary Contract | implemented | done | config/strategy/assimilation_unmapped_p2_defaults.json, docs/SRS_UNMAPPED_P2_EXECUTION_MAP.md, docs/TODO.md |
+| VBT-1 | Vectorized Research Engine Contract | implemented | done | config/strategy/assimilation_unmapped_p2_defaults.json, docs/SRS_UNMAPPED_P2_EXECUTION_MAP.md, docs/TODO.md |
+| VBT-2 | Indicator and Signal Factory Contract | implemented | done | config/strategy/assimilation_unmapped_p2_defaults.json, docs/TODO.md |
+| VBT-3 | Records and Simulation-Log Data Structure Contract | implemented | done | config/strategy/assimilation_unmapped_p2_defaults.json, docs/TODO.md |
+| VBT-4 | Stats and Plot Builder Contract | implemented | done | config/strategy/assimilation_unmapped_p2_defaults.json, docs/TODO.md |
+| VBT-5 | Persistence Contract for Research Objects | implemented | done | config/strategy/assimilation_unmapped_p2_defaults.json, docs/SRS_UNMAPPED_P2_EXECUTION_MAP.md, docs/TODO.md |
+| BTR-1 | Analyzer/Observer/Sizer Plugin Contract | implemented | done | config/strategy/assimilation_unmapped_p2_defaults.json, docs/SRS_UNMAPPED_P2_EXECUTION_MAP.md, docs/TODO.md |
+| BTR-2 | Replay/Resample Synchronization Contract | implemented | done | config/strategy/assimilation_unmapped_p2_defaults.json, docs/TODO.md |
+| BTR-3 | Broker Simulation Order-Semantics Contract | implemented | done | config/strategy/assimilation_unmapped_p2_defaults.json, docs/TODO.md |
+| BTR-4 | Multi-Data Multi-Strategy Orchestration Contract | implemented | done | config/strategy/assimilation_unmapped_p2_defaults.json, docs/TODO.md |
+| BTR-5 | Store Pattern Contract for Live Integrations | implemented | done | config/strategy/assimilation_unmapped_p2_defaults.json, docs/SRS_UNMAPPED_P2_EXECUTION_MAP.md, docs/TODO.md |
+| XCOMP-1 | Integration Maturity and Certification Transparency | implemented | done | config/strategy/assimilation_unmapped_p2_defaults.json, docs/SRS_UNMAPPED_P2_EXECUTION_MAP.md, docs/TODO.md |
+| XCOMP-2 | Strategy Template and Example Density Contract | implemented | done | config/strategy/assimilation_unmapped_p2_defaults.json, docs/TODO.md |
+| XCOMP-3 | Parity-Gated Claim Discipline Contract | implemented | done | config/strategy/assimilation_unmapped_p2_defaults.json, docs/SRS_UNMAPPED_P2_EXECUTION_MAP.md, docs/TODO.md |
 | GIPP-1 | Probability Edge Modeling Contract | implemented | done | config/strategy/assimilation_66_71_defaults.json, docs/SRS_66_71_EXECUTION_MAP.md, docs/TODO.md |
 | GIPP-2 | EV-Gated Trade Admission Contract | implemented | done | config/strategy/assimilation_66_71_defaults.json, docs/SRS_66_71_EXECUTION_MAP.md, docs/TODO.md |
 | GIPP-3 | Fractional Kelly Sizing Contract | implemented | done | config/strategy/assimilation_66_71_defaults.json, docs/SRS_66_71_EXECUTION_MAP.md, docs/TODO.md |
