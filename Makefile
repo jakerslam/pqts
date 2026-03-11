@@ -67,12 +67,16 @@ leaderboard-site:
 	$(VENV_PY) scripts/export_simulation_leaderboard_site.py --reports-dir data/reports --output-dir site
 
 governance-check:
-	$(VENV_PY) tools/check_studio_contract.py
-	$(VENV_PY) tools/check_core_professional_contract.py
-	$(VENV_PY) tools/check_scope_governance.py --requested-markets crypto
-	$(VENV_PY) tools/check_tier_safety_policy.py
-	$(VENV_PY) tools/check_source_reliability.py
-	$(VENV_PY) tools/check_roadmap_governance.py
+	$(PY_RUN) tools/check_truth_surface.py
+	$(PY_RUN) tools/check_studio_contract.py
+	$(PY_RUN) tools/check_core_professional_contract.py
+	$(PY_RUN) tools/check_scope_governance.py --requested-markets crypto
+	$(PY_RUN) tools/check_integration_claim_parity.py --readme README.md --index config/integrations/official_integrations.json
+	$(PY_RUN) tools/check_benchmark_program.py --reference-performance results/reference_performance_latest.json --results-root . --policy config/benchmarks/program_policy.json
+	$(PY_RUN) tools/check_external_validation_evidence.py --user-research docs/USER_RESEARCH_2026_03.md --readme README.md
+	$(PY_RUN) tools/check_tier_safety_policy.py
+	$(PY_RUN) tools/check_source_reliability.py
+	$(PY_RUN) tools/check_roadmap_governance.py
 
 paper-6m:
 	$(VENV_PY) scripts/run_paper_6m_harness.py --months 6 --cycles-per-month 12 --sleep-seconds 0 --risk-profile balanced

@@ -1,4 +1,5 @@
 import { getAccountSummary, getPositions } from "@/lib/api/client";
+import { LiveStreamStatus } from "@/components/stream/live-stream-status";
 
 export default async function PortfolioPage() {
   const [account, positions]: [Awaited<ReturnType<typeof getAccountSummary>> | null, Awaited<ReturnType<typeof getPositions>>] =
@@ -8,6 +9,10 @@ export default async function PortfolioPage() {
 
   return (
     <section style={{ display: "grid", gap: 16 }}>
+      <article className="card" style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+        <LiveStreamStatus channel="positions" />
+        <LiveStreamStatus channel="pnl" />
+      </article>
       <div className="grid">
         <article className="card">
           <p className="kpi-title">Equity</p>

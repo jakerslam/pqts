@@ -1,4 +1,5 @@
 import { getFills, getOrders } from "@/lib/api/client";
+import { LiveStreamStatus } from "@/components/stream/live-stream-status";
 import Link from "next/link";
 
 export default async function ExecutionPage() {
@@ -11,6 +12,10 @@ export default async function ExecutionPage() {
         <p style={{ marginTop: 0, color: "var(--muted)" }}>
           Deep-dive surfaces for transaction-cost quality and order truth lineage.
         </p>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 8 }}>
+          <LiveStreamStatus channel="orders" />
+          <LiveStreamStatus channel="fills" />
+        </div>
         <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
           <Link href="/dashboard/execution-quality">Execution Quality Dashboard</Link>
           <Link href="/dashboard/order-truth">Per-Order Truth Drilldown</Link>
@@ -21,7 +26,9 @@ export default async function ExecutionPage() {
       <article className="card">
         <h2 style={{ marginTop: 0 }}>Orders</h2>
         {orders.length === 0 ? (
-          <p style={{ color: "var(--muted)" }}>No orders available from API.</p>
+          <p style={{ color: "var(--muted)" }}>
+            No orders available from API. This is an explicit empty/disconnected state, not synthetic demo data.
+          </p>
         ) : (
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
@@ -51,7 +58,9 @@ export default async function ExecutionPage() {
       <article className="card">
         <h2 style={{ marginTop: 0 }}>Recent Fills</h2>
         {fills.length === 0 ? (
-          <p style={{ color: "var(--muted)" }}>No fills available from API.</p>
+          <p style={{ color: "var(--muted)" }}>
+            No fills available from API. This is an explicit empty/disconnected state, not synthetic demo data.
+          </p>
         ) : (
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>

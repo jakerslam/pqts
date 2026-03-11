@@ -3373,3 +3373,319 @@ Observed source links:
 
 - External strategy/runtime claims from repository marketing copy shall be treated as design hypotheses until reproduced under PQTS benchmarks.
 - Imported requirements from this source shall be encoded as testable system contracts rather than profitability assertions.
+
+## 60. Additional Requirements from PQTS State/Trust-Surface Review (March 10, 2026)
+
+These requirements are derived from a repository-state review emphasizing noob/pro usability, trust-surface consistency, benchmark depth, and verified ecosystem coverage.
+
+Observed source links:
+- `https://github.com/jakerslam/pqts`
+- `https://raw.githubusercontent.com/jakerslam/pqts/main/docs/QUICKSTART_5_MIN.md`
+- `https://raw.githubusercontent.com/jakerslam/pqts/main/docs/IMPLEMENTATION_DIRECTION.md`
+- `https://raw.githubusercontent.com/jakerslam/pqts/main/results/native_benchmarks/README.md`
+- `https://raw.githubusercontent.com/jakerslam/pqts/main/src/dashboard/start.py`
+- `https://raw.githubusercontent.com/jakerslam/pqts/main/docs/BENCHMARKS.md`
+- `https://raw.githubusercontent.com/jakerslam/pqts/main/docs/ISSUE_BACKLOG.md`
+- `https://raw.githubusercontent.com/jakerslam/pqts/main/docs/USER_RESEARCH_2026_03.md`
+
+### COMP-15 Distribution and Install-Path Truth Consistency
+
+- Public install instructions shall remain synchronized with real distribution availability (for example PyPI package existence and version availability).
+- If a package/distribution channel is unavailable, user-facing docs/README/quickstart shall automatically downgrade to a source-install path and label package install as unavailable.
+- Release gates shall fail when install claims in docs conflict with runtime package registry status for the tagged version.
+
+### COMP-16 Version and Maturity Posture Consistency Gate
+
+- Repository docs shall use one canonical released version and maturity posture (`alpha`, `beta`, `stable`) per release line.
+- Stale version claims (for example non-existent major/minor release numbers) or maturity contradictions (`production-ready` vs `alpha`) shall fail docs validation gates.
+- Changelog, README, quickstart, and packaging metadata shall be checked for consistency before release publication.
+
+### LANG-13 Dashboard Runtime Safety and Port Consistency
+
+- Dashboard runtime entrypoints shall expose one canonical default port per surface and prohibit conflicting defaults across launch scripts and docs.
+- Production launch paths shall disable debug-mode server settings by default and require explicit opt-in for local development debug mode.
+- External stylesheet/script dependencies in operator-critical dashboards shall be pinned or mirrored to controlled assets for deterministic behavior and security review.
+
+### COMP-17 Benchmark Program Coverage and Cadence
+
+- Public benchmark publication shall operate as a matrix program across strategy class, market class, venue, and time window rather than isolated single bundles.
+- Benchmark reports shall include paper/live drift diagnostics and execution-quality metrics (fill, reject, slippage/TCA, and incident-rate context) for each matrix segment.
+- Monthly benchmark publication shall include trend deltas vs prior month with machine-readable summaries suitable for independent reproduction.
+
+### PMKT-16 Marketing-to-Verified Integration Parity Gate
+
+- Marketing claims about supported venues/market classes shall be validated against the machine-readable official integrations index before release.
+- Any claimed venue lacking verified adapter status in the canonical index shall be labeled `planned` or removed from primary marketing claims.
+- CI shall fail when integration coverage claims in README/docs drift from canonical integration metadata.
+
+### LANG-14 Public Surface Canonicalization Contract
+
+- Public-facing onboarding shall identify exactly one primary web surface for the active release phase and clearly label secondary surfaces as internal/legacy/transition.
+- Runtime launch docs and compose profiles shall prioritize the primary surface and avoid presenting overlapping equivalent paths without migration context.
+- Surface-transition plans shall publish explicit cutover criteria and rollback criteria tied to parity and reliability checks.
+
+### COMP-18 External User-Validation Evidence Contract
+
+- Beginner/pro usability claims shall be supported by externally sourced cohort evidence, not internal proxy runs only.
+- User-research artifacts shall record cohort provenance (external vs internal), cohort size, task success rates, and top blockers per persona.
+- Public readiness claims for noob/pro friendliness shall require at least one external cohort cycle in the current release window.
+
+## 61. Additional Requirements from Recogard Post + Gabagool Polymarket Bot Repo (March 10, 2026)
+
+These requirements capture additive, applicable strengths from the referenced X post and linked repository while preserving PQTS safety/truth-surface constraints.
+
+Observed source links:
+- `https://x.com/recogard/status/2031145282944045293?s=46`
+- `https://api.fxtwitter.com/recogard/status/2031145282944045293`
+- `https://github.com/Gabagool2-2/polymarket-trading-bot-python`
+- `https://raw.githubusercontent.com/Gabagool2-2/polymarket-trading-bot-python/main/README.md`
+
+### RCG-1 Time-Bucket Market Discovery and Asset Resolution
+
+- System shall support deterministic discovery of recurring short-horizon markets by configured time-bucket templates (for example `5m` epoch windows).
+- Before signal or execution, system shall resolve and validate venue market identifiers required for trading (for example market/condition IDs and YES/NO asset IDs).
+- If discovery returns zero matches, multiple ambiguous matches, or incomplete identifiers, strategy shall fail closed and emit explicit diagnostics.
+
+### RCG-2 Live-Market Dry-Run Parity Mode
+
+- Dry-run mode shall use the same live market-data, signal, and decision pipeline as live mode.
+- In dry-run mode, order submission shall be replaced with deterministic simulated fills using configurable top-of-book, latency, and slippage assumptions.
+- Dry-run artifacts shall include per-order `would_submit`, `would_fill`, and `why_blocked` outputs for promotion/readiness review.
+
+### RCG-3 Complementary Bundle Edge Gate with Fee Realism
+
+- Complementary YES/NO bundle opportunities shall require edge checks using modeled order-style fees and slippage (`maker`/`taker` aware), not fee-free assumptions.
+- Strategy shall block execution when apparent bundle edge disappears after modeled fees, slippage, and residual risk buffers.
+- Execution diagnostics shall log pre-fee edge, post-fee edge, and selected order-style assumptions per opportunity.
+
+### RCG-4 Dynamic Limit-Order Repricing Controller
+
+- Short-cycle strategies shall support cancel/replace repricing for active limit orders based on orderbook movement and stale-quote thresholds.
+- Repricing controls shall enforce bounded cancel/replace rates, max unfilled dwell time, and legging-risk protections.
+- Runtime telemetry shall track cancel/replace intensity, quote lifetime, and repricing effectiveness for each strategy/venue pair.
+
+### RCG-5 Maker-First Order-Style Policy
+
+- Strategy templates shall support maker-first (`post_only`) execution with explicit taker fallback policy.
+- Taker fallback shall only be allowed when net EV remains positive after taker fees and latency-impact assumptions.
+- Per-order records shall capture order-style selection rationale (`maker`, `taker_fallback`, `blocked`).
+
+### RCG-6 Resolution-to-Redeem Automation Lifecycle
+
+- System shall include a settlement worker that detects claimable resolved positions and executes redeem/claim operations automatically when enabled.
+- Redeem flow shall be idempotent with retry/backoff controls and fail-closed behavior on uncertain resolution state.
+- Telemetry shall include redeem attempts, success/failure reasons, settlement lag, and redeemed notional/PnL attribution.
+
+### RCG-7 Multi-Source Reference Price and Strike Context
+
+- Short-cycle signal engines shall support multiple reference-price providers with source-priority and freshness rules.
+- Optional strike/context scrapers may be used only when provenance, timestamp freshness, and schema validation checks pass.
+- Large cross-source divergence shall downgrade signal confidence or block entries according to configurable thresholds.
+
+### RCG-8 Progressive Stepwise Beginner Validation Ladder
+
+- Repository shall provide numbered validation steps from configuration -> market discovery -> stream health -> signal generation -> dry-run execution.
+- Each step shall emit machine-readable pass/fail output and remediation hints.
+- Quickstart docs shall link this stepwise ladder and the full-cycle command path for first-success onboarding.
+
+## 62. Additional Requirements for Greatly Upgraded Unified UI (March 10, 2026)
+
+These requirements codify a web-primary UI that serves beginners and professionals on one canonical product surface.
+
+Observed source links:
+- `https://github.com/jakerslam/pqts/blob/main/docs/IMPLEMENTATION_DIRECTION.md`
+- `https://github.com/jakerslam/pqts/blob/main/src/dashboard/app.py`
+- `https://github.com/jakerslam/pqts/blob/main/docs/ISSUE_BACKLOG.md`
+- `https://github.com/jakerslam/pqts/blob/main/docs/QUICKSTART_5_MIN.md`
+
+### UI-001 One Primary Surface Contract
+
+- Web app shall be the primary external UI surface.
+- Legacy dashboard surfaces shall be explicitly marked transitional/operator-only until parity gates pass.
+- System documentation shall expose one canonical user-facing navigation model and URL hierarchy.
+
+### UI-002 Unified Product Model Across User Densities
+
+- UI shall provide Guided and Pro density modes on the same underlying domain objects (accounts, runs, orders, fills, incidents, artifacts).
+- Guided mode shall reduce cognitive load and provide contextual explanations.
+- Pro mode shall expose raw fields, traces, venue details, and advanced controls.
+- Product architecture shall not fork into separate beginner/professional applications.
+
+### UI-003 Global Trust and Runtime Status Bar
+
+- Every page shall expose a global trust/status bar containing at minimum:
+  - environment (`demo`, `paper`, `shadow`, `canary`, `live`),
+  - workspace/account/venue context,
+  - connectivity and data freshness,
+  - native hotpath status (`native` or `fallback`),
+  - kill-switch state,
+  - run/trace ID,
+  - trust/provenance label for active data.
+
+### UI-004 Browser-First Safe Onboarding
+
+- Browser onboarding shall support demo exploration, template backtest, and bounded paper-campaign start without CLI dependency.
+- Default onboarding shall fail closed for live execution and shall not require live credentials.
+- Default onboarding shall not expose unsafe hidden auto-execution behavior.
+
+### UI-005 Time-to-Meaningful-Result SLO
+
+- Median time to first meaningful result on clean setup shall be under five minutes.
+- Meaningful result shall require completion of demo/backtest/paper artifact generation with visible outcome, explanation, and next-step guidance.
+
+### UI-006 GUI-to-Code Transparency Contract
+
+- Any action that changes strategy behavior shall expose generated config, CLI/code equivalent, config diff, and output artifacts.
+- UI shall preserve CLI/API parity so advanced users can bypass UI without loss of functionality.
+
+### UI-007 Primary Navigation Information Architecture
+
+- Primary navigation shall include Home, Strategy Lab, Portfolio, Execution, Risk, Promotions, Benchmarks/Results, Alerts, and Settings/Integrations.
+- Navigation and route naming shall remain stable across Guided and Pro modes.
+
+### UI-008 Command Center Landing Contract
+
+- Home/Command Center shall answer above-the-fold:
+  - what is running now,
+  - current safety posture,
+  - health status,
+  - capital performance,
+  - highest-priority operator action.
+- Command Center shall include portfolio summary, today PnL, open exposure, active incidents, current promotion stage, benchmark/reference callout, latest provenance marker, and one-click next action.
+
+### UI-009 Empty-State Integrity
+
+- Empty, unavailable, disconnected, and stale-data states shall be explicit and visually distinct from healthy trading states.
+- Empty states shall include guided next actions for first-time users.
+- Production UI shall never present silent zeros as success states when data is unavailable.
+
+### UI-010 Guided Strategy Lab
+
+- Strategy Lab shall provide template gallery flows with plain-language explanation of behavior, suitable market conditions, key risks, and success metrics.
+- Parameter editing shall default to safe constraints with human-readable labels.
+- Advanced parameters shall be progressively disclosed, not removed.
+
+### UI-011 Metric Explainability
+
+- Major KPIs shall expose plain-language meaning, metric definition/formula, importance rationale, threshold interpretation, and link to underlying raw data.
+- KPI explainability shall cover at minimum Sharpe, drawdown, fill rate, reject rate, slippage, canary readiness, and optimization priority.
+
+### UI-012 Safe Capital-Affecting Action Patterns
+
+- Paper-first progression shall be default.
+- Promotion-capable actions shall display current stage, gate status, unmet checks, rollback criteria, and risk impact before confirmation.
+- Capital-affecting and destructive actions shall require explicit confirmation and audit logging.
+
+### UI-013 Portfolio Surface Requirements
+
+- Portfolio view shall provide positions, balances, allocations, realized/unrealized PnL, and filters by account/venue/strategy/time.
+- Portfolio cards shall drill through to order/fill-level details.
+- Data views shall support export and cross-strategy/cross-venue comparison.
+
+### UI-014 Execution Surface Requirements
+
+- Execution view shall provide live order/fill tape, order lifecycle timelines, reject reasons, cancel/replace reasons, venue acknowledgments, latency, and slippage views.
+- Per-order explainability shall link strategy decision -> risk gate -> router decision -> venue response -> fill outcome.
+
+### UI-015 Risk and Incident Surface Requirements
+
+- Risk/Incident view shall provide current limits/utilization, kill-switch state, incident timeline, impacted scope, recommended next actions, and audited operator actions.
+- Role-gated controls shall include pause, flatten, reduce, and kill.
+
+### UI-016 Promotion Lifecycle Surface Requirements
+
+- Promotion UI shall model full stage progression: `backtest -> paper -> shadow -> canary -> live`.
+- Each stage shall expose gate checklist, evidence bundle, benchmark comparison, trust label, approver/audit trail, rollback plan, and blockers.
+
+### UI-017 Artifact Provenance Visibility
+
+- Every run, chart, benchmark card, and recommendation shall expose trust label, generation timestamp, run/trace ID, config version, code version/commit, data source, environment, and initiator identity.
+
+### UI-018 Benchmarks Above the Fold
+
+- Benchmark/reference callouts shall be visible on Command Center and Strategy surfaces.
+- UI shall clearly separate `reference` results from diagnostic and experimental artifacts.
+
+### UI-019 WebSocket-First Live UX
+
+- Live execution/risk/PnL/incident views shall be stream-first.
+- Polling may exist as fallback only.
+- Stream status shall be explicit (`connected`, `degraded`, `reconnecting`, `stale`).
+
+### UI-020 No Silent Demo Data on Production Surfaces
+
+- Production surfaces shall not silently substitute demo/synthetic data when real data is missing.
+- When data is absent, UI shall show explicit unavailable/disconnected states with remediation hints.
+
+### UI-021 Graceful Degradation and Loud Failure
+
+- Stream degradation states shall show staleness indicator, reconnect status, last successful timestamp, and degraded-capability warning.
+- Risk/incident alert rendering failures shall fail loudly and be observable.
+
+### UI-022 Tokenized Design System Requirement
+
+- UI shall replace ad hoc styling and unmanaged external stylesheet dependence with a tokenized design system.
+- Design tokens shall cover color, typography, spacing, motion, density, radii, and shadow semantics.
+- Status colors shall be semantic and consistent for gain/loss, pass/hold/fail, connected/degraded/down, and paper/live.
+
+### UI-023 Accessibility Contract
+
+- Core flows shall meet WCAG 2.2 AA.
+- Keyboard navigation shall cover all primary actions.
+- Tables/charts shall include accessible labels and text equivalents.
+- Color-only status communication shall be prohibited.
+
+### UI-024 Dense but Controllable Data Presentation
+
+- Data tables shall support sorting, filtering, resizing, pinning, and virtualization.
+- Charts shall support annotations, reference overlays, and deep-links to underlying records.
+- Users shall be able to switch between compact and expanded density modes.
+
+### UI-025 Global Search and Command Palette
+
+- Global search shall index strategies, orders, fills, incidents, accounts, runs, and relevant documents.
+- Command palette shall expose high-frequency operator actions and navigation commands.
+- Keyboard-first operation shall be supported for power users.
+
+### UI-026 Auth-Aware Shell and Role Visibility
+
+- Shell shall adapt navigation and capabilities by role and environment.
+- Viewer, operator, and admin roles shall have distinct visibility/action rights.
+- Sensitive credentials and high-risk controls shall remain masked or inaccessible by default.
+
+### UI-027 Privileged Action Audit Contract
+
+- Any pause/flatten/risk-override/promotion action shall record actor, role, timestamp, target, reason, before/after state, and trace ID.
+
+### UI-028 Assistant as Additive Surface
+
+- Assistant/chat shall augment but not replace core execution/risk/product navigation.
+- Assistant results shall render as typed widgets when contracts exist, with safe fallback rendering otherwise.
+- Assistant outcomes shall resolve to concrete pages, artifacts, diffs, or draft actions.
+
+### UI-029 Constrained Assistant Action Policy
+
+- Assistant shall be limited to recommend/draft/summarize/explain unless user approval and role/policy gates permit execution.
+- Capital-affecting actions initiated via assistant shall pass the same confirmation, role, and audit controls as manual actions.
+
+### UI-030 UI Product Analytics Contract
+
+- Product analytics shall capture time-to-first-meaningful-result, onboarding drop-off, time-to-first-paper-campaign, time-to-reject-reason diagnosis, time-to-incident-triage, Guided-vs-Pro usage split, and trust-label comprehension interactions.
+
+### UI-031 UI SLO Contract
+
+- Core page p95 interactive time shall be under two seconds.
+- Live-tape/incident rows shall target p95 stream-to-visible update under 500ms.
+- Risk/incident rendering shall have zero silent-failure tolerance.
+- Stream interruptions shall provide recoverable reconnect paths.
+
+## 63. Acceptance Criteria for Greatly Improved UI v1
+
+- Brand-new users shall complete demo -> backtest -> bounded paper flow from UI without CLI dependency or unsafe prompts.
+- Median time to first meaningful output shall be under five minutes.
+- Professional users shall identify order reject reason within 30 seconds and within three clicks from execution surface.
+- All live/canary pages shall expose environment, data freshness, hotpath/fallback status, and kill-switch state without scrolling.
+- Every benchmark/result artifact shall expose trust label and provenance in one interaction.
+- Production pages shall not silently substitute demo data.
+- Portfolio, execution, and risk pages shall consume canonical API/stream contracts rather than bespoke page-local adapters.
+- Legacy public UI surface shall not be deprecated until critical-workflow parity gates are demonstrated.

@@ -14,9 +14,18 @@ This file tracks tasks that cannot be reliably automated and require direct huma
 - Publish 4-5 reproducible performance result packages with config YAMLs, charts, and 2024-2026 metrics in a `results` publish bundle.
 - Perform a full README narrative overhaul with visuals and competitive positioning narrative.
 
+## P0 Trust-Surface Decisions (From March 10 Review)
+
+- Decide release-by-release distribution truth posture: either (a) keep PyPI install path live and verified, or (b) remove/replace `pip install` claims until publication is verified.
+- Approve and enforce one canonical maturity message for the active release (`alpha`/`beta`/`stable`) and remove contradictory claims from legacy docs.
+- Decide and sign off the single primary public web surface for this release phase (Next.js vs legacy dashboard exposure) and publish transition messaging.
+- Approve whether broad multi-market marketing claims stay live or are narrowed to only currently verified integrations in the canonical index.
+- Review and sign off benchmark narrative language so historical diagnostic bundles are contextualized correctly and not framed as reference proof.
+
 ## P1 Growth
 
 - Run and publicly report 3+ month paper campaigns across crypto/equities/forex with monthly report commentary.
+- Publish a weekly short-horizon trading journal (paper/live clearly labeled) with provenance-linked metrics, execution caveats, and postmortem notes.
 - Publish comparison table and long-form X thread series using `docs/X_THREAD_TEMPLATE.md`.
 - Submit project to discovery channels (awesome lists, communities, Show HN, etc.) and handle responses.
 - Write 2-3 long-form explainers on PQTS risk/ops approach and postmortem lessons.
@@ -42,6 +51,12 @@ This file tracks tasks that cannot be reliably automated and require direct huma
 - Own pricing-page and website messaging updates so tier language matches actual entitlements and safety constraints.
 - Produce and maintain plain-language onboarding narratives/tutorial scripts for Studio users (non-technical-first audience).
 - Conduct periodic user interviews (casual and professional cohorts) and convert findings into prioritization decisions.
+
+## P1 External Cohort Validation
+
+- Recruit and run external beginner and professional beta cohorts (non-internal participants) for each major UX release cycle.
+- Publish cohort summary notes with participant mix, task-completion outcomes, and top friction points.
+- Approve go/no-go readiness claims for “noob-friendly” and “pro-ready” only after external cohort evidence is reviewed.
 
 ## P0 Language and UI Direction Decisions
 

@@ -11,6 +11,8 @@ describe("onboarding plan", () => {
     });
     expect(plan.riskProfile).toBe("conservative");
     expect(plan.commands).toContain("pqts paper start --risk-profile conservative");
+    expect(plan.generatedConfig.risk_profile).toBe("conservative");
+    expect(plan.uiToCliDiff).toContain("risk_profile: conservative");
   });
 
   it("returns aggressive profile only for advanced auto high-capital flow", () => {

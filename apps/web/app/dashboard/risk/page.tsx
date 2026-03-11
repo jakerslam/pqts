@@ -1,5 +1,6 @@
 import { getRiskState } from "@/lib/api/client";
 import { OperatorActionPanel } from "@/components/operator/operator-action-panel";
+import { LiveStreamStatus } from "@/components/stream/live-stream-status";
 import { listBlockReasonEntries } from "@/lib/ops/block-reasons";
 
 export default async function RiskPage() {
@@ -10,6 +11,9 @@ export default async function RiskPage() {
     <section style={{ display: "grid", gap: 16 }}>
       <article className="card">
         <h2 style={{ marginTop: 0 }}>Risk State</h2>
+        <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
+          <LiveStreamStatus channel="risk" />
+        </div>
         {risk ? (
           <dl style={{ margin: 0, display: "grid", gridTemplateColumns: "220px 1fr", rowGap: 8 }}>
             <dt>Kill Switch</dt>
@@ -22,7 +26,9 @@ export default async function RiskPage() {
             <dd>${risk.daily_pnl.toFixed(2)}</dd>
           </dl>
         ) : (
-          <p style={{ color: "var(--muted)" }}>Risk endpoint unavailable.</p>
+          <p style={{ color: "var(--muted)" }}>
+            Risk endpoint unavailable. This indicates degraded connectivity or backend state, not a healthy zero-risk state.
+          </p>
         )}
       </article>
 

@@ -150,6 +150,9 @@ jobs:
       - name: Stack direction validation (gating)
         run: python3 tools/check_stack_direction.py
 
+      - name: Truth-surface consistency checks (gating)
+        run: python3 tools/check_truth_surface.py
+
       - name: Studio UX + template contract validation (gating)
         run: python3 tools/check_studio_contract.py
 
@@ -181,6 +184,12 @@ jobs:
             --index config/integrations/official_integrations.json \
             --max-age-days 45
 
+      - name: Integration claim parity checks (gating)
+        run: |
+          python3 tools/check_integration_claim_parity.py \
+            --readme README.md \
+            --index config/integrations/official_integrations.json
+
       - name: Benchmark bundle governance checks (gating)
         run: |
           python3 tools/check_result_bundle_governance.py \
@@ -190,8 +199,22 @@ jobs:
             --min-reference-packs 3 \
             --validate-only
 
+      - name: Benchmark program coverage checks (gating)
+        run: |
+          python3 tools/check_benchmark_program.py \
+            --reference-performance results/reference_performance_latest.json \
+            --results-root . \
+            --policy config/benchmarks/program_policy.json \
+            --report-out data/reports/benchmark_program/latest.json
+
       - name: Claim evidence checks (gating)
         run: python3 tools/check_claim_evidence.py
+
+      - name: External validation evidence checks (gating)
+        run: |
+          python3 tools/check_external_validation_evidence.py \
+            --user-research docs/USER_RESEARCH_2026_03.md \
+            --readme README.md
 
       - name: Source reliability checks (gating)
         run: python3 tools/check_source_reliability.py

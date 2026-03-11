@@ -1,0 +1,4210 @@
+{
+  "generated_at": "2026-03-10T23:20:27.311814+00:00",
+  "prefix_summary": {
+    "AC": {
+      "baseline_contract": 0,
+      "core_delivery": 3
+    },
+    "AHF": {
+      "baseline_contract": 11,
+      "core_delivery": 1
+    },
+    "AL": {
+      "baseline_contract": 10,
+      "core_delivery": 0
+    },
+    "AR": {
+      "baseline_contract": 8,
+      "core_delivery": 0
+    },
+    "AX": {
+      "baseline_contract": 10,
+      "core_delivery": 0
+    },
+    "BF": {
+      "baseline_contract": 0,
+      "core_delivery": 6
+    },
+    "COMP": {
+      "baseline_contract": 0,
+      "core_delivery": 18
+    },
+    "CT": {
+      "baseline_contract": 8,
+      "core_delivery": 0
+    },
+    "DK": {
+      "baseline_contract": 4,
+      "core_delivery": 0
+    },
+    "DN": {
+      "baseline_contract": 5,
+      "core_delivery": 0
+    },
+    "DV": {
+      "baseline_contract": 7,
+      "core_delivery": 0
+    },
+    "DXR": {
+      "baseline_contract": 7,
+      "core_delivery": 1
+    },
+    "FAUI": {
+      "baseline_contract": 12,
+      "core_delivery": 0
+    },
+    "FDATA": {
+      "baseline_contract": 12,
+      "core_delivery": 0
+    },
+    "FINGEN": {
+      "baseline_contract": 12,
+      "core_delivery": 0
+    },
+    "FINQA": {
+      "baseline_contract": 10,
+      "core_delivery": 0
+    },
+    "FR": {
+      "baseline_contract": 0,
+      "core_delivery": 8
+    },
+    "GK": {
+      "baseline_contract": 8,
+      "core_delivery": 1
+    },
+    "HD": {
+      "baseline_contract": 10,
+      "core_delivery": 0
+    },
+    "HK": {
+      "baseline_contract": 10,
+      "core_delivery": 0
+    },
+    "HL": {
+      "baseline_contract": 7,
+      "core_delivery": 0
+    },
+    "HM": {
+      "baseline_contract": 7,
+      "core_delivery": 0
+    },
+    "KL": {
+      "baseline_contract": 7,
+      "core_delivery": 0
+    },
+    "LANG": {
+      "baseline_contract": 0,
+      "core_delivery": 14
+    },
+    "LLE": {
+      "baseline_contract": 11,
+      "core_delivery": 0
+    },
+    "MOAT": {
+      "baseline_contract": 0,
+      "core_delivery": 16
+    },
+    "NCLI": {
+      "baseline_contract": 1,
+      "core_delivery": 5
+    },
+    "NFR": {
+      "baseline_contract": 0,
+      "core_delivery": 3
+    },
+    "NS": {
+      "baseline_contract": 6,
+      "core_delivery": 0
+    },
+    "OBBFD": {
+      "baseline_contract": 9,
+      "core_delivery": 0
+    },
+    "PG": {
+      "baseline_contract": 7,
+      "core_delivery": 0
+    },
+    "PH": {
+      "baseline_contract": 10,
+      "core_delivery": 0
+    },
+    "PL": {
+      "baseline_contract": 7,
+      "core_delivery": 0
+    },
+    "PMDESK": {
+      "baseline_contract": 12,
+      "core_delivery": 0
+    },
+    "PMKT": {
+      "baseline_contract": 0,
+      "core_delivery": 16
+    },
+    "PS": {
+      "baseline_contract": 7,
+      "core_delivery": 0
+    },
+    "QF": {
+      "baseline_contract": 9,
+      "core_delivery": 0
+    },
+    "RBI": {
+      "baseline_contract": 8,
+      "core_delivery": 0
+    },
+    "RCG": {
+      "baseline_contract": 0,
+      "core_delivery": 8
+    },
+    "RK": {
+      "baseline_contract": 9,
+      "core_delivery": 0
+    },
+    "RP": {
+      "baseline_contract": 9,
+      "core_delivery": 0
+    },
+    "RV": {
+      "baseline_contract": 0,
+      "core_delivery": 4
+    },
+    "SECAPI": {
+      "baseline_contract": 10,
+      "core_delivery": 0
+    },
+    "SH": {
+      "baseline_contract": 5,
+      "core_delivery": 0
+    },
+    "TD": {
+      "baseline_contract": 6,
+      "core_delivery": 0
+    },
+    "TVSRC": {
+      "baseline_contract": 9,
+      "core_delivery": 0
+    },
+    "UI": {
+      "baseline_contract": 0,
+      "core_delivery": 31
+    },
+    "VR": {
+      "baseline_contract": 7,
+      "core_delivery": 0
+    },
+    "WA": {
+      "baseline_contract": 9,
+      "core_delivery": 0
+    },
+    "WCR": {
+      "baseline_contract": 8,
+      "core_delivery": 0
+    },
+    "WF": {
+      "baseline_contract": 7,
+      "core_delivery": 0
+    },
+    "WK": {
+      "baseline_contract": 10,
+      "core_delivery": 0
+    },
+    "WR": {
+      "baseline_contract": 6,
+      "core_delivery": 0
+    },
+    "XR": {
+      "baseline_contract": 0,
+      "core_delivery": 7
+    },
+    "ZQ": {
+      "baseline_contract": 0,
+      "core_delivery": 8
+    }
+  },
+  "requirements": [
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.fr",
+      "id": "FR-1",
+      "prefix": "FR",
+      "source_status": "implemented",
+      "title": "Market Probability Normalization"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.fr",
+      "id": "FR-2",
+      "prefix": "FR",
+      "source_status": "implemented",
+      "title": "Fair Probability Estimation"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.fr",
+      "id": "FR-3",
+      "prefix": "FR",
+      "source_status": "implemented",
+      "title": "Underdog Mispricing Signal"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.fr",
+      "id": "FR-4",
+      "prefix": "FR",
+      "source_status": "implemented",
+      "title": "Profitability Gate Integration"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.fr",
+      "id": "FR-5",
+      "prefix": "FR",
+      "source_status": "implemented",
+      "title": "Position Sizing"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.fr",
+      "id": "FR-6",
+      "prefix": "FR",
+      "source_status": "implemented",
+      "title": "Portfolio Constraints"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.fr",
+      "id": "FR-7",
+      "prefix": "FR",
+      "source_status": "implemented",
+      "title": "Exit and Lifecycle Rules"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.fr",
+      "id": "FR-8",
+      "prefix": "FR",
+      "source_status": "implemented",
+      "title": "Telemetry and Attribution"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.nfr",
+      "id": "NFR-1",
+      "prefix": "NFR",
+      "source_status": "implemented",
+      "title": "Latency"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.nfr",
+      "id": "NFR-2",
+      "prefix": "NFR",
+      "source_status": "implemented",
+      "title": "Reliability"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.nfr",
+      "id": "NFR-3",
+      "prefix": "NFR",
+      "source_status": "implemented",
+      "title": "Determinism"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.ac",
+      "id": "AC-1",
+      "prefix": "AC",
+      "source_status": "implemented",
+      "title": "Backtest Readiness"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.ac",
+      "id": "AC-2",
+      "prefix": "AC",
+      "source_status": "implemented",
+      "title": "Paper-Trade Readiness"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.ac",
+      "id": "AC-3",
+      "prefix": "AC",
+      "source_status": "implemented",
+      "title": "Promotion Gate"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.bf",
+      "id": "BF-1",
+      "prefix": "BF",
+      "source_status": "implemented",
+      "title": "Runtime Configuration and Boot Controls"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.bf",
+      "id": "BF-2",
+      "prefix": "BF",
+      "source_status": "implemented",
+      "title": "Market/Strategy Control Plane"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.bf",
+      "id": "BF-3",
+      "prefix": "BF",
+      "source_status": "implemented",
+      "title": "Mandatory Order and Risk Pipeline"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.bf",
+      "id": "BF-4",
+      "prefix": "BF",
+      "source_status": "implemented",
+      "title": "Market Data and Reliability Controls"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.bf",
+      "id": "BF-5",
+      "prefix": "BF",
+      "source_status": "implemented",
+      "title": "Research, Simulation, and Ops Automation"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.bf",
+      "id": "BF-6",
+      "prefix": "BF",
+      "source_status": "implemented",
+      "title": "Security, Compliance, and Data Governance"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.rv",
+      "id": "RV-1",
+      "prefix": "RV",
+      "source_status": "implemented",
+      "title": "Core Control Plane"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.rv",
+      "id": "RV-2",
+      "prefix": "RV",
+      "source_status": "implemented",
+      "title": "Execution and Risk Overlay"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.rv",
+      "id": "RV-3",
+      "prefix": "RV",
+      "source_status": "implemented",
+      "title": "Runtime Integrity and Security"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.rv",
+      "id": "RV-4",
+      "prefix": "RV",
+      "source_status": "implemented",
+      "title": "Simulation and Ops Flow"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.xr",
+      "id": "XR-1",
+      "prefix": "XR",
+      "source_status": "implemented",
+      "title": "Short-Cycle Binary Arbitrage Scanner"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.xr",
+      "id": "XR-2",
+      "prefix": "XR",
+      "source_status": "implemented",
+      "title": "Legging/Execution Safety for Two-Leg Trades"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.xr",
+      "id": "XR-3",
+      "prefix": "XR",
+      "source_status": "implemented",
+      "title": "Venue Universe and Market-Type Configuration"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.xr",
+      "id": "XR-4",
+      "prefix": "XR",
+      "source_status": "implemented",
+      "title": "Micro-Edge Throughput Accounting"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.xr",
+      "id": "XR-5",
+      "prefix": "XR",
+      "source_status": "implemented",
+      "title": "Optional Asymmetric Single-Leg Mode"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.xr",
+      "id": "XR-6",
+      "prefix": "XR",
+      "source_status": "implemented",
+      "title": "Automation Security Hardening (Linked Setup Thread)"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.xr",
+      "id": "XR-7",
+      "prefix": "XR",
+      "source_status": "implemented",
+      "title": "Provenance and Confidence Handling"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.hm",
+      "id": "HM-1",
+      "prefix": "HM",
+      "source_status": "unmapped",
+      "title": "Universe-Scale Squeeze Monitoring"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.hm",
+      "id": "HM-2",
+      "prefix": "HM",
+      "source_status": "unmapped",
+      "title": "Multi-Factor Squeeze Feature Set"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.hm",
+      "id": "HM-3",
+      "prefix": "HM",
+      "source_status": "unmapped",
+      "title": "Composite Scoring and Ranking"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.hm",
+      "id": "HM-4",
+      "prefix": "HM",
+      "source_status": "unmapped",
+      "title": "Alerting Pipeline"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.hm",
+      "id": "HM-5",
+      "prefix": "HM",
+      "source_status": "unmapped",
+      "title": "Feature Store and Rolling Snapshot Retention"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.hm",
+      "id": "HM-6",
+      "prefix": "HM",
+      "source_status": "unmapped",
+      "title": "Parameter Tuning and Governance"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.hm",
+      "id": "HM-7",
+      "prefix": "HM",
+      "source_status": "unmapped",
+      "title": "Safety and Promotion Constraints"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.td",
+      "id": "TD-1",
+      "prefix": "TD",
+      "source_status": "unmapped",
+      "title": "Time-to-Resolution Value Model"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.td",
+      "id": "TD-2",
+      "prefix": "TD",
+      "source_status": "unmapped",
+      "title": "Hold-vs-Exit Policy Engine"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.td",
+      "id": "TD-3",
+      "prefix": "TD",
+      "source_status": "unmapped",
+      "title": "Early-Exit Suppression Guard"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.td",
+      "id": "TD-4",
+      "prefix": "TD",
+      "source_status": "unmapped",
+      "title": "Resolution-Centric Lifecycle Tracking"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.td",
+      "id": "TD-5",
+      "prefix": "TD",
+      "source_status": "unmapped",
+      "title": "Policy A/B and Promotion Rules"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.td",
+      "id": "TD-6",
+      "prefix": "TD",
+      "source_status": "unmapped",
+      "title": "Advisory on External Performance Claims"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.zq",
+      "id": "ZQ-1",
+      "prefix": "ZQ",
+      "source_status": "implemented",
+      "title": "Split-Plane Architecture (Analysis vs Execution)"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.zq",
+      "id": "ZQ-2",
+      "prefix": "ZQ",
+      "source_status": "implemented",
+      "title": "Short-Cycle Feature Evaluation Loop"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.zq",
+      "id": "ZQ-3",
+      "prefix": "ZQ",
+      "source_status": "implemented",
+      "title": "Latency and Throughput SLOs for HFT Path"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.zq",
+      "id": "ZQ-4",
+      "prefix": "ZQ",
+      "source_status": "implemented",
+      "title": "Kelly-Constrained Position Sizing"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.zq",
+      "id": "ZQ-5",
+      "prefix": "ZQ",
+      "source_status": "implemented",
+      "title": "High-Frequency Execution Governance"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.zq",
+      "id": "ZQ-6",
+      "prefix": "ZQ",
+      "source_status": "implemented",
+      "title": "Cross-Market Expansion Controls"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.zq",
+      "id": "ZQ-7",
+      "prefix": "ZQ",
+      "source_status": "implemented",
+      "title": "Weather/Event-Market Exogenous Data Integration (Optional)"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.zq",
+      "id": "ZQ-8",
+      "prefix": "ZQ",
+      "source_status": "implemented",
+      "title": "External Performance Claim Handling"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.kl",
+      "id": "KL-1",
+      "prefix": "KL",
+      "source_status": "unmapped",
+      "title": "Kyle\u2019s Lambda Market-Toxicity Estimation"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.kl",
+      "id": "KL-2",
+      "prefix": "KL",
+      "source_status": "unmapped",
+      "title": "Adverse-Selection Guardrail"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.kl",
+      "id": "KL-3",
+      "prefix": "KL",
+      "source_status": "unmapped",
+      "title": "Impact-Aware Market Selection"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.kl",
+      "id": "KL-4",
+      "prefix": "KL",
+      "source_status": "unmapped",
+      "title": "Microstructure/Fair-Value Divergence Telemetry"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.kl",
+      "id": "KL-5",
+      "prefix": "KL",
+      "source_status": "unmapped",
+      "title": "Execution Diagnostics and SLO Coupling"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.kl",
+      "id": "KL-6",
+      "prefix": "KL",
+      "source_status": "unmapped",
+      "title": "Risk and Promotion Constraints"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.kl",
+      "id": "KL-7",
+      "prefix": "KL",
+      "source_status": "unmapped",
+      "title": "External Claim Handling"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.wf",
+      "id": "WF-1",
+      "prefix": "WF",
+      "source_status": "unmapped",
+      "title": "Wallet-Flow Context Stream"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.wf",
+      "id": "WF-2",
+      "prefix": "WF",
+      "source_status": "unmapped",
+      "title": "Whale Quorum Trigger Logic"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.wf",
+      "id": "WF-3",
+      "prefix": "WF",
+      "source_status": "unmapped",
+      "title": "Pre-Move Entry and Immediate Hedge Workflow"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.wf",
+      "id": "WF-4",
+      "prefix": "WF",
+      "source_status": "unmapped",
+      "title": "Locked-Spread Validation"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.wf",
+      "id": "WF-5",
+      "prefix": "WF",
+      "source_status": "unmapped",
+      "title": "Latency and Reliability Gates for Whale-Flow Strategy"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.wf",
+      "id": "WF-6",
+      "prefix": "WF",
+      "source_status": "unmapped",
+      "title": "Safety and Scope Controls"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.wf",
+      "id": "WF-7",
+      "prefix": "WF",
+      "source_status": "unmapped",
+      "title": "External Claim Handling"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.dv",
+      "id": "DV-1",
+      "prefix": "DV",
+      "source_status": "unmapped",
+      "title": "Strategy-Knowledge Ingestion Pipeline"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.dv",
+      "id": "DV-2",
+      "prefix": "DV",
+      "source_status": "unmapped",
+      "title": "Author-to-Wallet Mapping Layer"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.dv",
+      "id": "DV-3",
+      "prefix": "DV",
+      "source_status": "unmapped",
+      "title": "Publish-vs-Trade Divergence Detection"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.dv",
+      "id": "DV-4",
+      "prefix": "DV",
+      "source_status": "unmapped",
+      "title": "Behavior-Weighted Strategy Overrides"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.dv",
+      "id": "DV-5",
+      "prefix": "DV",
+      "source_status": "unmapped",
+      "title": "Consensus Event Triggering"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.dv",
+      "id": "DV-6",
+      "prefix": "DV",
+      "source_status": "unmapped",
+      "title": "Research-to-Execution Governance"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.dv",
+      "id": "DV-7",
+      "prefix": "DV",
+      "source_status": "unmapped",
+      "title": "Source Reliability and Claim Handling"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.ps",
+      "id": "PS-1",
+      "prefix": "PS",
+      "source_status": "unmapped",
+      "title": "Low-Price Candidate Scanner"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.ps",
+      "id": "PS-2",
+      "prefix": "PS",
+      "source_status": "unmapped",
+      "title": "Basket Campaign Construction"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.ps",
+      "id": "PS-3",
+      "prefix": "PS",
+      "source_status": "unmapped",
+      "title": "Hit-Rate and Expectancy Guardrails"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.ps",
+      "id": "PS-4",
+      "prefix": "PS",
+      "source_status": "unmapped",
+      "title": "High-Volume Settlement and Accounting"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.ps",
+      "id": "PS-5",
+      "prefix": "PS",
+      "source_status": "unmapped",
+      "title": "External Wallet/Bot Signal Hygiene"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.ps",
+      "id": "PS-6",
+      "prefix": "PS",
+      "source_status": "unmapped",
+      "title": "Throughput, Rate-Limit, and Latency Controls"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.ps",
+      "id": "PS-7",
+      "prefix": "PS",
+      "source_status": "unmapped",
+      "title": "Source Reliability and Claim Handling"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.rbi",
+      "id": "RBI-1",
+      "prefix": "RBI",
+      "source_status": "unmapped",
+      "title": "Research-Backtest-Incubate (RBI) Pipeline"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.rbi",
+      "id": "RBI-2",
+      "prefix": "RBI",
+      "source_status": "unmapped",
+      "title": "Multi-Agent Role Separation"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.rbi",
+      "id": "RBI-3",
+      "prefix": "RBI",
+      "source_status": "unmapped",
+      "title": "Parallel Experiment Orchestration"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.rbi",
+      "id": "RBI-4",
+      "prefix": "RBI",
+      "source_status": "unmapped",
+      "title": "Promotion Gate Before Incubation"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.rbi",
+      "id": "RBI-5",
+      "prefix": "RBI",
+      "source_status": "unmapped",
+      "title": "Feature/Filter Ablation Requirements"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.rbi",
+      "id": "RBI-6",
+      "prefix": "RBI",
+      "source_status": "unmapped",
+      "title": "Model Routing, Cost, and Reasoning-Budget Controls"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.rbi",
+      "id": "RBI-7",
+      "prefix": "RBI",
+      "source_status": "unmapped",
+      "title": "Evaluation Data Breadth and Reproducibility"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.rbi",
+      "id": "RBI-8",
+      "prefix": "RBI",
+      "source_status": "unmapped",
+      "title": "Source Reliability and Claim Handling"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.ct",
+      "id": "CT-1",
+      "prefix": "CT",
+      "source_status": "unmapped",
+      "title": "Consensus-Over-Single-Wallet Decisioning"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.ct",
+      "id": "CT-2",
+      "prefix": "CT",
+      "source_status": "unmapped",
+      "title": "Wallet Selection and Qualification Filters"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.ct",
+      "id": "CT-3",
+      "prefix": "CT",
+      "source_status": "unmapped",
+      "title": "Wallet Exclusion Heuristics"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.ct",
+      "id": "CT-4",
+      "prefix": "CT",
+      "source_status": "unmapped",
+      "title": "Copy Execution Modes and Controls"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.ct",
+      "id": "CT-5",
+      "prefix": "CT",
+      "source_status": "unmapped",
+      "title": "Ongoing Rotation and Drift Management"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.ct",
+      "id": "CT-6",
+      "prefix": "CT",
+      "source_status": "unmapped",
+      "title": "Portfolio Risk Overlay for Copy Baskets"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.ct",
+      "id": "CT-7",
+      "prefix": "CT",
+      "source_status": "unmapped",
+      "title": "Market Impact and Liquidity Protection"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.ct",
+      "id": "CT-8",
+      "prefix": "CT",
+      "source_status": "unmapped",
+      "title": "Source Reliability and Claim Handling"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.vr",
+      "id": "VR-1",
+      "prefix": "VR",
+      "source_status": "unmapped",
+      "title": "Variance-Drag Measurement Engine"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.vr",
+      "id": "VR-2",
+      "prefix": "VR",
+      "source_status": "unmapped",
+      "title": "Belief-vs-Actual Performance Reconciliation"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.vr",
+      "id": "VR-3",
+      "prefix": "VR",
+      "source_status": "unmapped",
+      "title": "Drawdown and Path-Dependency Diagnostics"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.vr",
+      "id": "VR-4",
+      "prefix": "VR",
+      "source_status": "unmapped",
+      "title": "Risk Calculator Workflow and Latency Targets"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.vr",
+      "id": "VR-5",
+      "prefix": "VR",
+      "source_status": "unmapped",
+      "title": "Reproducible Formula and Code Outputs"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.vr",
+      "id": "VR-6",
+      "prefix": "VR",
+      "source_status": "unmapped",
+      "title": "Data Quality and Metric Integrity Controls"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.vr",
+      "id": "VR-7",
+      "prefix": "VR",
+      "source_status": "unmapped",
+      "title": "Source Reliability and Claim Handling"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.qf",
+      "id": "QF-1",
+      "prefix": "QF",
+      "source_status": "unmapped",
+      "title": "Composite Edge Signal"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.qf",
+      "id": "QF-2",
+      "prefix": "QF",
+      "source_status": "unmapped",
+      "title": "LMSR-Aware Market Modeling"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.qf",
+      "id": "QF-3",
+      "prefix": "QF",
+      "source_status": "unmapped",
+      "title": "Sequential Bayesian Update Loop"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.qf",
+      "id": "QF-4",
+      "prefix": "QF",
+      "source_status": "unmapped",
+      "title": "Explicit EV Entry Gate"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.qf",
+      "id": "QF-5",
+      "prefix": "QF",
+      "source_status": "unmapped",
+      "title": "Fractional Kelly Sizing Policy"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.qf",
+      "id": "QF-6",
+      "prefix": "QF",
+      "source_status": "unmapped",
+      "title": "Strategy Archetype Module Support"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.qf",
+      "id": "QF-7",
+      "prefix": "QF",
+      "source_status": "unmapped",
+      "title": "Publish-vs-Behavior Divergence Mining"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.qf",
+      "id": "QF-8",
+      "prefix": "QF",
+      "source_status": "unmapped",
+      "title": "Live Ops Hub and Sandbox Requirements"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.qf",
+      "id": "QF-9",
+      "prefix": "QF",
+      "source_status": "unmapped",
+      "title": "Source Reliability and Claim Handling"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.hd",
+      "id": "HD-1",
+      "prefix": "HD",
+      "source_status": "unmapped",
+      "title": "Hyperbolic Discount Valuation Path"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.hd",
+      "id": "HD-2",
+      "prefix": "HD",
+      "source_status": "unmapped",
+      "title": "Deterministic Pre-Trade Rule Gate"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.hd",
+      "id": "HD-3",
+      "prefix": "HD",
+      "source_status": "unmapped",
+      "title": "Multi-Stage Agent Workflow"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.hd",
+      "id": "HD-4",
+      "prefix": "HD",
+      "source_status": "unmapped",
+      "title": "Quant Risk Metric Guardrails"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.hd",
+      "id": "HD-5",
+      "prefix": "HD",
+      "source_status": "unmapped",
+      "title": "Arbitrage Consistency Checks"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.hd",
+      "id": "HD-6",
+      "prefix": "HD",
+      "source_status": "unmapped",
+      "title": "Execution Controls and Auto-Hedge"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.hd",
+      "id": "HD-7",
+      "prefix": "HD",
+      "source_status": "unmapped",
+      "title": "Loss-Cause Learning Loop"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.hd",
+      "id": "HD-8",
+      "prefix": "HD",
+      "source_status": "unmapped",
+      "title": "Skill/Prompt Packaging Requirements"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.hd",
+      "id": "HD-9",
+      "prefix": "HD",
+      "source_status": "unmapped",
+      "title": "External Terminal and Paper-Mode Requirements"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.hd",
+      "id": "HD-10",
+      "prefix": "HD",
+      "source_status": "unmapped",
+      "title": "Source Reliability and Claim Handling"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.ar",
+      "id": "AR-1",
+      "prefix": "AR",
+      "source_status": "unmapped",
+      "title": "Fixed-Price Entry Mode"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.ar",
+      "id": "AR-2",
+      "prefix": "AR",
+      "source_status": "unmapped",
+      "title": "Short-Horizon Impulse Capture Logic"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.ar",
+      "id": "AR-3",
+      "prefix": "AR",
+      "source_status": "unmapped",
+      "title": "Aggressive Reinvestment Policy Controls"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.ar",
+      "id": "AR-4",
+      "prefix": "AR",
+      "source_status": "unmapped",
+      "title": "Target-Multiple Exit Framework"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.ar",
+      "id": "AR-5",
+      "prefix": "AR",
+      "source_status": "unmapped",
+      "title": "Compounding Path and Ruin-Risk Analytics"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.ar",
+      "id": "AR-6",
+      "prefix": "AR",
+      "source_status": "unmapped",
+      "title": "Session State, Telemetry, and Control Surface"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.ar",
+      "id": "AR-7",
+      "prefix": "AR",
+      "source_status": "unmapped",
+      "title": "Profile/Wallet Context as Optional Signal"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.ar",
+      "id": "AR-8",
+      "prefix": "AR",
+      "source_status": "unmapped",
+      "title": "Source Reliability and Claim Handling"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.rk",
+      "id": "RK-1",
+      "prefix": "RK",
+      "source_status": "unmapped",
+      "title": "Model Stack and Probability Calibration"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.rk",
+      "id": "RK-2",
+      "prefix": "RK",
+      "source_status": "unmapped",
+      "title": "Explicit Edge Threshold Gate"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.rk",
+      "id": "RK-3",
+      "prefix": "RK",
+      "source_status": "unmapped",
+      "title": "Risk Gate Sequence and Latency Budget"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.rk",
+      "id": "RK-4",
+      "prefix": "RK",
+      "source_status": "unmapped",
+      "title": "Fractional Kelly and Bankroll Caps"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.rk",
+      "id": "RK-5",
+      "prefix": "RK",
+      "source_status": "unmapped",
+      "title": "Hard Risk Limits"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.rk",
+      "id": "RK-6",
+      "prefix": "RK",
+      "source_status": "unmapped",
+      "title": "Signal-Quality and Microstructure Filters"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.rk",
+      "id": "RK-7",
+      "prefix": "RK",
+      "source_status": "unmapped",
+      "title": "Backtest Scoreboard and Category Breakdown"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.rk",
+      "id": "RK-8",
+      "prefix": "RK",
+      "source_status": "unmapped",
+      "title": "Simulated-vs-Live Performance Separation"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.rk",
+      "id": "RK-9",
+      "prefix": "RK",
+      "source_status": "unmapped",
+      "title": "Source Reliability and Claim Handling"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.ph",
+      "id": "PH-1",
+      "prefix": "PH",
+      "source_status": "unmapped",
+      "title": "Market Scope and Timing Window"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.ph",
+      "id": "PH-2",
+      "prefix": "PH",
+      "source_status": "unmapped",
+      "title": "Dual-Leg Parity Entry Rule"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.ph",
+      "id": "PH-3",
+      "prefix": "PH",
+      "source_status": "unmapped",
+      "title": "Hold-to-Resolution Cycle Control"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.ph",
+      "id": "PH-4",
+      "prefix": "PH",
+      "source_status": "unmapped",
+      "title": "Structural-vs-Latency Edge Attribution"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.ph",
+      "id": "PH-5",
+      "prefix": "PH",
+      "source_status": "unmapped",
+      "title": "High-Throughput Reliability Controls"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.ph",
+      "id": "PH-6",
+      "prefix": "PH",
+      "source_status": "unmapped",
+      "title": "Balance-Linked Scaling Guardrails"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.ph",
+      "id": "PH-7",
+      "prefix": "PH",
+      "source_status": "unmapped",
+      "title": "Live Profile Reconciliation and Loss Visibility"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.ph",
+      "id": "PH-8",
+      "prefix": "PH",
+      "source_status": "unmapped",
+      "title": "Copytrade and Third-Party Endpoint Hygiene"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.ph",
+      "id": "PH-9",
+      "prefix": "PH",
+      "source_status": "unmapped",
+      "title": "Deployment and Secret Management Controls"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.ph",
+      "id": "PH-10",
+      "prefix": "PH",
+      "source_status": "unmapped",
+      "title": "Source Reliability and Claim Handling"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.hk",
+      "id": "HK-1",
+      "prefix": "HK",
+      "source_status": "unmapped",
+      "title": "Correlation Decomposition and Hidden Concentration"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.hk",
+      "id": "HK-2",
+      "prefix": "HK",
+      "source_status": "unmapped",
+      "title": "Factor Exposure and Hedge Overlay"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.hk",
+      "id": "HK-3",
+      "prefix": "HK",
+      "source_status": "unmapped",
+      "title": "Boundary-Hit Probability for Near-Resolution Sizing"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.hk",
+      "id": "HK-4",
+      "prefix": "HK",
+      "source_status": "unmapped",
+      "title": "Horizon-Scaling of Uncertainty"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.hk",
+      "id": "HK-5",
+      "prefix": "HK",
+      "source_status": "unmapped",
+      "title": "Volatility Clustering and Shock-Decay Modeling"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.hk",
+      "id": "HK-6",
+      "prefix": "HK",
+      "source_status": "unmapped",
+      "title": "Heteroscedastic Regression and Robust Estimation"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.hk",
+      "id": "HK-7",
+      "prefix": "HK",
+      "source_status": "unmapped",
+      "title": "VaR Ensemble and Assumption Divergence Alerts"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.hk",
+      "id": "HK-8",
+      "prefix": "HK",
+      "source_status": "unmapped",
+      "title": "Martingale/Markov Assumption Boundaries"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.hk",
+      "id": "HK-9",
+      "prefix": "HK",
+      "source_status": "unmapped",
+      "title": "Data-Driven Education/Research Ingestion Governance"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.hk",
+      "id": "HK-10",
+      "prefix": "HK",
+      "source_status": "unmapped",
+      "title": "Source Reliability and Claim Handling"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.ax",
+      "id": "AX-1",
+      "prefix": "AX",
+      "source_status": "unmapped",
+      "title": "Expectancy-First Strategy Evaluation"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.ax",
+      "id": "AX-2",
+      "prefix": "AX",
+      "source_status": "unmapped",
+      "title": "Payoff Asymmetry Guardrails"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.ax",
+      "id": "AX-3",
+      "prefix": "AX",
+      "source_status": "unmapped",
+      "title": "Multi-Model Weather Consensus Gate"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.ax",
+      "id": "AX-4",
+      "prefix": "AX",
+      "source_status": "unmapped",
+      "title": "Forecast-Update Clock Scheduling"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.ax",
+      "id": "AX-5",
+      "prefix": "AX",
+      "source_status": "unmapped",
+      "title": "Stale-Price Capture and Pre-Settlement Exit Rules"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.ax",
+      "id": "AX-6",
+      "prefix": "AX",
+      "source_status": "unmapped",
+      "title": "Regime-Aware Swing Strategy Gating"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.ax",
+      "id": "AX-7",
+      "prefix": "AX",
+      "source_status": "unmapped",
+      "title": "High-Frequency Micro-Bet Controls"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.ax",
+      "id": "AX-8",
+      "prefix": "AX",
+      "source_status": "unmapped",
+      "title": "Data Feed Provenance and Resolution Integrity"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.ax",
+      "id": "AX-9",
+      "prefix": "AX",
+      "source_status": "unmapped",
+      "title": "External Bot and Copytrade Endpoint Hygiene"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.ax",
+      "id": "AX-10",
+      "prefix": "AX",
+      "source_status": "unmapped",
+      "title": "Source Reliability and Claim Handling"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.wk",
+      "id": "WK-1",
+      "prefix": "WK",
+      "source_status": "unmapped",
+      "title": "Market Scope and Horizon Controls"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.wk",
+      "id": "WK-2",
+      "prefix": "WK",
+      "source_status": "unmapped",
+      "title": "Signal Families: Probability Gap and Parity Gap"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.wk",
+      "id": "WK-3",
+      "prefix": "WK",
+      "source_status": "unmapped",
+      "title": "Sequential Probability Update Engine"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.wk",
+      "id": "WK-4",
+      "prefix": "WK",
+      "source_status": "unmapped",
+      "title": "Latency SLO and Execution Pipeline"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.wk",
+      "id": "WK-5",
+      "prefix": "WK",
+      "source_status": "unmapped",
+      "title": "Throughput Reliability and Order-Safety Controls"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.wk",
+      "id": "WK-6",
+      "prefix": "WK",
+      "source_status": "unmapped",
+      "title": "Expected Value and Sizing Discipline"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.wk",
+      "id": "WK-7",
+      "prefix": "WK",
+      "source_status": "unmapped",
+      "title": "Regime-Adaptive Risk Scaling"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.wk",
+      "id": "WK-8",
+      "prefix": "WK",
+      "source_status": "unmapped",
+      "title": "External Prediction Source Governance"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.wk",
+      "id": "WK-9",
+      "prefix": "WK",
+      "source_status": "unmapped",
+      "title": "Public Profile Reconciliation and Tail-Loss Visibility"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.wk",
+      "id": "WK-10",
+      "prefix": "WK",
+      "source_status": "unmapped",
+      "title": "Copytrade Endpoint Hygiene and Claim Handling"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.al",
+      "id": "AL-1",
+      "prefix": "AL",
+      "source_status": "unmapped",
+      "title": "LMSR Cost Function Fidelity"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.al",
+      "id": "AL-2",
+      "prefix": "AL",
+      "source_status": "unmapped",
+      "title": "Marginal Price and Probability Coherence"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.al",
+      "id": "AL-3",
+      "prefix": "AL",
+      "source_status": "unmapped",
+      "title": "Liquidity Parameter (`b`) Governance"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.al",
+      "id": "AL-4",
+      "prefix": "AL",
+      "source_status": "unmapped",
+      "title": "Trade Impact and Delta-Cost Quoting"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.al",
+      "id": "AL-5",
+      "prefix": "AL",
+      "source_status": "unmapped",
+      "title": "Bounded-Loss and Subsidy Accounting"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.al",
+      "id": "AL-6",
+      "prefix": "AL",
+      "source_status": "unmapped",
+      "title": "Inventory State Integrity"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.al",
+      "id": "AL-7",
+      "prefix": "AL",
+      "source_status": "unmapped",
+      "title": "LMSR-Based Mispricing Detection"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.al",
+      "id": "AL-8",
+      "prefix": "AL",
+      "source_status": "unmapped",
+      "title": "Liquidity/Counterparty Independence Controls"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.al",
+      "id": "AL-9",
+      "prefix": "AL",
+      "source_status": "unmapped",
+      "title": "AI-Generated Strategy Artifact Governance"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.al",
+      "id": "AL-10",
+      "prefix": "AL",
+      "source_status": "unmapped",
+      "title": "Source Reliability and Claim Handling"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.ns",
+      "id": "NS-1",
+      "prefix": "NS",
+      "source_status": "unmapped",
+      "title": "Market-Universe Pre-Filter Gate"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.ns",
+      "id": "NS-2",
+      "prefix": "NS",
+      "source_status": "unmapped",
+      "title": "Ensemble-Confidence Fire Rule"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.ns",
+      "id": "NS-3",
+      "prefix": "NS",
+      "source_status": "unmapped",
+      "title": "Independent Risk-Validator Quorum"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.ns",
+      "id": "NS-4",
+      "prefix": "NS",
+      "source_status": "unmapped",
+      "title": "Parallel Sub-Agent Concurrency Controls"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.ns",
+      "id": "NS-5",
+      "prefix": "NS",
+      "source_status": "unmapped",
+      "title": "Skill Trigger Precision Monitoring for Trading Agents"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.ns",
+      "id": "NS-6",
+      "prefix": "NS",
+      "source_status": "unmapped",
+      "title": "Source Reliability and Claim Handling"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.pl",
+      "id": "PL-1",
+      "prefix": "PL",
+      "source_status": "unmapped",
+      "title": "Weather Distribution-to-Bucket Probability Mapping"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.pl",
+      "id": "PL-2",
+      "prefix": "PL",
+      "source_status": "unmapped",
+      "title": "Paired Entry/Exit Threshold Profile Governance"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.pl",
+      "id": "PL-3",
+      "prefix": "PL",
+      "source_status": "unmapped",
+      "title": "Per-Scan Trade Budget and Market Universe Controls"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.pl",
+      "id": "PL-4",
+      "prefix": "PL",
+      "source_status": "unmapped",
+      "title": "Segregated Execution Wallet and Funding Guardrails"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.pl",
+      "id": "PL-5",
+      "prefix": "PL",
+      "source_status": "unmapped",
+      "title": "Unattended Operation Watchdogs"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.pl",
+      "id": "PL-6",
+      "prefix": "PL",
+      "source_status": "unmapped",
+      "title": "Third-Party Skill/Module Supply-Chain Controls"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.pl",
+      "id": "PL-7",
+      "prefix": "PL",
+      "source_status": "unmapped",
+      "title": "Source Reliability and Claim Handling"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.pg",
+      "id": "PG-1",
+      "prefix": "PG",
+      "source_status": "unmapped",
+      "title": "Wrapper-Fee-Aware Execution Gate"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.pg",
+      "id": "PG-2",
+      "prefix": "PG",
+      "source_status": "unmapped",
+      "title": "Chat-Native Limit Order Lifecycle Controls"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.pg",
+      "id": "PG-3",
+      "prefix": "PG",
+      "source_status": "unmapped",
+      "title": "Bot-Generated Wallet Lifecycle and Recovery Controls"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.pg",
+      "id": "PG-4",
+      "prefix": "PG",
+      "source_status": "unmapped",
+      "title": "Auto-Bridge Deposit Reconciliation"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.pg",
+      "id": "PG-5",
+      "prefix": "PG",
+      "source_status": "unmapped",
+      "title": "Copy-Mirroring Control Plane Hardening"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.pg",
+      "id": "PG-6",
+      "prefix": "PG",
+      "source_status": "unmapped",
+      "title": "Promotional PnL Artifact Separation"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.pg",
+      "id": "PG-7",
+      "prefix": "PG",
+      "source_status": "unmapped",
+      "title": "Source Reliability and Claim Handling"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.hl",
+      "id": "HL-1",
+      "prefix": "HL",
+      "source_status": "unmapped",
+      "title": "Latency-Normalized Opportunity Scoring"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.hl",
+      "id": "HL-2",
+      "prefix": "HL",
+      "source_status": "unmapped",
+      "title": "Micro-Window Execution Integrity"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.hl",
+      "id": "HL-3",
+      "prefix": "HL",
+      "source_status": "unmapped",
+      "title": "Pre-Close Entry Gating"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.hl",
+      "id": "HL-4",
+      "prefix": "HL",
+      "source_status": "unmapped",
+      "title": "Convergence-Exit Automation"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.hl",
+      "id": "HL-5",
+      "prefix": "HL",
+      "source_status": "unmapped",
+      "title": "Feed Lead-Lag Provenance and Entitlement Controls"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.hl",
+      "id": "HL-6",
+      "prefix": "HL",
+      "source_status": "unmapped",
+      "title": "Latency-Edge Capacity and Decay Monitoring"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.hl",
+      "id": "HL-7",
+      "prefix": "HL",
+      "source_status": "unmapped",
+      "title": "Source Reliability and Claim Handling"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.dk",
+      "id": "DK-1",
+      "prefix": "DK",
+      "source_status": "unmapped",
+      "title": "Causal Time-Alignment and Lookahead Prevention"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.dk",
+      "id": "DK-2",
+      "prefix": "DK",
+      "source_status": "unmapped",
+      "title": "Event-Feed Revision and Finality Handling"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.dk",
+      "id": "DK-3",
+      "prefix": "DK",
+      "source_status": "unmapped",
+      "title": "Cross-Domain Latency Baselines and Drift Alerts"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.dk",
+      "id": "DK-4",
+      "prefix": "DK",
+      "source_status": "unmapped",
+      "title": "Source Reliability and Claim Handling"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.wr",
+      "id": "WR-1",
+      "prefix": "WR",
+      "source_status": "unmapped",
+      "title": "Two-Sided Liquidity Provisioning Mode"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.wr",
+      "id": "WR-2",
+      "prefix": "WR",
+      "source_status": "unmapped",
+      "title": "Fill-State Outcome Engine"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.wr",
+      "id": "WR-3",
+      "prefix": "WR",
+      "source_status": "unmapped",
+      "title": "Reward-Aware Net PnL Decomposition"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.wr",
+      "id": "WR-4",
+      "prefix": "WR",
+      "source_status": "unmapped",
+      "title": "One-Leg Fill Hedge Controls"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.wr",
+      "id": "WR-5",
+      "prefix": "WR",
+      "source_status": "unmapped",
+      "title": "Niche-Market Competition Scoring"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.wr",
+      "id": "WR-6",
+      "prefix": "WR",
+      "source_status": "unmapped",
+      "title": "Source Reliability and Claim Handling"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.dn",
+      "id": "DN-1",
+      "prefix": "DN",
+      "source_status": "unmapped",
+      "title": "Social Wallet Address Ingestion and Validation"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.dn",
+      "id": "DN-2",
+      "prefix": "DN",
+      "source_status": "unmapped",
+      "title": "Directed Market-List Trading Mode"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.dn",
+      "id": "DN-3",
+      "prefix": "DN",
+      "source_status": "unmapped",
+      "title": "Preference-Constrained Adaptive Tuning"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.dn",
+      "id": "DN-4",
+      "prefix": "DN",
+      "source_status": "unmapped",
+      "title": "High-Probability Tail-Risk Overlay"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.dn",
+      "id": "DN-5",
+      "prefix": "DN",
+      "source_status": "unmapped",
+      "title": "Source Reliability and Claim Handling"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.sh",
+      "id": "SH-1",
+      "prefix": "SH",
+      "source_status": "unmapped",
+      "title": "Confidence-Ladder Order Slicing"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.sh",
+      "id": "SH-2",
+      "prefix": "SH",
+      "source_status": "unmapped",
+      "title": "Child-Order Sequence Integrity"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.sh",
+      "id": "SH-3",
+      "prefix": "SH",
+      "source_status": "unmapped",
+      "title": "Ultra-Short Horizon Regime Isolation"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.sh",
+      "id": "SH-4",
+      "prefix": "SH",
+      "source_status": "unmapped",
+      "title": "High-Volume Micro-Execution Reliability Budget"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.sh",
+      "id": "SH-5",
+      "prefix": "SH",
+      "source_status": "unmapped",
+      "title": "Source Reliability and Claim Handling"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.rp",
+      "id": "RP-1",
+      "prefix": "RP",
+      "source_status": "unmapped",
+      "title": "Deterministic Metric-Backed Resolution Contracts"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.rp",
+      "id": "RP-2",
+      "prefix": "RP",
+      "source_status": "unmapped",
+      "title": "Verified-Data Oracle and Snapshot Finality"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.rp",
+      "id": "RP-3",
+      "prefix": "RP",
+      "source_status": "unmapped",
+      "title": "Startup/Founder Market Template Library"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.rp",
+      "id": "RP-4",
+      "prefix": "RP",
+      "source_status": "unmapped",
+      "title": "Entity-Centric Market Graph"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.rp",
+      "id": "RP-5",
+      "prefix": "RP",
+      "source_status": "unmapped",
+      "title": "Virtual-Credit Engagement Environment"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.rp",
+      "id": "RP-6",
+      "prefix": "RP",
+      "source_status": "unmapped",
+      "title": "Market Discovery and Coverage Controls"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.rp",
+      "id": "RP-7",
+      "prefix": "RP",
+      "source_status": "unmapped",
+      "title": "Public Activity Feed with Privacy-Safe Telemetry"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.rp",
+      "id": "RP-8",
+      "prefix": "RP",
+      "source_status": "unmapped",
+      "title": "Reputation Leaderboard Quality Controls"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.rp",
+      "id": "RP-9",
+      "prefix": "RP",
+      "source_status": "unmapped",
+      "title": "Source Reliability and Claim Handling"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.gk",
+      "id": "GK-1",
+      "prefix": "GK",
+      "source_status": "unmapped",
+      "title": "One-Command Container Runtime"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.gk",
+      "id": "GK-2",
+      "prefix": "GK",
+      "source_status": "unmapped",
+      "title": "Public Simulation Leaderboard Publication"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.gk",
+      "id": "GK-3",
+      "prefix": "GK",
+      "source_status": "unmapped",
+      "title": "Operator Notification Integrations (Telegram/Discord)"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.gk",
+      "id": "GK-4",
+      "prefix": "GK",
+      "source_status": "unmapped",
+      "title": "Historical Dataset Bootstrap and Seeding"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.gk",
+      "id": "GK-5",
+      "prefix": "GK",
+      "source_status": "unmapped",
+      "title": "Hyperparameter + Purged-CV Automation"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.gk",
+      "id": "GK-6",
+      "prefix": "GK",
+      "source_status": "unmapped",
+      "title": "Automated Monthly Performance Report Builder"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.gk",
+      "id": "GK-7",
+      "prefix": "GK",
+      "source_status": "unmapped",
+      "title": "Strategy Scaffolding and Plugin Extension Interface"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.gk",
+      "id": "GK-8",
+      "prefix": "GK",
+      "source_status": "unmapped",
+      "title": "Hybrid Backtesting Execution Modes"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.gk",
+      "id": "GK-9",
+      "prefix": "GK",
+      "source_status": "implemented",
+      "title": "Prometheus-Compatible Metrics Surface"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.wa",
+      "id": "WA-1",
+      "prefix": "WA",
+      "source_status": "unmapped",
+      "title": "Primary Backend Framework"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.wa",
+      "id": "WA-2",
+      "prefix": "WA",
+      "source_status": "unmapped",
+      "title": "Primary Frontend Framework"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.wa",
+      "id": "WA-3",
+      "prefix": "WA",
+      "source_status": "unmapped",
+      "title": "Streamlit Role Boundary"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.wa",
+      "id": "WA-4",
+      "prefix": "WA",
+      "source_status": "unmapped",
+      "title": "API and Streaming Contracts"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.wa",
+      "id": "WA-5",
+      "prefix": "WA",
+      "source_status": "unmapped",
+      "title": "Data and Session Architecture"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.wa",
+      "id": "WA-6",
+      "prefix": "WA",
+      "source_status": "unmapped",
+      "title": "AuthN/AuthZ and Security"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.wa",
+      "id": "WA-7",
+      "prefix": "WA",
+      "source_status": "unmapped",
+      "title": "Reliability and Operability"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.wa",
+      "id": "WA-8",
+      "prefix": "WA",
+      "source_status": "unmapped",
+      "title": "Frontend Quality and Testing"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.wa",
+      "id": "WA-9",
+      "prefix": "WA",
+      "source_status": "unmapped",
+      "title": "Migration and Compatibility"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.dxr",
+      "id": "DXR-1",
+      "prefix": "DXR",
+      "source_status": "unmapped",
+      "title": "Agent Scratchpad Audit Trail"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.dxr",
+      "id": "DXR-2",
+      "prefix": "DXR",
+      "source_status": "unmapped",
+      "title": "Anti-Loop Tool Execution Controls"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.dxr",
+      "id": "DXR-3",
+      "prefix": "DXR",
+      "source_status": "unmapped",
+      "title": "Context Overflow Recovery and Memory Flush"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.dxr",
+      "id": "DXR-4",
+      "prefix": "DXR",
+      "source_status": "unmapped",
+      "title": "Provider-Routed LLM Layer"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.dxr",
+      "id": "DXR-5",
+      "prefix": "DXR",
+      "source_status": "unmapped",
+      "title": "Conditional Tool Registry and Failover"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.dxr",
+      "id": "DXR-6",
+      "prefix": "DXR",
+      "source_status": "implemented",
+      "title": "Skill Package Interface (SKILL.md)"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.dxr",
+      "id": "DXR-7",
+      "prefix": "DXR",
+      "source_status": "unmapped",
+      "title": "Structured Evaluation Harness"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.dxr",
+      "id": "DXR-8",
+      "prefix": "DXR",
+      "source_status": "unmapped",
+      "title": "Messaging Channel Gateway with Access Policies"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.wcr",
+      "id": "WCR-1",
+      "prefix": "WCR",
+      "source_status": "unmapped",
+      "title": "Multi-Source Search Adapter Framework"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.wcr",
+      "id": "WCR-2",
+      "prefix": "WCR",
+      "source_status": "unmapped",
+      "title": "Recency-Normalized Aggregation"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.wcr",
+      "id": "WCR-3",
+      "prefix": "WCR",
+      "source_status": "unmapped",
+      "title": "Canonical URL Resolution"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.wcr",
+      "id": "WCR-4",
+      "prefix": "WCR",
+      "source_status": "unmapped",
+      "title": "Robust JS-Heavy Page Parsing Pipeline"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.wcr",
+      "id": "WCR-5",
+      "prefix": "WCR",
+      "source_status": "unmapped",
+      "title": "Link Graph Extraction Capability"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.wcr",
+      "id": "WCR-6",
+      "prefix": "WCR",
+      "source_status": "unmapped",
+      "title": "Resource and Session Controls for Ingestion"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.wcr",
+      "id": "WCR-7",
+      "prefix": "WCR",
+      "source_status": "unmapped",
+      "title": "Parse Output Quality Contract"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.wcr",
+      "id": "WCR-8",
+      "prefix": "WCR",
+      "source_status": "unmapped",
+      "title": "Real-Site Integration Test Coverage"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.lle",
+      "id": "LLE-1",
+      "prefix": "LLE",
+      "source_status": "unmapped",
+      "title": "Task-Specific Evaluation Packs (Classification + Regression)"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.lle",
+      "id": "LLE-2",
+      "prefix": "LLE",
+      "source_status": "unmapped",
+      "title": "Strict Structured Output Contract for Model Judgments"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.lle",
+      "id": "LLE-3",
+      "prefix": "LLE",
+      "source_status": "unmapped",
+      "title": "Provider-Parity Tool Calling Layer"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.lle",
+      "id": "LLE-4",
+      "prefix": "LLE",
+      "source_status": "unmapped",
+      "title": "Cost and Latency as First-Class Evaluation Metrics"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.lle",
+      "id": "LLE-5",
+      "prefix": "LLE",
+      "source_status": "unmapped",
+      "title": "Dual Artifact Output (Metrics + Raw Predictions)"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.lle",
+      "id": "LLE-6",
+      "prefix": "LLE",
+      "source_status": "unmapped",
+      "title": "Best-Model Selection per Metric Family"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.lle",
+      "id": "LLE-7",
+      "prefix": "LLE",
+      "source_status": "unmapped",
+      "title": "Tolerance-Banded Regression Accuracy"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.lle",
+      "id": "LLE-8",
+      "prefix": "LLE",
+      "source_status": "unmapped",
+      "title": "Confusion-Matrix-Native Classification Scoring"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.lle",
+      "id": "LLE-9",
+      "prefix": "LLE",
+      "source_status": "unmapped",
+      "title": "Dataset Factory + Local Cache Strategy"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.lle",
+      "id": "LLE-10",
+      "prefix": "LLE",
+      "source_status": "unmapped",
+      "title": "Hypothesis-Driven Financial Label Construction"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.lle",
+      "id": "LLE-11",
+      "prefix": "LLE",
+      "source_status": "unmapped",
+      "title": "Hierarchical Financial Extraction Workflow (XBRL-Oriented)"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.ahf",
+      "id": "AHF-1",
+      "prefix": "AHF",
+      "source_status": "unmapped",
+      "title": "Runtime-Composable Agent Graphs"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.ahf",
+      "id": "AHF-2",
+      "prefix": "AHF",
+      "source_status": "unmapped",
+      "title": "Strategy Flow Templates and Versioned Persistence"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.ahf",
+      "id": "AHF-3",
+      "prefix": "AHF",
+      "source_status": "unmapped",
+      "title": "Execution Run Registry with Lifecycle Status"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.ahf",
+      "id": "AHF-4",
+      "prefix": "AHF",
+      "source_status": "unmapped",
+      "title": "Per-Cycle Session Telemetry for Continuous Modes"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.ahf",
+      "id": "AHF-5",
+      "prefix": "AHF",
+      "source_status": "implemented",
+      "title": "Server-Sent Event Streaming for Operator UX"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.ahf",
+      "id": "AHF-6",
+      "prefix": "AHF",
+      "source_status": "unmapped",
+      "title": "Per-Agent Model Routing Overrides"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.ahf",
+      "id": "AHF-7",
+      "prefix": "AHF",
+      "source_status": "unmapped",
+      "title": "Deterministic Trade Feasibility Pre-Checks"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.ahf",
+      "id": "AHF-8",
+      "prefix": "AHF",
+      "source_status": "unmapped",
+      "title": "Integrated Long/Short + Margin Accounting Model"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.ahf",
+      "id": "AHF-9",
+      "prefix": "AHF",
+      "source_status": "unmapped",
+      "title": "Volatility and Correlation-Aware Position Limits"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.ahf",
+      "id": "AHF-10",
+      "prefix": "AHF",
+      "source_status": "unmapped",
+      "title": "Hybrid Signal Fabric with Reasoning Artifacts"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.ahf",
+      "id": "AHF-11",
+      "prefix": "AHF",
+      "source_status": "unmapped",
+      "title": "Backtest Progression with Benchmark Context"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.ahf",
+      "id": "AHF-12",
+      "prefix": "AHF",
+      "source_status": "unmapped",
+      "title": "API Key Vault Operations for Multi-Provider Runtime"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.obbfd",
+      "id": "OBBFD-1",
+      "prefix": "OBBFD",
+      "source_status": "unmapped",
+      "title": "Deterministic API-Key Resolution Precedence"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.obbfd",
+      "id": "OBBFD-2",
+      "prefix": "OBBFD",
+      "source_status": "unmapped",
+      "title": "UI-Boot Degraded Mode for Option Endpoints"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.obbfd",
+      "id": "OBBFD-3",
+      "prefix": "OBBFD",
+      "source_status": "unmapped",
+      "title": "Decorator-Driven Widget Registry Contract"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.obbfd",
+      "id": "OBBFD-4",
+      "prefix": "OBBFD",
+      "source_status": "unmapped",
+      "title": "Declarative Workspace/App Manifest Endpoint"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.obbfd",
+      "id": "OBBFD-5",
+      "prefix": "OBBFD",
+      "source_status": "unmapped",
+      "title": "Financial Table Normalization + Transposition Layer"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.obbfd",
+      "id": "OBBFD-6",
+      "prefix": "OBBFD",
+      "source_status": "unmapped",
+      "title": "Standardized Parameter Options Endpoints"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.obbfd",
+      "id": "OBBFD-7",
+      "prefix": "OBBFD",
+      "source_status": "unmapped",
+      "title": "Provider Proxy Reliability Envelope"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.obbfd",
+      "id": "OBBFD-8",
+      "prefix": "OBBFD",
+      "source_status": "unmapped",
+      "title": "Health and Deployment SLO Integration"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.obbfd",
+      "id": "OBBFD-9",
+      "prefix": "OBBFD",
+      "source_status": "unmapped",
+      "title": "Real-Time Subscription Session Registry (Optional Module)"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.finqa",
+      "id": "FINQA-1",
+      "prefix": "FINQA",
+      "source_status": "unmapped",
+      "title": "Two-Stage Retrieval-to-Reasoning Pipeline Contract"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.finqa",
+      "id": "FINQA-2",
+      "prefix": "FINQA",
+      "source_status": "unmapped",
+      "title": "Unified Multi-Source Evidence Model (Text + Table)"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.finqa",
+      "id": "FINQA-3",
+      "prefix": "FINQA",
+      "source_status": "unmapped",
+      "title": "Retrieval Quality Metrics with Top-K Recall Reporting"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.finqa",
+      "id": "FINQA-4",
+      "prefix": "FINQA",
+      "source_status": "unmapped",
+      "title": "Context Packing Under Token/Length Budgets"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.finqa",
+      "id": "FINQA-5",
+      "prefix": "FINQA",
+      "source_status": "unmapped",
+      "title": "Executable Program DSL for Numeric Reasoning"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.finqa",
+      "id": "FINQA-6",
+      "prefix": "FINQA",
+      "source_status": "unmapped",
+      "title": "Dual Accuracy Regime: Execution vs Program Equivalence"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.finqa",
+      "id": "FINQA-7",
+      "prefix": "FINQA",
+      "source_status": "unmapped",
+      "title": "Blind-Test Benchmark Governance"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.finqa",
+      "id": "FINQA-8",
+      "prefix": "FINQA",
+      "source_status": "unmapped",
+      "title": "Leakage-Resistant Data Transformation Controls"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.finqa",
+      "id": "FINQA-9",
+      "prefix": "FINQA",
+      "source_status": "unmapped",
+      "title": "Program Representation Compatibility (Sequential + Nested)"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.finqa",
+      "id": "FINQA-10",
+      "prefix": "FINQA",
+      "source_status": "unmapped",
+      "title": "Prediction Artifact Standardization for External Leaderboards"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.pmdesk",
+      "id": "PMDESK-1",
+      "prefix": "PMDESK",
+      "source_status": "unmapped",
+      "title": "Layered Desk Runtime Separation"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.pmdesk",
+      "id": "PMDESK-2",
+      "prefix": "PMDESK",
+      "source_status": "unmapped",
+      "title": "Bayesian Probability Update Engine"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.pmdesk",
+      "id": "PMDESK-3",
+      "prefix": "PMDESK",
+      "source_status": "unmapped",
+      "title": "Cross-Market Dependency Graph Enforcement"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.pmdesk",
+      "id": "PMDESK-4",
+      "prefix": "PMDESK",
+      "source_status": "unmapped",
+      "title": "Calibration Surface and Bias Diagnostics"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.pmdesk",
+      "id": "PMDESK-5",
+      "prefix": "PMDESK",
+      "source_status": "unmapped",
+      "title": "Uncertainty-Adjusted Kelly Sizing"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.pmdesk",
+      "id": "PMDESK-6",
+      "prefix": "PMDESK",
+      "source_status": "unmapped",
+      "title": "Microstructure-Aware Execution Algorithms"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.pmdesk",
+      "id": "PMDESK-7",
+      "prefix": "PMDESK",
+      "source_status": "unmapped",
+      "title": "Informed-Flow and Liquidity Kill Switches"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.pmdesk",
+      "id": "PMDESK-8",
+      "prefix": "PMDESK",
+      "source_status": "unmapped",
+      "title": "Portfolio Risk Guardrails (VaR + Drawdown)"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.pmdesk",
+      "id": "PMDESK-9",
+      "prefix": "PMDESK",
+      "source_status": "unmapped",
+      "title": "Cross-Venue Price Discovery and Latency Arb Module"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.pmdesk",
+      "id": "PMDESK-10",
+      "prefix": "PMDESK",
+      "source_status": "unmapped",
+      "title": "On-Chain Settlement-Aware Monitoring"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.pmdesk",
+      "id": "PMDESK-11",
+      "prefix": "PMDESK",
+      "source_status": "unmapped",
+      "title": "Event-Driven Data Backbone Requirements"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.pmdesk",
+      "id": "PMDESK-12",
+      "prefix": "PMDESK",
+      "source_status": "unmapped",
+      "title": "Infrastructure and Reliability Baseline"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.faui",
+      "id": "FAUI-1",
+      "prefix": "FAUI",
+      "source_status": "unmapped",
+      "title": "Tool-Aware Generative UI Rendering Contract"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.faui",
+      "id": "FAUI-2",
+      "prefix": "FAUI",
+      "source_status": "unmapped",
+      "title": "Stream-Event-Driven Chat Orchestration"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.faui",
+      "id": "FAUI-3",
+      "prefix": "FAUI",
+      "source_status": "unmapped",
+      "title": "Remote Runnable API Boundary"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.faui",
+      "id": "FAUI-4",
+      "prefix": "FAUI",
+      "source_status": "unmapped",
+      "title": "Graph Node Event Contract Stability"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.faui",
+      "id": "FAUI-5",
+      "prefix": "FAUI",
+      "source_status": "unmapped",
+      "title": "Strongly Typed Tool Argument Schemas"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.faui",
+      "id": "FAUI-6",
+      "prefix": "FAUI",
+      "source_status": "unmapped",
+      "title": "Multi-Source Financial + Web Retrieval Surface"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.faui",
+      "id": "FAUI-7",
+      "prefix": "FAUI",
+      "source_status": "unmapped",
+      "title": "UI-Native Data Shape Normalization"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.faui",
+      "id": "FAUI-8",
+      "prefix": "FAUI",
+      "source_status": "unmapped",
+      "title": "Progressive Loading Components per Tool Type"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.faui",
+      "id": "FAUI-9",
+      "prefix": "FAUI",
+      "source_status": "unmapped",
+      "title": "Structured Error Envelope for Tool Failures"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.faui",
+      "id": "FAUI-10",
+      "prefix": "FAUI",
+      "source_status": "unmapped",
+      "title": "Frontend/Backend Local Compose Development Contract"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.faui",
+      "id": "FAUI-11",
+      "prefix": "FAUI",
+      "source_status": "unmapped",
+      "title": "Agent Run Observability and Trace Correlation"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.faui",
+      "id": "FAUI-12",
+      "prefix": "FAUI",
+      "source_status": "unmapped",
+      "title": "Extensible Tool-and-Component Plugin Path"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.fdata",
+      "id": "FDATA-1",
+      "prefix": "FDATA",
+      "source_status": "unmapped",
+      "title": "Multi-Source Financial Corpus Ingestion"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.fdata",
+      "id": "FDATA-2",
+      "prefix": "FDATA",
+      "source_status": "unmapped",
+      "title": "SEC Filing Identity + Access Compliance"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.fdata",
+      "id": "FDATA-3",
+      "prefix": "FDATA",
+      "source_status": "unmapped",
+      "title": "Filing Item-Scoped Extraction Controls"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.fdata",
+      "id": "FDATA-4",
+      "prefix": "FDATA",
+      "source_status": "unmapped",
+      "title": "Deterministic Text Cleanup Pipeline"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.fdata",
+      "id": "FDATA-5",
+      "prefix": "FDATA",
+      "source_status": "unmapped",
+      "title": "Token-Aware Chunking with Overlap"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.fdata",
+      "id": "FDATA-6",
+      "prefix": "FDATA",
+      "source_status": "unmapped",
+      "title": "Question Budget Allocation Policy"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.fdata",
+      "id": "FDATA-7",
+      "prefix": "FDATA",
+      "source_status": "unmapped",
+      "title": "Structured LLM Function-Call Output Contract"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.fdata",
+      "id": "FDATA-8",
+      "prefix": "FDATA",
+      "source_status": "unmapped",
+      "title": "Grounded, Standalone Q/A Quality Policy"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.fdata",
+      "id": "FDATA-9",
+      "prefix": "FDATA",
+      "source_status": "unmapped",
+      "title": "Provider Guardrails and Retry Strategy"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.fdata",
+      "id": "FDATA-10",
+      "prefix": "FDATA",
+      "source_status": "unmapped",
+      "title": "Canonical Dataset Schema and Validation"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.fdata",
+      "id": "FDATA-11",
+      "prefix": "FDATA",
+      "source_status": "unmapped",
+      "title": "Generation Provenance and Usage Telemetry"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.fdata",
+      "id": "FDATA-12",
+      "prefix": "FDATA",
+      "source_status": "unmapped",
+      "title": "Synthetic Financial QA Regression Tests"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.fingen",
+      "id": "FINGEN-1",
+      "prefix": "FINGEN",
+      "source_status": "unmapped",
+      "title": "Server-Action AI Runtime with Split UI/Model State"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.fingen",
+      "id": "FINGEN-2",
+      "prefix": "FINGEN",
+      "source_status": "unmapped",
+      "title": "Optimistic User-Turn Rendering"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.fingen",
+      "id": "FINGEN-3",
+      "prefix": "FINGEN",
+      "source_status": "unmapped",
+      "title": "Unified Event Stream Handling for LLM + Tools"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.fingen",
+      "id": "FINGEN-4",
+      "prefix": "FINGEN",
+      "source_status": "unmapped",
+      "title": "Tool Invocation Transparency UI"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.fingen",
+      "id": "FINGEN-5",
+      "prefix": "FINGEN",
+      "source_status": "unmapped",
+      "title": "Tool-Result-to-Widget Routing"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.fingen",
+      "id": "FINGEN-6",
+      "prefix": "FINGEN",
+      "source_status": "unmapped",
+      "title": "Financial Data Adapter Layer (Polygon-Style)"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.fingen",
+      "id": "FINGEN-7",
+      "prefix": "FINGEN",
+      "source_status": "unmapped",
+      "title": "Structured Tool Schemas for Agent Reliability"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.fingen",
+      "id": "FINGEN-8",
+      "prefix": "FINGEN",
+      "source_status": "unmapped",
+      "title": "Message-Role Conversion Contract"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.fingen",
+      "id": "FINGEN-9",
+      "prefix": "FINGEN",
+      "source_status": "unmapped",
+      "title": "Rich Markdown Rendering with Data-Oriented Components"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.fingen",
+      "id": "FINGEN-10",
+      "prefix": "FINGEN",
+      "source_status": "unmapped",
+      "title": "Input UX Controls for High-Velocity Chat"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.fingen",
+      "id": "FINGEN-11",
+      "prefix": "FINGEN",
+      "source_status": "unmapped",
+      "title": "Scroll Anchoring and Navigation in Streaming Chats"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.fingen",
+      "id": "FINGEN-12",
+      "prefix": "FINGEN",
+      "source_status": "unmapped",
+      "title": "Multi-Modal Assistant Turn Composition"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.secapi",
+      "id": "SECAPI-1",
+      "prefix": "SECAPI",
+      "source_status": "unmapped",
+      "title": "SEC-Compliant Request Identity Policy"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.secapi",
+      "id": "SECAPI-2",
+      "prefix": "SECAPI",
+      "source_status": "unmapped",
+      "title": "Master Ticker-to-CIK Registry Ingestion"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.secapi",
+      "id": "SECAPI-3",
+      "prefix": "SECAPI",
+      "source_status": "unmapped",
+      "title": "Canonical CIK Normalization Contract"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.secapi",
+      "id": "SECAPI-4",
+      "prefix": "SECAPI",
+      "source_status": "unmapped",
+      "title": "Company Submissions Metadata Pipeline"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.secapi",
+      "id": "SECAPI-5",
+      "prefix": "SECAPI",
+      "source_status": "unmapped",
+      "title": "XBRL Company Facts Taxonomy Traversal"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.secapi",
+      "id": "SECAPI-6",
+      "prefix": "SECAPI",
+      "source_status": "unmapped",
+      "title": "Concept-Level Time-Series Endpoint Support"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.secapi",
+      "id": "SECAPI-7",
+      "prefix": "SECAPI",
+      "source_status": "unmapped",
+      "title": "Unit-Aware Metric Extraction"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.secapi",
+      "id": "SECAPI-8",
+      "prefix": "SECAPI",
+      "source_status": "unmapped",
+      "title": "Form-Scoped Series Derivation"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.secapi",
+      "id": "SECAPI-9",
+      "prefix": "SECAPI",
+      "source_status": "unmapped",
+      "title": "Tabular Normalization for Analytics Pipelines"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.secapi",
+      "id": "SECAPI-10",
+      "prefix": "SECAPI",
+      "source_status": "unmapped",
+      "title": "Issuer Fundamentals Discovery Utilities"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.tvsrc",
+      "id": "TVSRC-1",
+      "prefix": "TVSRC",
+      "source_status": "unmapped",
+      "title": "Public Indicator-Script Ingestion Contract"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.tvsrc",
+      "id": "TVSRC-2",
+      "prefix": "TVSRC",
+      "source_status": "unmapped",
+      "title": "Pine-to-Python Translation Pipeline"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.tvsrc",
+      "id": "TVSRC-3",
+      "prefix": "TVSRC",
+      "source_status": "unmapped",
+      "title": "Translation Equivalence Validation"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.tvsrc",
+      "id": "TVSRC-4",
+      "prefix": "TVSRC",
+      "source_status": "unmapped",
+      "title": "Batch Backtest Factory for Large Candidate Sets"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.tvsrc",
+      "id": "TVSRC-5",
+      "prefix": "TVSRC",
+      "source_status": "unmapped",
+      "title": "Filter-Augmented Variant Expansion and Ablation"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.tvsrc",
+      "id": "TVSRC-6",
+      "prefix": "TVSRC",
+      "source_status": "unmapped",
+      "title": "Composite-Score Ranking from Results Registry"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.tvsrc",
+      "id": "TVSRC-7",
+      "prefix": "TVSRC",
+      "source_status": "unmapped",
+      "title": "Short-Side Exit Logic Invariant Tests"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.tvsrc",
+      "id": "TVSRC-8",
+      "prefix": "TVSRC",
+      "source_status": "unmapped",
+      "title": "Coverage Pipeline for Trending/Editor-Pick Script Sources"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.tvsrc",
+      "id": "TVSRC-9",
+      "prefix": "TVSRC",
+      "source_status": "unmapped",
+      "title": "Source Reliability and Claim Handling"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.comp",
+      "id": "COMP-1",
+      "prefix": "COMP",
+      "source_status": "implemented",
+      "title": "Documentation Availability and Metadata Integrity"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.comp",
+      "id": "COMP-2",
+      "prefix": "COMP",
+      "source_status": "implemented",
+      "title": "Semantic Release and Distribution Credibility"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.comp",
+      "id": "COMP-3",
+      "prefix": "COMP",
+      "source_status": "implemented",
+      "title": "Public Benchmark Quality Gate"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.comp",
+      "id": "COMP-4",
+      "prefix": "COMP",
+      "source_status": "implemented",
+      "title": "Golden Dataset and Provenance Governance"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.comp",
+      "id": "COMP-5",
+      "prefix": "COMP",
+      "source_status": "implemented",
+      "title": "Reference Strategy Pack Publication Standard"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.comp",
+      "id": "COMP-6",
+      "prefix": "COMP",
+      "source_status": "implemented",
+      "title": "One Engine, Two Product Surfaces"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.comp",
+      "id": "COMP-7",
+      "prefix": "COMP",
+      "source_status": "implemented",
+      "title": "Studio (Casual) UX Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.comp",
+      "id": "COMP-8",
+      "prefix": "COMP",
+      "source_status": "implemented",
+      "title": "Core (Professional) UX Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.comp",
+      "id": "COMP-9",
+      "prefix": "COMP",
+      "source_status": "implemented",
+      "title": "Surface Parity and Traceability"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.comp",
+      "id": "COMP-10",
+      "prefix": "COMP",
+      "source_status": "implemented",
+      "title": "Wedge-First Market Scope Governance"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.comp",
+      "id": "COMP-11",
+      "prefix": "COMP",
+      "source_status": "implemented",
+      "title": "First-Success CLI Path"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.comp",
+      "id": "COMP-12",
+      "prefix": "COMP",
+      "source_status": "implemented",
+      "title": "Template-First, Code-Optional, Code-Visible Operation"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.comp",
+      "id": "COMP-13",
+      "prefix": "COMP",
+      "source_status": "implemented",
+      "title": "Public Claim and Evidence Policy"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.comp",
+      "id": "COMP-14",
+      "prefix": "COMP",
+      "source_status": "implemented",
+      "title": "Tiering Model Safety Baseline"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.lang",
+      "id": "LANG-1",
+      "prefix": "LANG",
+      "source_status": "implemented",
+      "title": "Python-First, Not Python-Only Architecture Policy"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.lang",
+      "id": "LANG-2",
+      "prefix": "LANG",
+      "source_status": "implemented",
+      "title": "Native Kernel Boundary for Hot Path"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.lang",
+      "id": "LANG-3",
+      "prefix": "LANG",
+      "source_status": "implemented",
+      "title": "Native Migration Trigger Criteria"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.lang",
+      "id": "LANG-4",
+      "prefix": "LANG",
+      "source_status": "implemented",
+      "title": "Research Data Plane Standard"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.lang",
+      "id": "LANG-5",
+      "prefix": "LANG",
+      "source_status": "implemented",
+      "title": "API and Configuration Contract Hardening"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.lang",
+      "id": "LANG-6",
+      "prefix": "LANG",
+      "source_status": "implemented",
+      "title": "UI Surface Coherence Requirement"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.lang",
+      "id": "LANG-7",
+      "prefix": "LANG",
+      "source_status": "implemented",
+      "title": "FastAPI-Centered Control Plane"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.lang",
+      "id": "LANG-8",
+      "prefix": "LANG",
+      "source_status": "implemented",
+      "title": "Storage-Tier Policy"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.lang",
+      "id": "LANG-9",
+      "prefix": "LANG",
+      "source_status": "implemented",
+      "title": "Engine-Loop and Dashboard Responsiveness SLOs"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.lang",
+      "id": "LANG-10",
+      "prefix": "LANG",
+      "source_status": "implemented",
+      "title": "Interop Packaging and Distribution"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.lang",
+      "id": "LANG-11",
+      "prefix": "LANG",
+      "source_status": "implemented",
+      "title": "UI Migration Safety"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.lang",
+      "id": "LANG-12",
+      "prefix": "LANG",
+      "source_status": "implemented",
+      "title": "Source Reliability and Claim Handling"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.pmkt",
+      "id": "PMKT-1",
+      "prefix": "PMKT",
+      "source_status": "implemented",
+      "title": "Official Integration Index"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.pmkt",
+      "id": "PMKT-2",
+      "prefix": "PMKT",
+      "source_status": "implemented",
+      "title": "Auth State Segmentation for Venue Clients"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.pmkt",
+      "id": "PMKT-3",
+      "prefix": "PMKT",
+      "source_status": "implemented",
+      "title": "Signature-Type and Funder Address Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.pmkt",
+      "id": "PMKT-4",
+      "prefix": "PMKT",
+      "source_status": "implemented",
+      "title": "API Credential Lifecycle and Rotation"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.pmkt",
+      "id": "PMKT-5",
+      "prefix": "PMKT",
+      "source_status": "implemented",
+      "title": "Allowance and Approval Preflight Controls"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.pmkt",
+      "id": "PMKT-6",
+      "prefix": "PMKT",
+      "source_status": "implemented",
+      "title": "Canonical Order Lifecycle and Batch Operations"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.pmkt",
+      "id": "PMKT-7",
+      "prefix": "PMKT",
+      "source_status": "implemented",
+      "title": "Streaming Coverage and Disconnect Safety"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.pmkt",
+      "id": "PMKT-8",
+      "prefix": "PMKT",
+      "source_status": "implemented",
+      "title": "Remote Signer and Builder-Mode Support"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.pmkt",
+      "id": "PMKT-9",
+      "prefix": "PMKT",
+      "source_status": "implemented",
+      "title": "CLI Automation Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.pmkt",
+      "id": "PMKT-10",
+      "prefix": "PMKT",
+      "source_status": "implemented",
+      "title": "Read-Only First and Guided Setup UX"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.pmkt",
+      "id": "PMKT-11",
+      "prefix": "PMKT",
+      "source_status": "implemented",
+      "title": "Wallet-Mode Example Packs and Smoke Tests"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.pmkt",
+      "id": "PMKT-12",
+      "prefix": "PMKT",
+      "source_status": "implemented",
+      "title": "Hybrid Matching and Non-Custodial Settlement Invariants"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.pmkt",
+      "id": "PMKT-13",
+      "prefix": "PMKT",
+      "source_status": "implemented",
+      "title": "Complementary-Outcome Fee Symmetry"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.pmkt",
+      "id": "PMKT-14",
+      "prefix": "PMKT",
+      "source_status": "implemented",
+      "title": "Deployment Registry and Audit Artifact Governance"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.pmkt",
+      "id": "PMKT-15",
+      "prefix": "PMKT",
+      "source_status": "implemented",
+      "title": "Source Reliability and Claim Handling"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.moat",
+      "id": "MOAT-1",
+      "prefix": "MOAT",
+      "source_status": "implemented",
+      "title": "Per-Order Truth Graph"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.moat",
+      "id": "MOAT-2",
+      "prefix": "MOAT",
+      "source_status": "implemented",
+      "title": "Live Divergence Diagnosis and Prescriptive Actions"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.moat",
+      "id": "MOAT-3",
+      "prefix": "MOAT",
+      "source_status": "implemented",
+      "title": "Promotion OS State Machine"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.moat",
+      "id": "MOAT-4",
+      "prefix": "MOAT",
+      "source_status": "implemented",
+      "title": "Promotion Memo and Rollback Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.moat",
+      "id": "MOAT-5",
+      "prefix": "MOAT",
+      "source_status": "implemented",
+      "title": "Stage-Aware Capital Allocation"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.moat",
+      "id": "MOAT-6",
+      "prefix": "MOAT",
+      "source_status": "implemented",
+      "title": "Execution Intelligence Data Model"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.moat",
+      "id": "MOAT-7",
+      "prefix": "MOAT",
+      "source_status": "implemented",
+      "title": "Adaptive Routing and Throttling from Execution Intelligence"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.moat",
+      "id": "MOAT-8",
+      "prefix": "MOAT",
+      "source_status": "implemented",
+      "title": "Single Strategy Object Across Casual and Pro Surfaces"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.moat",
+      "id": "MOAT-9",
+      "prefix": "MOAT",
+      "source_status": "implemented",
+      "title": "Bidirectional Transparency and Parity"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.moat",
+      "id": "MOAT-10",
+      "prefix": "MOAT",
+      "source_status": "implemented",
+      "title": "Policy-Constrained Autonomous Operator"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.moat",
+      "id": "MOAT-11",
+      "prefix": "MOAT",
+      "source_status": "implemented",
+      "title": "Incident Co-Pilot and Safe Rollback Assist"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.moat",
+      "id": "MOAT-12",
+      "prefix": "MOAT",
+      "source_status": "implemented",
+      "title": "Proof-as-Product Artifact Pipeline"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.moat",
+      "id": "MOAT-13",
+      "prefix": "MOAT",
+      "source_status": "implemented",
+      "title": "Public Trust Classifications and Evidence Gates"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.moat",
+      "id": "MOAT-14",
+      "prefix": "MOAT",
+      "source_status": "implemented",
+      "title": "Team Governance and Capital Controls"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.moat",
+      "id": "MOAT-15",
+      "prefix": "MOAT",
+      "source_status": "implemented",
+      "title": "Moat-vs-Parity Roadmap Governance"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.moat",
+      "id": "MOAT-16",
+      "prefix": "MOAT",
+      "source_status": "implemented",
+      "title": "Source Reliability and Claim Handling"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.ncli",
+      "id": "NCLI-1",
+      "prefix": "NCLI",
+      "source_status": "implemented",
+      "title": "Authenticated SSE Stream Surface"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.ncli",
+      "id": "NCLI-2",
+      "prefix": "NCLI",
+      "source_status": "implemented",
+      "title": "Skill Package Discovery and Distribution Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.ncli",
+      "id": "NCLI-3",
+      "prefix": "NCLI",
+      "source_status": "implemented",
+      "title": "Nightly Bounded Self-Improvement Review Loop"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.ncli",
+      "id": "NCLI-4",
+      "prefix": "NCLI",
+      "source_status": "implemented",
+      "title": "Deployment Run-Mode Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.ncli",
+      "id": "NCLI-5",
+      "prefix": "NCLI",
+      "source_status": "implemented",
+      "title": "Agent Memory/Journal/Judge Artifact Contract"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.ncli",
+      "id": "NCLI-6",
+      "prefix": "NCLI",
+      "source_status": "unmapped",
+      "title": "Source Reliability and Claim Handling"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.comp",
+      "id": "COMP-15",
+      "prefix": "COMP",
+      "source_status": "implemented",
+      "title": "Distribution and Install-Path Truth Consistency"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.comp",
+      "id": "COMP-16",
+      "prefix": "COMP",
+      "source_status": "implemented",
+      "title": "Version and Maturity Posture Consistency Gate"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.lang",
+      "id": "LANG-13",
+      "prefix": "LANG",
+      "source_status": "implemented",
+      "title": "Dashboard Runtime Safety and Port Consistency"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.comp",
+      "id": "COMP-17",
+      "prefix": "COMP",
+      "source_status": "implemented",
+      "title": "Benchmark Program Coverage and Cadence"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.pmkt",
+      "id": "PMKT-16",
+      "prefix": "PMKT",
+      "source_status": "implemented",
+      "title": "Marketing-to-Verified Integration Parity Gate"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.lang",
+      "id": "LANG-14",
+      "prefix": "LANG",
+      "source_status": "implemented",
+      "title": "Public Surface Canonicalization Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.comp",
+      "id": "COMP-18",
+      "prefix": "COMP",
+      "source_status": "implemented",
+      "title": "External User-Validation Evidence Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.rcg",
+      "id": "RCG-1",
+      "prefix": "RCG",
+      "source_status": "implemented",
+      "title": "Time-Bucket Market Discovery and Asset Resolution"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.rcg",
+      "id": "RCG-2",
+      "prefix": "RCG",
+      "source_status": "implemented",
+      "title": "Live-Market Dry-Run Parity Mode"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.rcg",
+      "id": "RCG-3",
+      "prefix": "RCG",
+      "source_status": "implemented",
+      "title": "Complementary Bundle Edge Gate with Fee Realism"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.rcg",
+      "id": "RCG-4",
+      "prefix": "RCG",
+      "source_status": "implemented",
+      "title": "Dynamic Limit-Order Repricing Controller"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.rcg",
+      "id": "RCG-5",
+      "prefix": "RCG",
+      "source_status": "implemented",
+      "title": "Maker-First Order-Style Policy"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.rcg",
+      "id": "RCG-6",
+      "prefix": "RCG",
+      "source_status": "implemented",
+      "title": "Resolution-to-Redeem Automation Lifecycle"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.rcg",
+      "id": "RCG-7",
+      "prefix": "RCG",
+      "source_status": "implemented",
+      "title": "Multi-Source Reference Price and Strike Context"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.rcg",
+      "id": "RCG-8",
+      "prefix": "RCG",
+      "source_status": "implemented",
+      "title": "Progressive Stepwise Beginner Validation Ladder"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.ui",
+      "id": "UI-001",
+      "prefix": "UI",
+      "source_status": "implemented",
+      "title": "One Primary Surface Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.ui",
+      "id": "UI-002",
+      "prefix": "UI",
+      "source_status": "implemented",
+      "title": "Unified Product Model Across User Densities"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.ui",
+      "id": "UI-003",
+      "prefix": "UI",
+      "source_status": "implemented",
+      "title": "Global Trust and Runtime Status Bar"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.ui",
+      "id": "UI-004",
+      "prefix": "UI",
+      "source_status": "implemented",
+      "title": "Browser-First Safe Onboarding"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.ui",
+      "id": "UI-005",
+      "prefix": "UI",
+      "source_status": "implemented",
+      "title": "Time-to-Meaningful-Result SLO"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.ui",
+      "id": "UI-006",
+      "prefix": "UI",
+      "source_status": "implemented",
+      "title": "GUI-to-Code Transparency Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.ui",
+      "id": "UI-007",
+      "prefix": "UI",
+      "source_status": "implemented",
+      "title": "Primary Navigation Information Architecture"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.ui",
+      "id": "UI-008",
+      "prefix": "UI",
+      "source_status": "implemented",
+      "title": "Command Center Landing Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.ui",
+      "id": "UI-009",
+      "prefix": "UI",
+      "source_status": "implemented",
+      "title": "Empty-State Integrity"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.ui",
+      "id": "UI-010",
+      "prefix": "UI",
+      "source_status": "implemented",
+      "title": "Guided Strategy Lab"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.ui",
+      "id": "UI-011",
+      "prefix": "UI",
+      "source_status": "implemented",
+      "title": "Metric Explainability"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.ui",
+      "id": "UI-012",
+      "prefix": "UI",
+      "source_status": "implemented",
+      "title": "Safe Capital-Affecting Action Patterns"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.ui",
+      "id": "UI-013",
+      "prefix": "UI",
+      "source_status": "implemented",
+      "title": "Portfolio Surface Requirements"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.ui",
+      "id": "UI-014",
+      "prefix": "UI",
+      "source_status": "implemented",
+      "title": "Execution Surface Requirements"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.ui",
+      "id": "UI-015",
+      "prefix": "UI",
+      "source_status": "implemented",
+      "title": "Risk and Incident Surface Requirements"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.ui",
+      "id": "UI-016",
+      "prefix": "UI",
+      "source_status": "implemented",
+      "title": "Promotion Lifecycle Surface Requirements"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.ui",
+      "id": "UI-017",
+      "prefix": "UI",
+      "source_status": "implemented",
+      "title": "Artifact Provenance Visibility"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.ui",
+      "id": "UI-018",
+      "prefix": "UI",
+      "source_status": "implemented",
+      "title": "Benchmarks Above the Fold"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.ui",
+      "id": "UI-019",
+      "prefix": "UI",
+      "source_status": "implemented",
+      "title": "WebSocket-First Live UX"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.ui",
+      "id": "UI-020",
+      "prefix": "UI",
+      "source_status": "implemented",
+      "title": "No Silent Demo Data on Production Surfaces"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.ui",
+      "id": "UI-021",
+      "prefix": "UI",
+      "source_status": "implemented",
+      "title": "Graceful Degradation and Loud Failure"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.ui",
+      "id": "UI-022",
+      "prefix": "UI",
+      "source_status": "implemented",
+      "title": "Tokenized Design System Requirement"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.ui",
+      "id": "UI-023",
+      "prefix": "UI",
+      "source_status": "implemented",
+      "title": "Accessibility Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.ui",
+      "id": "UI-024",
+      "prefix": "UI",
+      "source_status": "implemented",
+      "title": "Dense but Controllable Data Presentation"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.ui",
+      "id": "UI-025",
+      "prefix": "UI",
+      "source_status": "implemented",
+      "title": "Global Search and Command Palette"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.ui",
+      "id": "UI-026",
+      "prefix": "UI",
+      "source_status": "implemented",
+      "title": "Auth-Aware Shell and Role Visibility"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.ui",
+      "id": "UI-027",
+      "prefix": "UI",
+      "source_status": "implemented",
+      "title": "Privileged Action Audit Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.ui",
+      "id": "UI-028",
+      "prefix": "UI",
+      "source_status": "implemented",
+      "title": "Assistant as Additive Surface"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.ui",
+      "id": "UI-029",
+      "prefix": "UI",
+      "source_status": "implemented",
+      "title": "Constrained Assistant Action Policy"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.ui",
+      "id": "UI-030",
+      "prefix": "UI",
+      "source_status": "implemented",
+      "title": "UI Product Analytics Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.ui",
+      "id": "UI-031",
+      "prefix": "UI",
+      "source_status": "implemented",
+      "title": "UI SLO Contract"
+    }
+  ],
+  "summary": {
+    "tier_counts": {
+      "baseline_contract": 347,
+      "core_delivery": 150
+    },
+    "total_requirements": 497
+  }
+}

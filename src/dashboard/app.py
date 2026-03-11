@@ -683,8 +683,5 @@ def update_simulation_leaderboard_table(n):
     )
 
 
-# External stylesheet
-app.css.append_css({"external_url": "https://codepen.io/chriddyp/pen/bWLwgP.css"})
-
 if __name__ == "__main__":
-    app.run_server(debug=True, host="0.0.0.0", port=8050)
+    app.run(host="0.0.0.0", port=8501, debug=False)

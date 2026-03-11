@@ -10,6 +10,11 @@
   --space-2: 12px;
   --space-3: 16px;
   --space-4: 24px;
+  --ok: #15803d;
+  --warn: #b45309;
+  --bad: #b91c1c;
+  --info: #1d4ed8;
+  --focus: #0ea5e9;
 }
 
 * {
@@ -24,6 +29,10 @@ body {
   color: var(--text);
   font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   min-height: 100%;
+}
+
+body[data-pqts-density="pro"] {
+  --space-3: 12px;
 }
 
 a {
@@ -94,4 +103,107 @@ main {
   color: #f6f8fa;
   padding: 10px;
   overflow-x: auto;
+}
+
+.trust-status-shell {
+  margin-bottom: 16px;
+}
+
+.trust-status-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.status-chip {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 4px 8px;
+  font-size: 0.8rem;
+  background: #f8fafc;
+}
+
+.status-chip-reference {
+  border-color: var(--ok);
+  color: var(--ok);
+}
+
+.status-chip-diagnostic_only {
+  border-color: var(--warn);
+  color: var(--warn);
+}
+
+.status-chip-unverified {
+  border-color: var(--bad);
+  color: var(--bad);
+}
+
+.status-chip-connected {
+  border-color: var(--ok);
+  color: var(--ok);
+}
+
+.status-chip-reconnecting,
+.status-chip-stale {
+  border-color: var(--warn);
+  color: var(--warn);
+}
+
+.status-chip-degraded {
+  border-color: var(--bad);
+  color: var(--bad);
+}
+
+.inline-link-button {
+  border: 1px dashed var(--border);
+  background: #fff;
+  color: var(--info);
+  border-radius: 6px;
+  padding: 4px 8px;
+  cursor: pointer;
+}
+
+.inline-link-button:focus-visible,
+.palette-row:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.palette-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 32, 0.44);
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+}
+
+.palette-card {
+  width: min(780px, 100%);
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  display: grid;
+  gap: 10px;
+}
+
+.palette-row {
+  width: 100%;
+  text-align: left;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #fff;
+  padding: 10px;
+  display: grid;
+  gap: 4px;
+  cursor: pointer;
 }

@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { buildOrderTruth } from "@/lib/ops/reference-data";
+import { buildOrderTruth, loadReferenceProvenance } from "@/lib/ops/reference-data";
 
 interface PageProps {
   searchParams?: {
@@ -11,9 +11,16 @@ interface PageProps {
 export default function OrderTruthPage({ searchParams }: PageProps) {
   const orderId = String(searchParams?.order_id ?? "").trim();
   const payload = buildOrderTruth(orderId);
+  const provenance = loadReferenceProvenance();
 
   return (
     <section style={{ display: "grid", gap: 16 }}>
+      <article className="card">
+        <p style={{ margin: 0 }}>
+          Trust: <span className={`status-chip status-chip-${provenance.trust_label}`}>{provenance.trust_label}</span> · source{" "}
+          <code>{provenance.source_path || "unknown"}</code>
+        </p>
+      </article>
       <article className="card" style={{ display: "grid", gap: 8 }}>
         <h2 style={{ margin: 0 }}>Per-Order Truth Drilldown</h2>
         {payload.selected ? (

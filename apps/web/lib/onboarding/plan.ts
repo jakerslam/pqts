@@ -11,6 +11,8 @@ export interface OnboardingPlan {
   riskProfile: "conservative" | "balanced" | "aggressive";
   commands: string[];
   notes: string[];
+  generatedConfig: Record<string, string | number | boolean>;
+  uiToCliDiff: string[];
 }
 
 function clampCapital(capitalUsd: number): number {
@@ -49,9 +51,24 @@ export function buildOnboardingPlan(input: OnboardingInput): OnboardingPlan {
     "The wizard generates CLI-first steps so every UI action stays code-visible.",
     "Run paper mode before any canary/live stage and preserve generated artifacts for promotion evidence.",
   ];
+  const generatedConfig: Record<string, string | number | boolean> = {
+    experience: normalizedInput.experience,
+    automation: normalizedInput.automation,
+    capital_usd: capitalUsd,
+    risk_profile: riskProfile,
+    paper_first: true,
+    allow_live: false,
+  };
+  const uiToCliDiff = [
+    `risk_profile: ${riskProfile}`,
+    `capital_usd: ${capitalUsd}`,
+    `automation: ${normalizedInput.automation}`,
+  ];
   return {
     riskProfile,
     commands,
     notes,
+    generatedConfig,
+    uiToCliDiff,
   };
 }

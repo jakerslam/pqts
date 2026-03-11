@@ -148,6 +148,23 @@ export function OnboardingWizard() {
         <code>{commandBlock}</code>
       </pre>
 
+      <article className="card" style={{ background: "#f8fbff", display: "grid", gap: 8 }}>
+        <h3 style={{ margin: 0 }}>Generated Config (UI → Code)</h3>
+        <pre className="pqts-code-block" style={{ margin: 0 }}>
+          <code>{JSON.stringify(plan.generatedConfig, null, 2)}</code>
+        </pre>
+        <p style={{ margin: 0, color: "var(--muted)" }}>
+          Diff from prior default profile:
+        </p>
+        <ul style={{ margin: 0, paddingLeft: 18 }}>
+          {plan.uiToCliDiff.map((line) => (
+            <li key={line}>
+              <code>{line}</code>
+            </li>
+          ))}
+        </ul>
+      </article>
+
       <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
         <button type="button" onClick={handleCopy}>
           Copy commands
@@ -165,6 +182,12 @@ export function OnboardingWizard() {
         <article className="card" style={{ display: "grid", gap: 8 }}>
           <h3 style={{ margin: 0 }}>Run Progress: {run.run_id}</h3>
           <p style={{ margin: 0, color: "var(--muted)" }}>Status: {run.status}</p>
+          {typeof run.first_meaningful_result_seconds === "number" ? (
+            <p style={{ margin: 0, color: "var(--muted)" }}>
+              Time to first meaningful result: {run.first_meaningful_result_seconds}s ·{" "}
+              {run.meets_under_5_minute_goal ? "within 5-minute goal" : "outside 5-minute goal"}
+            </p>
+          ) : null}
           <ul style={{ margin: 0, paddingLeft: 18 }}>
             {run.steps.map((step) => (
               <li key={step.id}>

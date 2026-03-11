@@ -22,10 +22,27 @@ export interface ReferenceBundleSummary {
   };
 }
 
+export interface ReferenceProvenance {
+  trust_label: "reference" | "diagnostic_only" | "unverified";
+  generated_at: string;
+  bundle: string;
+  report_path: string;
+  leaderboard_path: string;
+  source_path: string;
+}
+
 interface ReferencePerformancePayload {
   generated_at: string;
   bundle_count: number;
   bundles: ReferenceBundleSummary[];
+}
+
+interface ReferenceBundleReportResult {
+  tca_path?: string;
+}
+
+interface ReferenceBundleReport {
+  results?: ReferenceBundleReportResult[];
 }
 
 function readJson<T>(filePath: string, fallback: T): T {
@@ -63,6 +80,32 @@ export function loadBestReferenceBundle(): ReferenceBundleSummary | null {
     })[0];
 }
 
+function inferTrustLabel(bundle: ReferenceBundleSummary | null): "reference" | "diagnostic_only" | "unverified" {
+  if (!bundle) {
+    return "unverified";
+  }
+  if (bundle.summary.avg_quality_score >= 0.25 && bundle.summary.avg_fill_rate > 0.0) {
+    return "reference";
+  }
+  if (bundle.summary.avg_fill_rate > 0.0) {
+    return "diagnostic_only";
+  }
+  return "unverified";
+}
+
+export function loadReferenceProvenance(): ReferenceProvenance {
+  const payload = loadReferencePerformance();
+  const best = loadBestReferenceBundle();
+  return {
+    trust_label: inferTrustLabel(best),
+    generated_at: String(payload.generated_at ?? ""),
+    bundle: String(best?.bundle ?? ""),
+    report_path: String(best?.report_path ?? ""),
+    leaderboard_path: String(best?.leaderboard_path ?? ""),
+    source_path: String(best?.path ?? ""),
+  };
+}
+
 export interface ExecutionQualityRow {
   trade_id: string;
   strategy_id: string;
@@ -92,12 +135,12 @@ export function loadExecutionQualityRows(limit = 500): ExecutionQualityRow[] {
   if (!fs.existsSync(reportPath)) {
     return [];
   }
-  const report = readJson<any>(reportPath, {});
+  const report = readJson<ReferenceBundleReport>(reportPath, {});
   const results = Array.isArray(report.results) ? report.results : [];
   if (results.length === 0) {
     return [];
   }
-  const tcaPath = String(results[0].tca_path ?? "").trim();
+  const tcaPath = String(results[0]?.tca_path ?? "").trim();
   if (!tcaPath) {
     return [];
   }

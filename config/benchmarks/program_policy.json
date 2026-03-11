@@ -1,0 +1,8 @@
+{
+  "min_bundles": 3,
+  "min_markets": 3,
+  "min_strategies": 3,
+  "min_venues": 3,
+  "min_month_buckets": 1,
+  "allow_single_month_bootstrap": true
+}

@@ -5,9 +5,28 @@ from __future__ import annotations
 from collections import deque
 from dataclasses import dataclass, field
 from statistics import fmean
-from typing import Iterable, Mapping
+from typing import Callable, Iterable, Mapping
 
 from portfolio.kelly_core import kelly_fraction_from_probability
+from strategies.short_cycle_rcg import (
+    ClaimablePosition,
+    DryRunParityArtifact,
+    MakerFirstDecision,
+    MarketDiscoveryInput,
+    ReferencePriceContext,
+    ReferencePriceSample,
+    RepricingDecision,
+    ResolvedMarket,
+    SettlementAttempt,
+    SettlementWorker,
+    build_dry_run_parity_artifact,
+    build_reference_price_context,
+    choose_maker_first_style,
+    decide_dynamic_repricing,
+    discover_markets,
+    evaluate_beginner_validation_ladder,
+    evaluate_complementary_bundle_edge,
+)
 
 
 @dataclass(frozen=True)
@@ -262,3 +281,131 @@ class ShortCycleBinaryEngine:
         if now_ms - sample_timestamp_ms > max_age_ms:
             return False, "exogenous_feed_stale"
         return True, "ok"
+
+    @staticmethod
+    def discover_market_buckets(
+        *,
+        rows: Iterable[MarketDiscoveryInput],
+        allowed_assets: Iterable[str],
+        allowed_intervals: Iterable[str],
+    ) -> tuple[list[ResolvedMarket], list[str]]:
+        return discover_markets(
+            rows=rows,
+            allowed_assets=list(allowed_assets),
+            allowed_intervals=list(allowed_intervals),
+        )
+
+    @staticmethod
+    def dry_run_parity_artifact(
+        *,
+        market_id: str,
+        expected_edge_bps: float,
+        liquidity_score: float,
+        risk_passed: bool,
+        min_liquidity_score: float = 0.65,
+    ) -> DryRunParityArtifact:
+        return build_dry_run_parity_artifact(
+            market_id=market_id,
+            expected_edge_bps=expected_edge_bps,
+            liquidity_score=liquidity_score,
+            risk_passed=risk_passed,
+            min_liquidity_score=min_liquidity_score,
+        )
+
+    @staticmethod
+    def complementary_bundle_edge_gate(
+        *,
+        ask_yes: float,
+        ask_no: float,
+        maker_fee_bps: float,
+        taker_fee_bps: float,
+        use_maker: bool,
+        slippage_bps: float,
+        residual_risk_bps: float,
+        min_required_bps: float,
+    ) -> dict[str, float | bool]:
+        return evaluate_complementary_bundle_edge(
+            ask_yes=ask_yes,
+            ask_no=ask_no,
+            maker_fee_bps=maker_fee_bps,
+            taker_fee_bps=taker_fee_bps,
+            use_maker=use_maker,
+            slippage_bps=slippage_bps,
+            residual_risk_bps=residual_risk_bps,
+            min_required_bps=min_required_bps,
+        ).to_dict()
+
+    @staticmethod
+    def repricing_policy(
+        *,
+        side: str,
+        current_limit_price: float,
+        best_bid: float,
+        best_ask: float,
+        now_ms: int,
+        last_quote_ms: int,
+        max_quote_lifetime_ms: int,
+        min_tick: float,
+        replace_count: int,
+        max_replace_count: int,
+    ) -> RepricingDecision:
+        return decide_dynamic_repricing(
+            side=side,
+            current_limit_price=current_limit_price,
+            best_bid=best_bid,
+            best_ask=best_ask,
+            now_ms=now_ms,
+            last_quote_ms=last_quote_ms,
+            max_quote_lifetime_ms=max_quote_lifetime_ms,
+            min_tick=min_tick,
+            replace_count=replace_count,
+            max_replace_count=max_replace_count,
+        )
+
+    @staticmethod
+    def maker_first_policy(
+        *,
+        maker_first_enabled: bool,
+        taker_fallback_enabled: bool,
+        urgency_score: float,
+        elapsed_wait_ms: int,
+        max_maker_wait_ms: int,
+    ) -> MakerFirstDecision:
+        return choose_maker_first_style(
+            maker_first_enabled=maker_first_enabled,
+            taker_fallback_enabled=taker_fallback_enabled,
+            urgency_score=urgency_score,
+            elapsed_wait_ms=elapsed_wait_ms,
+            max_maker_wait_ms=max_maker_wait_ms,
+        )
+
+    @staticmethod
+    def reference_price_context(
+        *,
+        samples: Iterable[ReferencePriceSample],
+        now_ms: int,
+        max_age_ms: int,
+        max_divergence_bps: float,
+    ) -> ReferencePriceContext:
+        return build_reference_price_context(
+            samples=samples,
+            now_ms=now_ms,
+            max_age_ms=max_age_ms,
+            max_divergence_bps=max_divergence_bps,
+        )
+
+    @staticmethod
+    def beginner_validation_ladder(checks: Mapping[str, bool]) -> dict[str, object]:
+        return evaluate_beginner_validation_ladder(checks)
+
+    @staticmethod
+    def settlement_worker_run(
+        *,
+        worker: SettlementWorker,
+        positions: Iterable[ClaimablePosition],
+        redeem_fn: Callable[[ClaimablePosition], tuple[bool, str]],
+    ) -> list[SettlementAttempt]:
+        return worker.process_claimable_positions(
+            positions=positions,
+            redeem_fn=redeem_fn,
+        )

@@ -1,4 +1,4 @@
-import { loadExecutionQualityRows } from "@/lib/ops/reference-data";
+import { loadExecutionQualityRows, loadReferenceProvenance } from "@/lib/ops/reference-data";
 
 function mean(values: number[]): number {
   if (values.length === 0) {
@@ -9,12 +9,22 @@ function mean(values: number[]): number {
 
 export default function ExecutionQualityPage() {
   const rows = loadExecutionQualityRows(250);
+  const provenance = loadReferenceProvenance();
   const realized = rows.map((row) => row.realized_slippage_bps);
   const predicted = rows.map((row) => row.predicted_slippage_bps);
   const alpha = rows.map((row) => row.realized_net_alpha_usd);
 
   return (
     <section style={{ display: "grid", gap: 16 }}>
+      <article className="card">
+        <h3 style={{ marginTop: 0 }}>Provenance</h3>
+        <p style={{ margin: "0 0 8px" }}>
+          Trust: <span className={`status-chip status-chip-${provenance.trust_label}`}>{provenance.trust_label}</span>
+        </p>
+        <p style={{ margin: 0, color: "var(--muted)" }}>
+          Generated: <code>{provenance.generated_at || "unknown"}</code> · Bundle: <code>{provenance.bundle || "n/a"}</code>
+        </p>
+      </article>
       <div className="grid">
         <article className="card">
           <p className="kpi-title">Rows</p>

@@ -1,0 +1,23 @@
+{
+  "canonical_release_version": "0.1.1",
+  "maturity": "alpha",
+  "distribution": {
+    "pypi": {
+      "available": false,
+      "package": "pqts"
+    }
+  },
+  "ui_surface": {
+    "primary": "nextjs_web",
+    "dashboard_port": 8501,
+    "forbid_external_codepen": true,
+    "required_markers": [
+      "Primary public web surface: Next.js (`apps/web`).",
+      "Dash remains the operator fallback during web cutover."
+    ],
+    "quickstart_required_markers": [
+      "Primary public web surface: Next.js (`apps/web`).",
+      "Dash fallback (operator/internal)"
+    ]
+  }
+}

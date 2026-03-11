@@ -1,10 +1,17 @@
 # 5-Minute Quickstart
 
-## 1) Install + Initialize
+## 1) Install + Initialize (Source Path)
 
 ```bash
-pip install pqts
+git clone https://github.com/jakerslam/pqts.git
+cd pqts
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+pip install -e .
 pqts init
+# fallback if console scripts are unavailable:
+python main.py init
 ```
 
 This creates a safe local workspace (`data/`, `results/`, `logs/`) and copies `.env.example` when available.
@@ -37,10 +44,20 @@ pqts paper start
 This runs a bounded paper campaign with risk-safe defaults and writes snapshots to `data/reports/paper`.
 Paper-start also emits template artifacts/diffs for transparent GUI->code handoff.
 
-## 5) Legacy Runtime and Docker Paths
+## 5) Primary Web Surface + Runtime Paths
+
+Primary public web surface: Next.js (`apps/web`).
+Dash fallback (operator/internal): `python src/dashboard/start.py`.
 
 ```bash
-pqts run config/paper.yaml --show-toggles
+cd apps/web
+npm install
+npm run dev
+# or run engine/runtime directly:
+cd ..
+python main.py run config/paper.yaml --show-toggles
+# Dash fallback (operator/internal):
+python src/dashboard/start.py
 docker compose up --build
 ```
 

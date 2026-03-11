@@ -124,6 +124,8 @@ Latest release: [v0.1.1](https://github.com/jakerslam/PQTS/releases/tag/v0.1.1)
 ## 🌐 Web App Dashboard (Next.js)
 
 The authenticated web surface lives in `apps/web` and now includes:
+Primary public web surface: Next.js (`apps/web`).
+Dash remains the operator fallback during web cutover.
 
 - Promotion Control Center (`/dashboard/promotion`)
 - Execution Quality (`/dashboard/execution-quality`)

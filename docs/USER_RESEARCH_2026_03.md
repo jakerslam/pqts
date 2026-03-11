@@ -2,6 +2,12 @@
 
 Last updated: 2026-03-10 (America/Denver)
 
+Validation metadata:
+- `release_window: 2026-03`
+- `external_beginner_participants: 0`
+- `external_pro_participants: 0`
+- `internal_proxy_participants: 2`
+
 ## Objective
 
 Capture one monthly feedback cycle for both target cohorts and convert findings into concrete roadmap deltas.

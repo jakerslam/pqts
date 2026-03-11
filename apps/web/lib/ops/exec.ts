@@ -1,4 +1,4 @@
-import { execFile } from "node:child_process";
+import { execFile, type ExecFileException } from "node:child_process";
 
 import { resolveRepoRoot } from "@/lib/ops/repo-root";
 
@@ -24,8 +24,8 @@ export async function runPython(
       command[0],
       command.slice(1),
       { cwd, timeout: timeoutMs, maxBuffer: 8 * 1024 * 1024 },
-      (error, stdout, stderr) => {
-        const code = typeof (error as any)?.code === "number" ? Number((error as any).code) : 0;
+      (error: ExecFileException | null, stdout, stderr) => {
+        const code = typeof error?.code === "number" ? Number(error.code) : 0;
         resolve({
           ok: code === 0,
           command,

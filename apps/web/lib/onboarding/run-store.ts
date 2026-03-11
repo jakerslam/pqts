@@ -14,9 +14,13 @@ export interface OnboardingStep {
 export interface OnboardingRun {
   run_id: string;
   created_at: string;
+  started_at?: string;
+  completed_at?: string;
   status: OnboardingRunStatus;
   steps: OnboardingStep[];
   artifacts: string[];
+  first_meaningful_result_seconds?: number;
+  meets_under_5_minute_goal?: boolean;
 }
 
 const onboardingRuns = new Map<string, OnboardingRun>();
@@ -54,6 +58,7 @@ function _executeRun(runIdValue: string): void {
     return;
   }
   run.status = "running";
+  run.started_at = nowIso();
   const reportRoot = `data/reports/quickstart/${runIdValue}`;
   run.steps.forEach((step, idx) => {
     const startDelay = idx * 700;
@@ -72,6 +77,13 @@ function _executeRun(runIdValue: string): void {
       const allDone = run.steps.every((row) => row.status === "completed");
       if (allDone) {
         run.status = "completed";
+        run.completed_at = nowIso();
+        const created = Date.parse(run.created_at);
+        const completed = Date.parse(run.completed_at);
+        if (Number.isFinite(created) && Number.isFinite(completed) && completed >= created) {
+          run.first_meaningful_result_seconds = Math.floor((completed - created) / 1000);
+          run.meets_under_5_minute_goal = run.first_meaningful_result_seconds <= 300;
+        }
       }
     }, endDelay);
   });

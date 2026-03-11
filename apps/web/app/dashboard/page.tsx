@@ -1,12 +1,80 @@
 import Link from "next/link";
+
 import { StreamTurnPreview } from "@/components/stream/stream-turn-preview";
 import { ToolEventRenderer } from "@/components/tool-renderers/tool-event-renderer";
+import { getAccountSummary, getRiskState } from "@/lib/api/client";
+import { loadBestReferenceBundle, loadReferencePerformance } from "@/lib/ops/reference-data";
 import { getRegisteredToolTypes } from "@/lib/tools/registry";
 
-export default function DashboardHomePage() {
+function nextActionHref(bundleCount: number, killSwitchActive: boolean): string {
+  if (killSwitchActive) {
+    return "/dashboard/risk";
+  }
+  if (bundleCount <= 0) {
+    return "/onboarding";
+  }
+  return "/dashboard/promotion";
+}
+
+function nextActionLabel(bundleCount: number, killSwitchActive: boolean): string {
+  if (killSwitchActive) {
+    return "Review risk incidents";
+  }
+  if (bundleCount <= 0) {
+    return "Run onboarding flow";
+  }
+  return "Review promotion gates";
+}
+
+export default async function DashboardHomePage() {
   const knownTypes = getRegisteredToolTypes();
+  const [account, risk] = await Promise.all([getAccountSummary(), getRiskState()]).catch(() => [null, null]);
+  const references = loadReferencePerformance();
+  const bestBundle = loadBestReferenceBundle();
+  const killSwitchActive = Boolean(risk?.kill_switch_active);
+  const actionHref = nextActionHref(references.bundle_count, killSwitchActive);
+  const actionLabel = nextActionLabel(references.bundle_count, killSwitchActive);
+
   return (
     <section style={{ display: "grid", gap: 16 }}>
+      <article className="card">
+        <h2 style={{ marginTop: 0 }}>Command Center</h2>
+        <div className="grid">
+          <article className="card" style={{ background: "#f8fbff" }}>
+            <p className="kpi-title">What is running now?</p>
+            <p className="kpi-value">{references.bundle_count > 0 ? "Reference Bundles Active" : "No Published Bundle"}</p>
+          </article>
+          <article className="card" style={{ background: "#f8fbff" }}>
+            <p className="kpi-title">Is it safe?</p>
+            <p className="kpi-value">{killSwitchActive ? "Kill-Switch Active" : "Guardrails Normal"}</p>
+          </article>
+          <article className="card" style={{ background: "#f8fbff" }}>
+            <p className="kpi-title">Capital snapshot</p>
+            <p className="kpi-value">{account ? `$${account.equity.toFixed(2)} equity` : "Unavailable"}</p>
+          </article>
+          <article className="card" style={{ background: "#f8fbff" }}>
+            <p className="kpi-title">What needs attention?</p>
+            <p className="kpi-value">{actionLabel}</p>
+            <Link href={actionHref}>Continue</Link>
+          </article>
+        </div>
+        <p style={{ marginBottom: 0, color: "var(--muted)" }}>
+          Promotion stage: {killSwitchActive ? "halt" : "paper/canary review"} · Benchmarks: {references.bundle_count}
+        </p>
+      </article>
+
+      <article className="card">
+        <h3 style={{ marginTop: 0 }}>Benchmark Reference Callout</h3>
+        {bestBundle ? (
+          <p style={{ margin: 0 }}>
+            <strong>{bestBundle.bundle}</strong> · quality {bestBundle.summary.avg_quality_score.toFixed(3)} · fill {bestBundle.summary.avg_fill_rate.toFixed(3)} · trust{" "}
+            <span className="status-chip status-chip-reference">reference</span>
+          </p>
+        ) : (
+          <p style={{ margin: 0, color: "var(--muted)" }}>No benchmark bundle available yet.</p>
+        )}
+      </article>
+
       <div className="grid">
         <article className="card">
           <h3>Onboarding</h3>
@@ -56,7 +124,7 @@ export default function DashboardHomePage() {
         <article className="card">
           <h3>Notifications</h3>
           <p>Preview and execute stdout/Telegram/Discord channel checks.</p>
-          <Link href="/dashboard/notifications">Open notifications check</Link>
+          <Link href="/dashboard/alerts">Open alerts view</Link>
         </article>
       </div>
 
