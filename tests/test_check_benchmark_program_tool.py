@@ -100,3 +100,63 @@ def test_benchmark_program_flags_insufficient_coverage(tmp_path: Path) -> None:
         policy_path=policy_path,
     )
     assert any("bundle_count" in item for item in errors)
+
+
+def test_benchmark_program_uses_market_fallback_venues_when_tca_missing(tmp_path: Path) -> None:
+    policy_path = tmp_path / "policy.json"
+    _write_json(
+        policy_path,
+        {
+            "min_bundles": 1,
+            "min_markets": 3,
+            "min_strategies": 1,
+            "min_venues": 3,
+            "min_month_buckets": 1,
+            "allow_single_month_bootstrap": True,
+        },
+    )
+    suite_path = tmp_path / "results" / "bundle_a" / "simulation_suite.json"
+    _write_json(
+        suite_path,
+        {
+            "created_at": "2026-03-10T00:00:00+00:00",
+            "results": [
+                {
+                    "scenario": {"market": "crypto", "strategy": "market_making"},
+                    "tca_path": "",
+                },
+                {
+                    "scenario": {"market": "equities", "strategy": "market_making"},
+                    "tca_path": "",
+                },
+                {
+                    "scenario": {"market": "forex", "strategy": "market_making"},
+                    "tca_path": "",
+                },
+            ],
+        },
+    )
+
+    ref_path = tmp_path / "results" / "reference_performance_latest.json"
+    _write_json(
+        ref_path,
+        {
+            "generated_at": "2026-03-10T00:00:00+00:00",
+            "bundles": [
+                {
+                    "bundle": "bundle_a",
+                    "markets": "crypto,equities,forex",
+                    "strategies": "market_making",
+                    "report_path": str(suite_path.relative_to(tmp_path)),
+                }
+            ],
+        },
+    )
+
+    errors, report = evaluate_benchmark_program(
+        reference_performance_path=ref_path,
+        results_root=tmp_path,
+        policy_path=policy_path,
+    )
+    assert errors == []
+    assert set(report["venues"]) == {"sim_alpaca", "sim_binance", "sim_oanda"}

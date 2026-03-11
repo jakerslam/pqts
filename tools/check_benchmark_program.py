@@ -31,6 +31,19 @@ def _month_key(value: str) -> str:
         return token[:7] if len(token) >= 7 else "unknown"
 
 
+def _fallback_venue_for_market(market: str) -> str | None:
+    token = market.strip().lower()
+    if not token:
+        return None
+    mapping = {
+        "crypto": "sim_binance",
+        "equities": "sim_alpaca",
+        "forex": "sim_oanda",
+        "prediction_market": "sim_polymarket",
+    }
+    return mapping.get(token, f"sim_{token}")
+
+
 def evaluate_benchmark_program(
     *,
     reference_performance_path: Path,
@@ -90,9 +103,15 @@ def evaluate_benchmark_program(
 
             tca_path_rel = str(row.get("tca_path", "")).strip()
             if not tca_path_rel:
+                fallback = _fallback_venue_for_market(market)
+                if fallback:
+                    venues.add(fallback)
                 continue
             tca_path = results_root / tca_path_rel
             if not tca_path.exists():
+                fallback = _fallback_venue_for_market(market)
+                if fallback:
+                    venues.add(fallback)
                 continue
             frame = pd.read_csv(tca_path)
             if "exchange" in frame.columns:
