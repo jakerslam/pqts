@@ -7,6 +7,12 @@ Semantic Versioning.
 
 ## [Unreleased]
 
+## [0.1.4] - 2026-03-10
+
+### Fixed
+- Release workflow now strips non-distribution files from `dist/` before trusted PyPI publish.
+- Prevents `InvalidDistribution` failures caused by metadata artifacts (for example `SHA256SUMS.txt`) being treated as package uploads.
+
 ## [0.1.3] - 2026-03-10
 
 ### Changed
