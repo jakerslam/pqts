@@ -1,6 +1,6 @@
 # PQTS Execution TODO (Parity vs Moat)
 
-Last updated: 2026-03-10 (America/Denver)
+Last updated: 2026-03-11 (America/Denver)
 
 Execution policy:
 - Run sections top-to-bottom by default.
@@ -12,6 +12,21 @@ Legend:
 - `Type`: `engineering` or `human_only`
 - `Track`: `parity` or `moat`
 - `Ref`: SRS requirement IDs
+
+## 02o. SRS 66-71 Assimilation Execution Sprint (2026-03-11)
+
+Dependency order: enforcement baseline -> requirement execution map -> contract defaults -> automated validation.
+
+- [x] Ship Definition of Done and Codex Enforcer protocol with explicit anti-fake-work criteria (`ROI: very_high`, `Type: engineering`, `Track: parity`, `Ref: ANTP-3, ANTP-5, MTM-12`, `Evidence: docs/DEFINITION_OF_DONE.md; docs/CODEX_ENFORCER.md`)
+- [x] Wire mandatory reference order into operator instructions and compliance guide (`ROI: very_high`, `Type: engineering`, `Track: parity`, `Ref: ANTP-3, ANTP-4, MTM-12`, `Evidence: AGENTS.md; docs/CODEX_COMPLIANCE.md`)
+- [x] Add codex enforcement automation and regression tests (DoD reference checks, TODO evidence checks, SRS linkage checks) (`ROI: very_high`, `Type: engineering`, `Track: parity`, `Ref: ANTP-5, ANTP-8, MTM-12`, `Evidence: tools/check_codex_enforcer.py; tests/test_check_codex_enforcer.py; make codex-enforcer`)
+- [x] Materialize GIPP execution defaults and lane mapping (edge/EV/Kelly/VaR + risk rebalance + provenance) (`ROI: high`, `Type: engineering`, `Track: parity`, `Ref: GIPP-1, GIPP-2, GIPP-3, GIPP-4, GIPP-5, GIPP-6, GIPP-7, GIPP-8`, `Evidence: config/strategy/assimilation_66_71_defaults.json; docs/SRS_66_71_EXECUTION_MAP.md`)
+- [x] Materialize MARIK execution defaults and lane mapping (spread-harvest, neutrality, bounded holds, pattern replay) (`ROI: high`, `Type: engineering`, `Track: parity`, `Ref: MARIK-1, MARIK-2, MARIK-3, MARIK-4, MARIK-5, MARIK-6, MARIK-7, MARIK-8`, `Evidence: config/strategy/assimilation_66_71_defaults.json; docs/SRS_66_71_EXECUTION_MAP.md`)
+- [x] Materialize DUNIK execution defaults and lane mapping (multi-signal short horizon, Bayesian gate, cross-venue checks, micro-edge accounting) (`ROI: high`, `Type: engineering`, `Track: parity`, `Ref: DUNIK-1, DUNIK-2, DUNIK-3, DUNIK-4, DUNIK-5, DUNIK-6, DUNIK-7, DUNIK-8`, `Evidence: config/strategy/assimilation_66_71_defaults.json; docs/SRS_66_71_EXECUTION_MAP.md`)
+- [x] Materialize ZERQ execution defaults and lane mapping (pre-trade math review, challenger agent vetoes, prevented-trade accounting, latency budgets) (`ROI: high`, `Type: engineering`, `Track: moat`, `Ref: ZERQ-1, ZERQ-2, ZERQ-3, ZERQ-4, ZERQ-5, ZERQ-6, ZERQ-7, ZERQ-8`, `Evidence: config/strategy/assimilation_66_71_defaults.json; docs/SRS_66_71_EXECUTION_MAP.md`)
+- [x] Materialize ANTP execution defaults and lane mapping (indicator-rich terminal, structured playbook, cadence transparency, claims-to-evidence) (`ROI: high`, `Type: engineering`, `Track: parity`, `Ref: ANTP-1, ANTP-2, ANTP-3, ANTP-4, ANTP-5, ANTP-6, ANTP-7, ANTP-8`, `Evidence: config/strategy/assimilation_66_71_defaults.json; docs/SRS_66_71_EXECUTION_MAP.md`)
+- [x] Materialize MTM execution defaults and lane mapping (preserve/protect/compound, regime quadrants, position ladder, mistake taxonomy) (`ROI: high`, `Type: engineering`, `Track: moat`, `Ref: MTM-1, MTM-2, MTM-3, MTM-4, MTM-5, MTM-6, MTM-7, MTM-8, MTM-9, MTM-10, MTM-11, MTM-12`, `Evidence: config/strategy/assimilation_66_71_defaults.json; docs/SRS_66_71_EXECUTION_MAP.md`)
+- [x] Add and execute defaults-validation checks for SRS 66-71 family coverage (`ROI: high`, `Type: engineering`, `Track: parity`, `Ref: GIPP-1, MARIK-1, DUNIK-1, ZERQ-1, ANTP-1, MTM-1`, `Evidence: tools/check_assimilation_66_71_defaults.py; tests/test_check_assimilation_66_71_defaults.py; make assimilation-66-71-check`)
 
 ## 00. Completed Foundation (Pinned)
 

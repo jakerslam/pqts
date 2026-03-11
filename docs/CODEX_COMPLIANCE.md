@@ -10,8 +10,10 @@ Before making code changes, review in this order:
 
 1. `AGENTS.md` (root-level operating instructions)
 2. `docs/CODEX_COMPLIANCE.md` (this file)
-3. `docs/ARCHITECTURE.md` (canonical system structure and boundaries)
-4. `docs/IMPLEMENTATION_DIRECTION.md` (current strategic implementation direction)
+3. `docs/CODEX_ENFORCER.md` (session enforcement protocol)
+4. `docs/DEFINITION_OF_DONE.md` (check-off criteria)
+5. `docs/ARCHITECTURE.md` (canonical system structure and boundaries)
+6. `docs/IMPLEMENTATION_DIRECTION.md` (current strategic implementation direction)
 
 ## Architecture Compliance
 

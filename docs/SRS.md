@@ -3733,3 +3733,536 @@ These requirements codify external review findings focused on eliminating contro
 
 - When GitHub Pages deployment is unavailable due repository permissions, docs publish workflow shall still emit a browsable static artifact.
 - README/docs shall document fallback artifact access until primary docs hosting is enabled.
+
+## 65. Competitor Strength Assimilation Requirements (March 11, 2026)
+
+These are gap-oriented requirements extracted from public competitor repository/docs strengths and normalized into PQTS contracts.
+
+Observed source links:
+- `https://github.com/freqtrade/freqtrade`
+- `https://github.com/nautechsystems/nautilus_trader`
+- `https://github.com/hummingbot/hummingbot`
+- `https://github.com/QuantConnect/Lean`
+- `https://github.com/polakowo/vectorbt`
+- `https://github.com/mementum/backtrader`
+
+### LEAN-1 Algorithm Framework Layer Contract
+
+- PQTS shall expose explicit strategy framework interfaces for `alpha`, `universe_selection`, `portfolio_construction`, `execution_model`, and `risk_model`.
+- Stage promotion and runtime composition shall accept interchangeable implementations per layer without modifying core engine code.
+
+### LEAN-2 Research-to-Production Template Contract
+
+- PQTS shall ship canonical research templates that map notebook research outputs to production strategy modules with zero manual field remapping.
+- Template artifacts shall include data assumptions, feature lineage, and deployable strategy config.
+
+### LEAN-3 CLI Surface Completeness Contract
+
+- PQTS CLI shall expose first-class commands for `project-init`, `research`, `backtest`, `optimize`, and `live` with consistent flags and artifact outputs.
+- Command contracts shall remain parity-safe across local and containerized execution paths.
+
+### LEAN-4 Optimization Job Contract
+
+- PQTS shall provide optimization job specifications with reproducible parameter-space definitions, run metadata, and best-result promotion candidates.
+- Optimization results shall be serializable and resumable.
+
+### LEAN-5 Data Tooling and Conversion Contract
+
+- PQTS shall provide a toolbox-style data conversion/import layer for external vendor formats with schema validation and reproducible conversion manifests.
+- Converted datasets shall emit provenance metadata and checksum artifacts.
+
+### LEAN-6 Brokerage/Data Adapter Readiness Matrix
+
+- PQTS shall maintain machine-readable adapter readiness metadata (capabilities, known limits, maturity state, last validation date) for each venue/provider.
+- Public claims shall be constrained to readiness entries marked production-certified.
+
+### FTR-1 Pairlist Pipeline Contract
+
+- PQTS shall implement chainable universe/pairlist handlers with deterministic ordering, refresh cadence controls, and cache policy.
+- Handler chain shall support static, liquidity/volume, remote, and producer-fed list sources plus post-filters (spread, volatility, age/delist, precision).
+
+### FTR-2 Strategy Protection Stack Contract
+
+- PQTS shall provide configurable strategy protections including cooldown locks, stoploss-cluster guards, drawdown guards, and low-profit pair locks.
+- Protections shall be stage-aware and emit explicit lock/unlock reason codes.
+
+### FTR-3 Lookahead-Bias Detection Contract
+
+- PQTS shall provide a lookahead-bias analysis command that compares baseline and sliced signal runs to detect future-data leakage.
+- Output shall include per-strategy bias status, affected indicators/signals, and reproducible evidence artifacts.
+
+### FTR-4 Recursive-Indicator Stability Contract
+
+- PQTS shall provide recursive analysis tooling that evaluates indicator stability across startup-window variants and reports variance risk.
+- Strategy promotion gates shall fail when recursive instability exceeds configured thresholds.
+
+### FTR-5 Backtest Artifact Bundle Contract
+
+- PQTS backtests shall export bundled artifacts including metrics, trade log, config snapshot, strategy snapshot, notes, and reproducibility metadata.
+- Bundle format shall support UI/CLI reload for subsequent analysis without rerun.
+
+### FTR-6 Producer-Consumer Signal Distribution Contract
+
+- PQTS shall support producer/consumer mode for sharing analyzed frames/signals across bot instances via authenticated stream channels.
+- Consumer instances shall verify source freshness and schema before accepting upstream data.
+
+### FTR-7 Operator API + Message Stream Contract
+
+- PQTS shall expose authenticated REST endpoints plus a message websocket/SSE stream for operator actions, bot status, and strategy telemetry.
+- API shall support OpenAPI schema export and token-based authentication flows.
+
+### FTR-8 Notification Command Surface Contract
+
+- PQTS shall provide granular operator notification channels with configurable verbosity for strategy, protection, execution, and incident events.
+- Notification controls shall be policy-bound and auditable.
+
+### FTR-9 Feature/Target Namespace Contract for ML
+
+- PQTS ML pipelines shall enforce explicit feature and target namespaces with typed validation and confidence/outlier flags returned to strategy logic.
+- Live inference trust flags shall be visible in UI and promotion gates.
+
+### NAUT-1 Shared-Core Environment Context Contract
+
+- PQTS shall enforce a shared runtime core across `backtest`, `sandbox`, and `live` contexts with no duplicate business logic implementations.
+- Any context-specific divergence shall be declared via explicit adapter/policy boundaries.
+
+### NAUT-2 Deterministic Event Runtime Contract
+
+- PQTS shall preserve deterministic event ordering for core strategy/risk/execution flows under identical inputs and seeds.
+- Runtime shall emit deterministic replay hashes for verification.
+
+### NAUT-3 Timestamp Precision Contract
+
+- PQTS shall standardize high-precision UTC timestamp handling across ingest, execution, storage, and replay boundaries.
+- Timestamp formatting and precision policy shall be explicit and test-gated.
+
+### NAUT-4 Adapter Triad Contract
+
+- Each venue adapter shall implement a standard triad: instrument provider, data client(s), and execution client(s).
+- Adapter contracts shall include reconciliation responsibilities and failure semantics.
+
+### NAUT-5 Backtest Fill-Model Realism Contract
+
+- PQTS shall support data-type-aware fill modeling (bar/L1/L2/L3) with explicit assumptions and immutable historical data policy.
+- Fill-model configuration shall expose realism-vs-speed tradeoffs and be reproducible.
+
+### NAUT-6 Live Reconciliation Invariant Contract
+
+- PQTS shall support startup and continuous reconciliation with invariant checks across order/position state and venue reports.
+- Reconciliation outcomes shall generate machine-readable discrepancy classes and remediation actions.
+
+### NAUT-7 Component Lifecycle State-Machine Contract
+
+- Core runtime components shall use explicit lifecycle states with guarded transitions and bounded transitional durations.
+- Invalid transitions shall fail closed and emit typed diagnostics.
+
+### NAUT-8 Message Bus Externalization Contract
+
+- PQTS shall support internal message bus externalization with type filters, stream routing, and producer/consumer bridge semantics.
+- Stream serialization and schema compatibility shall be versioned.
+
+### HBOT-1 Controller/Executor Strategy Architecture Contract
+
+- PQTS shall support controller/executor decomposition for strategy_v2-style composition where high-level controllers orchestrate reusable execution units.
+- Executor orchestrator shall manage executor lifecycle, state, and telemetry.
+
+### HBOT-2 Reusable Executor Library Contract
+
+- PQTS shall provide reusable executor modules for common execution intents (for example TWAP, grid, DCA, arbitrage, market-making variants).
+- Executors shall have typed configs and deterministic simulation adapters.
+
+### HBOT-3 Collateral-Aware Budget Checking Contract
+
+- PQTS shall provide pre-trade budget checking that can resize or reject order candidates based on available collateral and fee requirements.
+- Budget checks shall support all-or-none and partial-resize modes with audit output.
+
+### HBOT-4 In-Flight/Lost-Order Tracking Contract
+
+- PQTS shall maintain robust in-flight order tracking with cached-order retention, lost-order thresholds, and duplicate-safe update handling.
+- Lost-order transitions shall be observable and reconciled explicitly.
+
+### HBOT-5 Connector Metrics Collection Contract
+
+- PQTS connectors shall emit standardized connector-level metrics (fills, volume, latency, failures, disconnects) via collector modules.
+- Metrics shall be consumable by ops dashboards and promotion gates.
+
+### HBOT-6 Gateway Connector Boundary Contract
+
+- PQTS shall define a gateway boundary for DEX/non-CEX connectivity with clear capability declarations and risk constraints.
+- Gateway adapters shall be tested with the same contract suite as direct connectors.
+
+### VBT-1 Vectorized Research Engine Contract
+
+- PQTS research layer shall support vectorized simulation over multi-asset, multi-parameter, multi-period grids using efficient array backends.
+- Grid expansion logic shall remain reproducible and memory-bounded.
+
+### VBT-2 Indicator and Signal Factory Contract
+
+- PQTS shall provide indicator/signal factory primitives to generate compiled custom indicators/signals from user functions with typed parameter spaces.
+- Factory outputs shall be compatible with backtest and paper/live strategy pipelines.
+
+### VBT-3 Records and Simulation-Log Data Structure Contract
+
+- PQTS shall provide optimized record structures for large simulation logs, fills, and event traces with fast query/reduction primitives.
+- Record structures shall support export to analytics-friendly formats.
+
+### VBT-4 Stats and Plot Builder Contract
+
+- PQTS shall expose composable stats and plot builder APIs for strategy, signal, and portfolio components.
+- Built stats/plots shall be reusable in UI reports and notebook workflows.
+
+### VBT-5 Persistence Contract for Research Objects
+
+- PQTS shall support persistence and reload of research objects (data snapshots, indicators, portfolio simulations) with schema/version tagging.
+- Reloaded artifacts shall preserve deterministic summary metrics.
+
+### BTR-1 Analyzer/Observer/Sizer Plugin Contract
+
+- PQTS shall define first-class plugin contracts for analyzers, observers, and sizers with stable lifecycle hooks and typed outputs.
+- Plugin execution shall be deterministic and stage-aware.
+
+### BTR-2 Replay/Resample Synchronization Contract
+
+- PQTS shall provide robust resample/replay pipelines with synchronization invariants across mixed timeframe feeds.
+- Replay/resample behavior shall be regression-tested for live/paper/backtest consistency.
+
+### BTR-3 Broker Simulation Order-Semantics Contract
+
+- PQTS broker simulation shall support rich order semantics (market/limit/stop/trailing/bracket/OCO) with configurable commission/slippage/fill policies.
+- Simulation order semantics shall map to live adapter capabilities with explicit mismatch warnings.
+
+### BTR-4 Multi-Data Multi-Strategy Orchestration Contract
+
+- PQTS shall support multi-data and multi-strategy orchestration in one runtime with deterministic scheduling and isolated strategy accounting.
+- Step-by-step execution mode shall be available for debugging and training workflows.
+
+### BTR-5 Store Pattern Contract for Live Integrations
+
+- PQTS live integrations shall support a store-style abstraction that unifies feed/broker/adaptor state and notifications.
+- Store abstractions shall support replayable startup state restoration.
+
+### XCOMP-1 Integration Maturity and Certification Transparency
+
+- PQTS shall expose integration maturity states (`stable`, `beta`, `experimental`, `planned`) with objective promotion criteria and latest certification evidence.
+- Marketing/docs/UI shall consume this same canonical maturity registry.
+
+### XCOMP-2 Strategy Template and Example Density Contract
+
+- PQTS shall maintain a high-density library of runnable strategy examples/templates spanning core styles and markets, each with reproducible artifacts.
+- Templates shall include beginner and pro variants on the same underlying strategy objects.
+
+### XCOMP-3 Parity-Gated Claim Discipline Contract
+
+- For every externally claimed capability, PQTS shall maintain an automated proof gate (test, artifact, or validation report) before publication.
+- Capabilities without current proof shall be labeled clearly as experimental/unverified.
+
+## 66. X Post Assimilation Requirements (gipppezkv, March 10, 2026)
+
+These requirements are distilled from the referenced X post and links, normalized into auditable system contracts.
+
+Observed source links:
+- `https://x.com/gipppezkv/status/2031258926461673664?s=20`
+- `https://kreo.app/@gipp00` (transaction tracking link referenced in post)
+- `https://resources.anthropic.com/hubfs/The-Complete-Guide-to-Building-Skill-for-Claude.pdf` (quoted link in thread context)
+
+### GIPP-1 Probability Edge Modeling Contract
+
+- PQTS shall compute explicit model-vs-market edge per candidate trade as `edge = p_model - p_market`.
+- `p_market` derivation shall be reproducible from venue odds/price inputs and stored with each decision.
+
+### GIPP-2 EV-Gated Trade Admission Contract
+
+- PQTS shall require positive cost-adjusted expected value before route submission using a documented formula contract.
+- EV calculation inputs (`p_model`, payout/odds transform, fees/slippage assumptions) shall be persisted per decision trace.
+
+### GIPP-3 Fractional Kelly Sizing Contract
+
+- PQTS shall support Kelly-derived sizing with mandatory fractional scaling and hard caps by strategy/stage/account.
+- Kelly sizing shall fail closed when probability confidence, liquidity, or model-quality thresholds are not met.
+
+### GIPP-4 VaR-Bounded Positioning Contract
+
+- PQTS shall compute per-strategy and portfolio VaR guardrails and bound position sizing/entry when projected VaR breaches budget.
+- VaR methodology and confidence level shall be explicit, versioned, and visible in decision artifacts.
+
+### GIPP-5 Real-Time Mispricing Scan Contract
+
+- PQTS shall support continuous market scanning for pricing inefficiency candidates with bounded evaluation latency and stale-data protections.
+- Candidate discovery events shall be traceable from market snapshot to final execution/risk decision.
+
+### GIPP-6 Dynamic Risk Rebalance Contract
+
+- During open positions, PQTS shall continuously recompute edge/EV/risk state and rebalance exposure (reduce/hold/exit) under policy controls.
+- Rebalance actions shall emit reason codes tied to changed probabilities, volatility, liquidity, or risk budget state.
+
+### GIPP-7 Public-Grade Transaction Provenance Contract
+
+- PQTS shall export verifiable transaction ledgers for paper/live runs, including timestamp, market, side, size, rationale metrics, and realized outcome.
+- Export format shall support human-readable public summaries and machine-readable audit bundles without exposing secrets.
+
+### GIPP-8 Agent Skill Prompt Governance Contract
+
+- If LLM-assisted strategy components are used, PQTS shall version and test skill/prompt artifacts as first-class configuration with reproducibility metadata.
+- Any model-assisted recommendation that affects capital shall include policy-bound validation and fallback behavior on model unavailability.
+
+## 67. X Post Assimilation Requirements (MarikWeb3, March 10, 2026)
+
+These requirements are distilled from the referenced X post and linked wallet behavior, normalized into auditable system contracts.
+
+Observed source links:
+- `https://x.com/MarikWeb3/status/2031397014794060074?s=20`
+- `https://polymarket.com/@distinct-baguette?via=Marik` (wallet link referenced in post)
+
+### MARIK-1 Spread-Harvest Strategy Contract
+
+- PQTS shall support explicit spread-harvest strategy mode where expected edge is sourced from bid/ask dislocations rather than directional outcome prediction.
+- Strategy artifacts shall label this mode as market-making/spread-capture and separate its KPIs from directional alpha strategies.
+
+### MARIK-2 Two-Sided Orderbook Participation Contract
+
+- PQTS shall support synchronized two-sided participation logic (YES/NO or equivalent opposing market sides) with bounded exposure per market.
+- Order lifecycle telemetry shall preserve per-side entry/exit and realized edge decomposition.
+
+### MARIK-3 Inventory-Neutrality Guardrail Contract
+
+- Spread-harvest strategies shall enforce inventory-neutrality constraints with configurable maximum net directional exposure and auto-rebalance/flatten actions.
+- Breaches of neutrality bounds shall emit typed incident events and trigger policy-defined mitigation.
+
+### MARIK-4 Hold-Time Bounded Capture Contract
+
+- PQTS shall support bounded hold-time policies (for example short horizon minutes-scale exits) for spread-capture strategies.
+- Policies shall include TTL exit, timeout cancellation, and emergency unwind behavior with auditable reason codes.
+
+### MARIK-5 Panic-Flow Pattern Detector Contract
+
+- PQTS shall provide orderbook microstructure detectors for panic/imbalance flow patterns that increase spread-capture opportunity.
+- Detector outputs shall be versioned features with confidence scores and stale-data protections.
+
+### MARIK-6 Per-Trade Edge Attribution Contract
+
+- PQTS shall compute and persist realized PnL attribution per completed cycle as spread-capture components (for example `delta_bid_capture`, `delta_ask_capture`) plus costs.
+- Aggregated attribution shall reconcile exactly to realized strategy PnL.
+
+### MARIK-7 High-Turnover Safety Budget Contract
+
+- For high-turnover spread strategies, PQTS shall enforce daily action budgets (order count, cancel/replace rate, fee budget, and slippage budget).
+- Budget exhaustion shall degrade strategy state to reduce-only/hold according to policy.
+
+### MARIK-8 Pattern-Watch Replication Harness Contract
+
+- PQTS shall provide a replay/simulation harness that can evaluate identified wallet/orderbook behavioral motifs against historical market tapes.
+- Harness outputs shall include reproducible motif detection precision, fill-rate, reject-rate, and realized net edge after costs.
+
+## 68. X Post Assimilation Requirements (dunik_7, March 10, 2026)
+
+These requirements are distilled from the referenced X post and linked wallet behavior, normalized into auditable system contracts.
+
+Observed source links:
+- `https://x.com/dunik_7/status/2031316903172489468?s=20`
+- `https://polymarket.com/@BoneReader?via=999` (wallet link referenced in post)
+
+### DUNIK-1 Multi-Signal Short-Horizon Feature Contract
+
+- PQTS shall support short-horizon feature fusion using exchange orderbook state, on-chain context, funding signals, and near-term realized volatility windows.
+- Feature windows and normalization rules shall be versioned and reproducible per strategy run.
+
+### DUNIK-2 Bayesian Probability Engine Contract
+
+- PQTS shall provide a Bayesian probability estimation module for event-outcome markets with explicit priors, likelihood updates, and posterior confidence outputs.
+- Posterior probability and confidence artifacts shall be stored per candidate decision.
+
+### DUNIK-3 Minimum Edge Threshold Gate Contract
+
+- PQTS shall enforce configurable minimum edge thresholds (for example strategy default `edge_min = 4%`) before order submission.
+- Threshold checks shall be cost-adjusted and include fees/slippage assumptions.
+
+### DUNIK-4 High-Probability Entry Band Contract
+
+- PQTS shall support parameterized high-probability entry bands (for example 90-95 cent price zones in binary outcome markets) for low-margin capture strategies.
+- Entry band policies shall include spread/liquidity validation and adverse-selection safeguards.
+
+### DUNIK-5 High-Frequency Throughput and Concurrency Contract
+
+- PQTS shall support high-frequency, high-count trade loops with bounded per-market and portfolio-level concurrency limits.
+- The runtime shall expose throughput, queue depth, and action budget telemetry to prevent overload-driven risk.
+
+### DUNIK-6 Cross-Venue Confirmation Contract
+
+- PQTS shall support cross-venue reference checks (for example centralized exchange momentum/price context) before opening event-market positions.
+- Cross-venue dependencies shall include freshness checks and degrade-to-safe behavior on missing or stale feeds.
+
+### DUNIK-7 Latency-Bounded Exit Contract
+
+- PQTS shall support latency-bounded exit policies intended to close positions before expected market repricing windows.
+- Exit latency targets, timeout paths, and fallback unwind behavior shall be configurable and auditable.
+
+### DUNIK-8 Micro-Edge Attribution and Scale Accounting Contract
+
+- PQTS shall attribute realized performance as micro-edge accumulation metrics (per-trade cents captured, turnover, and net after costs) with full reconciliation.
+- Reporting shall separate directional alpha from microstructure capture to avoid metric contamination.
+
+## 69. X Post Assimilation Requirements (zerqfer, March 10, 2026)
+
+These requirements are distilled from the referenced X post and normalized into auditable system contracts.
+
+Observed source links:
+- `https://x.com/zerqfer/status/2031430737526747405?s=20`
+
+### ZERQ-1 Pre-Trade Math Verification Gate Contract
+
+- PQTS shall run pre-trade mathematical validation on each candidate order, including formula integrity checks for EV, volatility inputs, and sizing equations before routing.
+- Trades failing math verification shall be blocked with explicit reason codes and persisted diagnostics.
+
+### ZERQ-2 Multi-Agent Challenger Review Contract
+
+- PQTS shall support a challenger review layer where independent analysis agents evaluate trade candidates from the primary strategy engine before execution.
+- Challenger recommendations shall be policy-bound (`allow`, `warn`, `block`) with auditable vote rationale.
+
+### ZERQ-3 Bug-Class Detection Rules Contract
+
+- PQTS shall maintain a ruleset for edge-killing bug classes (for example decimal/scale errors, stale volatility windows, sign errors, malformed Kelly inputs) and test them on candidate trades.
+- Rules shall be versioned and regression-tested against historical incident replays.
+
+### ZERQ-4 Prevented-Trade Accountability Contract
+
+- PQTS shall track and report prevented trades separately from executed trades, including prevented notional, prevented downside estimate, and counterfactual outcome where available.
+- Daily reports shall include `executed_count`, `blocked_count`, and quality metrics for block decisions.
+
+### ZERQ-5 Binary Fair-Value Model Registry Contract
+
+- PQTS shall maintain an explicit registry of binary-outcome fair-value models (including Black-Scholes-derived adaptations where used), each with assumptions, calibration method, and validity bounds.
+- Strategy configs shall reference registry IDs instead of ad-hoc inline model formulas.
+
+### ZERQ-6 Short-Interval Imbalance Scanner Contract
+
+- PQTS shall support short-interval orderbook imbalance scanning with configurable cadence (default target in the 10-30 second range), freshness checks, and backpressure handling.
+- Scanner outputs shall include timestamped imbalance features consumable by execution/risk modules.
+
+### ZERQ-7 Pluggable Context Engine Contract
+
+- PQTS shall support pluggable context engines (for example wallet-flow trackers, venue context enrichers, news/state features) through typed interfaces and isolated failure behavior.
+- Context-engine failures shall degrade safely and never bypass hard risk/kill-switch controls.
+
+### ZERQ-8 Real-Time Review Latency Budget Contract
+
+- Pre-trade review layers shall operate under explicit latency budgets with fail-closed or degrade-to-safe policy selection per strategy stage.
+- Budget adherence and timeout outcomes shall be observable in execution telemetry and SLO reporting.
+
+## 70. X Post Assimilation Requirements (antpalkin, March 10, 2026)
+
+These requirements are distilled from the referenced X post and linked product context, normalized into auditable system contracts.
+
+Observed source links:
+- `https://x.com/antpalkin/status/2031430305660215464?s=20`
+- `http://terminal.polysigma.io/` (terminal link referenced in quoted content)
+- `https://polymarket.com/@LastKnight` (example account link referenced in quoted content)
+- `http://polysigma.io` (product link referenced in quoted content)
+
+### ANTP-1 Indicator-Rich Prediction Terminal Contract
+
+- PQTS shall provide a prediction terminal view for short-horizon markets with configurable indicator panels, market context overlays, and execution readiness state.
+- Indicator calculations and data sources shall be inspectable from the UI and exportable in run artifacts.
+
+### ANTP-2 Structured Beginner-to-Operator Playbook Contract
+
+- PQTS shall ship a structured learning/playbook path that maps onboarding steps to concrete outcomes (demo, backtest, paper campaign, review).
+- Each step shall reference exact commands/UI actions, expected artifacts, and clear pass/fail completion criteria.
+
+### ANTP-3 Module-Based Curriculum Artifact Contract
+
+- PQTS docs shall maintain moduleized training content (topic units with prerequisites and checkpoints) aligned to actual product workflows.
+- Curriculum modules shall version-lock to release tags and fail CI on broken command/path references.
+
+### ANTP-4 Continuous Update Cadence Transparency Contract
+
+- PQTS shall publish a machine-readable changelog and weekly release summary for strategy, execution, and UI changes affecting operator behavior.
+- The terminal/help surfaces shall expose “what changed” notices linked to release evidence.
+
+### ANTP-5 Claims-to-Evidence Marketing Guardrail Contract
+
+- Any public performance or precision claim shown in docs/UI shall link to reproducible evidence bundles with run config, timeframe, costs, and trust label.
+- Unsupported promotional claims shall be blocked by docs/release validation checks.
+
+### ANTP-6 Example Account Replication Contract
+
+- When external accounts/wallets are cited as exemplars, PQTS shall provide internal replication harnesses that test the claimed behavior under explicit assumptions.
+- Replication reports shall publish what was reproducible, what was not, and key uncertainty drivers.
+
+### ANTP-7 Multi-Locale Documentation Accessibility Contract
+
+- PQTS shall support multilingual documentation artifacts for core onboarding and safety workflows, with synchronization checks against canonical English docs.
+- Translation status and staleness shall be surfaced in docs metadata.
+
+### ANTP-8 Terminal Data Freshness and Latency Disclosure Contract
+
+- Prediction terminal pages shall display explicit data freshness, ingestion lag, and indicator recompute latency badges.
+- If freshness or latency thresholds are breached, terminal recommendations shall degrade to warning/hold mode and log diagnostic events.
+
+## 71. External Assimilation Requirements (Hedgeye "Master The Market", January 29, 2025)
+
+These requirements are distilled from the referenced material and normalized into auditable system contracts.
+
+Observed source links:
+- `https://info.hedgeye.com/master-the-market`
+- `https://storage.pardot.com/764243/1738158424MLZsUu3O/eBook_1.29.2025.pdf`
+- Local user-provided copy: `/Users/jay/Document (Lcl)/master the market.pdf`
+
+### MTM-1 Preserve-Protect-Compound Objective Contract
+
+- PQTS shall enforce portfolio objectives in priority order: preserve capital, protect against large drawdowns, then compound returns.
+- Strategy scorecards and promotion gates shall include objective compliance checks before considering return optimization.
+
+### MTM-2 Drawdown Recovery Math Contract
+
+- PQTS shall compute and display required recovery return after drawdowns and use that metric in risk budgeting and escalation policies.
+- If projected recovery burden exceeds configured tolerances, the system shall tighten exposure and require explicit operator acknowledgment.
+
+### MTM-3 Rate-of-Change Regime Engine Contract
+
+- PQTS shall support a regime engine based on year-over-year rate-of-change inputs for growth and inflation, with explicit policy overlays.
+- Regime transitions shall be backtestable and emitted as structured events consumable by allocation and execution modules.
+
+### MTM-4 Four-Quadrant Regime Mapping Contract
+
+- PQTS shall maintain a four-quadrant mapping of growth/inflation acceleration states with predefined risk postures and preferred/avoided asset exposures.
+- Quadrant mappings shall be versioned, evidence-backed, and linked to realized outcome reports.
+
+### MTM-5 Top-Down plus Bottom-Up Fusion Contract
+
+- PQTS shall require that deployable strategy decisions can be decomposed into top-down macro context and bottom-up security/execution evidence.
+- Conflict between macro and micro signals shall trigger policy-defined sizing reductions or hold decisions.
+
+### MTM-6 Multi-Horizon Signal Stack Contract
+
+- PQTS shall expose a standardized multi-horizon signal stack (short, intermediate, long) for every tradable instrument.
+- Signal state transitions shall support breakout/breakdown detection and be auditable in decision traces.
+
+### MTM-7 Price-Volume-Volatility Range Model Contract
+
+- PQTS shall provide a quantitative probable-range model using price, volume, and volatility inputs to generate actionable buy/sell zones.
+- Range model outputs shall include confidence and phase-transition flags with replay validation support.
+
+### MTM-8 Position Sizing Ladder Contract
+
+- PQTS shall enforce per-asset-class minimum/maximum position sizing bounds calibrated by realized/implied volatility class.
+- Position adjustments shall be executed in configurable basis-point ladders with explicit anti-overconcentration checks.
+
+### MTM-9 Buy-Dip and Exit Rules Contract
+
+- PQTS shall implement rule-based dip-buy and exit logic tied to multi-horizon support/break conditions and range-structure signals.
+- Exit hierarchy shall include reduce, minimum-position, and full-exit states with machine-verifiable trigger criteria.
+
+### MTM-10 Stop-Loss and Process-Override Contract
+
+- PQTS shall support hard stop-loss controls that become stricter as conviction transitions from thesis to risk containment mode.
+- Manual override of stop or sizing rules shall require reason capture, approval policy checks, and post-mortem tagging.
+
+### MTM-11 Systematic-Flow Pressure Monitor Contract
+
+- PQTS shall monitor systematic flow proxies (for example volatility shocks, forced de-risking indicators, and liquidity stress) and translate them into risk posture adjustments.
+- Flow-pressure alerts shall be linked to potential cascade buy/sell scenarios and recommended mitigation actions.
+
+### MTM-12 Mistake Taxonomy and Learning Loop Contract
+
+- PQTS shall maintain a mistake taxonomy (model error, data staleness, sizing breach, process violation, narrative bias, etc.) for every adverse event.
+- Weekly process reviews shall aggregate taxonomy outcomes and automatically generate prioritized remediation tasks.

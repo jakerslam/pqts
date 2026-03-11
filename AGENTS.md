@@ -11,6 +11,15 @@ Applies to:
 
 Does not override hard execution/risk controls already enforced in code.
 
+## Codex Enforcement (Mandatory)
+
+Before any implementation session, read:
+
+1. `docs/CODEX_ENFORCER.md`
+2. `docs/DEFINITION_OF_DONE.md`
+
+Task check-offs in `docs/TODO.md` must satisfy the DoD and include `Evidence:`.
+
 ## Hard Safety Rules (Non-Bypassable)
 
 1. The only order entry path is `execution.RiskAwareRouter.submit_order()`.
@@ -114,4 +123,3 @@ Do not make pilot default unless acceptance criteria in `docs/AGENT_PILOT_CORPUS
 2. Archive stale/deprecated cards.
 3. Re-run stage-gate summaries for active paper/canary strategies.
 4. Compare pilot vs control metrics and update challenger status.
-

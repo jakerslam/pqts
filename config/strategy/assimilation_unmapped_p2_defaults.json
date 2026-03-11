@@ -1,0 +1,113 @@
+{
+  "version": "2026-03-11",
+  "scope": "P2 unmapped SRS family closure defaults",
+  "families": {
+    "COH": {
+      "refs": ["COH-1", "COH-2", "COH-3", "COH-4", "COH-5", "COH-6", "COH-7", "COH-8"],
+      "controls": {
+        "canonical_api_contract": "/v1",
+        "thin_client_only": true,
+        "version_source_of_truth": "pyproject.toml",
+        "backlog_freshness_days": 7
+      },
+      "acceptance_evidence": [
+        "web/api contract validator pass",
+        "no local shadow routes in web layer",
+        "onboarding/docs canonical-path lint"
+      ]
+    },
+    "LEAN": {
+      "refs": ["LEAN-1", "LEAN-2", "LEAN-3", "LEAN-4", "LEAN-5", "LEAN-6"],
+      "controls": {
+        "framework_layers": ["alpha", "universe", "portfolio", "execution", "risk"],
+        "research_to_prod_template_lock": true,
+        "optimizer_resume_supported": true
+      },
+      "acceptance_evidence": [
+        "framework layer contract schema",
+        "optimization artifact reproducibility",
+        "adapter readiness matrix export"
+      ]
+    },
+    "FTR": {
+      "refs": ["FTR-1", "FTR-2", "FTR-3", "FTR-4", "FTR-5", "FTR-6", "FTR-7", "FTR-8", "FTR-9"],
+      "controls": {
+        "pairlist_pipeline_enabled": true,
+        "protection_stack_enabled": true,
+        "lookahead_bias_gate": true,
+        "recursive_stability_gate": true
+      },
+      "acceptance_evidence": [
+        "backtest bundle contract",
+        "operator API and stream schema",
+        "feature/target namespace validation report"
+      ]
+    },
+    "NAUT": {
+      "refs": ["NAUT-1", "NAUT-2", "NAUT-3", "NAUT-4", "NAUT-5", "NAUT-6", "NAUT-7", "NAUT-8"],
+      "controls": {
+        "shared_core_context": true,
+        "deterministic_replay_hash": true,
+        "timestamp_precision": "utc_high_precision",
+        "lifecycle_state_machine": true
+      },
+      "acceptance_evidence": [
+        "determinism and replay hash tests",
+        "adapter triad contract checks",
+        "message bus externalization schema"
+      ]
+    },
+    "HBOT": {
+      "refs": ["HBOT-1", "HBOT-2", "HBOT-3", "HBOT-4", "HBOT-5", "HBOT-6"],
+      "controls": {
+        "controller_executor_architecture": true,
+        "executor_library_enabled": true,
+        "collateral_budget_precheck": true
+      },
+      "acceptance_evidence": [
+        "in-flight/lost-order state transitions",
+        "connector metrics collector outputs",
+        "gateway boundary capability checks"
+      ]
+    },
+    "VBT": {
+      "refs": ["VBT-1", "VBT-2", "VBT-3", "VBT-4", "VBT-5"],
+      "controls": {
+        "vectorized_grid_research": true,
+        "indicator_signal_factory": true,
+        "records_structure_optimized": true
+      },
+      "acceptance_evidence": [
+        "stats/plot builder contract tests",
+        "research object persistence version tags",
+        "records export compatibility checks"
+      ]
+    },
+    "BTR": {
+      "refs": ["BTR-1", "BTR-2", "BTR-3", "BTR-4", "BTR-5"],
+      "controls": {
+        "plugin_contracts": ["analyzer", "observer", "sizer"],
+        "resample_replay_sync_invariants": true,
+        "order_semantics_matrix": ["market", "limit", "stop", "trailing", "bracket", "oco"]
+      },
+      "acceptance_evidence": [
+        "plugin lifecycle determinism tests",
+        "multi-data multi-strategy scheduling checks",
+        "store abstraction startup restoration tests"
+      ]
+    },
+    "XCOMP": {
+      "refs": ["XCOMP-1", "XCOMP-2", "XCOMP-3"],
+      "controls": {
+        "integration_maturity_registry": true,
+        "template_density_minimum": 12,
+        "claim_parity_gate": true
+      },
+      "acceptance_evidence": [
+        "docs/marketing parity validation",
+        "template library coverage report",
+        "claim gate CI checks"
+      ]
+    }
+  }
+}

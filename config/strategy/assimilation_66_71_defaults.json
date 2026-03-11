@@ -1,0 +1,96 @@
+{
+  "version": "2026-03-11",
+  "scope": "SRS sections 66-71 assimilation defaults",
+  "families": {
+    "GIPP": {
+      "refs": ["GIPP-1", "GIPP-2", "GIPP-3", "GIPP-4", "GIPP-5", "GIPP-6", "GIPP-7", "GIPP-8"],
+      "controls": {
+        "edge_min_bps": 25,
+        "ev_gate": "cost_adjusted_positive",
+        "kelly_fraction_cap": 0.25,
+        "var_confidence": 0.95,
+        "risk_rebalance_interval_seconds": 30
+      },
+      "acceptance_evidence": [
+        "per-decision EV trace with p_model/p_market decomposition",
+        "kelly+VaR bounded position audit",
+        "public-grade transaction ledger export without secrets"
+      ]
+    },
+    "MARIK": {
+      "refs": ["MARIK-1", "MARIK-2", "MARIK-3", "MARIK-4", "MARIK-5", "MARIK-6", "MARIK-7", "MARIK-8"],
+      "controls": {
+        "mode": "spread_harvest",
+        "inventory_net_exposure_cap": 0.05,
+        "hold_ttl_seconds": 300,
+        "panic_flow_min_confidence": 0.6,
+        "daily_cancel_replace_budget": 1200
+      },
+      "acceptance_evidence": [
+        "two-sided lifecycle telemetry and attribution",
+        "inventory-neutrality incident events",
+        "pattern replication harness metrics"
+      ]
+    },
+    "DUNIK": {
+      "refs": ["DUNIK-1", "DUNIK-2", "DUNIK-3", "DUNIK-4", "DUNIK-5", "DUNIK-6", "DUNIK-7", "DUNIK-8"],
+      "controls": {
+        "edge_min_percent": 4.0,
+        "entry_band_cents": [90, 95],
+        "short_horizon_window_seconds": 300,
+        "max_concurrent_positions": 200,
+        "latency_exit_target_ms": 200
+      },
+      "acceptance_evidence": [
+        "bayesian posterior artifacts per decision",
+        "cross-venue freshness checks and safe degradation",
+        "micro-edge throughput and post-cost attribution report"
+      ]
+    },
+    "ZERQ": {
+      "refs": ["ZERQ-1", "ZERQ-2", "ZERQ-3", "ZERQ-4", "ZERQ-5", "ZERQ-6", "ZERQ-7", "ZERQ-8"],
+      "controls": {
+        "pretrade_math_review_required": true,
+        "challenger_review_mode": "allow_warn_block",
+        "review_latency_budget_ms": 25,
+        "bug_class_rules_enabled": true,
+        "prevented_trade_reporting_enabled": true
+      },
+      "acceptance_evidence": [
+        "blocked trade diagnostics with rule identifiers",
+        "prevented-trade accountability report",
+        "review latency SLO report"
+      ]
+    },
+    "ANTP": {
+      "refs": ["ANTP-1", "ANTP-2", "ANTP-3", "ANTP-4", "ANTP-5", "ANTP-6", "ANTP-7", "ANTP-8"],
+      "controls": {
+        "terminal_primary_surface": "web",
+        "onboarding_playbook_steps": ["demo", "backtest", "paper", "review"],
+        "docs_module_version_lock": true,
+        "claims_require_evidence_link": true,
+        "latency_freshness_badges_required": true
+      },
+      "acceptance_evidence": [
+        "indicator/source transparency in terminal",
+        "playbook pass/fail checkpoints",
+        "claims-to-evidence lint pass"
+      ]
+    },
+    "MTM": {
+      "refs": ["MTM-1", "MTM-2", "MTM-3", "MTM-4", "MTM-5", "MTM-6", "MTM-7", "MTM-8", "MTM-9", "MTM-10", "MTM-11", "MTM-12"],
+      "controls": {
+        "objective_priority": ["preserve", "protect", "compound"],
+        "drawdown_recovery_math_required": true,
+        "regime_engine": "growth_inflation_rate_of_change",
+        "signal_stack_horizons": ["trade", "trend", "tail"],
+        "position_ladder_bps": [50, 150]
+      },
+      "acceptance_evidence": [
+        "quadrant regime event logs",
+        "position ladder and stop-loss audit trail",
+        "mistake taxonomy weekly remediation output"
+      ]
+    }
+  }
+}

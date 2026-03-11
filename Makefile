@@ -4,7 +4,7 @@ VENV ?= .venv
 VENV_PY := $(VENV)/bin/python
 PY_RUN := $(if $(wildcard $(VENV_PY)),$(VENV_PY),$(PYTHON))
 
-.PHONY: setup setup-lock demo sim-suite stream-worker ws-ingestion tournament canary-ramp reconcile slo-report error-budget control-plane arch-check arch-map scaffold-module leaderboard-site governance-check paper-6m paper-90d nightly-review run-mode native bench-exec reference-bundles reference-performance certified-paper chaos-suite benchmark-program docker-up observability-up doctor onboard status test lint clean
+.PHONY: setup setup-lock demo sim-suite stream-worker ws-ingestion tournament canary-ramp reconcile slo-report error-budget control-plane arch-check arch-map scaffold-module leaderboard-site codex-enforcer assimilation-66-71-check governance-check paper-6m paper-90d nightly-review run-mode native bench-exec reference-bundles reference-performance certified-paper chaos-suite benchmark-program docker-up observability-up doctor onboard status test lint clean
 
 setup:
 	bash scripts/bootstrap_env.sh --python "$(PYTHON)" --venv "$(VENV)"
@@ -67,6 +67,8 @@ leaderboard-site:
 	$(VENV_PY) scripts/export_simulation_leaderboard_site.py --reports-dir data/reports --output-dir site
 
 governance-check:
+	$(PY_RUN) tools/check_codex_enforcer.py
+	$(PY_RUN) tools/check_assimilation_66_71_defaults.py --config config/strategy/assimilation_66_71_defaults.json
 	$(PY_RUN) tools/check_truth_surface.py
 	$(PY_RUN) tools/check_studio_contract.py
 	$(PY_RUN) tools/check_core_professional_contract.py
@@ -82,6 +84,12 @@ governance-check:
 	$(PY_RUN) tools/check_tier_safety_policy.py
 	$(PY_RUN) tools/check_source_reliability.py
 	$(PY_RUN) tools/check_roadmap_governance.py
+
+codex-enforcer:
+	$(PY_RUN) tools/check_codex_enforcer.py
+
+assimilation-66-71-check:
+	$(PY_RUN) tools/check_assimilation_66_71_defaults.py --config config/strategy/assimilation_66_71_defaults.json
 
 paper-6m:
 	$(VENV_PY) scripts/run_paper_6m_harness.py --months 6 --cycles-per-month 12 --sleep-seconds 0 --risk-profile balanced
