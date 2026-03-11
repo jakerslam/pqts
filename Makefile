@@ -70,6 +70,7 @@ governance-check:
 	$(PY_RUN) tools/check_truth_surface.py
 	$(PY_RUN) tools/check_studio_contract.py
 	$(PY_RUN) tools/check_core_professional_contract.py
+	$(PY_RUN) tools/check_web_api_contracts.py
 	$(PY_RUN) tools/check_scope_governance.py --requested-markets crypto
 	$(PY_RUN) tools/check_integration_claim_parity.py --readme README.md --index config/integrations/official_integrations.json
 	$(PY_RUN) scripts/run_exchange_certification.py --venues binance,coinbase,alpaca,oanda --output data/reports/certifications/latest.json

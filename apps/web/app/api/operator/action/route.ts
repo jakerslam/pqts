@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { recordOperatorAction } from "@/lib/operator/actions";
+import { proxyApi } from "@/lib/api/server-proxy";
 
 interface Body {
   kind?:
@@ -23,6 +23,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "kind is required" }, { status: 400 });
   }
 
-  const action = recordOperatorAction({ kind, actor, note });
-  return NextResponse.json({ action });
+  return proxyApi("/v1/operator/actions", {
+    method: "POST",
+    body: { kind, actor, note },
+  });
 }

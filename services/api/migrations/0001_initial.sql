@@ -44,3 +44,15 @@ CREATE TABLE IF NOT EXISTS api_risk_incidents (
   payload JSONB NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_api_risk_incidents_account_id ON api_risk_incidents(account_id);
+
+CREATE TABLE IF NOT EXISTS api_operator_actions (
+  action_id TEXT PRIMARY KEY,
+  created_at TEXT NOT NULL,
+  payload JSONB NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_api_operator_actions_created_at ON api_operator_actions(created_at);
+
+CREATE TABLE IF NOT EXISTS api_promotion_records (
+  strategy_id TEXT PRIMARY KEY,
+  payload JSONB NOT NULL
+);

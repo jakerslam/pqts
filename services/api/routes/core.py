@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import sys
 from datetime import datetime, timezone
 from typing import Annotated, Any
+from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 
@@ -20,6 +22,17 @@ from services.api.cache import APICache, enforce_rate_limit, get_cache
 from services.api.correlation import read_request_correlation, with_correlation
 from services.api.persistence import APIPersistence, get_persistence
 from services.api.state import APIRuntimeStore, StreamHub, get_store, get_stream_hub
+from services.api.ops_data import (
+    build_data_seed_command,
+    build_notify_command,
+    build_order_truth,
+    data_seed_presets,
+    list_template_run_artifacts,
+    parse_last_json_line,
+    run_python_command,
+    summarize_execution_quality,
+    summarize_replay,
+)
 
 router = APIRouter(prefix="/v1", tags=["core"])
 
@@ -33,6 +46,43 @@ def _invalid_payload(exc: Exception) -> HTTPException:
 
 def _utc_now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
+
+
+_PROMOTION_STAGE_ORDER = ("backtest", "paper", "shadow", "canary", "live")
+
+
+def _default_promotion_record(strategy_id: str) -> dict[str, Any]:
+    return {
+        "strategy_id": strategy_id,
+        "stage": "paper",
+        "capital_allocation_pct": 2.0,
+        "rollback_trigger": "reject_rate>0.30 or slippage_mape_pct>25",
+        "updated_at": _utc_now_iso(),
+        "history": [],
+    }
+
+
+def _coerce_stage(stage: str) -> str:
+    token = stage.strip().lower()
+    if token in _PROMOTION_STAGE_ORDER or token == "halted":
+        return token
+    return "paper"
+
+
+def _next_stage(current: str, action: str) -> str:
+    stage = _coerce_stage(current)
+    if action == "hold":
+        return stage
+    if action == "halt":
+        return "halted"
+    if stage == "halted":
+        return "paper" if action in {"advance", "rollback"} else stage
+    idx = _PROMOTION_STAGE_ORDER.index(stage)
+    if action == "rollback":
+        return _PROMOTION_STAGE_ORDER[max(idx - 1, 0)]
+    if action == "advance":
+        return _PROMOTION_STAGE_ORDER[min(idx + 1, len(_PROMOTION_STAGE_ORDER) - 1)]
+    return stage
 
 
 def _enforce_read_limit(request: Request, cache: APICache, identity: APIIdentity) -> None:
@@ -372,3 +422,212 @@ async def append_risk_incident(
         run_id=run_id,
     )
     return with_correlation(request, {"incident": incident})
+
+
+@router.get("/operator/actions")
+def list_operator_actions(
+    identity: Annotated[APIIdentity, Depends(require_identity)],
+    request: Request,
+    cache: Annotated[APICache, Depends(get_cache)],
+    store: Annotated[APIRuntimeStore, Depends(get_store)],
+    persistence: Annotated[APIPersistence | None, Depends(get_persistence)],
+    limit: Annotated[int, Query(ge=1, le=500)] = 100,
+) -> dict[str, Any]:
+    _enforce_read_limit(request, cache, identity)
+    if persistence is not None:
+        actions = persistence.list_operator_actions(limit=limit)
+    else:
+        actions = [dict(item) for item in store.operator_actions[:limit]]
+    return with_correlation(request, {"actions": actions})
+
+
+@router.post("/operator/actions")
+def append_operator_action(
+    payload: dict[str, Any],
+    identity: Annotated[APIIdentity, Depends(require_operator)],
+    request: Request,
+    cache: Annotated[APICache, Depends(get_cache)],
+    store: Annotated[APIRuntimeStore, Depends(get_store)],
+    persistence: Annotated[APIPersistence | None, Depends(get_persistence)],
+) -> dict[str, Any]:
+    _enforce_write_limit(request, cache, identity)
+    kind = str(payload.get("kind", "")).strip()
+    if not kind:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="kind is required")
+    entry = {
+        "id": str(payload.get("id", f"op_{uuid4().hex[:10]}")),
+        "kind": kind,
+        "actor": str(payload.get("actor", identity.subject)).strip() or identity.subject,
+        "note": str(payload.get("note", "")).strip(),
+        "created_at": str(payload.get("created_at", _utc_now_iso())),
+    }
+    store.operator_actions.insert(0, entry)
+    del store.operator_actions[250:]
+    if persistence is not None:
+        persistence.append_operator_action(entry)
+    return with_correlation(request, {"action": entry})
+
+
+@router.get("/promotions")
+def list_promotions(
+    identity: Annotated[APIIdentity, Depends(require_identity)],
+    request: Request,
+    cache: Annotated[APICache, Depends(get_cache)],
+    store: Annotated[APIRuntimeStore, Depends(get_store)],
+    persistence: Annotated[APIPersistence | None, Depends(get_persistence)],
+) -> dict[str, Any]:
+    _enforce_read_limit(request, cache, identity)
+    if persistence is not None:
+        records = persistence.list_promotion_records()
+    else:
+        records = [dict(item) for item in store.promotion_records.values()]
+    if not records:
+        records = [dict(item) for item in APIRuntimeStore.bootstrap().promotion_records.values()]
+        for record in records:
+            store.promotion_records[str(record.get("strategy_id", ""))] = record
+    records = sorted(records, key=lambda row: str(row.get("strategy_id", "")))
+    return with_correlation(request, {"records": records})
+
+
+@router.post("/promotions/actions")
+def apply_promotion_action(
+    payload: dict[str, Any],
+    identity: Annotated[APIIdentity, Depends(require_operator)],
+    request: Request,
+    cache: Annotated[APICache, Depends(get_cache)],
+    store: Annotated[APIRuntimeStore, Depends(get_store)],
+    persistence: Annotated[APIPersistence | None, Depends(get_persistence)],
+) -> dict[str, Any]:
+    _enforce_write_limit(request, cache, identity)
+    strategy_id = str(payload.get("strategy_id", "")).strip()
+    action = str(payload.get("action", "")).strip().lower()
+    if not strategy_id:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="strategy_id is required")
+    if action not in {"advance", "hold", "rollback", "halt"}:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="invalid action")
+
+    current = store.promotion_records.get(strategy_id) or _default_promotion_record(strategy_id)
+    stage_before = _coerce_stage(str(current.get("stage", "paper")))
+    stage_after = _next_stage(stage_before, action)
+    history = current.get("history", [])
+    history_rows = history if isinstance(history, list) else []
+    event = {
+        "action": action,
+        "actor": str(payload.get("actor", identity.subject)).strip() or identity.subject,
+        "note": str(payload.get("note", "")).strip(),
+        "from_stage": stage_before,
+        "to_stage": stage_after,
+        "at": _utc_now_iso(),
+    }
+    updated = {
+        **current,
+        "strategy_id": strategy_id,
+        "stage": stage_after,
+        "updated_at": _utc_now_iso(),
+        "history": [event, *history_rows][:100],
+    }
+    store.promotion_records[strategy_id] = updated
+    if persistence is not None:
+        persistence.upsert_promotion_record(updated)
+
+    records = sorted(
+        [dict(item) for item in store.promotion_records.values()],
+        key=lambda row: str(row.get("strategy_id", "")),
+    )
+    return with_correlation(request, {"updated": updated, "records": records})
+
+
+@router.get("/ops/execution-quality")
+def get_execution_quality(
+    identity: Annotated[APIIdentity, Depends(require_identity)],
+    request: Request,
+    cache: Annotated[APICache, Depends(get_cache)],
+    limit: Annotated[int, Query(ge=1, le=2000)] = 200,
+) -> dict[str, Any]:
+    _enforce_read_limit(request, cache, identity)
+    payload = summarize_execution_quality(limit=limit)
+    return with_correlation(request, payload)
+
+
+@router.get("/ops/order-truth")
+def get_order_truth(
+    identity: Annotated[APIIdentity, Depends(require_identity)],
+    request: Request,
+    cache: Annotated[APICache, Depends(get_cache)],
+    order_id: Annotated[str | None, Query()] = None,
+) -> dict[str, Any]:
+    _enforce_read_limit(request, cache, identity)
+    payload = build_order_truth(order_id=order_id)
+    payload["rows"] = payload["rows"][:100]
+    return with_correlation(request, payload)
+
+
+@router.get("/ops/replay")
+def get_replay(
+    identity: Annotated[APIIdentity, Depends(require_identity)],
+    request: Request,
+    cache: Annotated[APICache, Depends(get_cache)],
+    limit: Annotated[int, Query(ge=1, le=1000)] = 120,
+) -> dict[str, Any]:
+    _enforce_read_limit(request, cache, identity)
+    return with_correlation(request, summarize_replay(limit=limit))
+
+
+@router.get("/ops/template-gallery")
+def get_template_gallery(
+    identity: Annotated[APIIdentity, Depends(require_identity)],
+    request: Request,
+    cache: Annotated[APICache, Depends(get_cache)],
+    mode: Annotated[str | None, Query()] = None,
+    limit: Annotated[int, Query(ge=1, le=200)] = 40,
+) -> dict[str, Any]:
+    _enforce_read_limit(request, cache, identity)
+    artifacts = list_template_run_artifacts(mode=mode, limit=limit)
+    return with_correlation(request, {"count": len(artifacts), "artifacts": artifacts})
+
+
+@router.get("/ops/data-seed/presets")
+def get_data_seed_presets(
+    identity: Annotated[APIIdentity, Depends(require_identity)],
+    request: Request,
+    cache: Annotated[APICache, Depends(get_cache)],
+) -> dict[str, Any]:
+    _enforce_read_limit(request, cache, identity)
+    return with_correlation(request, {"presets": data_seed_presets()})
+
+
+@router.post("/ops/data-seed/run")
+def run_data_seed(
+    payload: dict[str, Any],
+    identity: Annotated[APIIdentity, Depends(require_operator)],
+    request: Request,
+    cache: Annotated[APICache, Depends(get_cache)],
+) -> dict[str, Any]:
+    _enforce_write_limit(request, cache, identity)
+    command = build_data_seed_command(payload)
+    execute = bool(payload.get("execute", False))
+    if not execute:
+        return with_correlation(request, {
+            "dry_run": True,
+            "command": [sys.executable, *command],
+            "note": "Set execute=true to run bounded data bootstrap with cache/checksum/retry controls.",
+        })
+    result = run_python_command(command, timeout_seconds=180)
+    output_lines = [line for line in str(result.get("stdout", "")).splitlines() if line.strip()]
+    return with_correlation(request, {"dry_run": False, **result, "output_lines": output_lines})
+
+
+@router.post("/ops/notify/test")
+def run_notify_test(
+    payload: dict[str, Any],
+    identity: Annotated[APIIdentity, Depends(require_operator)],
+    request: Request,
+    cache: Annotated[APICache, Depends(get_cache)],
+) -> dict[str, Any]:
+    _enforce_write_limit(request, cache, identity)
+    command = build_notify_command(payload)
+    execute = bool(payload.get("execute", False))
+    if not execute:
+        return with_correlation(request, {"dry_run": True, "command": [sys.executable, *command]})
+    result = run_python_command(command, timeout_seconds=90)
+    return with_correlation(request, {"dry_run": False, **result, "parsed": parse_last_json_line(str(result.get("stdout", "")))})

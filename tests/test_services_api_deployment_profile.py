@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+import tomllib
+
 from services.api.config import APISettings
 
 
@@ -26,3 +29,12 @@ def test_profile_env_overrides(monkeypatch) -> None:  # type: ignore[no-untyped-
     assert settings.workers == 8
     assert settings.limit_concurrency == 2048
     assert settings.graceful_shutdown_timeout_seconds == 90
+
+
+def test_default_service_version_matches_pyproject() -> None:
+    payload = tomllib.loads(Path("pyproject.toml").read_text(encoding="utf-8"))
+    project = payload.get("project", {})
+    expected = str(project.get("version", "")).strip()
+    assert expected
+    settings = APISettings.from_env()
+    assert settings.service_version == expected

@@ -211,6 +211,16 @@ Legend:
 - [x] Add external beta cohort framework registry + CI contract checks (`ROI: high`, `Type: engineering`, `Track: moat`, `Ref: COMP-18`)
 - [x] Update README/quickstart trust narrative to expose benchmark-program, certification, and 90-day harness surfaces (`ROI: high`, `Type: engineering`, `Track: parity`, `Ref: COMP-13, COMP-17`)
 
+## 02n. Coherence Closure From External Review (2026-03-10)
+
+- [x] Align web dashboard API client with canonical FastAPI `/v1` contracts for account/portfolio/execution/risk (remove `/api/v1/*` pseudo-contract usage) (`ROI: very_high`, `Type: engineering`, `Track: parity`, `Ref: LANG-7, UI-001, UI-013, UI-014, UI-015`)
+- [x] Eliminate API service version drift by deriving default API version from `pyproject.toml` (`ROI: high`, `Type: engineering`, `Track: parity`, `Ref: COMP-16`)
+- [x] Consolidate onboarding narrative to one preferred package-first path with explicit source/dev fallback (`ROI: high`, `Type: engineering`, `Track: parity`, `Ref: COMP-11, COMP-15`)
+- [x] Mark legacy issue template backlog as historical to avoid stale implementation-status contradictions (`ROI: medium`, `Type: engineering`, `Track: parity`, `Ref: COMP-16`)
+- [x] Replace local/in-memory web operator and promotion stores with FastAPI-backed endpoints and persistence (`ROI: very_high`, `Type: engineering`, `Track: moat`, `Ref: UI-027, MOAT-14`)
+- [x] Replace file-backed web diagnostics routes (`execution-quality`, `order-truth`, `replay`, `template-gallery`) with canonical backend services (`ROI: high`, `Type: engineering`, `Track: moat`, `Ref: MOAT-1, MOAT-2, UI-017, UI-018`)
+- [x] Complete web thin-client cutover by removing remaining Python-spawn route handlers from web API layer (`ROI: high`, `Type: engineering`, `Track: parity`, `Ref: LANG-7, UI-019`)
+
 ## 03. Human-Only Parallel Lane
 
 - [x] Finalize and sign blocking decisions in [docs/HUMAN_DECISIONS_LOG.md](/Users/jay/Document%20(Lcl)/Coding/PQTS/docs/HUMAN_DECISIONS_LOG.md) (`ROI: very_high`, `Type: human_only`, `Track: parity`, `Ref: COMP-10, LANG-6, LANG-3, COMP-14`)

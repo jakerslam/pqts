@@ -3689,3 +3689,47 @@ Observed source links:
 - Production pages shall not silently substitute demo data.
 - Portfolio, execution, and risk pages shall consume canonical API/stream contracts rather than bespoke page-local adapters.
 - Legacy public UI surface shall not be deprecated until critical-workflow parity gates are demonstrated.
+
+## 64. Coherence and Truth-Surface Closure Requirements
+
+These requirements codify external review findings focused on eliminating control-plane drift and contradictory public narratives.
+
+### COH-1 Web Client Contract Coherence
+
+- Web API client shall consume canonical FastAPI `/v1` contracts for account, portfolio, execution, and risk resources.
+- Deprecated pseudo-contract paths (for example `/api/v1/account`, `/api/v1/orders`) shall not be used for core dashboard reads.
+
+### COH-2 Web Thin-Client Boundary
+
+- Next.js API route handlers for operator and analytics surfaces shall not maintain authoritative in-memory domain state.
+- Domain writes/reads (promotion state, operator actions, execution/risk evidence) shall resolve through canonical backend services.
+
+### COH-3 Runtime Command Boundary
+
+- Production web route handlers shall not spawn Python processes for canonical control-plane actions where equivalent backend APIs exist.
+- Any temporary command-exec route shall be explicitly marked transitional and removed by cutover gate.
+
+### COH-4 Version Source-of-Truth Consistency
+
+- API-reported service version shall be derived from canonical release metadata (package/project version) unless explicitly overridden.
+- Public docs, release references, and runtime banners shall not present conflicting active versions.
+
+### COH-5 Onboarding Path Canonicalization
+
+- README and quickstart shall define one preferred first-success path and one clearly-labeled source/development fallback path.
+- Parallel equivalent “first path” narratives that differ in command surface shall be prohibited.
+
+### COH-6 Public Claim Scope Alignment
+
+- Market-scope claims shall align with active strategic wedge and integration maturity states.
+- Assets marked experimental in canonical integration index shall not be represented as fully production-certified without explicit qualifier.
+
+### COH-7 Backlog Freshness Contract
+
+- Historical issue-template documents shall be explicitly labeled non-canonical when active backlog state is managed elsewhere.
+- Canonical active backlog shall be singular and referenced from all auxiliary backlog documents.
+
+### COH-8 Docs Reachability Fallback
+
+- When GitHub Pages deployment is unavailable due repository permissions, docs publish workflow shall still emit a browsable static artifact.
+- README/docs shall document fallback artifact access until primary docs hosting is enabled.

@@ -73,6 +73,19 @@ class RiskIncidentRow(Base):
     payload: Mapped[str] = mapped_column(Text, nullable=False)
 
 
+class OperatorActionRow(Base):
+    __tablename__ = "api_operator_actions"
+    action_id: Mapped[str] = mapped_column(primary_key=True)
+    created_at: Mapped[str] = mapped_column(index=True)
+    payload: Mapped[str] = mapped_column(Text, nullable=False)
+
+
+class PromotionRecordRow(Base):
+    __tablename__ = "api_promotion_records"
+    strategy_id: Mapped[str] = mapped_column(primary_key=True)
+    payload: Mapped[str] = mapped_column(Text, nullable=False)
+
+
 def _ensure_sqlite_parent(url: str) -> None:
     if not url.startswith("sqlite:///"):
         return
@@ -147,6 +160,10 @@ class APIPersistence:
         for incidents in store.risk_incidents.values():
             for incident in incidents:
                 self.append_risk_incident(incident)
+        for action in store.operator_actions:
+            self.append_operator_action(action)
+        for record in store.promotion_records.values():
+            self.upsert_promotion_record(record)
 
     def hydrate_store(self, store: APIRuntimeStore) -> None:
         store.accounts = {}
@@ -156,6 +173,8 @@ class APIPersistence:
         store.pnl_snapshots = {}
         store.risk_states = {}
         store.risk_incidents = {}
+        store.operator_actions = []
+        store.promotion_records = {}
 
         with self.session_factory() as session:
             for row in session.scalars(select(AccountRow)).all():
@@ -186,6 +205,16 @@ class APIPersistence:
                 incident = _loads(row.payload)
                 account_id = str(incident.get("account_id", "paper-main"))
                 store.risk_incidents.setdefault(account_id, []).append(incident)
+
+            action_rows = session.scalars(
+                select(OperatorActionRow).order_by(OperatorActionRow.created_at.desc())
+            ).all()
+            store.operator_actions = [_loads(row.payload) for row in action_rows]
+
+            for row in session.scalars(select(PromotionRecordRow)).all():
+                record = _loads(row.payload)
+                strategy_id = str(record.get("strategy_id", row.strategy_id)).strip() or row.strategy_id
+                store.promotion_records[strategy_id] = record
 
     def upsert_account(self, snapshot: AccountSummary) -> None:
         with self.session_factory() as session:
@@ -285,6 +314,46 @@ class APIPersistence:
             rows = session.scalars(
                 select(RiskIncidentRow).where(RiskIncidentRow.account_id == account_id)
             ).all()
+            return [_loads(row.payload) for row in rows]
+
+    def append_operator_action(self, action: dict[str, Any]) -> None:
+        action_id = str(action.get("id", "")).strip()
+        if not action_id:
+            return
+        with self.session_factory() as session:
+            row = OperatorActionRow(
+                action_id=action_id,
+                created_at=str(action.get("created_at", "")),
+                payload=_dumps(dict(action)),
+            )
+            session.merge(row)
+            session.commit()
+
+    def list_operator_actions(self, limit: int = 100) -> list[dict[str, Any]]:
+        bounded = max(1, int(limit))
+        with self.session_factory() as session:
+            rows = session.scalars(
+                select(OperatorActionRow)
+                .order_by(OperatorActionRow.created_at.desc())
+                .limit(bounded)
+            ).all()
+            return [_loads(row.payload) for row in rows]
+
+    def upsert_promotion_record(self, record: dict[str, Any]) -> None:
+        strategy_id = str(record.get("strategy_id", "")).strip()
+        if not strategy_id:
+            return
+        with self.session_factory() as session:
+            row = PromotionRecordRow(
+                strategy_id=strategy_id,
+                payload=_dumps(dict(record)),
+            )
+            session.merge(row)
+            session.commit()
+
+    def list_promotion_records(self) -> list[dict[str, Any]]:
+        with self.session_factory() as session:
+            rows = session.scalars(select(PromotionRecordRow)).all()
             return [_loads(row.payload) for row in rows]
 
 

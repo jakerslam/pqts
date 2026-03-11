@@ -11,11 +11,11 @@
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Status](https://img.shields.io/badge/status-Paper%20Trading-yellow.svg)]()
 
-> A professional-grade algorithmic trading platform for crypto, equities, and forex markets.
+> A crypto-first algorithmic trading platform with staged expansion to equities and forex.
 
 ## 🚀 Features
 
-- **Multi-Market Support**: Trade crypto, stocks, and forex from one platform
+- **Crypto-First With Expansion Paths**: Production wedge is crypto; equities/forex adapters are staged behind certification gates
 - **10 Strategy Channels**: Scalping, arbitrage, trend following, mean reversion, ML, volume profile, regime detection, order flow, liquidity sweeps, multi-timeframe
 - **Universal Indicators**: Technical analysis that works across all markets
 - **Risk Management**: Institutional-grade position sizing (Kelly criterion) and drawdown controls
@@ -35,7 +35,7 @@ PQTS is built for operational robustness first, not just strategy scripts.
 | Reconciliation + incident telemetry | ✅ Native | ⚠️ Limited | ⚠️ Depends on setup | ⚠️ Limited |
 | Promotion/canary controls | ✅ Native | ❌ No first-class flow | ⚠️ Custom | ❌ No first-class flow |
 | Simulation leaderboard + reporting | ✅ Native | ⚠️ Backtesting focus | ✅ Strong backtesting | ⚠️ Bot metrics focus |
-| Multi-market scope (crypto/equities/forex) | ✅ | ⚠️ Primarily crypto | ✅ | ⚠️ Primarily crypto/market-making |
+| Multi-market scope (crypto/equities/forex) | ✅ (crypto-first, staged expansion) | ⚠️ Primarily crypto | ✅ | ⚠️ Primarily crypto/market-making |
 
 ## 🖼️ Visual Tour
 
@@ -72,31 +72,25 @@ python scripts/generate_readme_media.py
 ## 📊 Quick Start
 
 ```bash
-# Clone and setup
+# Preferred first-success path (package install)
+pip install -U pqts
+pqts quickstart --execute
+pqts backtest momentum
+pqts paper start
+```
+
+Source/development path:
+
+```bash
 git clone https://github.com/jakerslam/pqts.git
 cd pqts
-
-# Recommended: bootstrap local venv + dependencies
 make setup
 source .venv/bin/activate
-# Optional strict lock install:
-# make setup-lock
-
-# Copy environment template
 cp .env.example .env
-# Edit .env with your API keys
-
 # Start primary web dashboard
-cd apps/web
-npm install
-npm run dev
-
+cd apps/web && npm install && npm run dev
 # Dash fallback (operator/internal)
-cd ..
-python src/dashboard/start.py
-
-# Install published package:
-pip install -U pqts
+cd .. && python src/dashboard/start.py
 
 # Run paper trading
 python main.py config/paper.yaml
@@ -534,6 +528,7 @@ Repository layout guide: `docs/REPO_STRUCTURE.md`
 - [Codex Compliance](docs/CODEX_COMPLIANCE.md)
 - [Implementation Direction](docs/IMPLEMENTATION_DIRECTION.md)
 - [SRS](docs/SRS.md)
+- [Two-Week RYG Plan](docs/EXECUTION_PLAN_2W_RYG.md)
 - [SRS Coverage Matrix](docs/SRS_COVERAGE_MATRIX.md)
 - [SRS Gap Backlog](docs/SRS_GAP_BACKLOG.md)
 - [Development Summary](docs/DEVELOPMENT_SUMMARY.md)

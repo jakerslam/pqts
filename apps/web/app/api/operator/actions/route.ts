@@ -1,7 +1,5 @@
-import { NextResponse } from "next/server";
-
-import { listOperatorActions } from "@/lib/operator/actions";
+import { proxyApi } from "@/lib/api/server-proxy";
 
 export async function GET() {
-  return NextResponse.json({ actions: listOperatorActions(100) });
+  return proxyApi("/v1/operator/actions?limit=100");
 }

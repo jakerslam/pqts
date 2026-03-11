@@ -159,6 +159,9 @@ jobs:
       - name: Core professional contract validation (gating)
         run: python3 tools/check_core_professional_contract.py
 
+      - name: Web API contract validation (gating)
+        run: python3 tools/check_web_api_contracts.py
+
       - name: Wedge-first scope governance validation (gating)
         run: python3 tools/check_scope_governance.py --requested-markets crypto
 

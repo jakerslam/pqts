@@ -1,12 +1,9 @@
 import { NextResponse } from "next/server";
 
-import {
-  applyPromotionAction,
-  listPromotionRecords,
-  type PromotionAction,
-} from "@/lib/ops/promotion-store";
+import { proxyApi } from "@/lib/api/server-proxy";
 
 export const runtime = "nodejs";
+type PromotionAction = "advance" | "hold" | "rollback" | "halt";
 
 interface PromotionBody {
   strategy_id?: string;
@@ -18,9 +15,7 @@ interface PromotionBody {
 const VALID_ACTIONS = new Set<PromotionAction>(["advance", "hold", "rollback", "halt"]);
 
 export async function GET() {
-  return NextResponse.json({
-    records: listPromotionRecords(),
-  });
+  return proxyApi("/v1/promotions");
 }
 
 export async function POST(request: Request) {
@@ -33,14 +28,13 @@ export async function POST(request: Request) {
   if (!strategyId) {
     return NextResponse.json({ error: "strategy_id is required" }, { status: 400 });
   }
-  const updated = applyPromotionAction({
-    strategy_id: strategyId,
-    action,
-    actor: String(payload.actor ?? "web_operator"),
-    note: String(payload.note ?? ""),
-  });
-  return NextResponse.json({
-    updated,
-    records: listPromotionRecords(),
+  return proxyApi("/v1/promotions/actions", {
+    method: "POST",
+    body: {
+      strategy_id: strategyId,
+      action,
+      actor: String(payload.actor ?? "web_operator"),
+      note: String(payload.note ?? ""),
+    },
   });
 }

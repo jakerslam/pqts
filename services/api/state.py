@@ -34,10 +34,13 @@ class APIRuntimeStore:
     pnl_snapshots: dict[str, list[PnLSnapshot]] = field(default_factory=dict)
     risk_states: dict[str, RiskStateSnapshot] = field(default_factory=dict)
     risk_incidents: dict[str, list[dict[str, Any]]] = field(default_factory=dict)
+    operator_actions: list[dict[str, Any]] = field(default_factory=list)
+    promotion_records: dict[str, dict[str, Any]] = field(default_factory=dict)
 
     @classmethod
     def bootstrap(cls) -> "APIRuntimeStore":
         now = _utc_now()
+        now_iso = now.isoformat()
         account = AccountSummary(
             account_id="paper-main",
             cash=100_000.0,
@@ -88,6 +91,33 @@ class APIRuntimeStore:
             pnl_snapshots={account.account_id: [pnl]},
             risk_states={account.account_id: risk},
             risk_incidents={account.account_id: []},
+            operator_actions=[],
+            promotion_records={
+                "funding_arbitrage": {
+                    "strategy_id": "funding_arbitrage",
+                    "stage": "paper",
+                    "capital_allocation_pct": 2.0,
+                    "rollback_trigger": "reject_rate>0.30 or slippage_mape_pct>25",
+                    "updated_at": now_iso,
+                    "history": [],
+                },
+                "market_making": {
+                    "strategy_id": "market_making",
+                    "stage": "paper",
+                    "capital_allocation_pct": 2.0,
+                    "rollback_trigger": "reject_rate>0.30 or slippage_mape_pct>25",
+                    "updated_at": now_iso,
+                    "history": [],
+                },
+                "trend_following": {
+                    "strategy_id": "trend_following",
+                    "stage": "paper",
+                    "capital_allocation_pct": 2.0,
+                    "rollback_trigger": "reject_rate>0.30 or slippage_mape_pct>25",
+                    "updated_at": now_iso,
+                    "history": [],
+                },
+            },
         )
 
 

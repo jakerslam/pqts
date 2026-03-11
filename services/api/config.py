@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import os
 from dataclasses import dataclass
+from pathlib import Path
+import tomllib
 
 
 def _env_bool(name: str, default: bool) -> bool:
@@ -13,10 +15,26 @@ def _env_bool(name: str, default: bool) -> bool:
     return value.strip().lower() in {"1", "true", "yes", "on"}
 
 
+def _default_service_version() -> str:
+    repo_root = Path(__file__).resolve().parents[2]
+    pyproject_path = repo_root / "pyproject.toml"
+    if not pyproject_path.exists():
+        return "0.1.0"
+    try:
+        payload = tomllib.loads(pyproject_path.read_text(encoding="utf-8"))
+    except Exception:
+        return "0.1.0"
+    project = payload.get("project", {})
+    if not isinstance(project, dict):
+        return "0.1.0"
+    version = str(project.get("version", "")).strip()
+    return version or "0.1.0"
+
+
 @dataclass(frozen=True)
 class APISettings:
     service_name: str = "PQTS API"
-    service_version: str = "0.1.0"
+    service_version: str = _default_service_version()
     environment: str = "dev"
     host: str = "0.0.0.0"
     port: int = 8000
