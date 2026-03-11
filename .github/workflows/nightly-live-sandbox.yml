@@ -56,3 +56,18 @@ jobs:
             --max-timeout-rate 0.02 \
             --max-reconciliation-mismatches 0 \
             --output data/reports/nightly_live_sandbox_gate.json
+
+      - name: Run chaos/recovery suite
+        run: |
+          python3 scripts/run_chaos_recovery_suite.py \
+            --strict \
+            --out-dir data/reports/chaos
+
+      - name: Upload nightly sandbox artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: nightly-sandbox-artifacts
+          path: |
+            data/reports/nightly_exchange_certification.json
+            data/reports/nightly_live_sandbox_gate.json
+            data/reports/chaos

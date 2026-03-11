@@ -190,6 +190,24 @@ jobs:
             --readme README.md \
             --index config/integrations/official_integrations.json
 
+      - name: Certified-paper integration report (gating)
+        run: |
+          python3 scripts/run_exchange_certification.py \
+            --venues binance,coinbase,alpaca,oanda \
+            --output data/reports/certifications/latest.json
+
+      - name: Certified-paper integration checks (gating)
+        run: |
+          python3 tools/check_certified_paper_integrations.py \
+            --index config/integrations/official_integrations.json \
+            --cert-report data/reports/certifications/latest.json
+
+      - name: Native latency regression checks (gating)
+        run: |
+          python3 tools/check_native_latency_regression.py \
+            --results-dir results/native_benchmarks \
+            --policy config/native/latency_policy.json
+
       - name: Benchmark bundle governance checks (gating)
         run: |
           python3 tools/check_result_bundle_governance.py \
@@ -215,6 +233,12 @@ jobs:
           python3 tools/check_external_validation_evidence.py \
             --user-research docs/USER_RESEARCH_2026_03.md \
             --readme README.md
+
+      - name: External beta cohort framework checks (gating)
+        run: |
+          python3 tools/check_external_beta_framework.py \
+            --registry data/validation/external_beta/cohort_registry.json \
+            --user-research docs/USER_RESEARCH_2026_03.md
 
       - name: Source reliability checks (gating)
         run: python3 tools/check_source_reliability.py

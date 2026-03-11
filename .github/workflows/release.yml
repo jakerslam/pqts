@@ -55,6 +55,13 @@ jobs:
             --checksums dist/SHA256SUMS.txt \
             --metadata dist/release_metadata.json
 
+      - name: Verify release provenance integrity
+        run: |
+          python3 tools/check_release_provenance.py \
+            --dist-dir dist \
+            --metadata dist/release_metadata.json \
+            --checksums dist/SHA256SUMS.txt
+
       - name: Upload dist artifacts
         uses: actions/upload-artifact@v4
         with:

@@ -4,7 +4,9 @@
 [![CI](https://github.com/jakerslam/pqts/actions/workflows/ci.yml/badge.svg)](https://github.com/jakerslam/pqts/actions/workflows/ci.yml)
 [![Coverage](https://github.com/jakerslam/pqts/actions/workflows/coverage.yml/badge.svg)](https://github.com/jakerslam/pqts/actions/workflows/coverage.yml)
 [![Docs](https://github.com/jakerslam/pqts/actions/workflows/publish-leaderboard.yml/badge.svg)](https://github.com/jakerslam/pqts/actions/workflows/publish-leaderboard.yml)
+[![Benchmark Program](https://github.com/jakerslam/pqts/actions/workflows/benchmark-program.yml/badge.svg)](https://github.com/jakerslam/pqts/actions/workflows/benchmark-program.yml)
 [![Release](https://github.com/jakerslam/pqts/actions/workflows/release.yml/badge.svg)](https://github.com/jakerslam/pqts/actions/workflows/release.yml)
+[![Nightly Sandbox](https://github.com/jakerslam/pqts/actions/workflows/nightly-live-sandbox.yml/badge.svg)](https://github.com/jakerslam/pqts/actions/workflows/nightly-live-sandbox.yml)
 [![PyPI](https://img.shields.io/pypi/v/pqts.svg)](https://pypi.org/project/pqts/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Status](https://img.shields.io/badge/status-Paper%20Trading-yellow.svg)]()
@@ -84,7 +86,13 @@ source .venv/bin/activate
 cp .env.example .env
 # Edit .env with your API keys
 
-# Start dashboard
+# Start primary web dashboard
+cd apps/web
+npm install
+npm run dev
+
+# Dash fallback (operator/internal)
+cd ..
 python src/dashboard/start.py
 
 # Install published package:
@@ -117,9 +125,9 @@ Dashboard: `http://localhost:8501`
 API metrics (observability profile): `http://localhost:8000/metrics`  
 Prometheus (observability profile): `http://localhost:9090`  
 Grafana (observability profile): `http://localhost:3000` (`admin` / `admin`)
-Docs site (GitHub Pages): [https://jakerslam.github.io/pqts/](https://jakerslam.github.io/pqts/) (requires Pages enablement in repo settings)
+Docs site (GitHub Pages): [https://jakerslam.github.io/PQTS/](https://jakerslam.github.io/PQTS/)
 Leaderboard fallback in-repo page: [docs/leaderboard/index.html](docs/leaderboard/index.html)
-Latest release: [v0.1.1](https://github.com/jakerslam/PQTS/releases/tag/v0.1.1)
+Latest release: [v0.1.5](https://github.com/jakerslam/PQTS/releases/tag/v0.1.5)
 
 ## 🌐 Web App Dashboard (Next.js)
 
@@ -243,6 +251,20 @@ make paper-6m
 Artifacts are written under `data/reports/paper_6m/`, including one consolidated
 `paper_6m_harness_<timestamp>.json` report.
 
+Ninety-day paper-trading harness (3 monthly slices, external-beta oriented):
+
+```bash
+python3 scripts/run_paper_90d_harness.py --days 90 --cycles-per-month 12 --sleep-seconds 0
+# or:
+make paper-90d
+```
+
+Certified-paper integration gate (marketed venues + certification evidence):
+
+```bash
+make certified-paper
+```
+
 World-class ops checklist (all 10 steps, one command):
 
 ```bash
@@ -253,6 +275,12 @@ Governance and contract gates (recommended before PR/release):
 
 ```bash
 make governance-check
+```
+
+Benchmark program and monthly proof artifact generation:
+
+```bash
+make benchmark-program
 ```
 
 Live secret validation:
@@ -346,6 +374,14 @@ Regenerate published reference bundles and sync README/docs callouts:
 make reference-bundles
 ```
 
+Trust + provenance program:
+
+- Weekly benchmark automation: `.github/workflows/benchmark-program.yml`
+- Latest benchmark matrix report: `data/reports/benchmark_program/latest.json`
+- Monthly benchmark reports: `data/reports/monthly/<YYYY-MM>/`
+- Certified-paper integration report: `data/reports/certifications/latest.json`
+- External beta framework contract: `docs/EXTERNAL_BETA_FRAMEWORK.md`
+
 ## 🔔 Notifications (Telegram/Discord)
 
 Incident automation can dispatch notifications directly:
@@ -427,19 +463,19 @@ Access at `http://localhost:8501`
 
 Reference callout from latest `reference` bundle (auto-generated from `results/reference_performance_latest.json`):
 <!-- REFERENCE_PERFORMANCE:START -->
-_Last generated (UTC): 2026-03-10 19:59:10_
+_Last generated (UTC): 2026-03-11 05:45:39_
 
-- `2026-03-10_reference_crypto_trend_following` ([bundle](results/2026-03-10_reference_crypto_trend_following/README.md), [csv](results/2026-03-10_reference_crypto_trend_following/simulation_leaderboard_20260310T195908561273Z.csv), [report](results/2026-03-10_reference_crypto_trend_following/simulation_suite_20260310T195908561273Z.json))
-  - `avg_quality_score=0.8336`
+- `2026-03-11_reference_multi_market_making` ([bundle](results/2026-03-11_reference_multi_market_making/README.md), [csv](results/2026-03-11_reference_multi_market_making/simulation_leaderboard_20260311T054538975060Z.csv), [report](results/2026-03-11_reference_multi_market_making/simulation_suite_20260311T054538975060Z.json))
+  - `avg_quality_score=0.8403`
   - `avg_fill_rate=1.0000`
   - `avg_reject_rate=0.0000`
-  - `total_filled=36` / `total_submitted=36`
+  - `total_filled=90` / `total_submitted=90`
 
 | Bundle | Markets | Strategy | Quality | Fill | Reject |
 |---|---|---|---:|---:|---:|
-| `2026-03-10_reference_crypto_funding_arbitrage` | `crypto` | `funding_arbitrage` | `0.8221` | `1.0000` | `0.0000` |
-| `2026-03-10_reference_crypto_trend_following` | `crypto` | `trend_following` | `0.8336` | `1.0000` | `0.0000` |
-| `2026-03-10_reference_multi_market_making` | `crypto,equities,forex` | `market_making` | `0.8246` | `1.0000` | `0.0000` |
+| `2026-03-11_reference_crypto_funding_arbitrage` | `crypto` | `funding_arbitrage` | `0.8120` | `1.0000` | `0.0000` |
+| `2026-03-11_reference_crypto_trend_following` | `crypto` | `trend_following` | `0.8128` | `1.0000` | `0.0000` |
+| `2026-03-11_reference_multi_market_making` | `crypto,equities,forex` | `market_making` | `0.8403` | `1.0000` | `0.0000` |
 <!-- REFERENCE_PERFORMANCE:END -->
 
 | Strategy | Timeframe | Edge |
@@ -522,6 +558,7 @@ Repository layout guide: `docs/REPO_STRUCTURE.md`
 - [Architecture Diagram](docs/ARCHITECTURE_DIAGRAM.md)
 - [Benchmarks](docs/BENCHMARKS.md)
 - [Reference Performance](docs/REFERENCE_PERFORMANCE.md)
+- [External Beta Framework](docs/EXTERNAL_BETA_FRAMEWORK.md)
 - [Release Checklist](docs/RELEASE_CHECKLIST.md)
 - [Branch Protection Guidance](docs/BRANCH_PROTECTION.md)
 - [PyPI Publishing Setup](docs/PYPI_PUBLISHING.md)

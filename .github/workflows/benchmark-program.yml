@@ -1,0 +1,72 @@
+name: Benchmark Program
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "20 7 * * 1"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: benchmark-program-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  benchmark_program:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install mkdocs==1.6.1 mkdocs-material==9.5.50 mkdocs-mermaid2-plugin==1.2.1
+
+      - name: Publish reference bundles
+        run: |
+          python3 scripts/publish_reference_bundles.py \
+            --config config/paper.yaml \
+            --out-root results
+
+      - name: Render latest reference performance snapshot
+        run: python3 scripts/render_reference_performance.py
+
+      - name: Generate monthly benchmark report
+        run: |
+          python3 scripts/generate_monthly_report.py \
+            --results-dir results \
+            --out-dir data/reports/monthly
+
+      - name: Generate certified-paper integration report
+        run: |
+          python3 scripts/run_exchange_certification.py \
+            --venues binance,coinbase,alpaca,oanda \
+            --output data/reports/certifications/latest.json
+
+      - name: Validate benchmark program coverage
+        run: |
+          python3 tools/check_benchmark_program.py \
+            --reference-performance results/reference_performance_latest.json \
+            --results-root . \
+            --policy config/benchmarks/program_policy.json \
+            --report-out data/reports/benchmark_program/latest.json
+
+      - name: Upload benchmark program artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-program-artifacts
+          path: |
+            results/reference_performance_latest.json
+            data/reports/benchmark_program/latest.json
+            data/reports/monthly
+            data/reports/provenance/benchmark_provenance.jsonl
+            data/reports/certifications/latest.json

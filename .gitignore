@@ -33,7 +33,12 @@ wheels/
 .env.*.local
 
 # Data
-data/
+data/*
+!data/validation/
+data/validation/*
+!data/validation/external_beta/
+data/validation/external_beta/*
+!data/validation/external_beta/cohort_registry.json
 *.csv
 *.parquet
 *.db

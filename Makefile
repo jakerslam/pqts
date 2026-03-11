@@ -4,7 +4,7 @@ VENV ?= .venv
 VENV_PY := $(VENV)/bin/python
 PY_RUN := $(if $(wildcard $(VENV_PY)),$(VENV_PY),$(PYTHON))
 
-.PHONY: setup setup-lock demo sim-suite stream-worker ws-ingestion tournament canary-ramp reconcile slo-report error-budget control-plane arch-check arch-map scaffold-module leaderboard-site governance-check paper-6m nightly-review run-mode native bench-exec reference-bundles reference-performance docker-up observability-up doctor onboard status test lint clean
+.PHONY: setup setup-lock demo sim-suite stream-worker ws-ingestion tournament canary-ramp reconcile slo-report error-budget control-plane arch-check arch-map scaffold-module leaderboard-site governance-check paper-6m paper-90d nightly-review run-mode native bench-exec reference-bundles reference-performance certified-paper chaos-suite benchmark-program docker-up observability-up doctor onboard status test lint clean
 
 setup:
 	bash scripts/bootstrap_env.sh --python "$(PYTHON)" --venv "$(VENV)"
@@ -72,14 +72,21 @@ governance-check:
 	$(PY_RUN) tools/check_core_professional_contract.py
 	$(PY_RUN) tools/check_scope_governance.py --requested-markets crypto
 	$(PY_RUN) tools/check_integration_claim_parity.py --readme README.md --index config/integrations/official_integrations.json
+	$(PY_RUN) scripts/run_exchange_certification.py --venues binance,coinbase,alpaca,oanda --output data/reports/certifications/latest.json
+	$(PY_RUN) tools/check_certified_paper_integrations.py --index config/integrations/official_integrations.json --cert-report data/reports/certifications/latest.json
+	$(PY_RUN) tools/check_native_latency_regression.py --results-dir results/native_benchmarks --policy config/native/latency_policy.json
 	$(PY_RUN) tools/check_benchmark_program.py --reference-performance results/reference_performance_latest.json --results-root . --policy config/benchmarks/program_policy.json
 	$(PY_RUN) tools/check_external_validation_evidence.py --user-research docs/USER_RESEARCH_2026_03.md --readme README.md
+	$(PY_RUN) tools/check_external_beta_framework.py --registry data/validation/external_beta/cohort_registry.json --user-research docs/USER_RESEARCH_2026_03.md
 	$(PY_RUN) tools/check_tier_safety_policy.py
 	$(PY_RUN) tools/check_source_reliability.py
 	$(PY_RUN) tools/check_roadmap_governance.py
 
 paper-6m:
 	$(VENV_PY) scripts/run_paper_6m_harness.py --months 6 --cycles-per-month 12 --sleep-seconds 0 --risk-profile balanced
+
+paper-90d:
+	$(PY_RUN) scripts/run_paper_90d_harness.py --days 90 --cycles-per-month 12 --sleep-seconds 0 --risk-profile balanced
 
 nightly-review:
 	$(VENV_PY) scripts/run_nightly_strategy_review.py --snapshot auto --output table
@@ -101,6 +108,19 @@ reference-bundles:
 
 reference-performance:
 	$(PY_RUN) scripts/render_reference_performance.py
+
+certified-paper:
+	$(PY_RUN) scripts/run_exchange_certification.py --venues binance,coinbase,alpaca,oanda --output data/reports/certifications/latest.json
+	$(PY_RUN) tools/check_certified_paper_integrations.py --index config/integrations/official_integrations.json --cert-report data/reports/certifications/latest.json
+
+chaos-suite:
+	$(PY_RUN) scripts/run_chaos_recovery_suite.py --strict --out-dir data/reports/chaos
+
+benchmark-program:
+	$(PY_RUN) scripts/publish_reference_bundles.py --config config/paper.yaml --out-root results
+	$(PY_RUN) scripts/render_reference_performance.py
+	$(PY_RUN) scripts/generate_monthly_report.py --results-dir results --out-dir data/reports/monthly
+	$(PY_RUN) tools/check_benchmark_program.py --reference-performance results/reference_performance_latest.json --results-root . --policy config/benchmarks/program_policy.json --report-out data/reports/benchmark_program/latest.json
 
 docker-up:
 	docker compose up --build

@@ -2,12 +2,20 @@
   "engine_id": "pqts-core-engine",
   "surfaces": [
     {
-      "name": "studio-dashboard",
+      "name": "studio-web",
       "surface_type": "studio",
+      "framework": "nextjs",
+      "entrypoint": "apps/web",
+      "consumes_control_plane": true,
+      "active": true
+    },
+    {
+      "name": "operator-dashboard-legacy",
+      "surface_type": "admin",
       "framework": "dash",
       "entrypoint": "src/dashboard/start.py",
       "consumes_control_plane": true,
-      "active": true
+      "active": false
     },
     {
       "name": "core-cli",

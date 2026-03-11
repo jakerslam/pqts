@@ -13,8 +13,8 @@ def test_surface_contract_tool_passes(tmp_path: Path, monkeypatch) -> None:
             {
                 "name": "studio",
                 "surface_type": "studio",
-                "framework": "dash",
-                "entrypoint": "studio.py",
+                "framework": "nextjs",
+                "entrypoint": "apps/web",
                 "consumes_control_plane": True,
                 "active": True,
             },

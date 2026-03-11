@@ -84,3 +84,16 @@ python3 examples/wallet_modes/run_example.py --mode safe --output json
 ```bash
 make governance-check
 ```
+
+## 8) Benchmark + Campaign Harnesses
+
+```bash
+# 90-day campaign harness
+make paper-90d
+
+# reference bundles + monthly benchmark report
+make benchmark-program
+
+# certified-paper integrations gate
+make certified-paper
+```

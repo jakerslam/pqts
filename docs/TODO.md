@@ -198,6 +198,19 @@ Legend:
 - [x] Implement progressive stepwise beginner validation ladder with machine-readable remediation output and quickstart linking (`ROI: high`, `Type: engineering`, `Track: parity`, `Ref: RCG-8`, `Depends: RCG-1, RCG-2`)
 - [x] Implement resolution-to-redeem settlement worker with idempotent retry/backoff and attribution telemetry (`ROI: high`, `Type: engineering`, `Track: parity`, `Ref: RCG-6`)
 
+## 02m. Reliability + Trust Automation Closure (2026-03-10)
+
+- [x] Enable GitHub Pages auto-provisioning in docs publish workflow (`ROI: very_high`, `Type: engineering`, `Track: parity`, `Ref: COMP-15, LANG-14`)
+- [x] Add scheduled benchmark-program workflow (reference bundles + monthly report + certification artifact upload) (`ROI: very_high`, `Type: engineering`, `Track: moat`, `Ref: COMP-5, COMP-17, MOAT-12`)
+- [x] Add ninety-day paper-trading harness command surface and reporting (`ROI: high`, `Type: engineering`, `Track: parity`, `Ref: COMP-11, COMP-18`)
+- [x] Add certified-paper integration governance gate for marketed venues (`ROI: high`, `Type: engineering`, `Track: parity`, `Ref: PMKT-16, COMP-13`)
+- [x] Add native latency regression policy + CI gate (`ROI: high`, `Type: engineering`, `Track: parity`, `Ref: LANG-3, LANG-10`)
+- [x] Add nightly chaos/recovery validation suite artifact gate (`ROI: high`, `Type: engineering`, `Track: parity`, `Ref: UI-021, MOAT-11`)
+- [x] Consolidate active Studio surface contract to Next.js with Dash as inactive operator fallback (`ROI: very_high`, `Type: engineering`, `Track: parity`, `Ref: UI-001, LANG-14`)
+- [x] Add release metadata provenance verification before GitHub release/PyPI publish (`ROI: high`, `Type: engineering`, `Track: parity`, `Ref: COMP-2, COMP-16`)
+- [x] Add external beta cohort framework registry + CI contract checks (`ROI: high`, `Type: engineering`, `Track: moat`, `Ref: COMP-18`)
+- [x] Update README/quickstart trust narrative to expose benchmark-program, certification, and 90-day harness surfaces (`ROI: high`, `Type: engineering`, `Track: parity`, `Ref: COMP-13, COMP-17`)
+
 ## 03. Human-Only Parallel Lane
 
 - [x] Finalize and sign blocking decisions in [docs/HUMAN_DECISIONS_LOG.md](/Users/jay/Document%20(Lcl)/Coding/PQTS/docs/HUMAN_DECISIONS_LOG.md) (`ROI: very_high`, `Type: human_only`, `Track: parity`, `Ref: COMP-10, LANG-6, LANG-3, COMP-14`)
@@ -255,4 +268,3 @@ Legend:
 - [x] Assimilate WF requirement family into baseline contracts, policy hooks, and evidence tracking (`ROI: high`, `Type: engineering`, `Track: parity`, `Ref: WF-1, WF-2, WF-3, WF-4, WF-5, WF-6, WF-7`)
 - [x] Assimilate WK requirement family into baseline contracts, policy hooks, and evidence tracking (`ROI: high`, `Type: engineering`, `Track: parity`, `Ref: WK-1, WK-2, WK-3, WK-4, WK-5, WK-6, WK-7, WK-8, WK-9, WK-10`)
 - [x] Assimilate WR requirement family into baseline contracts, policy hooks, and evidence tracking (`ROI: high`, `Type: engineering`, `Track: parity`, `Ref: WR-1, WR-2, WR-3, WR-4, WR-5, WR-6`)
-

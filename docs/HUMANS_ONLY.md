@@ -22,6 +22,7 @@ This file tracks tasks that cannot be reliably automated and require direct huma
 - Decide and sign off the single primary public web surface for this release phase (Next.js vs legacy dashboard exposure) and publish transition messaging.
 - Approve whether broad multi-market marketing claims stay live or are narrowed to only currently verified integrations in the canonical index.
 - Review and sign off benchmark narrative language so historical diagnostic bundles are contextualized correctly and not framed as reference proof.
+- Ensure Docker CLI is installed and runnable on maintainer workstations used for release validation (`docker --version`, `docker compose version`).
 
 ## P1 Growth
 

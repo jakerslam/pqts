@@ -145,7 +145,8 @@ def _write_report(
         "## Outputs",
         "",
         f"- Handoff Blob: `{handoff_path}`",
-        "- Dashboard: `python src/dashboard/start.py` then open `http://localhost:8050`",
+        "- Web dashboard: `cd apps/web && npm run dev` then open `http://localhost:3000/dashboard`",
+        "- Dash fallback (operator/internal): `python src/dashboard/start.py` then open `http://localhost:8501`",
     ]
     report_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
     return report_path
@@ -286,7 +287,8 @@ def main() -> int:
     summary = {
         "report_path": str(report_path),
         "handoff_blob_path": str(handoff_path),
-        "dashboard_url": "http://localhost:8050",
+        "dashboard_url": "http://localhost:3000/dashboard",
+        "dashboard_fallback_url": "http://localhost:8501",
         "upgrade_url": str(args.upgrade_url),
         "operator_tier": operator_tier.name,
         "campaign_result": campaign_result,

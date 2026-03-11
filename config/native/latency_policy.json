@@ -1,0 +1,5 @@
+{
+  "max_native_p95_ms": 25.0,
+  "min_speedup_vs_fallback": 1.5,
+  "max_artifact_age_days": 30
+}

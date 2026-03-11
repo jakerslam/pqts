@@ -7,7 +7,7 @@
     "native_only_for_hotpath": true
   },
   "ui_policy": {
-    "primary_studio_framework": "dash",
+    "primary_studio_framework": "nextjs",
     "legacy_frameworks": ["streamlit"]
   }
 }

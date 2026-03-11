@@ -25,7 +25,8 @@ Last updated: 2026-03-09 (America/Denver)
 - Python remains the system default for runtime, execution logic, risk gating, and orchestration.
 - The product target is Python-first (not Python-only): user-facing surface remains mostly Python, while hot-path kernels migrate to Rust when profiling triggers are met.
 - FastAPI is the canonical control plane; all active surfaces consume API contracts.
-- Dash is the current Python-native operator UI. Next.js (`apps/web`) is the customer-facing web surface trajectory.
+- Next.js (`apps/web`) is the primary external Studio surface.
+- Dash (`src/dashboard/start.py`) remains operator/internal fallback during cutover windows.
 - DuckDB/Polars/PyArrow remain the preferred analytical data-plane stack for heavy scan/aggregation paths.
 - R remains supported as an optional research validator bridge for experiment gate metrics.
 

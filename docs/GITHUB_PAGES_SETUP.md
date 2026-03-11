@@ -4,24 +4,22 @@ Last updated: 2026-03-10 (America/Denver)
 
 ## Current Status
 
-Pages publish workflow is wired (`.github/workflows/publish-leaderboard.yml`) and runs successfully through site build, but deployment is blocked until repository Pages is enabled.
-
-Observed workflow error:
-
-- `Get Pages site failed: Not Found`
-- `Create Pages site failed: Resource not accessible by integration`
+Pages publish workflow is wired (`.github/workflows/publish-leaderboard.yml`) with
+`actions/configure-pages@v5` using `enablement: true`. This enables first-run site
+creation when repository settings permit GitHub Actions Pages deployments.
 
 ## One-Time Repository Setup (Owner/Admin)
 
 1. Open repository settings: `Settings -> Pages`.
 2. Set source to **GitHub Actions**.
 3. Save settings and confirm Pages is enabled for the repository.
+4. Ensure workflow permissions allow `pages:write` and `id-token:write`.
 
 ## After Enablement
 
 1. Re-run workflow: `Publish Docs Site` (workflow dispatch), or push any docs change.
 2. Verify deployment URL appears in workflow summary.
-3. Confirm URL resolves: `https://jakerslam.github.io/pqts/`.
+3. Confirm URL resolves: `https://jakerslam.github.io/PQTS/`.
 
 ## Fallback Artifact
 
