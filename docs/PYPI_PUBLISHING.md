@@ -37,9 +37,9 @@ pip install pqts==X.Y.Z
 pqts --help
 ```
 
-## 6) Release Attempt Notes (2026-03-10)
+## 6) Release Attempt Notes (2026-03-10 to 2026-03-11)
 
-Release pipelines for tags `v0.1.0` and `v0.1.1` succeeded through build + GitHub release, but PyPI publish failed with:
+Release pipelines for tags `v0.1.0`, `v0.1.1`, and `v0.1.2` succeeded through build + GitHub release, but PyPI publish failed with:
 
 - `invalid-publisher`: valid token, but no corresponding publisher
 
@@ -49,9 +49,16 @@ Observed OIDC claims from the failed run:
 - `workflow_ref`: `jakerslam/PQTS/.github/workflows/release.yml@refs/tags/v0.1.1`
 - `environment`: `pypi`
 
+Most recent failing run:
+
+- workflow run id: `22934006492`
+- tag: `v0.1.2`
+- failing job: `publish_pypi` (`Publish to PyPI (trusted publishing)`)
+
 Required fix on PyPI side:
 
 1. Ensure trusted publisher is configured for **repository `jakerslam/PQTS`** (exact casing).
 2. Ensure workflow path is `.github/workflows/release.yml`.
 3. Ensure environment is `pypi`.
-4. Re-run publish from a new patch tag (for example `v0.1.2`) after correcting the trusted publisher entry.
+4. Ensure the trusted publisher is configured on the correct `pqts` PyPI project and not an adjacent/test project.
+5. Re-run publish from a new patch tag (for example `v0.1.3`) after correcting the trusted publisher entry.
