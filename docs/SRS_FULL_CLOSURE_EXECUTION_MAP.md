@@ -159,6 +159,12 @@ contracts for every remaining SRS family-assimilation block.
 - Baseline hook: `srs_baseline.mnc`
 - Contract: fail-closed, provenance-required, evidence-logged
 
+## DLM Family
+
+- Refs: `DLM-1, DLM-2, DLM-3, DLM-4, DLM-5`
+- Baseline hook: `srs_baseline.dlm`
+- Contract: fail-closed, provenance-required, evidence-logged
+
 ## NCLI Family
 
 - Refs: `NCLI-6`

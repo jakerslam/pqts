@@ -4,8 +4,8 @@ This matrix is auto-generated from `docs/SRS.md`, `docs/TODO.md`, and repository
 
 ## Summary
 
-- Total requirements: **659**
-- implemented: **659**
+- Total requirements: **664**
+- implemented: **664**
 - partial: **0**
 - planned: **0**
 - traced: **0**
@@ -29,6 +29,7 @@ This matrix is auto-generated from `docs/SRS.md`, `docs/TODO.md`, and repository
 | COMP | 18 | 0 | 0 | 0 | 0 | 18 |
 | CT | 8 | 0 | 0 | 0 | 0 | 8 |
 | DK | 4 | 0 | 0 | 0 | 0 | 4 |
+| DLM | 5 | 0 | 0 | 0 | 0 | 5 |
 | DN | 5 | 0 | 0 | 0 | 0 | 5 |
 | DUNIK | 8 | 0 | 0 | 0 | 0 | 8 |
 | DV | 7 | 0 | 0 | 0 | 0 | 7 |
@@ -757,3 +758,8 @@ This matrix is auto-generated from `docs/SRS.md`, `docs/TODO.md`, and repository
 | MNC-3 | Contiguous Range-Strip Arbitrage Contract | implemented | done | config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md, docs/TODO.md |
 | MNC-4 | Uncertainty-Collapse Exit Timing Contract | implemented | done | config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md, docs/TODO.md |
 | MNC-5 | Source Reliability and Claim Handling | implemented | done | config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md, docs/TODO.md |
+| DLM-1 | Next-Step Directional Target Contract | implemented | done | config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md, docs/TODO.md |
+| DLM-2 | Indicator-Fabric Governance Contract | implemented | done | config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md, docs/TODO.md |
+| DLM-3 | Monte-Carlo Dropout Uncertainty Contract | implemented | done | config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md, docs/TODO.md |
+| DLM-4 | Throughput-Aware Multi-Market Classifier Operations | implemented | done | config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md, docs/TODO.md |
+| DLM-5 | Source Reliability and Claim Handling | implemented | done | config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md, docs/TODO.md |

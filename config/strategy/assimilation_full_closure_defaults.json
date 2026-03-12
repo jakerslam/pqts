@@ -561,6 +561,25 @@
         "closure checker pass"
       ]
     },
+    "DLM": {
+      "refs": [
+        "DLM-1",
+        "DLM-2",
+        "DLM-3",
+        "DLM-4",
+        "DLM-5"
+      ],
+      "controls": {
+        "policy_hook": "srs_baseline.dlm",
+        "fail_closed": true,
+        "provenance_required": true
+      },
+      "acceptance_evidence": [
+        "baseline contract configuration entry",
+        "execution map linkage",
+        "closure checker pass"
+      ]
+    },
     "NCLI": {
       "refs": [
         "NCLI-6"

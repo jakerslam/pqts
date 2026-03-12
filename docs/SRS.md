@@ -4712,3 +4712,40 @@ Observed source links:
 
 - Public claims from this source chain about guaranteed returns, extreme compounding, or deterministic overnight gains shall be marked `unverified` unless backed by reproducible trade-level evidence.
 - Requirements adopted from this source chain shall remain limited to observable mechanics and validated controls rather than promotional profitability claims.
+
+## 82. Additional Delta Requirements from External Post Chain (de1lymoon, March 11, 2026)
+
+These requirements capture net-new, applicable deltas from the referenced post focused on indicator-rich directional classification and uncertainty-aware model gating.
+
+Observed source links:
+- `https://x.com/de1lymoon/status/2031750472395047364?s=20`
+- Quoted context reference in post body: `Noisy (@noisyb0y1)` (thread mention)
+
+### DLM-1 Next-Step Directional Target Contract
+
+- Prediction-market directional models shall support explicit next-step classification targets (for example `target = 1` when next close/probability exceeds current, else `0`).
+- Training/inference artifacts shall persist target-construction rules, horizon definition, and label version metadata.
+- Strategy decisions shall clearly distinguish directional classification outputs from price-level forecasting outputs.
+
+### DLM-2 Indicator-Fabric Governance Contract
+
+- Indicator-rich models shall support versioned feature manifests that include indicator definitions, lookback windows, and compute dependencies.
+- Feature pipelines shall validate freshness, null-rate bounds, and schema compatibility before inference.
+- Feature-set changes shall require reproducible backtest/replay evidence before promotion.
+
+### DLM-3 Monte-Carlo Dropout Uncertainty Contract
+
+- Model runtime shall support Monte Carlo Dropout (or equivalent stochastic forward-pass uncertainty estimation) for directional classifiers.
+- Inference artifacts shall persist predictive mean, uncertainty dispersion metrics, and sample-count configuration.
+- Trade admission and sizing shall fail closed or downscale when uncertainty exceeds stage-policy limits.
+
+### DLM-4 Throughput-Aware Multi-Market Classifier Operations
+
+- Classifier pipelines operating across many markets shall enforce bounded inference latency budgets and per-cycle throughput caps.
+- Runtime shall log market-count processed, inference latency distribution, and dropped/skipped candidates due to budget constraints.
+- Capacity breaches shall degrade safely (`hold`/`reduce`) rather than silently executing with stale predictions.
+
+### DLM-5 Source Reliability and Claim Handling
+
+- Public claims from this source chain about win-rate, PnL, or guaranteed profitability shall be marked `unverified` unless backed by reproducible trade-level evidence.
+- Requirements adopted from this source chain shall remain limited to observable mechanics and validated controls rather than promotional profitability claims.
