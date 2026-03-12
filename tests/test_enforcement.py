@@ -54,8 +54,11 @@ def _is_under(path: Path, parent: Path) -> bool:
 
 def _iter_repo_python_files() -> list[Path]:
     files: list[Path] = []
+    skip_dirs = {".venv", "venv", "node_modules", "build", "dist"}
     for path in ROOT.rglob("*.py"):
         if "__pycache__" in path.parts:
+            continue
+        if set(path.parts).intersection(skip_dirs):
             continue
         files.append(path)
     return files

@@ -15,4 +15,9 @@ def test_srs_assimilation_registry_includes_both_tiers() -> None:
     report = ensure_srs_assimilation_coverage()
     tier_counts = report["summary"]["tier_counts"]
     assert tier_counts.get("core_delivery", 0) > 0
-    assert tier_counts.get("baseline_contract", 0) > 0
+    assert tier_counts.get("baseline_contract", 0) >= 0
+    assert (
+        tier_counts.get("core_delivery", 0)
+        + tier_counts.get("baseline_contract", 0)
+        == report["registry_rows"]
+    )

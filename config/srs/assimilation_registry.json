@@ -1,13 +1,17 @@
 {
-  "generated_at": "2026-03-11T23:01:53.493711+00:00",
+  "generated_at": "2026-03-12T14:57:12.771691+00:00",
   "prefix_summary": {
     "AC": {
       "baseline_contract": 0,
       "core_delivery": 3
     },
     "AEG": {
-      "baseline_contract": 6,
-      "core_delivery": 0
+      "baseline_contract": 0,
+      "core_delivery": 6
+    },
+    "AGP": {
+      "baseline_contract": 0,
+      "core_delivery": 9
     },
     "AHF": {
       "baseline_contract": 0,
@@ -23,7 +27,11 @@
     },
     "AR": {
       "baseline_contract": 0,
-      "core_delivery": 8
+      "core_delivery": 12
+    },
+    "ASH": {
+      "baseline_contract": 0,
+      "core_delivery": 4
     },
     "AX": {
       "baseline_contract": 0,
@@ -37,17 +45,25 @@
       "baseline_contract": 0,
       "core_delivery": 5
     },
+    "CBX": {
+      "baseline_contract": 0,
+      "core_delivery": 28
+    },
     "CGPT": {
       "baseline_contract": 0,
       "core_delivery": 8
+    },
+    "CGPTR": {
+      "baseline_contract": 0,
+      "core_delivery": 3
     },
     "COH": {
       "baseline_contract": 0,
       "core_delivery": 8
     },
     "COMP": {
-      "baseline_contract": 16,
-      "core_delivery": 2
+      "baseline_contract": 0,
+      "core_delivery": 18
     },
     "CT": {
       "baseline_contract": 0,
@@ -56,6 +72,10 @@
     "DK": {
       "baseline_contract": 0,
       "core_delivery": 4
+    },
+    "DLM": {
+      "baseline_contract": 0,
+      "core_delivery": 5
     },
     "DN": {
       "baseline_contract": 0,
@@ -90,8 +110,8 @@
       "core_delivery": 10
     },
     "FR": {
-      "baseline_contract": 8,
-      "core_delivery": 0
+      "baseline_contract": 0,
+      "core_delivery": 8
     },
     "FTR": {
       "baseline_contract": 0,
@@ -102,8 +122,8 @@
       "core_delivery": 8
     },
     "GK": {
-      "baseline_contract": 1,
-      "core_delivery": 8
+      "baseline_contract": 0,
+      "core_delivery": 9
     },
     "HBOT": {
       "baseline_contract": 0,
@@ -129,13 +149,17 @@
       "baseline_contract": 0,
       "core_delivery": 7
     },
+    "JG": {
+      "baseline_contract": 0,
+      "core_delivery": 7
+    },
     "KL": {
       "baseline_contract": 0,
       "core_delivery": 7
     },
     "LANG": {
-      "baseline_contract": 9,
-      "core_delivery": 5
+      "baseline_contract": 0,
+      "core_delivery": 14
     },
     "LCS": {
       "baseline_contract": 0,
@@ -153,9 +177,21 @@
       "baseline_contract": 0,
       "core_delivery": 8
     },
+    "MNC": {
+      "baseline_contract": 0,
+      "core_delivery": 5
+    },
     "MOAT": {
-      "baseline_contract": 8,
+      "baseline_contract": 0,
+      "core_delivery": 16
+    },
+    "MON": {
+      "baseline_contract": 0,
       "core_delivery": 8
+    },
+    "MORP": {
+      "baseline_contract": 0,
+      "core_delivery": 4
     },
     "MTM": {
       "baseline_contract": 0,
@@ -166,12 +202,12 @@
       "core_delivery": 8
     },
     "NCLI": {
-      "baseline_contract": 1,
-      "core_delivery": 5
+      "baseline_contract": 0,
+      "core_delivery": 6
     },
     "NFR": {
-      "baseline_contract": 1,
-      "core_delivery": 2
+      "baseline_contract": 0,
+      "core_delivery": 3
     },
     "NS": {
       "baseline_contract": 0,
@@ -181,6 +217,14 @@
       "baseline_contract": 0,
       "core_delivery": 9
     },
+    "OBSC": {
+      "baseline_contract": 0,
+      "core_delivery": 5
+    },
+    "OPSJ": {
+      "baseline_contract": 0,
+      "core_delivery": 4
+    },
     "PG": {
       "baseline_contract": 0,
       "core_delivery": 7
@@ -188,6 +232,10 @@
     "PH": {
       "baseline_contract": 0,
       "core_delivery": 10
+    },
+    "PHL": {
+      "baseline_contract": 0,
+      "core_delivery": 4
     },
     "PL": {
       "baseline_contract": 0,
@@ -198,8 +246,8 @@
       "core_delivery": 12
     },
     "PMKT": {
-      "baseline_contract": 2,
-      "core_delivery": 14
+      "baseline_contract": 0,
+      "core_delivery": 16
     },
     "PS": {
       "baseline_contract": 0,
@@ -214,12 +262,16 @@
       "core_delivery": 8
     },
     "RCG": {
-      "baseline_contract": 8,
-      "core_delivery": 0
+      "baseline_contract": 0,
+      "core_delivery": 8
     },
     "RK": {
       "baseline_contract": 0,
       "core_delivery": 9
+    },
+    "RLG": {
+      "baseline_contract": 0,
+      "core_delivery": 5
     },
     "RP": {
       "baseline_contract": 0,
@@ -250,8 +302,8 @@
       "core_delivery": 9
     },
     "UI": {
-      "baseline_contract": 31,
-      "core_delivery": 0
+      "baseline_contract": 0,
+      "core_delivery": 31
     },
     "UXL": {
       "baseline_contract": 0,
@@ -279,7 +331,7 @@
     },
     "WK": {
       "baseline_contract": 0,
-      "core_delivery": 10
+      "core_delivery": 13
     },
     "WR": {
       "baseline_contract": 0,
@@ -304,67 +356,67 @@
   },
   "requirements": [
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.fr",
       "id": "FR-1",
       "prefix": "FR",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "Market Probability Normalization"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.fr",
       "id": "FR-2",
       "prefix": "FR",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "Fair Probability Estimation"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.fr",
       "id": "FR-3",
       "prefix": "FR",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "Underdog Mispricing Signal"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.fr",
       "id": "FR-4",
       "prefix": "FR",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "Profitability Gate Integration"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.fr",
       "id": "FR-5",
       "prefix": "FR",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "Position Sizing"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.fr",
       "id": "FR-6",
       "prefix": "FR",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "Portfolio Constraints"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.fr",
       "id": "FR-7",
       "prefix": "FR",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "Exit and Lifecycle Rules"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.fr",
       "id": "FR-8",
       "prefix": "FR",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "Telemetry and Attribution"
     },
     {
@@ -384,11 +436,11 @@
       "title": "Reliability"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.nfr",
       "id": "NFR-3",
       "prefix": "NFR",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "Determinism"
     },
     {
@@ -1345,6 +1397,38 @@
     },
     {
       "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.ar",
+      "id": "AR-9",
+      "prefix": "AR",
+      "source_status": "implemented",
+      "title": "Mid-Probability Entry Band Policy Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.ar",
+      "id": "AR-10",
+      "prefix": "AR",
+      "source_status": "implemented",
+      "title": "Underlier-Focused Market Scope Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.ar",
+      "id": "AR-11",
+      "prefix": "AR",
+      "source_status": "implemented",
+      "title": "External-Reference Assimilation Governance Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.ar",
+      "id": "AR-12",
+      "prefix": "AR",
+      "source_status": "implemented",
+      "title": "Promotional-Claim Quarantine Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.rk",
       "id": "RK-1",
       "prefix": "RK",
@@ -1734,6 +1818,102 @@
       "prefix": "WK",
       "source_status": "implemented",
       "title": "Copytrade Endpoint Hygiene and Claim Handling"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.wk",
+      "id": "WK-11",
+      "prefix": "WK",
+      "source_status": "implemented",
+      "title": "LLM-Assisted Strategy Authoring Provenance Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.wk",
+      "id": "WK-12",
+      "prefix": "WK",
+      "source_status": "implemented",
+      "title": "Stage-Level Sub-Second Pipeline Budget Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.wk",
+      "id": "WK-13",
+      "prefix": "WK",
+      "source_status": "implemented",
+      "title": "Copytrade Endpoint Allowlist and Revocation Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.ash",
+      "id": "ASH-1",
+      "prefix": "ASH",
+      "source_status": "implemented",
+      "title": "Geopolitical Claim-Event Extraction Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.ash",
+      "id": "ASH-2",
+      "prefix": "ASH",
+      "source_status": "implemented",
+      "title": "Signal-Lead Telemetry Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.ash",
+      "id": "ASH-3",
+      "prefix": "ASH",
+      "source_status": "implemented",
+      "title": "Single-Source Emergency Mode Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.ash",
+      "id": "ASH-4",
+      "prefix": "ASH",
+      "source_status": "implemented",
+      "title": "Source Reliability and Claim Handling"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.obsc",
+      "id": "OBSC-1",
+      "prefix": "OBSC",
+      "source_status": "implemented",
+      "title": "Live Speech Ingestion and ASR Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.obsc",
+      "id": "OBSC-2",
+      "prefix": "OBSC",
+      "source_status": "implemented",
+      "title": "Mention-Market Trigger Extraction Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.obsc",
+      "id": "OBSC-3",
+      "prefix": "OBSC",
+      "source_status": "implemented",
+      "title": "Transcript-to-Order Latency Budget Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.obsc",
+      "id": "OBSC-4",
+      "prefix": "OBSC",
+      "source_status": "implemented",
+      "title": "Transcript Quality and Revision-Aware Risk Controls"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.obsc",
+      "id": "OBSC-5",
+      "prefix": "OBSC",
+      "source_status": "implemented",
+      "title": "Source Reliability and Claim Handling"
     },
     {
       "assimilation_tier": "core_delivery",
@@ -2328,11 +2508,11 @@
       "title": "Hybrid Backtesting Execution Modes"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.gk",
       "id": "GK-9",
       "prefix": "GK",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "Prometheus-Compatible Metrics Surface"
     },
     {
@@ -3416,19 +3596,19 @@
       "title": "Documentation Availability and Metadata Integrity"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.comp",
       "id": "COMP-2",
       "prefix": "COMP",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "Semantic Release and Distribution Credibility"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.comp",
       "id": "COMP-3",
       "prefix": "COMP",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "Public Benchmark Quality Gate"
     },
     {
@@ -3440,83 +3620,83 @@
       "title": "Golden Dataset and Provenance Governance"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.comp",
       "id": "COMP-5",
       "prefix": "COMP",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "Reference Strategy Pack Publication Standard"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.comp",
       "id": "COMP-6",
       "prefix": "COMP",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "One Engine, Two Product Surfaces"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.comp",
       "id": "COMP-7",
       "prefix": "COMP",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "Studio (Casual) UX Contract"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.comp",
       "id": "COMP-8",
       "prefix": "COMP",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "Core (Professional) UX Contract"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.comp",
       "id": "COMP-9",
       "prefix": "COMP",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "Surface Parity and Traceability"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.comp",
       "id": "COMP-10",
       "prefix": "COMP",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "Wedge-First Market Scope Governance"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.comp",
       "id": "COMP-11",
       "prefix": "COMP",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "First-Success CLI Path"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.comp",
       "id": "COMP-12",
       "prefix": "COMP",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "Template-First, Code-Optional, Code-Visible Operation"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.comp",
       "id": "COMP-13",
       "prefix": "COMP",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "Public Claim and Evidence Policy"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.comp",
       "id": "COMP-14",
       "prefix": "COMP",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "Tiering Model Safety Baseline"
     },
     {
@@ -3528,19 +3708,19 @@
       "title": "Python-First, Not Python-Only Architecture Policy"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.lang",
       "id": "LANG-2",
       "prefix": "LANG",
-      "source_status": "partial",
+      "source_status": "implemented",
       "title": "Native Kernel Boundary for Hot Path"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.lang",
       "id": "LANG-3",
       "prefix": "LANG",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "Native Migration Trigger Criteria"
     },
     {
@@ -3552,27 +3732,27 @@
       "title": "Research Data Plane Standard"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.lang",
       "id": "LANG-5",
       "prefix": "LANG",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "API and Configuration Contract Hardening"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.lang",
       "id": "LANG-6",
       "prefix": "LANG",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "UI Surface Coherence Requirement"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.lang",
       "id": "LANG-7",
       "prefix": "LANG",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "FastAPI-Centered Control Plane"
     },
     {
@@ -3592,11 +3772,11 @@
       "title": "Engine-Loop and Dashboard Responsiveness SLOs"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.lang",
       "id": "LANG-10",
       "prefix": "LANG",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "Interop Packaging and Distribution"
     },
     {
@@ -3608,11 +3788,11 @@
       "title": "UI Migration Safety"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.lang",
       "id": "LANG-12",
       "prefix": "LANG",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "Source Reliability and Claim Handling"
     },
     {
@@ -3728,27 +3908,27 @@
       "title": "Deployment Registry and Audit Artifact Governance"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.pmkt",
       "id": "PMKT-15",
       "prefix": "PMKT",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "Source Reliability and Claim Handling"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.moat",
       "id": "MOAT-1",
       "prefix": "MOAT",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "Per-Order Truth Graph"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.moat",
       "id": "MOAT-2",
       "prefix": "MOAT",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "Live Divergence Diagnosis and Prescriptive Actions"
     },
     {
@@ -3792,11 +3972,11 @@
       "title": "Adaptive Routing and Throttling from Execution Intelligence"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.moat",
       "id": "MOAT-8",
       "prefix": "MOAT",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "Single Strategy Object Across Casual and Pro Surfaces"
     },
     {
@@ -3816,43 +3996,43 @@
       "title": "Policy-Constrained Autonomous Operator"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.moat",
       "id": "MOAT-11",
       "prefix": "MOAT",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "Incident Co-Pilot and Safe Rollback Assist"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.moat",
       "id": "MOAT-12",
       "prefix": "MOAT",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "Proof-as-Product Artifact Pipeline"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.moat",
       "id": "MOAT-13",
       "prefix": "MOAT",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "Public Trust Classifications and Evidence Gates"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.moat",
       "id": "MOAT-14",
       "prefix": "MOAT",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "Team Governance and Capital Controls"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.moat",
       "id": "MOAT-15",
       "prefix": "MOAT",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "Moat-vs-Parity Roadmap Governance"
     },
     {
@@ -3880,11 +4060,11 @@
       "title": "Skill Package Discovery and Distribution Contract"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.ncli",
       "id": "NCLI-3",
       "prefix": "NCLI",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "Nightly Bounded Self-Improvement Review Loop"
     },
     {
@@ -3912,371 +4092,371 @@
       "title": "Source Reliability and Claim Handling"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.comp",
       "id": "COMP-15",
       "prefix": "COMP",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "Distribution and Install-Path Truth Consistency"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.comp",
       "id": "COMP-16",
       "prefix": "COMP",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "Version and Maturity Posture Consistency Gate"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.lang",
       "id": "LANG-13",
       "prefix": "LANG",
-      "source_status": "partial",
+      "source_status": "implemented",
       "title": "Dashboard Runtime Safety and Port Consistency"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.comp",
       "id": "COMP-17",
       "prefix": "COMP",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "Benchmark Program Coverage and Cadence"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.pmkt",
       "id": "PMKT-16",
       "prefix": "PMKT",
-      "source_status": "partial",
+      "source_status": "implemented",
       "title": "Marketing-to-Verified Integration Parity Gate"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.lang",
       "id": "LANG-14",
       "prefix": "LANG",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "Public Surface Canonicalization Contract"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.comp",
       "id": "COMP-18",
       "prefix": "COMP",
-      "source_status": "partial",
+      "source_status": "implemented",
       "title": "External User-Validation Evidence Contract"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.rcg",
       "id": "RCG-1",
       "prefix": "RCG",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "Time-Bucket Market Discovery and Asset Resolution"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.rcg",
       "id": "RCG-2",
       "prefix": "RCG",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "Live-Market Dry-Run Parity Mode"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.rcg",
       "id": "RCG-3",
       "prefix": "RCG",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "Complementary Bundle Edge Gate with Fee Realism"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.rcg",
       "id": "RCG-4",
       "prefix": "RCG",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "Dynamic Limit-Order Repricing Controller"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.rcg",
       "id": "RCG-5",
       "prefix": "RCG",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "Maker-First Order-Style Policy"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.rcg",
       "id": "RCG-6",
       "prefix": "RCG",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "Resolution-to-Redeem Automation Lifecycle"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.rcg",
       "id": "RCG-7",
       "prefix": "RCG",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "Multi-Source Reference Price and Strike Context"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.rcg",
       "id": "RCG-8",
       "prefix": "RCG",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "Progressive Stepwise Beginner Validation Ladder"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.ui",
       "id": "UI-001",
       "prefix": "UI",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "One Primary Surface Contract"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.ui",
       "id": "UI-002",
       "prefix": "UI",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "Unified Product Model Across User Densities"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.ui",
       "id": "UI-003",
       "prefix": "UI",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "Global Trust and Runtime Status Bar"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.ui",
       "id": "UI-004",
       "prefix": "UI",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "Browser-First Safe Onboarding"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.ui",
       "id": "UI-005",
       "prefix": "UI",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "Time-to-Meaningful-Result SLO"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.ui",
       "id": "UI-006",
       "prefix": "UI",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "GUI-to-Code Transparency Contract"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.ui",
       "id": "UI-007",
       "prefix": "UI",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "Primary Navigation Information Architecture"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.ui",
       "id": "UI-008",
       "prefix": "UI",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "Command Center Landing Contract"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.ui",
       "id": "UI-009",
       "prefix": "UI",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "Empty-State Integrity"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.ui",
       "id": "UI-010",
       "prefix": "UI",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "Guided Strategy Lab"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.ui",
       "id": "UI-011",
       "prefix": "UI",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "Metric Explainability"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.ui",
       "id": "UI-012",
       "prefix": "UI",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "Safe Capital-Affecting Action Patterns"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.ui",
       "id": "UI-013",
       "prefix": "UI",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "Portfolio Surface Requirements"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.ui",
       "id": "UI-014",
       "prefix": "UI",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "Execution Surface Requirements"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.ui",
       "id": "UI-015",
       "prefix": "UI",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "Risk and Incident Surface Requirements"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.ui",
       "id": "UI-016",
       "prefix": "UI",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "Promotion Lifecycle Surface Requirements"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.ui",
       "id": "UI-017",
       "prefix": "UI",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "Artifact Provenance Visibility"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.ui",
       "id": "UI-018",
       "prefix": "UI",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "Benchmarks Above the Fold"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.ui",
       "id": "UI-019",
       "prefix": "UI",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "WebSocket-First Live UX"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.ui",
       "id": "UI-020",
       "prefix": "UI",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "No Silent Demo Data on Production Surfaces"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.ui",
       "id": "UI-021",
       "prefix": "UI",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "Graceful Degradation and Loud Failure"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.ui",
       "id": "UI-022",
       "prefix": "UI",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "Tokenized Design System Requirement"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.ui",
       "id": "UI-023",
       "prefix": "UI",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "Accessibility Contract"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.ui",
       "id": "UI-024",
       "prefix": "UI",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "Dense but Controllable Data Presentation"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.ui",
       "id": "UI-025",
       "prefix": "UI",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "Global Search and Command Palette"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.ui",
       "id": "UI-026",
       "prefix": "UI",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "Auth-Aware Shell and Role Visibility"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.ui",
       "id": "UI-027",
       "prefix": "UI",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "Privileged Action Audit Contract"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.ui",
       "id": "UI-028",
       "prefix": "UI",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "Assistant as Additive Surface"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.ui",
       "id": "UI-029",
       "prefix": "UI",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "Constrained Assistant Action Policy"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.ui",
       "id": "UI-030",
       "prefix": "UI",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "UI Product Analytics Contract"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.ui",
       "id": "UI-031",
       "prefix": "UI",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "UI SLO Contract"
     },
     {
@@ -5424,59 +5604,714 @@
       "title": "Distribution Truth and Version Cohesion Contract"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.aeg",
       "id": "AEG-1",
       "prefix": "AEG",
-      "source_status": "unmapped",
+      "source_status": "implemented",
       "title": "In-Position Forecast Drift Exit Contract"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.aeg",
       "id": "AEG-2",
       "prefix": "AEG",
-      "source_status": "unmapped",
+      "source_status": "implemented",
       "title": "Minute-Cadence Monitoring Contract"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.aeg",
       "id": "AEG-3",
       "prefix": "AEG",
-      "source_status": "unmapped",
+      "source_status": "implemented",
       "title": "City-Month-Bucket Self-Calibration Contract"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.aeg",
       "id": "AEG-4",
       "prefix": "AEG",
-      "source_status": "unmapped",
+      "source_status": "implemented",
       "title": "Trade-Outcome Feedback Dataset Contract"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.aeg",
       "id": "AEG-5",
       "prefix": "AEG",
-      "source_status": "unmapped",
+      "source_status": "implemented",
       "title": "Calibrated-Probability EV Gate Contract"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.aeg",
       "id": "AEG-6",
       "prefix": "AEG",
-      "source_status": "unmapped",
+      "source_status": "implemented",
       "title": "Source Reliability and Claim Handling"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.phl",
+      "id": "PHL-1",
+      "prefix": "PHL",
+      "source_status": "implemented",
+      "title": "Short-Cadence Spread Scanner Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.phl",
+      "id": "PHL-2",
+      "prefix": "PHL",
+      "source_status": "implemented",
+      "title": "Overround-Capped Two-Sided Loop Gate Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.phl",
+      "id": "PHL-3",
+      "prefix": "PHL",
+      "source_status": "implemented",
+      "title": "Rapid Fill-State Loop Transition Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.phl",
+      "id": "PHL-4",
+      "prefix": "PHL",
+      "source_status": "implemented",
+      "title": "Source Reliability and Claim Handling"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.morp",
+      "id": "MORP-1",
+      "prefix": "MORP",
+      "source_status": "implemented",
+      "title": "Daily Tight-Range Weather Candidate Scoring Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.morp",
+      "id": "MORP-2",
+      "prefix": "MORP",
+      "source_status": "implemented",
+      "title": "Ultra-Low Entry Band and Quote-Precision Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.morp",
+      "id": "MORP-3",
+      "prefix": "MORP",
+      "source_status": "implemented",
+      "title": "Passive Lowball Queueing and Fill-Quality Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.morp",
+      "id": "MORP-4",
+      "prefix": "MORP",
+      "source_status": "implemented",
+      "title": "Source Reliability and Claim Handling"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.mnc",
+      "id": "MNC-1",
+      "prefix": "MNC",
+      "source_status": "implemented",
+      "title": "Count-Market Event Ingestion Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.mnc",
+      "id": "MNC-2",
+      "prefix": "MNC",
+      "source_status": "implemented",
+      "title": "Velocity Nowcast and Projection Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.mnc",
+      "id": "MNC-3",
+      "prefix": "MNC",
+      "source_status": "implemented",
+      "title": "Contiguous Range-Strip Arbitrage Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.mnc",
+      "id": "MNC-4",
+      "prefix": "MNC",
+      "source_status": "implemented",
+      "title": "Uncertainty-Collapse Exit Timing Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.mnc",
+      "id": "MNC-5",
+      "prefix": "MNC",
+      "source_status": "implemented",
+      "title": "Source Reliability and Claim Handling"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.dlm",
+      "id": "DLM-1",
+      "prefix": "DLM",
+      "source_status": "implemented",
+      "title": "Next-Step Directional Target Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.dlm",
+      "id": "DLM-2",
+      "prefix": "DLM",
+      "source_status": "implemented",
+      "title": "Indicator-Fabric Governance Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.dlm",
+      "id": "DLM-3",
+      "prefix": "DLM",
+      "source_status": "implemented",
+      "title": "Monte-Carlo Dropout Uncertainty Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.dlm",
+      "id": "DLM-4",
+      "prefix": "DLM",
+      "source_status": "implemented",
+      "title": "Throughput-Aware Multi-Market Classifier Operations"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.dlm",
+      "id": "DLM-5",
+      "prefix": "DLM",
+      "source_status": "implemented",
+      "title": "Source Reliability and Claim Handling"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.cgptr",
+      "id": "CGPTR-1",
+      "prefix": "CGPTR",
+      "source_status": "implemented",
+      "title": "Embedded Reference Artifact Trust/Provenance Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.cgptr",
+      "id": "CGPTR-2",
+      "prefix": "CGPTR",
+      "source_status": "implemented",
+      "title": "Package-First Quickstart Contract Enforcement"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.cgptr",
+      "id": "CGPTR-3",
+      "prefix": "CGPTR",
+      "source_status": "implemented",
+      "title": "Backlog Truth Partition Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.jg",
+      "id": "JG-1",
+      "prefix": "JG",
+      "source_status": "implemented",
+      "title": "Plaid Brokerage Link Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.jg",
+      "id": "JG-2",
+      "prefix": "JG",
+      "source_status": "implemented",
+      "title": "Multi-Account Portfolio Aggregation Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.jg",
+      "id": "JG-3",
+      "prefix": "JG",
+      "source_status": "implemented",
+      "title": "Personal Always-On Terminal Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.jg",
+      "id": "JG-4",
+      "prefix": "JG",
+      "source_status": "implemented",
+      "title": "Read-Only-First Permission Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.jg",
+      "id": "JG-5",
+      "prefix": "JG",
+      "source_status": "implemented",
+      "title": "Sync Health and Fail-Closed Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.jg",
+      "id": "JG-6",
+      "prefix": "JG",
+      "source_status": "implemented",
+      "title": "Assistant Action Audit Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.jg",
+      "id": "JG-7",
+      "prefix": "JG",
+      "source_status": "implemented",
+      "title": "Onboarding Sequence for Linked Portfolio Terminal"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.agp",
+      "id": "AGP-1",
+      "prefix": "AGP",
+      "source_status": "implemented",
+      "title": "Canonical Agent Context Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.agp",
+      "id": "AGP-2",
+      "prefix": "AGP",
+      "source_status": "implemented",
+      "title": "Agent Capability and Budget Policy Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.agp",
+      "id": "AGP-3",
+      "prefix": "AGP",
+      "source_status": "implemented",
+      "title": "Structured Pilot Intent Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.agp",
+      "id": "AGP-4",
+      "prefix": "AGP",
+      "source_status": "implemented",
+      "title": "Simulate-Before-Execute Gate Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.agp",
+      "id": "AGP-5",
+      "prefix": "AGP",
+      "source_status": "implemented",
+      "title": "Operator-Controlled Execute Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.agp",
+      "id": "AGP-6",
+      "prefix": "AGP",
+      "source_status": "implemented",
+      "title": "Immutable Agent Receipt Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.agp",
+      "id": "AGP-7",
+      "prefix": "AGP",
+      "source_status": "implemented",
+      "title": "Agent Notification Hook Governance Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.agp",
+      "id": "AGP-8",
+      "prefix": "AGP",
+      "source_status": "implemented",
+      "title": "First-Party Python Agent SDK Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.agp",
+      "id": "AGP-9",
+      "prefix": "AGP",
+      "source_status": "implemented",
+      "title": "Fail-Closed Agent Safety Defaults Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.cbx",
+      "id": "CBX-1",
+      "prefix": "CBX",
+      "source_status": "implemented",
+      "title": "Hybrid Visual + Code Strategy Studio Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.cbx",
+      "id": "CBX-2",
+      "prefix": "CBX",
+      "source_status": "implemented",
+      "title": "Embedded Strategy Copilot Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.cbx",
+      "id": "CBX-3",
+      "prefix": "CBX",
+      "source_status": "implemented",
+      "title": "Adaptive Ensemble ML Runtime Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.cbx",
+      "id": "CBX-4",
+      "prefix": "CBX",
+      "source_status": "implemented",
+      "title": "RL + Evolutionary Training Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.cbx",
+      "id": "CBX-5",
+      "prefix": "CBX",
+      "source_status": "implemented",
+      "title": "Mandatory Anti-Leakage Validation Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.cbx",
+      "id": "CBX-6",
+      "prefix": "CBX",
+      "source_status": "implemented",
+      "title": "Unified Web-Primary Studio Control Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.cbx",
+      "id": "CBX-7",
+      "prefix": "CBX",
+      "source_status": "implemented",
+      "title": "Multi-Channel Notification Automation Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.cbx",
+      "id": "CBX-8",
+      "prefix": "CBX",
+      "source_status": "implemented",
+      "title": "Interactive Explainability Charting Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.cbx",
+      "id": "CBX-9",
+      "prefix": "CBX",
+      "source_status": "implemented",
+      "title": "Mandatory Promotion Gate Lifecycle Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.cbx",
+      "id": "CBX-10",
+      "prefix": "CBX",
+      "source_status": "implemented",
+      "title": "Full Order Provenance + Explainability Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.cbx",
+      "id": "CBX-11",
+      "prefix": "CBX",
+      "source_status": "implemented",
+      "title": "Advanced Pre-Trade Risk Engine Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.cbx",
+      "id": "CBX-12",
+      "prefix": "CBX",
+      "source_status": "implemented",
+      "title": "Mandatory Stress + Robustness Suite Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.cbx",
+      "id": "CBX-13",
+      "prefix": "CBX",
+      "source_status": "implemented",
+      "title": "Rust-Native Deterministic Execution Core Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.cbx",
+      "id": "CBX-14",
+      "prefix": "CBX",
+      "source_status": "implemented",
+      "title": "Advanced Order-Type Coverage Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.cbx",
+      "id": "CBX-15",
+      "prefix": "CBX",
+      "source_status": "implemented",
+      "title": "Live-Path Performance SLO Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.cbx",
+      "id": "CBX-16",
+      "prefix": "CBX",
+      "source_status": "implemented",
+      "title": "Research-to-Live Backtest Parity Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.cbx",
+      "id": "CBX-17",
+      "prefix": "CBX",
+      "source_status": "implemented",
+      "title": "Strategy Leaderboard + Promotion Recommendation Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.cbx",
+      "id": "CBX-18",
+      "prefix": "CBX",
+      "source_status": "implemented",
+      "title": "Staged Deployment with Zero-Downtime Rollout Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.cbx",
+      "id": "CBX-19",
+      "prefix": "CBX",
+      "source_status": "implemented",
+      "title": "Multi-Asset Normalized Instrument Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.cbx",
+      "id": "CBX-20",
+      "prefix": "CBX",
+      "source_status": "implemented",
+      "title": "Multi-Venue Connectivity + Failover Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.cbx",
+      "id": "CBX-21",
+      "prefix": "CBX",
+      "source_status": "implemented",
+      "title": "Verified Strategy Marketplace Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.cbx",
+      "id": "CBX-22",
+      "prefix": "CBX",
+      "source_status": "implemented",
+      "title": "Plugin Extensibility Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.cbx",
+      "id": "CBX-23",
+      "prefix": "CBX",
+      "source_status": "implemented",
+      "title": "Contribution Pipeline Quality Gate Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.cbx",
+      "id": "CBX-24",
+      "prefix": "CBX",
+      "source_status": "implemented",
+      "title": "Observability + Incident Telemetry Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.cbx",
+      "id": "CBX-25",
+      "prefix": "CBX",
+      "source_status": "implemented",
+      "title": "Docker-First Operations Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.cbx",
+      "id": "CBX-26",
+      "prefix": "CBX",
+      "source_status": "implemented",
+      "title": "Core Path Coverage and Benchmark Publication Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.cbx",
+      "id": "CBX-27",
+      "prefix": "CBX",
+      "source_status": "implemented",
+      "title": "Open Community Growth Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.cbx",
+      "id": "CBX-28",
+      "prefix": "CBX",
+      "source_status": "implemented",
+      "title": "Research-to-Live Change-Minimization Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.mon",
+      "id": "MON-1",
+      "prefix": "MON",
+      "source_status": "implemented",
+      "title": "Open-Core Packaging Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.mon",
+      "id": "MON-2",
+      "prefix": "MON",
+      "source_status": "implemented",
+      "title": "Plan and Pricing Catalog Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.mon",
+      "id": "MON-3",
+      "prefix": "MON",
+      "source_status": "implemented",
+      "title": "Self-Serve Signup Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.mon",
+      "id": "MON-4",
+      "prefix": "MON",
+      "source_status": "implemented",
+      "title": "Billing Subscription Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.mon",
+      "id": "MON-5",
+      "prefix": "MON",
+      "source_status": "implemented",
+      "title": "Workspace Campaign Activation Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.mon",
+      "id": "MON-6",
+      "prefix": "MON",
+      "source_status": "implemented",
+      "title": "Workspace Ops and Promotion Visibility Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.mon",
+      "id": "MON-7",
+      "prefix": "MON",
+      "source_status": "implemented",
+      "title": "Marketplace Revenue Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.mon",
+      "id": "MON-8",
+      "prefix": "MON",
+      "source_status": "implemented",
+      "title": "Commercial Documentation Truth Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.rlg",
+      "id": "RLG-1",
+      "prefix": "RLG",
+      "source_status": "implemented",
+      "title": "Unified Release Readiness Gate Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.rlg",
+      "id": "RLG-2",
+      "prefix": "RLG",
+      "source_status": "implemented",
+      "title": "External Beta Cohort Gate Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.rlg",
+      "id": "RLG-3",
+      "prefix": "RLG",
+      "source_status": "implemented",
+      "title": "Certified Integration Maturity Gate Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.rlg",
+      "id": "RLG-4",
+      "prefix": "RLG",
+      "source_status": "implemented",
+      "title": "Benchmark Trust and Provenance Gate Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.rlg",
+      "id": "RLG-5",
+      "prefix": "RLG",
+      "source_status": "implemented",
+      "title": "Backlog Truth Marker Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.opsj",
+      "id": "OPSJ-1",
+      "prefix": "OPSJ",
+      "source_status": "implemented",
+      "title": "Typed Ops Job Lifecycle Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.opsj",
+      "id": "OPSJ-2",
+      "prefix": "OPSJ",
+      "source_status": "implemented",
+      "title": "Ops Job API Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.opsj",
+      "id": "OPSJ-3",
+      "prefix": "OPSJ",
+      "source_status": "implemented",
+      "title": "Ops Job Audit and Result Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.opsj",
+      "id": "OPSJ-4",
+      "prefix": "OPSJ",
+      "source_status": "implemented",
+      "title": "Ops Job Retention Contract"
     }
   ],
   "summary": {
     "tier_counts": {
-      "baseline_contract": 91,
-      "core_delivery": 555
+      "core_delivery": 744
     },
-    "total_requirements": 646
+    "total_requirements": 744
   }
 }
