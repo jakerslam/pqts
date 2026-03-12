@@ -1069,7 +1069,10 @@
         "WK-7",
         "WK-8",
         "WK-9",
-        "WK-10"
+        "WK-10",
+        "WK-11",
+        "WK-12",
+        "WK-13"
       ],
       "controls": {
         "policy_hook": "srs_baseline.wk",

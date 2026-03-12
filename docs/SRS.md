@@ -1512,6 +1512,32 @@ Observed outbound links:
 - External automation pathways shall remain in shadow mode until they pass internal replay, risk, and regression controls.
 - Public claims about large profits, extreme throughput, or rapid setup time from this source chain shall be marked `unverified` unless validated with reproducible trade-level evidence.
 
+## 84. Additional Delta Requirements from External Post Chain (w1nklerr, March 11, 2026)
+
+These requirements capture net-new, applicable deltas from the referenced follow-up post and avoid duplicating previously-assimilated short-horizon, parity-gap, and copytrade safety controls.
+
+Observed source links:
+- `https://x.com/w1nklerr/status/2031771017434042537?s=20`
+- `http://t.me/KreoPolyBot?start=ref-defiwinkle` (post body copytrade link)
+
+### WK-11 LLM-Assisted Strategy Authoring Provenance Contract
+
+- Strategy logic drafted with LLM providers (source context: Anthropic-assisted authoring) shall preserve model/provider provenance, prompt hash, and generation timestamp in run artifacts.
+- LLM-authored strategy drafts shall require deterministic replay/backtest evidence and risk-policy conformance checks before paper/canary promotion.
+- Runtime shall block direct live/canary activation of unreviewed LLM-authored strategy artifacts.
+
+### WK-12 Stage-Level Sub-Second Pipeline Budget Contract
+
+- For short-horizon strategies with sub-second goals, runtime shall track stage-level latency budgets for ingest, probability update, EV/sizing, and order submission.
+- Telemetry shall persist per-stage latency distributions and identify bottleneck stage IDs on budget breach.
+- Budget breaches shall trigger safe degradation (`hold`, throttle, or disable) instead of continuing with stale decision state.
+
+### WK-13 Copytrade Endpoint Allowlist and Revocation Contract
+
+- Copytrade integrations shall support explicit endpoint allowlists with per-endpoint trust tier, capability scope, and expiry policy.
+- Operator controls shall support immediate endpoint revocation/disable with auditable reason and timestamp.
+- Trades originating from copytrade pathways shall include endpoint ID provenance for replay, incident triage, and compliance auditing.
+
 ## 31. Additional Requirements from External Post Chain (AleiahLock, March 8, 2026)
 
 These requirements are derived from the referenced post and quoted-link chain describing LMSR mechanics, probability-coherent pricing, and liquidity-parameterized market-maker behavior.

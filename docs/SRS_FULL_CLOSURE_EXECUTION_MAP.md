@@ -299,7 +299,7 @@ contracts for every remaining SRS family-assimilation block.
 
 ## WK Family
 
-- Refs: `WK-1, WK-2, WK-3, WK-4, WK-5, WK-6, WK-7, WK-8, WK-9, WK-10`
+- Refs: `WK-1, WK-2, WK-3, WK-4, WK-5, WK-6, WK-7, WK-8, WK-9, WK-10, WK-11, WK-12, WK-13`
 - Baseline hook: `srs_baseline.wk`
 - Contract: fail-closed, provenance-required, evidence-logged
 

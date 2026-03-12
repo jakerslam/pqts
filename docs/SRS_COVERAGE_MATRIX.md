@@ -4,8 +4,8 @@ This matrix is auto-generated from `docs/SRS.md`, `docs/TODO.md`, and repository
 
 ## Summary
 
-- Total requirements: **668**
-- implemented: **668**
+- Total requirements: **671**
+- implemented: **671**
 - partial: **0**
 - planned: **0**
 - traced: **0**
@@ -88,7 +88,7 @@ This matrix is auto-generated from `docs/SRS.md`, `docs/TODO.md`, and repository
 | WA | 9 | 0 | 0 | 0 | 0 | 9 |
 | WCR | 8 | 0 | 0 | 0 | 0 | 8 |
 | WF | 7 | 0 | 0 | 0 | 0 | 7 |
-| WK | 10 | 0 | 0 | 0 | 0 | 10 |
+| WK | 13 | 0 | 0 | 0 | 0 | 13 |
 | WR | 6 | 0 | 0 | 0 | 0 | 6 |
 | XCOMP | 3 | 0 | 0 | 0 | 0 | 3 |
 | XR | 7 | 0 | 0 | 0 | 0 | 7 |
@@ -282,6 +282,9 @@ This matrix is auto-generated from `docs/SRS.md`, `docs/TODO.md`, and repository
 | WK-8 | External Prediction Source Governance | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
 | WK-9 | Public Profile Reconciliation and Tail-Loss Visibility | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
 | WK-10 | Copytrade Endpoint Hygiene and Claim Handling | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
+| WK-11 | LLM-Assisted Strategy Authoring Provenance Contract | implemented | done | config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md, docs/TODO.md |
+| WK-12 | Stage-Level Sub-Second Pipeline Budget Contract | implemented | done | config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md, docs/TODO.md |
+| WK-13 | Copytrade Endpoint Allowlist and Revocation Contract | implemented | done | config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md, docs/TODO.md |
 | AL-1 | LMSR Cost Function Fidelity | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
 | AL-2 | Marginal Price and Probability Coherence | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
 | AL-3 | Liquidity Parameter (`b`) Governance | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
