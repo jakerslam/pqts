@@ -524,6 +524,24 @@
         "closure checker pass"
       ]
     },
+    "MORP": {
+      "refs": [
+        "MORP-1",
+        "MORP-2",
+        "MORP-3",
+        "MORP-4"
+      ],
+      "controls": {
+        "policy_hook": "srs_baseline.morp",
+        "fail_closed": true,
+        "provenance_required": true
+      },
+      "acceptance_evidence": [
+        "baseline contract configuration entry",
+        "execution map linkage",
+        "closure checker pass"
+      ]
+    },
     "NCLI": {
       "refs": [
         "NCLI-6"
@@ -618,6 +636,24 @@
       ],
       "controls": {
         "policy_hook": "srs_baseline.ph",
+        "fail_closed": true,
+        "provenance_required": true
+      },
+      "acceptance_evidence": [
+        "baseline contract configuration entry",
+        "execution map linkage",
+        "closure checker pass"
+      ]
+    },
+    "PHL": {
+      "refs": [
+        "PHL-1",
+        "PHL-2",
+        "PHL-3",
+        "PHL-4"
+      ],
+      "controls": {
+        "policy_hook": "srs_baseline.phl",
         "fail_closed": true,
         "provenance_required": true
       },

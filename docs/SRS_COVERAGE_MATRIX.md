@@ -4,8 +4,8 @@ This matrix is auto-generated from `docs/SRS.md`, `docs/TODO.md`, and repository
 
 ## Summary
 
-- Total requirements: **646**
-- implemented: **646**
+- Total requirements: **654**
+- implemented: **654**
 - partial: **0**
 - planned: **0**
 - traced: **0**
@@ -54,6 +54,7 @@ This matrix is auto-generated from `docs/SRS.md`, `docs/TODO.md`, and repository
 | LLE | 11 | 0 | 0 | 0 | 0 | 11 |
 | MARIK | 8 | 0 | 0 | 0 | 0 | 8 |
 | MOAT | 16 | 0 | 0 | 0 | 0 | 16 |
+| MORP | 4 | 0 | 0 | 0 | 0 | 4 |
 | MTM | 12 | 0 | 0 | 0 | 0 | 12 |
 | NAUT | 8 | 0 | 0 | 0 | 0 | 8 |
 | NCLI | 6 | 0 | 0 | 0 | 0 | 6 |
@@ -62,6 +63,7 @@ This matrix is auto-generated from `docs/SRS.md`, `docs/TODO.md`, and repository
 | OBBFD | 9 | 0 | 0 | 0 | 0 | 9 |
 | PG | 7 | 0 | 0 | 0 | 0 | 7 |
 | PH | 10 | 0 | 0 | 0 | 0 | 10 |
+| PHL | 4 | 0 | 0 | 0 | 0 | 4 |
 | PL | 7 | 0 | 0 | 0 | 0 | 7 |
 | PMDESK | 12 | 0 | 0 | 0 | 0 | 12 |
 | PMKT | 16 | 0 | 0 | 0 | 0 | 16 |
@@ -741,3 +743,11 @@ This matrix is auto-generated from `docs/SRS.md`, `docs/TODO.md`, and repository
 | AEG-4 | Trade-Outcome Feedback Dataset Contract | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
 | AEG-5 | Calibrated-Probability EV Gate Contract | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
 | AEG-6 | Source Reliability and Claim Handling | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
+| PHL-1 | Short-Cadence Spread Scanner Contract | implemented | done | config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md, docs/TODO.md |
+| PHL-2 | Overround-Capped Two-Sided Loop Gate Contract | implemented | done | config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md, docs/TODO.md |
+| PHL-3 | Rapid Fill-State Loop Transition Contract | implemented | done | config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md, docs/TODO.md |
+| PHL-4 | Source Reliability and Claim Handling | implemented | done | config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md, docs/TODO.md |
+| MORP-1 | Daily Tight-Range Weather Candidate Scoring Contract | implemented | done | config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md, docs/TODO.md |
+| MORP-2 | Ultra-Low Entry Band and Quote-Precision Contract | implemented | done | config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md, docs/TODO.md |
+| MORP-3 | Passive Lowball Queueing and Fill-Quality Contract | implemented | done | config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md, docs/TODO.md |
+| MORP-4 | Source Reliability and Claim Handling | implemented | done | config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md, docs/TODO.md |

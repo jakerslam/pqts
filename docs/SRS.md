@@ -4611,3 +4611,67 @@ Observed source links:
 
 - Public claims about rapid intraday bankroll growth from weather bots shall be marked `unverified` unless backed by reproducible, trade-level artifacts with bounded evaluation windows.
 - Requirements adopted from this source chain shall remain limited to observable mechanics and validated inferred controls.
+
+## 79. Additional Delta Requirements from External Post Chain (0xPhilanthrop follow-up, March 11, 2026)
+
+These requirements capture net-new, applicable deltas from the referenced post while avoiding duplication of existing two-sided, hedge, and copytrade safety contracts.
+
+Observed source links:
+- `https://x.com/0xPhilanthrop/status/2031459815818424804?s=20`
+- `https://t.me/KreoPolyBot?start=ref-53blg718p7` (post body link)
+- `https://polymarket.com` (post body link)
+
+### PHL-1 Short-Cadence Spread Scanner Contract
+
+- Short-horizon spread-loop strategies shall support configurable scanner cadence with default `5s` cycle interval.
+- Each scan cycle shall persist candidate snapshot metadata including timestamp, per-leg executable quotes, and depth context.
+- Missed-cycle and stale-snapshot conditions shall emit typed incidents and fail closed to `hold` until scanner health recovers.
+
+### PHL-2 Overround-Capped Two-Sided Loop Gate Contract
+
+- System shall support a two-sided spread-loop gate using a configurable combined-quote cap (default source profile: `YES + NO <= 1.02`).
+- Candidate acceptance shall require fee/slippage-adjusted non-negative expectancy and explicit hedge-feasibility checks.
+- Cycles with combined quote above cap or negative post-cost expectancy shall be blocked with structured reason codes.
+
+### PHL-3 Rapid Fill-State Loop Transition Contract
+
+- If one leg fills first, runtime shall invoke immediate hedge workflow under configured max-latency and max-slippage budgets.
+- If both legs fill in loop mode, runtime shall execute deterministic neutral-exit/position-close transition logic.
+- Fill-state transitions (`none`, `one_leg`, `both_legs`, `hedged`, `closed`) shall be replayable with per-transition timing diagnostics.
+
+### PHL-4 Source Reliability and Claim Handling
+
+- Public claims from this source chain about overnight profit or simplicity-to-profit outcomes shall be marked `unverified` unless supported by reproducible trade-level artifacts.
+- Requirements adopted from this source shall remain limited to observable mechanics and validated controls rather than promotional profitability claims.
+
+## 80. Additional Delta Requirements from External Post Chain (morpphhhaw, March 11, 2026)
+
+These requirements capture net-new, applicable deltas from the referenced weather-market post while avoiding duplication of existing weather-consensus and two-sided-loop controls.
+
+Observed source links:
+- `https://x.com/morpphhhaw/status/2031662402392011174?s=20`
+- `https://ratio.you/r/8ASJG6JJ` (post body link)
+- `https://polymarket.com/@ColdMath?via=morph` (post body link)
+
+### MORP-1 Daily Tight-Range Weather Candidate Scoring Contract
+
+- Weather strategy shall support ranking daily city-range markets by forecast-band tightness and implied-odds dislocation.
+- Candidate scoring shall include market-specific range-width context and required edge buffer after cost assumptions.
+- Markets failing minimum dislocation score thresholds shall be excluded before order placement.
+
+### MORP-2 Ultra-Low Entry Band and Quote-Precision Contract
+
+- Strategy shall support configurable ultra-low entry bands for weather outcomes (source-profile defaults include sub-cent levels such as `0.1-0.2` cents where venue precision permits).
+- Order-construction logic shall enforce venue-precision-safe rounding and reject entries that lose asymmetry after rounding/fees.
+- Entry-band overrides shall be versioned and validated via replay before promotion to canary/live.
+
+### MORP-3 Passive Lowball Queueing and Fill-Quality Contract
+
+- Strategy shall support passive lowball limit-order queueing mode with explicit queue-age and cancel/replace limits.
+- Fill-quality telemetry shall distinguish passive-taken fills from aggressive execution paths and track adverse-selection outcomes.
+- Stale-queue or deteriorating-fill-quality conditions shall auto-tighten order placement or pause the mode.
+
+### MORP-4 Source Reliability and Claim Handling
+
+- Public claims from this source chain about extreme single-market ROI or repeatability of near-zero-entry outcomes shall be marked `unverified` unless backed by reproducible trade-level evidence.
+- Requirements adopted from this source chain shall remain limited to observable mechanics and validated controls rather than promotional profitability claims.

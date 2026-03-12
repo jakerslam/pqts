@@ -147,6 +147,12 @@ contracts for every remaining SRS family-assimilation block.
 - Baseline hook: `srs_baseline.lcs`
 - Contract: fail-closed, provenance-required, evidence-logged
 
+## MORP Family
+
+- Refs: `MORP-1, MORP-2, MORP-3, MORP-4`
+- Baseline hook: `srs_baseline.morp`
+- Contract: fail-closed, provenance-required, evidence-logged
+
 ## NCLI Family
 
 - Refs: `NCLI-6`
@@ -175,6 +181,12 @@ contracts for every remaining SRS family-assimilation block.
 
 - Refs: `PH-1, PH-2, PH-3, PH-4, PH-5, PH-6, PH-7, PH-8, PH-9, PH-10`
 - Baseline hook: `srs_baseline.ph`
+- Contract: fail-closed, provenance-required, evidence-logged
+
+## PHL Family
+
+- Refs: `PHL-1, PHL-2, PHL-3, PHL-4`
+- Baseline hook: `srs_baseline.phl`
 - Contract: fail-closed, provenance-required, evidence-logged
 
 ## PL Family
