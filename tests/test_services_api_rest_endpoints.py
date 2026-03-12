@@ -145,6 +145,12 @@ def test_ops_diagnostics_surfaces_return_payload_shapes() -> None:
     assert "rows" in truth.json()
     assert "explanation" in truth.json()
     assert "evidence_bundle" in truth.json()
+    assert "decision_card" in truth.json()
+
+    cards = client.get("/v1/ops/decision-cards", headers=_viewer())
+    assert cards.status_code == 200
+    assert "cards" in cards.json()
+    assert "count" in cards.json()
 
     replay = client.get("/v1/ops/replay", headers=_viewer())
     assert replay.status_code == 200

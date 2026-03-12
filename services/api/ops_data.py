@@ -8,17 +8,24 @@ import json
 import subprocess
 import sys
 import time
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
 try:
+    from execution.decision_cards import build_decision_card, load_decision_cards
     from execution.order_truth import load_pretrade_evidence_bundle, summarize_pretrade_evidence
 except ModuleNotFoundError:  # pragma: no cover - local repo path fallback
+    from src.execution.decision_cards import build_decision_card, load_decision_cards
     from src.execution.order_truth import load_pretrade_evidence_bundle, summarize_pretrade_evidence
 
 
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[2]
+
+
+def _utc_now_iso() -> str:
+    return datetime.now(timezone.utc).isoformat()
 
 
 def _read_json(path: Path, fallback: Any) -> Any:
@@ -264,12 +271,79 @@ def build_order_truth(order_id: str | None = None) -> dict[str, Any]:
             f"sources={evidence_summary.get('source_count', 0)} "
             f"gate={evidence_summary.get('risk_gate_decision', '')}"
         )
+    decision_card = _synthesize_decision_card(selected=selected, evidence_summary=evidence_summary)
     return {
         "selected": selected,
         "rows": rows,
         "explanation": explanation,
         "evidence_bundle": evidence_summary,
+        "decision_card": decision_card,
     }
+
+
+def _decision_card_store_path() -> Path:
+    return _repo_root() / "data" / "reports" / "decision_cards" / "latest.jsonl"
+
+
+def _synthesize_decision_card(
+    *,
+    selected: dict[str, Any] | None,
+    evidence_summary: dict[str, Any] | None,
+) -> dict[str, Any] | None:
+    if not isinstance(selected, dict):
+        return None
+    trade_id = str(selected.get("trade_id", "")).strip()
+    if not trade_id:
+        return None
+    symbol = str(selected.get("symbol", "")).strip() or "unknown_market"
+    strategy = str(selected.get("strategy_id", "")).strip() or "unknown_strategy"
+    p_market = 0.50
+    p_model = 0.50
+    if isinstance(evidence_summary, dict):
+        expected_ev = float(evidence_summary.get("expected_net_ev", 0.0) or 0.0)
+        p_model = max(0.0, min(1.0, p_market + (expected_ev / 100.0)))
+    realized_slip = _parse_float(selected.get("realized_slippage_bps"))
+    alpha = _parse_float(selected.get("realized_net_alpha_usd"))
+    gross_edge = max(0.0, alpha * 10.0)
+    total_penalty = max(0.0, realized_slip)
+    net_edge = gross_edge - total_penalty
+    card = build_decision_card(
+        card_id=f"card_{trade_id}",
+        strategy_id=strategy,
+        market_id=symbol,
+        generated_at=str(selected.get("timestamp") or _utc_now_iso()),
+        p_market=p_market,
+        p_model=p_model,
+        posterior_before=max(0.0, p_model - 0.01),
+        posterior_after=p_model,
+        gross_edge_bps=gross_edge,
+        total_penalty_bps=total_penalty,
+        net_edge_bps=net_edge,
+        expected_value_bps=alpha,
+        full_kelly_fraction=max(0.0, min(1.0, p_model - p_market)),
+        approved_fraction=max(0.0, min(0.10, p_model - p_market)),
+        stage="paper",
+        gate_passed=net_edge > 0.0,
+        gate_reason_codes=[] if net_edge > 0.0 else ["net_edge_below_threshold"],
+        trust_label=(
+            str(evidence_summary.get("trust_label", "unverified"))
+            if isinstance(evidence_summary, dict)
+            else "unverified"
+        ),
+        evidence_source="ops_data_synthesized",
+        evidence_ref=trade_id,
+    )
+    return card.to_dict()
+
+
+def list_decision_cards(limit: int = 50) -> dict[str, Any]:
+    rows = load_decision_cards(_decision_card_store_path(), limit=max(1, int(limit)))
+    if rows:
+        return {"count": len(rows), "cards": rows}
+    truth = build_order_truth()
+    synth = truth.get("decision_card")
+    cards = [synth] if isinstance(synth, dict) else []
+    return {"count": len(cards), "cards": cards}
 
 
 def list_template_run_artifacts(mode: str | None = None, limit: int = 40) -> list[dict[str, Any]]:

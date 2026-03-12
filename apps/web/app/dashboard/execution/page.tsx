@@ -7,7 +7,13 @@ export default async function ExecutionPage() {
   const [orders, fills, truth, references] = await Promise.all([
     getOrders().catch(() => []),
     getFills().catch(() => []),
-    getOrderTruth().catch(() => ({ selected: null, rows: [], explanation: [], evidence_bundle: null })),
+    getOrderTruth().catch(() => ({
+      selected: null,
+      rows: [],
+      explanation: [],
+      evidence_bundle: null,
+      decision_card: null,
+    })),
     getReferencePerformance().catch(() => null),
   ]);
 
@@ -47,6 +53,16 @@ export default async function ExecutionPage() {
               trust={truth.evidence_bundle.trust_label} · sources={truth.evidence_bundle.source_count} ·
               gate={truth.evidence_bundle.risk_gate_decision} · latency=
               {truth.evidence_bundle.latency_ms.toFixed(1)}ms
+            </div>
+          </div>
+        ) : null}
+        {truth.decision_card ? (
+          <div style={{ marginBottom: 12, padding: 10, border: "1px solid var(--border)" }}>
+            <strong>Decision Card</strong>
+            <div style={{ fontSize: 13, color: "var(--muted)", marginTop: 6 }}>
+              model={truth.decision_card.p_model.toFixed(4)} · market={truth.decision_card.p_market.toFixed(4)} ·
+              net_edge={truth.decision_card.net_edge_bps.toFixed(2)}bps · gate=
+              {truth.decision_card.gate_passed ? "passed" : "blocked"}
             </div>
           </div>
         ) : null}

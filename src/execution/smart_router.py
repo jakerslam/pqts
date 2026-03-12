@@ -5,7 +5,7 @@ from collections.abc import Mapping
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 from core.hotpath_runtime import smart_router_score
 from execution.fee_optimizer import FeeRebateOptimizer
@@ -43,6 +43,7 @@ class OrderRequest:
     strategy_id: str = "unknown"
     expected_alpha_bps: float = 0.0
     client_order_id: Optional[str] = None
+    decision_context: Dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass

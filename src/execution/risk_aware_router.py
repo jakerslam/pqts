@@ -46,6 +46,7 @@ from execution.live_ops_controls import (
     RateLimitConfig,
     RateLimitTracker,
 )
+from execution.lunar_edge_gate import NetEdgeGateInputs, evaluate_net_edge_gate
 from execution.market_data_resilience import (
     MarketDataResilienceManager,
     MarketDataResiliencePolicy,
@@ -339,6 +340,20 @@ class RiskAwareRouter:
             token = str(raw_campaign_strategy_ids).strip().lower()
             campaign_strategy_ids = {token} if token else set()
         self.profitability_campaign_strategy_ids = campaign_strategy_ids or {"campaign"}
+        lunar_edge_cfg = broker_config.get("lunar_edge_gate", {}) or {}
+        self.lunar_edge_gate_enabled = bool(lunar_edge_cfg.get("enabled", False))
+        self.lunar_edge_gate_min_net_edge_bps = float(
+            lunar_edge_cfg.get("min_net_edge_bps", self.profitability_min_edge_bps)
+        )
+        self.lunar_edge_gate_require_timestamps = bool(
+            lunar_edge_cfg.get("require_timestamps", True)
+        )
+        self.lunar_edge_gate_max_repricing_lag_ms = int(
+            lunar_edge_cfg.get("max_repricing_lag_ms", 20_000)
+        )
+        self.lunar_edge_gate_max_data_age_ms = int(
+            lunar_edge_cfg.get("max_data_age_ms", 15_000)
+        )
         self.require_live_client_order_id = bool(
             broker_config.get("require_live_client_order_id", True)
         )
@@ -1595,6 +1610,56 @@ class RiskAwareRouter:
                     f"expected_alpha_bps {expected_alpha_bps:.4f} < "
                     f"predicted_total_router_bps {predicted_total_router_bps:.4f} + "
                     f"min_edge_bps {self.profitability_min_edge_bps:.4f}"
+                )
+                self.audit_log.append(audit_entry)
+                return _result(
+                    success=False,
+                    decision_value=RiskDecision.HALT,
+                    risk_state_value=risk_state,
+                    order_id_value=None,
+                    exchange_value=route.exchange,
+                    rejected_reason_value=str(audit_entry["reject_reason"]),
+                )
+
+        if self.lunar_edge_gate_enabled:
+            context = order.decision_context if isinstance(order.decision_context, dict) else {}
+            lunar_gate = evaluate_net_edge_gate(
+                NetEdgeGateInputs(
+                    model_probability=float(context.get("model_probability", -1.0)),
+                    market_probability=float(context.get("market_probability", -1.0)),
+                    fee_bps=float(context.get("fee_bps", 0.0)),
+                    spread_bps=float(context.get("spread_bps", 0.0)),
+                    slippage_bps=float(context.get("slippage_bps", predicted_total_router_bps)),
+                    latency_penalty_bps=float(context.get("latency_penalty_bps", 0.0)),
+                    min_net_edge_bps=float(
+                        context.get("min_net_edge_bps", self.lunar_edge_gate_min_net_edge_bps)
+                    ),
+                    evidence_ts_ms=(
+                        int(context["evidence_ts_ms"])
+                        if context.get("evidence_ts_ms") is not None
+                        else None
+                    ),
+                    market_ts_ms=(
+                        int(context["market_ts_ms"])
+                        if context.get("market_ts_ms") is not None
+                        else None
+                    ),
+                    now_ts_ms=(
+                        int(context["now_ts_ms"])
+                        if context.get("now_ts_ms") is not None
+                        else int(time.time() * 1000)
+                    ),
+                    max_repricing_lag_ms=int(self.lunar_edge_gate_max_repricing_lag_ms),
+                    max_data_age_ms=int(self.lunar_edge_gate_max_data_age_ms),
+                    require_timestamps=bool(self.lunar_edge_gate_require_timestamps),
+                )
+            )
+            audit_entry["lunar_net_edge_gate"] = lunar_gate.to_dict()
+            if not lunar_gate.passed:
+                self.reject_count += 1
+                audit_entry["rejected"] = True
+                audit_entry["reject_reason"] = (
+                    "LUNAR_NET_EDGE_GATE: " + ",".join(lunar_gate.reason_codes)
                 )
                 self.audit_log.append(audit_entry)
                 return _result(

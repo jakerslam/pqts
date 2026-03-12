@@ -4,6 +4,7 @@ import type {
   AssistantAuditEvent,
   BrokerageAccount,
   BrokerageSyncHealthRow,
+  DecisionExplainabilityCard,
   ExecutionQualityRow,
   Fill,
   Order,
@@ -101,6 +102,7 @@ interface OrderTruthEnvelope {
   rows: ExecutionQualityEnvelope["rows"];
   explanation: string[];
   evidence_bundle?: OrderTruthPayload["evidence_bundle"];
+  decision_card?: DecisionExplainabilityCard | null;
 }
 
 interface BrokerageAccountsEnvelope {
@@ -121,6 +123,11 @@ interface BrokerageSyncHealthEnvelope {
 interface AssistantAuditEnvelope {
   events: AssistantAuditEvent[];
   count: number;
+}
+
+interface DecisionCardsEnvelope {
+  count: number;
+  cards: DecisionExplainabilityCard[];
 }
 
 export async function getAccountSummary(): Promise<AccountSummary> {
@@ -221,7 +228,17 @@ export async function getOrderTruth(orderId?: string): Promise<OrderTruthPayload
       payload.evidence_bundle && typeof payload.evidence_bundle === "object"
         ? payload.evidence_bundle
         : null,
+    decision_card:
+      payload.decision_card && typeof payload.decision_card === "object"
+        ? (payload.decision_card as DecisionExplainabilityCard)
+        : null,
   };
+}
+
+export async function getDecisionCards(limit = 50): Promise<DecisionExplainabilityCard[]> {
+  const bounded = Math.min(Math.max(Math.floor(limit), 1), 500);
+  const payload = await apiGet<DecisionCardsEnvelope>(`/v1/ops/decision-cards?limit=${bounded}`);
+  return Array.isArray(payload.cards) ? payload.cards : [];
 }
 
 export async function getReplay(limit = 120): Promise<ReplayPayload> {

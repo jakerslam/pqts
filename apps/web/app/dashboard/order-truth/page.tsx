@@ -12,7 +12,13 @@ interface PageProps {
 export default async function OrderTruthPage({ searchParams }: PageProps) {
   const orderId = String(searchParams?.order_id ?? "").trim();
   const [payload, reference] = await Promise.all([
-    getOrderTruth(orderId).catch(() => ({ selected: null, rows: [], explanation: [], evidence_bundle: null })),
+    getOrderTruth(orderId).catch(() => ({
+      selected: null,
+      rows: [],
+      explanation: [],
+      evidence_bundle: null,
+      decision_card: null,
+    })),
     getReferencePerformance().catch(() => null),
   ]);
   const provenance = reference?.provenance;
@@ -37,6 +43,18 @@ export default async function OrderTruthPage({ searchParams }: PageProps) {
               trust={payload.evidence_bundle.trust_label} · sources={payload.evidence_bundle.source_count} ·
               causal={payload.evidence_bundle.causal_ok ? "ok" : "fail"} · expected_net_ev=
               {payload.evidence_bundle.expected_net_ev.toFixed(4)}
+            </p>
+          </div>
+        ) : null}
+        {payload.decision_card ? (
+          <div style={{ padding: 10, border: "1px solid var(--border)" }}>
+            <strong>Decision Explainability Card</strong>
+            <p style={{ margin: "6px 0 0 0", color: "var(--muted)" }}>
+              p_market={payload.decision_card.p_market.toFixed(4)} · p_model=
+              {payload.decision_card.p_model.toFixed(4)} · posterior_delta=
+              {payload.decision_card.posterior_delta.toFixed(4)} · net_edge=
+              {payload.decision_card.net_edge_bps.toFixed(2)}bps · approved_fraction=
+              {(payload.decision_card.approved_fraction * 100).toFixed(2)}%
             </p>
           </div>
         ) : null}

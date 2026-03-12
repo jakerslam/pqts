@@ -115,6 +115,31 @@ export interface OrderTruthPayload {
     risk_gate_reason_codes: string[];
     expected_net_ev: number;
   } | null;
+  decision_card?: DecisionExplainabilityCard | null;
+}
+
+export interface DecisionExplainabilityCard {
+  card_id: string;
+  strategy_id: string;
+  market_id: string;
+  generated_at: string;
+  p_market: number;
+  p_model: number;
+  posterior_before: number;
+  posterior_after: number;
+  posterior_delta: number;
+  gross_edge_bps: number;
+  total_penalty_bps: number;
+  net_edge_bps: number;
+  expected_value_bps: number;
+  full_kelly_fraction: number;
+  approved_fraction: number;
+  stage: string;
+  gate_passed: boolean;
+  gate_reason_codes: string[];
+  trust_label: string;
+  evidence_source: string;
+  evidence_ref: string;
 }
 
 export interface ReplayEventTypeCount {

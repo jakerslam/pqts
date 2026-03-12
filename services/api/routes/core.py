@@ -51,6 +51,7 @@ from services.api.ops_data import (
     build_notify_command,
     build_order_truth,
     data_seed_presets,
+    list_decision_cards,
     list_template_run_artifacts,
     load_reference_performance,
     load_reference_provenance,
@@ -2395,6 +2396,18 @@ def get_order_truth(
     _enforce_read_limit(request, cache, identity)
     payload = build_order_truth(order_id=order_id)
     payload["rows"] = payload["rows"][:100]
+    return with_correlation(request, payload)
+
+
+@router.get("/ops/decision-cards")
+def get_decision_cards(
+    identity: Annotated[APIIdentity, Depends(require_identity)],
+    request: Request,
+    cache: Annotated[APICache, Depends(get_cache)],
+    limit: Annotated[int, Query(ge=1, le=500)] = 50,
+) -> dict[str, Any]:
+    _enforce_read_limit(request, cache, identity)
+    payload = list_decision_cards(limit=limit)
     return with_correlation(request, payload)
 
 
