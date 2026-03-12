@@ -16,11 +16,13 @@ Implements Grok's recommendation:
 Every 0.05% fee reduction on $100k at 5x turnover = +$2,500/year
 """
 
+from __future__ import annotations
+
 import logging
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 import pandas as pd
@@ -228,7 +230,7 @@ class RealisticCostModel:
         commission_rate: float = 0.001,  # 0.1% (maker rebate or taker fee)
         base_volatility: float = 0.50,  # 50% annualized
         impact_constant: float = 0.5,
-        impact_volatility_scale: float | None = None,
+        impact_volatility_scale: Optional[float] = None,
     ):  # Empirical constant
         self.commission = commission_rate
         self.base_vol = base_volatility

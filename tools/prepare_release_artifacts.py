@@ -9,7 +9,10 @@ import hashlib
 import json
 from pathlib import Path
 import re
-import tomllib
+try:
+    import tomllib  # type: ignore
+except ModuleNotFoundError:
+    import tomli as tomllib  # type: ignore
 from typing import Any
 
 

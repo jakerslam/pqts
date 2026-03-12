@@ -7,7 +7,7 @@ import json
 import os
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 import requests
 
@@ -48,7 +48,7 @@ def load_plan_catalog(settings: APISettings) -> dict[str, Any]:
     return payload
 
 
-def resolve_plan(catalog: dict[str, Any], requested_plan: str | None) -> str:
+def resolve_plan(catalog: dict[str, Any], requested_plan: Optional[str]) -> str:
     plans = catalog.get("plans", {})
     if not isinstance(plans, dict):
         plans = {}
@@ -130,7 +130,7 @@ def create_checkout_session(
     customer_email: str,
     success_url: str,
     cancel_url: str,
-    metadata: dict[str, Any] | None = None,
+    metadata: Optional[dict[str, Any]] = None,
     dry_run: bool = False,
 ) -> dict[str, Any]:
     provider = str(settings.billing_provider).strip().lower() or "demo"

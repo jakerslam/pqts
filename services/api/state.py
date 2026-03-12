@@ -5,7 +5,7 @@ from __future__ import annotations
 import asyncio
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Any
+from typing import Any, Optional
 
 from fastapi import Request, WebSocket
 
@@ -222,7 +222,12 @@ class StreamHub:
             "risk": set(),
         }
     )
-    _sse_guard: asyncio.Lock = field(default_factory=asyncio.Lock)
+    _sse_guard: Optional[asyncio.Lock] = field(default=None, init=False)
+
+    def _ensure_sse_guard(self) -> asyncio.Lock:
+        if self._sse_guard is None:
+            self._sse_guard = asyncio.Lock()
+        return self._sse_guard
 
     async def connect(self, channel: str, websocket: WebSocket) -> None:
         await websocket.accept()
@@ -238,12 +243,14 @@ class StreamHub:
         max_queue_size: int = 256,
     ) -> asyncio.Queue[dict[str, Any]]:
         queue: asyncio.Queue[dict[str, Any]] = asyncio.Queue(maxsize=max(1, int(max_queue_size)))
-        async with self._sse_guard:
+        guard = self._ensure_sse_guard()
+        async with guard:
             self._sse_channels.setdefault(channel, set()).add(queue)
         return queue
 
     async def unsubscribe_sse(self, channel: str, queue: asyncio.Queue[dict[str, Any]]) -> None:
-        async with self._sse_guard:
+        guard = self._ensure_sse_guard()
+        async with guard:
             self._sse_channels.setdefault(channel, set()).discard(queue)
 
     async def broadcast(
@@ -252,8 +259,8 @@ class StreamHub:
         event: str,
         payload: dict[str, Any],
         *,
-        trace_id: str | None = None,
-        run_id: str | None = None,
+        trace_id: Optional[str] = None,
+        run_id: Optional[str] = None,
     ) -> None:
         listeners = list(self._channels.get(channel, set()))
         dead: list[WebSocket] = []

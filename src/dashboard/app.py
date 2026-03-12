@@ -272,7 +272,7 @@ def update_equity_chart(n):
         dates = pd.date_range(start=datetime.now() - timedelta(days=30), periods=100, freq="H")
         values = 10000 + np.cumsum(np.random.randn(100) * 50)
         equity_data = [
-            {"timestamp": d.isoformat(), "value": v} for d, v in zip(dates, values, strict=False)
+            {"timestamp": d.isoformat(), "value": v} for d, v in zip(dates, values)
         ]
 
     df = pd.DataFrame(equity_data)

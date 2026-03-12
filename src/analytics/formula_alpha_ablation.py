@@ -42,7 +42,7 @@ def evaluate_formula_alpha_ablation(
 
     model_mean = sum(model) / n if n else 0.0
     baseline_mean = sum(baseline) / n if n else 0.0
-    lifts = [m - b for m, b in zip(model, baseline, strict=True)]
+    lifts = [m - b for m, b in zip(model, baseline)]
     lift_mean = sum(lifts) / n if n else 0.0
     positive_lift_rate = (sum(1 for x in lifts if x > 0.0) / n) if n else 0.0
     if lift_mean < float(min_lift_bps):

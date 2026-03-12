@@ -94,7 +94,7 @@ def allocate_question_budget(
             spare -= 1
 
     allocated: list[ChunkBudget] = []
-    for row, extra in zip(ordered, provisional, strict=False):
+    for row, extra in zip(ordered, provisional):
         allocated.append(
             ChunkBudget(
                 chunk_id=row.chunk_id,

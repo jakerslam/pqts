@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
-from typing import Any
+from typing import Any, Optional
 
 from fastapi import HTTPException, Request, status
 
@@ -45,14 +45,14 @@ class APICache:
             self._memory_expiry.pop(key, None)
             self._memory_values.pop(key, None)
 
-    def get(self, key: str) -> str | None:
+    def get(self, key: str) -> Optional[str]:
         if self.redis_client is not None:
             value = self.redis_client.get(key)
             return str(value) if value is not None else None
         self._cleanup_key(key)
         return self._memory_values.get(key)
 
-    def set(self, key: str, value: str, *, ttl_seconds: int | None = None) -> None:
+    def set(self, key: str, value: str, *, ttl_seconds: Optional[int] = None) -> None:
         if self.redis_client is not None:
             if ttl_seconds is None:
                 self.redis_client.set(key, value)

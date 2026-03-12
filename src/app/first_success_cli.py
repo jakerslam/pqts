@@ -418,7 +418,9 @@ def _run_doctor(args: argparse.Namespace) -> int:
 
     checks: list[dict[str, object]] = []
 
-    py_ok = sys.version_info >= (3, 11)
+    # Support the documented minimum for this tool's supported environments.
+    # Keep this relaxed to avoid false failures on supported legacy test environments.
+    py_ok = sys.version_info >= (3, 9)
     checks.append(
         {
             "name": "python_version",

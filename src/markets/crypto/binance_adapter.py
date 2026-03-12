@@ -5,7 +5,7 @@ import hmac
 import json
 import logging
 from datetime import datetime, timezone
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
 import aiohttp
 
@@ -187,7 +187,7 @@ class BinanceAdapter:
         """Get exchange information"""
         return await self._request("GET", "/api/v3/exchangeInfo")
 
-    def stream_descriptors(self) -> Dict[str, Dict[str, str | float]]:
+    def stream_descriptors(self) -> Dict[str, Dict[str, Union[str, float]]]:
         """Canonical market/order/fill stream endpoints for parity monitoring."""
         from execution.stream_contracts import build_stream_registry
 

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import Annotated, Callable
+from typing import Annotated, Callable, Optional
 
 from fastapi import Depends, Header, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
@@ -82,7 +82,7 @@ def get_token_store(request: Request) -> dict[str, APIRole]:
     return build_token_store("")
 
 
-def _resolve_session_mapping(request: Request, session_token: str) -> str | None:
+def _resolve_session_mapping(request: Request, session_token: str) -> Optional[str]:
     cache = getattr(request.app.state, "cache", None)
     if cache is None or not hasattr(cache, "get"):
         return None
@@ -101,7 +101,7 @@ def resolve_identity_for_token(
     *,
     token_store: dict[str, APIRole],
     auth_scheme: str,
-) -> APIIdentity | None:
+) -> Optional[APIIdentity]:
     value = token.strip()
     if not value:
         return None
@@ -121,9 +121,9 @@ _bearer = HTTPBearer(auto_error=False)
 
 def require_identity(
     request: Request,
-    credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(_bearer)],
+    credentials: Annotated[Optional[HTTPAuthorizationCredentials], Depends(_bearer)],
     token_store: Annotated[dict[str, APIRole], Depends(get_token_store)],
-    session_token: Annotated[str | None, Header(alias="X-Session-Token")] = None,
+    session_token: Annotated[Optional[str], Header(alias="X-Session-Token")] = None,
 ) -> APIIdentity:
     token = ""
     auth_scheme = ""

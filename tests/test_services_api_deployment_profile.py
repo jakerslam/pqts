@@ -3,7 +3,10 @@
 from __future__ import annotations
 
 from pathlib import Path
-import tomllib
+try:
+    import tomllib
+except ImportError:  # pragma: no cover - py<3.11 compatibility fallback
+    import tomli as tomllib
 
 from services.api.config import APISettings
 

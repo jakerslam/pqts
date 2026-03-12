@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 from fastapi import Request
 from sqlalchemy import Text, create_engine, select
@@ -118,7 +118,7 @@ class APIPersistence:
     session_factory: sessionmaker[Session]
 
     @classmethod
-    def connect(cls, database_url: str) -> "APIPersistence | None":
+    def connect(cls, database_url: str) -> Optional["APIPersistence"]:
         value = database_url.strip()
         if not value:
             return None
@@ -222,7 +222,7 @@ class APIPersistence:
             session.merge(row)
             session.commit()
 
-    def get_account(self, account_id: str) -> AccountSummary | None:
+    def get_account(self, account_id: str) -> Optional[AccountSummary]:
         with self.session_factory() as session:
             row = session.get(AccountRow, account_id)
             if row is None:
@@ -293,7 +293,7 @@ class APIPersistence:
             session.merge(row)
             session.commit()
 
-    def get_risk_state(self, account_id: str) -> RiskStateSnapshot | None:
+    def get_risk_state(self, account_id: str) -> Optional[RiskStateSnapshot]:
         with self.session_factory() as session:
             row = session.get(RiskStateRow, account_id)
             if row is None:
@@ -357,7 +357,7 @@ class APIPersistence:
             return [_loads(row.payload) for row in rows]
 
 
-def get_persistence(request: Request) -> APIPersistence | None:
+def get_persistence(request: Request) -> Optional[APIPersistence]:
     persistence = getattr(request.app.state, "persistence", None)
     if isinstance(persistence, APIPersistence):
         return persistence

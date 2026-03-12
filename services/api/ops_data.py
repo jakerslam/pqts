@@ -10,7 +10,7 @@ import sys
 import time
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 try:
     from execution.decision_cards import build_decision_card, load_decision_cards
@@ -51,7 +51,7 @@ def load_reference_performance() -> dict[str, Any]:
     return payload
 
 
-def load_best_reference_bundle() -> dict[str, Any] | None:
+def load_best_reference_bundle() -> Optional[dict[str, Any]]:
     payload = load_reference_performance()
     bundles = payload.get("bundles", [])
     if not isinstance(bundles, list) or not bundles:
@@ -242,7 +242,7 @@ def summarize_replay(limit: int = 120) -> dict[str, Any]:
     }
 
 
-def build_order_truth(order_id: str | None = None) -> dict[str, Any]:
+def build_order_truth(order_id: Optional[str] = None) -> dict[str, Any]:
     rows = load_execution_quality_rows(limit=300)
     evidence_path = _repo_root() / "data" / "reports" / "order_truth" / "event_intel_latest.json"
     evidence_summary = summarize_pretrade_evidence(load_pretrade_evidence_bundle(evidence_path))
@@ -287,9 +287,9 @@ def _decision_card_store_path() -> Path:
 
 def _synthesize_decision_card(
     *,
-    selected: dict[str, Any] | None,
-    evidence_summary: dict[str, Any] | None,
-) -> dict[str, Any] | None:
+    selected: Optional[dict[str, Any]],
+    evidence_summary: Optional[dict[str, Any]],
+) -> Optional[dict[str, Any]]:
     if not isinstance(selected, dict):
         return None
     trade_id = str(selected.get("trade_id", "")).strip()
@@ -346,7 +346,7 @@ def list_decision_cards(limit: int = 50) -> dict[str, Any]:
     return {"count": len(cards), "cards": cards}
 
 
-def list_template_run_artifacts(mode: str | None = None, limit: int = 40) -> list[dict[str, Any]]:
+def list_template_run_artifacts(mode: Optional[str] = None, limit: int = 40) -> list[dict[str, Any]]:
     reports_root = _repo_root() / "data" / "reports"
     if not reports_root.exists():
         return []
@@ -483,7 +483,7 @@ def build_notify_command(payload: dict[str, Any]) -> list[str]:
     return command
 
 
-def parse_last_json_line(stdout: str) -> dict[str, Any] | None:
+def parse_last_json_line(stdout: str) -> Optional[dict[str, Any]]:
     lines = [line.strip() for line in stdout.splitlines() if line.strip()]
     for line in reversed(lines):
         try:

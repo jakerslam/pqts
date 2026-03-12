@@ -9,7 +9,7 @@ import sys
 import threading
 import time
 from datetime import datetime, timezone
-from typing import Annotated, Any
+from typing import Annotated, Any, Optional
 from urllib.parse import urlparse
 from uuid import uuid4
 
@@ -251,7 +251,7 @@ def _compute_sync_state(link: dict[str, Any]) -> dict[str, Any]:
     last_sync = str(link.get("last_sync_at", "")).strip()
     stale_after = int(link.get("stale_after_seconds", _BROKERAGE_STALE_AFTER_SECONDS))
     is_stale = True
-    stale_seconds: int | None = None
+    stale_seconds: Optional[int] = None
     if last_sync:
         try:
             synced_at = datetime.fromisoformat(last_sync)
@@ -1110,7 +1110,7 @@ def get_account_summary(
     request: Request,
     cache: Annotated[APICache, Depends(get_cache)],
     store: Annotated[APIRuntimeStore, Depends(get_store)],
-    persistence: Annotated[APIPersistence | None, Depends(get_persistence)],
+    persistence: Annotated[Optional[APIPersistence], Depends(get_persistence)],
 ) -> dict[str, Any]:
     _enforce_read_limit(request, cache, identity)
     if persistence is not None:
@@ -1131,7 +1131,7 @@ async def upsert_account_summary(
     cache: Annotated[APICache, Depends(get_cache)],
     store: Annotated[APIRuntimeStore, Depends(get_store)],
     hub: Annotated[StreamHub, Depends(get_stream_hub)],
-    persistence: Annotated[APIPersistence | None, Depends(get_persistence)],
+    persistence: Annotated[Optional[APIPersistence], Depends(get_persistence)],
 ) -> dict[str, Any]:
     _enforce_write_limit(request, cache, identity)
     trace_id, run_id = read_request_correlation(request)
@@ -1160,7 +1160,7 @@ def list_positions(
     request: Request,
     cache: Annotated[APICache, Depends(get_cache)],
     store: Annotated[APIRuntimeStore, Depends(get_store)],
-    persistence: Annotated[APIPersistence | None, Depends(get_persistence)],
+    persistence: Annotated[Optional[APIPersistence], Depends(get_persistence)],
 ) -> dict[str, Any]:
     _enforce_read_limit(request, cache, identity)
     rows = (
@@ -1179,7 +1179,7 @@ async def append_position(
     cache: Annotated[APICache, Depends(get_cache)],
     store: Annotated[APIRuntimeStore, Depends(get_store)],
     hub: Annotated[StreamHub, Depends(get_stream_hub)],
-    persistence: Annotated[APIPersistence | None, Depends(get_persistence)],
+    persistence: Annotated[Optional[APIPersistence], Depends(get_persistence)],
 ) -> dict[str, Any]:
     _enforce_write_limit(request, cache, identity)
     trace_id, run_id = read_request_correlation(request)
@@ -1207,7 +1207,7 @@ def list_orders(
     request: Request,
     cache: Annotated[APICache, Depends(get_cache)],
     store: Annotated[APIRuntimeStore, Depends(get_store)],
-    persistence: Annotated[APIPersistence | None, Depends(get_persistence)],
+    persistence: Annotated[Optional[APIPersistence], Depends(get_persistence)],
 ) -> dict[str, Any]:
     _enforce_read_limit(request, cache, identity)
     rows = (
@@ -1224,7 +1224,7 @@ async def append_order(
     cache: Annotated[APICache, Depends(get_cache)],
     store: Annotated[APIRuntimeStore, Depends(get_store)],
     hub: Annotated[StreamHub, Depends(get_stream_hub)],
-    persistence: Annotated[APIPersistence | None, Depends(get_persistence)],
+    persistence: Annotated[Optional[APIPersistence], Depends(get_persistence)],
 ) -> dict[str, Any]:
     _enforce_write_limit(request, cache, identity)
     trace_id, run_id = read_request_correlation(request)
@@ -1252,7 +1252,7 @@ def list_fills(
     request: Request,
     cache: Annotated[APICache, Depends(get_cache)],
     store: Annotated[APIRuntimeStore, Depends(get_store)],
-    persistence: Annotated[APIPersistence | None, Depends(get_persistence)],
+    persistence: Annotated[Optional[APIPersistence], Depends(get_persistence)],
 ) -> dict[str, Any]:
     _enforce_read_limit(request, cache, identity)
     rows = (
@@ -1269,7 +1269,7 @@ async def append_fill(
     cache: Annotated[APICache, Depends(get_cache)],
     store: Annotated[APIRuntimeStore, Depends(get_store)],
     hub: Annotated[StreamHub, Depends(get_stream_hub)],
-    persistence: Annotated[APIPersistence | None, Depends(get_persistence)],
+    persistence: Annotated[Optional[APIPersistence], Depends(get_persistence)],
 ) -> dict[str, Any]:
     _enforce_write_limit(request, cache, identity)
     trace_id, run_id = read_request_correlation(request)
@@ -1297,7 +1297,7 @@ def list_pnl_snapshots(
     request: Request,
     cache: Annotated[APICache, Depends(get_cache)],
     store: Annotated[APIRuntimeStore, Depends(get_store)],
-    persistence: Annotated[APIPersistence | None, Depends(get_persistence)],
+    persistence: Annotated[Optional[APIPersistence], Depends(get_persistence)],
 ) -> dict[str, Any]:
     _enforce_read_limit(request, cache, identity)
     rows = (
@@ -1316,7 +1316,7 @@ async def append_pnl_snapshot(
     cache: Annotated[APICache, Depends(get_cache)],
     store: Annotated[APIRuntimeStore, Depends(get_store)],
     hub: Annotated[StreamHub, Depends(get_stream_hub)],
-    persistence: Annotated[APIPersistence | None, Depends(get_persistence)],
+    persistence: Annotated[Optional[APIPersistence], Depends(get_persistence)],
 ) -> dict[str, Any]:
     _enforce_write_limit(request, cache, identity)
     trace_id, run_id = read_request_correlation(request)
@@ -1344,7 +1344,7 @@ def get_risk_state(
     request: Request,
     cache: Annotated[APICache, Depends(get_cache)],
     store: Annotated[APIRuntimeStore, Depends(get_store)],
-    persistence: Annotated[APIPersistence | None, Depends(get_persistence)],
+    persistence: Annotated[Optional[APIPersistence], Depends(get_persistence)],
 ) -> dict[str, Any]:
     _enforce_read_limit(request, cache, identity)
     snapshot = (
@@ -1366,7 +1366,7 @@ async def upsert_risk_state(
     cache: Annotated[APICache, Depends(get_cache)],
     store: Annotated[APIRuntimeStore, Depends(get_store)],
     hub: Annotated[StreamHub, Depends(get_stream_hub)],
-    persistence: Annotated[APIPersistence | None, Depends(get_persistence)],
+    persistence: Annotated[Optional[APIPersistence], Depends(get_persistence)],
 ) -> dict[str, Any]:
     _enforce_write_limit(request, cache, identity)
     trace_id, run_id = read_request_correlation(request)
@@ -1396,7 +1396,7 @@ async def append_risk_incident(
     cache: Annotated[APICache, Depends(get_cache)],
     store: Annotated[APIRuntimeStore, Depends(get_store)],
     hub: Annotated[StreamHub, Depends(get_stream_hub)],
-    persistence: Annotated[APIPersistence | None, Depends(get_persistence)],
+    persistence: Annotated[Optional[APIPersistence], Depends(get_persistence)],
 ) -> dict[str, Any]:
     _enforce_write_limit(request, cache, identity)
     trace_id, run_id = read_request_correlation(request)
@@ -1428,7 +1428,7 @@ def list_operator_actions(
     request: Request,
     cache: Annotated[APICache, Depends(get_cache)],
     store: Annotated[APIRuntimeStore, Depends(get_store)],
-    persistence: Annotated[APIPersistence | None, Depends(get_persistence)],
+    persistence: Annotated[Optional[APIPersistence], Depends(get_persistence)],
     limit: Annotated[int, Query(ge=1, le=500)] = 100,
 ) -> dict[str, Any]:
     _enforce_read_limit(request, cache, identity)
@@ -1446,7 +1446,7 @@ def append_operator_action(
     request: Request,
     cache: Annotated[APICache, Depends(get_cache)],
     store: Annotated[APIRuntimeStore, Depends(get_store)],
-    persistence: Annotated[APIPersistence | None, Depends(get_persistence)],
+    persistence: Annotated[Optional[APIPersistence], Depends(get_persistence)],
 ) -> dict[str, Any]:
     _enforce_write_limit(request, cache, identity)
     kind = str(payload.get("kind", "")).strip()
@@ -1472,7 +1472,7 @@ def list_promotions(
     request: Request,
     cache: Annotated[APICache, Depends(get_cache)],
     store: Annotated[APIRuntimeStore, Depends(get_store)],
-    persistence: Annotated[APIPersistence | None, Depends(get_persistence)],
+    persistence: Annotated[Optional[APIPersistence], Depends(get_persistence)],
 ) -> dict[str, Any]:
     _enforce_read_limit(request, cache, identity)
     if persistence is not None:
@@ -1494,7 +1494,7 @@ def apply_promotion_action(
     request: Request,
     cache: Annotated[APICache, Depends(get_cache)],
     store: Annotated[APIRuntimeStore, Depends(get_store)],
-    persistence: Annotated[APIPersistence | None, Depends(get_persistence)],
+    persistence: Annotated[Optional[APIPersistence], Depends(get_persistence)],
 ) -> dict[str, Any]:
     _enforce_write_limit(request, cache, identity)
     strategy_id = str(payload.get("strategy_id", "")).strip()
@@ -1509,7 +1509,7 @@ def apply_promotion_action(
     stage_after = _next_stage(stage_before, action)
     adapter_provider = str(payload.get("adapter_provider", current.get("adapter_provider", ""))).strip().lower()
     adapter_status = str(current.get("adapter_status", "")).strip().lower()
-    adapter_gate_payload: dict[str, Any] | None = None
+    adapter_gate_payload: Optional[dict[str, Any]] = None
     if adapter_provider and stage_after in {"paper", "canary", "live"}:
         adapter_status = _resolve_adapter_status(adapter_provider)
         if not adapter_status:
@@ -1650,7 +1650,7 @@ def get_agent_context(
     request: Request,
     cache: Annotated[APICache, Depends(get_cache)],
     store: Annotated[APIRuntimeStore, Depends(get_store)],
-    agent_id: Annotated[str | None, Query()] = None,
+    agent_id: Annotated[Optional[str], Query()] = None,
 ) -> dict[str, Any]:
     _enforce_read_limit(request, cache, identity)
     resolved_agent_id = str(agent_id or identity.subject).strip() or identity.subject
@@ -1952,7 +1952,7 @@ def list_agent_hooks(
     request: Request,
     cache: Annotated[APICache, Depends(get_cache)],
     store: Annotated[APIRuntimeStore, Depends(get_store)],
-    agent_id: Annotated[str | None, Query()] = None,
+    agent_id: Annotated[Optional[str], Query()] = None,
 ) -> dict[str, Any]:
     _enforce_read_limit(request, cache, identity)
     resolved_agent_id = str(agent_id or identity.subject).strip() or identity.subject
@@ -2534,7 +2534,7 @@ def get_order_truth(
     identity: Annotated[APIIdentity, Depends(require_identity)],
     request: Request,
     cache: Annotated[APICache, Depends(get_cache)],
-    order_id: Annotated[str | None, Query()] = None,
+    order_id: Annotated[Optional[str], Query()] = None,
 ) -> dict[str, Any]:
     _enforce_read_limit(request, cache, identity)
     payload = build_order_truth(order_id=order_id)
@@ -2570,7 +2570,7 @@ def get_template_gallery(
     identity: Annotated[APIIdentity, Depends(require_identity)],
     request: Request,
     cache: Annotated[APICache, Depends(get_cache)],
-    mode: Annotated[str | None, Query()] = None,
+    mode: Annotated[Optional[str], Query()] = None,
     limit: Annotated[int, Query(ge=1, le=200)] = 40,
 ) -> dict[str, Any]:
     _enforce_read_limit(request, cache, identity)
@@ -2679,8 +2679,8 @@ def list_ops_jobs(
     cache: Annotated[APICache, Depends(get_cache)],
     store: Annotated[APIRuntimeStore, Depends(get_store)],
     limit: Annotated[int, Query(ge=1, le=200)] = 40,
-    job_type: Annotated[str | None, Query()] = None,
-    status_filter: Annotated[str | None, Query(alias="status")] = None,
+    job_type: Annotated[Optional[str], Query()] = None,
+    status_filter: Annotated[Optional[str], Query(alias="status")] = None,
 ) -> dict[str, Any]:
     _enforce_read_limit(request, cache, identity)
     selected_type = str(job_type or "").strip().lower()

@@ -13,7 +13,10 @@ from __future__ import annotations
 import argparse
 import json
 import re
-import tomllib
+try:
+    import tomllib  # type: ignore
+except ModuleNotFoundError:
+    import tomli as tomllib  # type: ignore
 from pathlib import Path
 from typing import Any
 

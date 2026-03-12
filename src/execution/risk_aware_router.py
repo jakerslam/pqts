@@ -23,6 +23,8 @@ Integration:
         pass
 """
 
+from __future__ import annotations
+
 import asyncio
 import hashlib
 import json
@@ -463,7 +465,7 @@ class RiskAwareRouter:
         # This preserves serialization for competing orders while allowing
         # parallel submissions across independent symbols/venues.
         self._submit_order_locks: Dict[str, asyncio.Lock] = {}
-        self._submit_order_locks_guard = asyncio.Lock()
+        self._submit_order_locks_guard: Optional[asyncio.Lock] = None
 
         # Audit logging (Step 5)
         self.audit_log: List[Dict] = []
@@ -907,12 +909,18 @@ class RiskAwareRouter:
         lock = self._submit_order_locks.get(partition_key)
         if lock is not None:
             return lock
-        async with self._submit_order_locks_guard:
+        guard = self._ensure_submit_order_lock_guard()
+        async with guard:
             lock = self._submit_order_locks.get(partition_key)
             if lock is None:
                 lock = asyncio.Lock()
                 self._submit_order_locks[partition_key] = lock
             return lock
+
+    def _ensure_submit_order_lock_guard(self) -> asyncio.Lock:
+        if self._submit_order_locks_guard is None:
+            self._submit_order_locks_guard = asyncio.Lock()
+        return self._submit_order_locks_guard
 
     async def submit_order(
         self,
@@ -1085,12 +1093,12 @@ class RiskAwareRouter:
             *,
             success: bool,
             decision_value: RiskDecision,
-            risk_state_value: RiskState | None,
-            order_id_value: str | None,
-            exchange_value: str | None,
-            rejected_reason_value: str | None,
-            latency_ms: float | None = None,
-            fill_ratio: float | None = None,
+            risk_state_value: Optional[RiskState],
+            order_id_value: Optional[str],
+            exchange_value: Optional[str],
+            rejected_reason_value: Optional[str],
+            latency_ms: Optional[float] = None,
+            fill_ratio: Optional[float] = None,
         ) -> OrderResult:
             audit_entry["execution_outcome"] = ExecutionOutcome(
                 success=bool(success),
@@ -2070,7 +2078,7 @@ class RiskAwareRouter:
         depth_1pct_usd: float,
         vol_24h: float,
         expected_alpha_bps: float,
-        order_book: Dict[str, Any] | None,
+        order_book: Optional[Dict[str, Any]],
         queue_ahead_qty: float,
     ) -> Dict[str, float]:
         """Persist predicted vs. realized slippage/costs for TCA calibration."""

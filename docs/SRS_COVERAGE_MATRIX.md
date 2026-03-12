@@ -514,8 +514,8 @@ This matrix is auto-generated from `docs/SRS.md`, `docs/TODO.md`, and repository
 | TVSRC-8 | Coverage Pipeline for Trending/Editor-Pick Script Sources | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
 | TVSRC-9 | Source Reliability and Claim Handling | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
 | COMP-19 | External Beta-First Usability and Operations Proof | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
-| COMP-20 | Exchange Adapter Certification and Maturity Gate | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
-| COMP-21 | Community and Traction Feedback Loop | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
+| COMP-20 | Exchange Adapter Certification and Maturity Gate | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| COMP-21 | Community and Traction Feedback Loop | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
 | COMP-1 | Documentation Availability and Metadata Integrity | implemented | done | config/srs/assimilation_registry.json, docs/COMP_ISSUES_DRAFT.md, docs/DOMINANCE_SRS_HUMAN_SPLIT.md |
 | COMP-2 | Semantic Release and Distribution Credibility | implemented | done | config/srs/assimilation_registry.json, docs/COMP_ISSUES_DRAFT.md, docs/TODO.md |
 | COMP-3 | Public Benchmark Quality Gate | implemented | done | config/srs/assimilation_registry.json, docs/COMP_ISSUES_DRAFT.md, docs/TODO.md |

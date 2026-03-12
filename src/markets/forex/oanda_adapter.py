@@ -2,7 +2,7 @@
 import asyncio
 import logging
 from datetime import datetime
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
 import aiohttp
 
@@ -177,7 +177,7 @@ class OandaAdapter:
             "PUT", f"/v3/accounts/{self.account_id}/trades/{trade_id}/close", json_data=data
         )
 
-    def stream_descriptors(self) -> Dict[str, Dict[str, str | float]]:
+    def stream_descriptors(self) -> Dict[str, Dict[str, Union[str, float]]]:
         """Canonical market/order/fill stream endpoints for parity monitoring."""
         from execution.stream_contracts import build_stream_registry
 

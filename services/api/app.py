@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
-from typing import Annotated, Any
+from typing import Annotated, Any, Optional
 from uuid import uuid4
 
 from fastapi import Depends, FastAPI, Request
@@ -62,7 +62,7 @@ def _render_prometheus_metrics(store: APIRuntimeStore) -> str:
     return "\n".join(lines) + "\n"
 
 
-def create_app(settings: APISettings | None = None) -> FastAPI:
+def create_app(settings: Optional[APISettings] = None) -> FastAPI:
     """Create a configured FastAPI application."""
     resolved = settings or APISettings.from_env()
     openapi_url = "/openapi.json" if resolved.enable_openapi else None

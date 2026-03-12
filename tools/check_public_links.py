@@ -5,7 +5,10 @@ from __future__ import annotations
 
 import argparse
 import sys
-import tomllib
+try:
+    import tomllib  # type: ignore
+except ModuleNotFoundError:
+    import tomli as tomllib  # type: ignore
 from pathlib import Path
 from typing import Callable, Iterable
 from urllib import error as urllib_error

@@ -10,7 +10,10 @@ from __future__ import annotations
 
 import argparse
 import re
-import tomllib
+try:
+    import tomllib  # type: ignore
+except ModuleNotFoundError:
+    import tomli as tomllib  # type: ignore
 from pathlib import Path
 
 _TAG_RE = re.compile(r"\bv(\d+\.\d+\.\d+)\b")
