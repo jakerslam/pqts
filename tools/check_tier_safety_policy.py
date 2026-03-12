@@ -5,13 +5,16 @@ from __future__ import annotations
 
 import argparse
 import json
-import sys
 from pathlib import Path
+import sys
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
-SRC_ROOT = REPO_ROOT / "src"
-if str(SRC_ROOT) not in sys.path:
-    sys.path.append(str(SRC_ROOT))
+REPO_ROOT = str(Path(__file__).resolve().parents[1])
+if REPO_ROOT not in sys.path:
+    sys.path = [REPO_ROOT, *sys.path]
+
+from python_bootstrap import ensure_repo_python_path
+
+ensure_repo_python_path()
 
 
 def build_arg_parser() -> argparse.ArgumentParser:

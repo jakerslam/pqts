@@ -2,7 +2,7 @@
   "artifact_id": "weekly_benchmark",
   "artifact_type": "benchmark",
   "cadence_hours": 24,
-  "last_run_at": "",
+  "last_run_at": "2026-03-12T20:27:51.544231+00:00",
   "provenance_ref": "data/reports/provenance/benchmark_provenance.jsonl",
   "reproducible_command": "make sim-suite",
   "result_class": "reference"

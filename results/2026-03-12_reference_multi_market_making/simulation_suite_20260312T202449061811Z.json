@@ -1,0 +1,150 @@
+{
+  "config_path": "config/paper.yaml",
+  "created_at": "2026-03-12T20:24:49.062396+00:00",
+  "leaderboard": [
+    {
+      "avg_fill_rate": 1.0,
+      "avg_quality_score": 0.8465685154721095,
+      "avg_reject_rate": 0.0,
+      "avg_slippage_mape_pct": 9.078525187010827,
+      "canary_ready_rate": 0.0,
+      "market": "equities",
+      "optimization_priority": 0.24421673639799873,
+      "promote_rate": 0.0,
+      "runs": 3,
+      "strategy": "market_making"
+    },
+    {
+      "avg_fill_rate": 1.0,
+      "avg_quality_score": 0.8249059434112298,
+      "avg_reject_rate": 0.0,
+      "avg_slippage_mape_pct": 10.621718590743034,
+      "canary_ready_rate": 0.0,
+      "market": "forex",
+      "optimization_priority": 0.28131124249620054,
+      "promote_rate": 0.0,
+      "runs": 3,
+      "strategy": "market_making"
+    },
+    {
+      "avg_fill_rate": 0.6666666666666666,
+      "avg_quality_score": 0.5581093135941545,
+      "avg_reject_rate": 0.3333333333333333,
+      "avg_slippage_mape_pct": 6.486038756750226,
+      "canary_ready_rate": 0.0,
+      "market": "crypto",
+      "optimization_priority": 0.8400844073066811,
+      "promote_rate": 0.0,
+      "runs": 3,
+      "strategy": "market_making"
+    }
+  ],
+  "leaderboard_path": "results/2026-03-12_reference_multi_market_making/simulation_leaderboard_20260312T202449061811Z.csv",
+  "mechanism_switches": {
+    "allocation_controls": false,
+    "capacity_curves": false,
+    "confidence_allocator": false,
+    "maker_urgency_ladder": true,
+    "market_data_resilience": true,
+    "profitability_gate": true,
+    "regime_overlay": true,
+    "routing_failover": true,
+    "shorting_controls": false,
+    "slippage_stress_model": true,
+    "tca_calibration_feedback": true
+  },
+  "results": [
+    {
+      "filled": 0,
+      "ops_critical": 0,
+      "promotion_decision": "unknown",
+      "quality_score": 0.0,
+      "ready_for_canary": false,
+      "reject_rate": 1.0,
+      "rejected": 1,
+      "risk_profile": {
+        "canary_allocation_scale": 1.0,
+        "description": "Default profile with baseline hard limits.",
+        "name": "balanced",
+        "risk_limit_scale": 1.0
+      },
+      "run_id": "sim_crypto_market_making_9c63f85a37",
+      "scenario": {
+        "cycles": 30,
+        "market": "crypto",
+        "notional_usd": 150.0,
+        "strategy": "market_making",
+        "symbols": [
+          "ADAUSDT"
+        ]
+      },
+      "submitted": 1,
+      "tca_path": "results/2026-03-12_reference_multi_market_making/tca/sim_crypto_market_making_9c63f85a37.csv",
+      "tca_records": 0
+    },
+    {
+      "filled": 30,
+      "ops_critical": 0,
+      "promotion_decision": "remain_in_paper",
+      "quality_score": 0.8328869102493013,
+      "ready_for_canary": false,
+      "reject_rate": 0.0,
+      "rejected": 0,
+      "risk_profile": {
+        "canary_allocation_scale": 1.0,
+        "description": "Default profile with baseline hard limits.",
+        "name": "balanced",
+        "risk_limit_scale": 1.0
+      },
+      "run_id": "sim_equities_market_making_6e9d35c130",
+      "scenario": {
+        "cycles": 30,
+        "market": "equities",
+        "notional_usd": 150.0,
+        "strategy": "market_making",
+        "symbols": [
+          "AAPL"
+        ]
+      },
+      "submitted": 30,
+      "tca_path": "results/2026-03-12_reference_multi_market_making/tca/sim_equities_market_making_6e9d35c130.csv",
+      "tca_records": 30
+    },
+    {
+      "filled": 30,
+      "ops_critical": 0,
+      "promotion_decision": "remain_in_paper",
+      "quality_score": 0.8334920972489781,
+      "ready_for_canary": false,
+      "reject_rate": 0.0,
+      "rejected": 0,
+      "risk_profile": {
+        "canary_allocation_scale": 1.0,
+        "description": "Default profile with baseline hard limits.",
+        "name": "balanced",
+        "risk_limit_scale": 1.0
+      },
+      "run_id": "sim_forex_market_making_8cd726d78a",
+      "scenario": {
+        "cycles": 30,
+        "market": "forex",
+        "notional_usd": 150.0,
+        "strategy": "market_making",
+        "symbols": [
+          "AUD_USD"
+        ]
+      },
+      "submitted": 30,
+      "tca_path": "results/2026-03-12_reference_multi_market_making/tca/sim_forex_market_making_8cd726d78a.csv",
+      "tca_records": 30
+    }
+  ],
+  "risk_profile": {
+    "canary_allocation_scale": 1.0,
+    "description": "Default profile with baseline hard limits.",
+    "name": "balanced",
+    "risk_limit_scale": 1.0
+  },
+  "scenario_count": 3,
+  "telemetry_log_path": "results/2026-03-12_reference_multi_market_making/simulation_events.jsonl"
+}

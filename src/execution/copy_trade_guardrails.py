@@ -2,15 +2,14 @@
 
 from __future__ import annotations
 
+from collections.abc import Awaitable, Callable
 from dataclasses import asdict, dataclass
-from typing import Any, Protocol
+from typing import Any
 
 from execution.smart_router import OrderRequest, OrderType
 
 
-class RouterSubmitProtocol(Protocol):
-    async def submit_order(self, order: OrderRequest, market_data: dict, portfolio: dict, **kwargs: Any) -> Any:
-        ...
+CopyTradeSubmitter = Callable[[OrderRequest, dict[str, Any], dict[str, Any]], Awaitable[Any]]
 
 
 @dataclass(frozen=True)
@@ -86,7 +85,7 @@ class CopyTradeSafetyEnvelope:
     async def submit_follow_signal(
         self,
         *,
-        router: RouterSubmitProtocol,
+        router: CopyTradeSubmitter,
         signal: CopyTradeSignal,
         market_data: dict,
         portfolio: dict,
@@ -115,7 +114,10 @@ class CopyTradeSafetyEnvelope:
                 "copytrade_notional_usd": float(decision.notional_usd),
             },
         )
-        result = await router.submit_order(order=order, market_data=market_data, portfolio=portfolio)
+        submitter = getattr(router, "submit_order", None)
+        if not callable(submitter):
+            raise RuntimeError("router must expose an async submit_order(order, market_data, portfolio) method")
+        result = await submitter(order=order, market_data=market_data, portfolio=portfolio)
         if bool(getattr(result, "success", False)):
             leader = str(signal.leader_id).strip().lower()
             self._follow_notional_by_leader[leader] = (

@@ -119,6 +119,16 @@ Dependency order: canonical plan catalog -> signup + subscription APIs -> campai
 - [x] Implement marketplace sale commission accounting and revenue summary APIs (`ROI: high`, `Type: engineering`, `Track: moat`, `Ref: MON-7`, `Impact: 9`, `Evidence: services/api/routes/core.py (/v1/marketplace/sales/record, /v1/marketplace/revenue-summary); services/api/commerce.py; tests/test_services_api_rest_endpoints.py`)
 - [x] Sync commercial docs and README pricing surfaces with implemented monetization APIs and plan catalog policy (`ROI: high`, `Type: engineering`, `Track: parity`, `Ref: MON-8`, `Impact: 8`, `Evidence: README.md; docs/PRICING_AND_PACKAGING.md; docs/SELF_SERVE_SIGNUP_SPEC.md`)
 
+## 02x. Competitive Gap Closure Sprint (2026-03-12)
+
+Dependency order: measurement instrumentation -> external cohort execution -> integration gating -> traction enforcement.
+
+- [ ] Create a standardized external-beginner/pro beta protocol (`onboarding + first-success + promotion`) with artifact schema for retention, first-result latency, and blocker taxonomy (`ROI: very_high`, `Type: engineering`, `Track: moat`, `Ref: COMP-19`, `Impact: 10`, `Evidence: scripts/run_external_beta_harness.py; data/validation/external_beta/cohort_registry.json; docs/USER_RESEARCH_2026_03.md`)
+- [ ] Run at least one external beginner cohort and one external pro cohort for each release window and archive completed evidence in monthly user research artifacts (`ROI: very_high`, `Type: human_only`, `Track: moat`, `Ref: COMP-19`, `Impact: 10`, `Evidence: data/validation/external_beta/cohort_registry.json; docs/USER_RESEARCH_2026_03.md; tools/check_release_readiness.py; scripts/assemble_release_readiness_summary.py`)
+- [ ] Add canonical integration readiness fields (`paper_ok`, `latency_budget`, `reliability_budget`, `incident_profile`) and enforce stage-aware certification in integration validator and promotion checks (`ROI: high`, `Type: engineering`, `Track: parity`, `Ref: COMP-20`, `Impact: 8`, `Evidence: config/integrations/official_integration_requirements.json; tools/check_official_integrations.py; tools/check_release_readiness.py; services/api/routes/core.py`)
+- [ ] Add stage-specific adapter lockout in promotion evaluators so non-certified adapters cannot advance to paper/canary/live (`ROI: very_high`, `Type: engineering`, `Track: moat`, `Ref: COMP-20`, `Impact: 10`, `Evidence: src/analytics/readiness_gates.py; services/api/routes/core.py; tests/test_services_api_rest_endpoints.py; tests/test_readiness_gates.py`)
+- [ ] Add recurring user-growth KPI digest generation and threshold-based roadmap reprioritization when two months of key metrics miss target (`ROI: high`, `Type: engineering`, `Track: parity`, `Ref: COMP-21`, `Impact: 8`, `Evidence: docs/GROWTH_KPI_REVIEW.md; scripts/compute_growth_kpi_targets.py; .github/workflows/ci.yml`)
+
 ## 00. Completed Foundation (Pinned)
 
 - [x] Docs/metadata link gate in CI and release (`ROI: very_high`, `Type: engineering`, `Track: parity`, `Ref: COMP-1`, `Impact: 10`, `Evidence: tools/check_public_links.py; .github/workflows/ci.yml; .github/workflows/release.yml`)
@@ -216,7 +226,7 @@ Dependency order: edge decomposition and priors -> sizing and behavioral gates -
 - [x] Add formula-only alpha ablation checks and promotion-blocking lift thresholds vs naive baseline (`ROI: high`, `Type: engineering`, `Track: moat`, `Ref: LUNR-8`, `Impact: 9`, `Evidence: src/analytics/formula_alpha_ablation.py; pytest -q tests/test_formula_alpha_ablation.py`)
 - [x] Publish decision explainability cards (`p_market`, `p_model`, posterior delta, EV, size, gate outcome) via API + dashboard linkage (`ROI: high`, `Type: engineering`, `Track: parity`, `Ref: LUNR-9`, `Impact: 8`, `Evidence: src/execution/decision_cards.py; services/api/ops_data.py; services/api/routes/core.py (/v1/ops/decision-cards); apps/web/app/dashboard/order-truth/page.tsx; apps/web/app/dashboard/execution/page.tsx; pytest -q tests/test_decision_cards.py tests/test_services_api_rest_endpoints.py; cd apps/web && npm run typecheck && npm test`)
 - [ ] Perform legal/compliance review for copy-trade workflows in target jurisdictions before enabling live copy-follow mode (`ROI: high`, `Type: human_only`, `Track: parity`, `Ref: LUNR-6`, `Impact: 8`, `Evidence: pending`)
-- [ ] Perform third-party bot/operator security due-diligence checklist before adding external signal adapters to production allowlist (`ROI: medium`, `Type: human_only`, `Track: parity`, `Ref: LUNR-6`, `Impact: 7`, `Evidence: pending`)
+- [ ] Perform third-party bot/operator security due-diligence checklist before adding external signal adapters to production allowlist (`ROI: medium`, `Type: human_only`, `Track: parity`, `Ref: LUNR-6`, `Impact: 6`, `Evidence: pending`)
 
 ## 02b. High-ROI Coverage Closure Sprint (2026-03-10)
 

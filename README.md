@@ -540,19 +540,19 @@ Fallback access at `http://localhost:8501`
 
 Reference callout from latest `reference` bundle (auto-generated from `results/reference_performance_latest.json`):
 <!-- REFERENCE_PERFORMANCE:START -->
-_Last generated (UTC): 2026-03-12 04:38:23_
+_Last generated (UTC): 2026-03-12 20:27:08_
 
-- `2026-03-12_reference_multi_market_making` ([bundle](results/2026-03-12_reference_multi_market_making/README.md), [csv](results/2026-03-12_reference_multi_market_making/simulation_leaderboard_20260312T043826475506Z.csv), [report](results/2026-03-12_reference_multi_market_making/simulation_suite_20260312T043826475506Z.json))
-  - `avg_quality_score=0.8275`
+- `2026-03-12_reference_multi_market_making` ([bundle](results/2026-03-12_reference_multi_market_making/README.md), [csv](results/2026-03-12_reference_multi_market_making/simulation_leaderboard_20260312T202711321403Z.csv), [report](results/2026-03-12_reference_multi_market_making/simulation_suite_20260312T202711321403Z.json))
+  - `avg_quality_score=0.8572`
   - `avg_fill_rate=1.0000`
   - `avg_reject_rate=0.0000`
   - `total_filled=90` / `total_submitted=90`
 
 | Bundle | Markets | Strategy | Quality | Fill | Reject |
 |---|---|---|---:|---:|---:|
-| `2026-03-12_reference_crypto_funding_arbitrage` | `crypto` | `funding_arbitrage` | `0.8248` | `1.0000` | `0.0000` |
-| `2026-03-12_reference_crypto_trend_following` | `crypto` | `trend_following` | `0.8273` | `1.0000` | `0.0000` |
-| `2026-03-12_reference_multi_market_making` | `crypto,equities,forex` | `market_making` | `0.8275` | `1.0000` | `0.0000` |
+| `2026-03-12_reference_crypto_funding_arbitrage` | `crypto` | `funding_arbitrage` | `0.8553` | `1.0000` | `0.0000` |
+| `2026-03-12_reference_crypto_trend_following` | `crypto` | `trend_following` | `0.8393` | `1.0000` | `0.0000` |
+| `2026-03-12_reference_multi_market_making` | `crypto,equities,forex` | `market_making` | `0.8572` | `1.0000` | `0.0000` |
 <!-- REFERENCE_PERFORMANCE:END -->
 
 | Strategy | Timeframe | Edge |

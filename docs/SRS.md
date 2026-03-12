@@ -3064,6 +3064,33 @@ Observed source links:
 - Public claims about extreme performance (for example very high profit factor) shall be marked `unverified` unless reproduced with trade-level artifacts, cost assumptions, and dataset/version provenance.
 - Requirements adopted from this source shall focus on reproducible workflow mechanics, not promotional performance claims.
 
+## 62. Additional Requirements from Competitive Gap Closing (March 12, 2026)
+
+These requirements close remaining competitive gaps against peers: external proof depth, verified ecosystem breadth, and quantifiable community traction.
+
+Observed benchmark gaps from comparative assessment:
+- No external casual/proof cohorts currently providing first-party onboarding and operational data.
+- Multi-venue claims in progress with limited production-grade certification for exchange adapters.
+- Trust surface is sound, but public adoption metrics and closed-loop user validation are not yet growth-lifting.
+
+### COMP-19 External Beta-First Usability and Operations Proof
+
+- Before any non-beta feature milestone, the platform shall execute at least one external beginner cohort and one external pro cohort through a standardized onboarding and promotion test script.
+- Cohort execution reports shall include participant persona, task completion rates, median time-to-first-meaningful-result, and top blockers in separate beginner/pro artifacts.
+- Product-level ease-of-use claims in docs/marketing shall be considered valid only when cohort metrics are available and updated for the active release window.
+
+### COMP-20 Exchange Adapter Certification and Maturity Gate
+
+- Each exchange/broker adapter shall declare explicit certification status (`experimental`, `certified`, `degraded`) in the canonical integrations index and include readiness checks (`paper_ok`, `latency_budget`, `reliability_budget`, `incident_profile`).
+- The platform shall block promotion to `paper`/`canary`/`live` for any strategy using an adapter that is not marked `certified` for that required stage.
+- Public marketing and onboarding surfaces shall only claim support for adapters that are `certified` for the selected stage.
+
+### COMP-21 Community and Traction Feedback Loop
+
+- The repo shall maintain a recurring evidence channel for adoption KPIs (for example GitHub stars, forks, issue volume, docs engagement, and community onboarding conversion).
+- Growth and trust metrics shall be summarized monthly and compared against sprint targets in a published review artifact.
+- If adoption and feedback targets are missed two consecutive months, the roadmap shall prioritize onboarding and usability work that directly improves first-success conversion over new feature expansion.
+
 ## 55. Additional Requirements from Comparative Platform Assessment (March 10, 2026)
 
 These requirements are derived from a comparative assessment against leading public quant platforms and frameworks focused on casual-user accessibility plus professional depth.

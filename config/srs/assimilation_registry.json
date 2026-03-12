@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-03-12T14:57:12.771691+00:00",
+  "generated_at": "2026-03-12T20:20:34.549875+00:00",
   "prefix_summary": {
     "AC": {
       "baseline_contract": 0,
@@ -62,7 +62,7 @@
       "core_delivery": 8
     },
     "COMP": {
-      "baseline_contract": 0,
+      "baseline_contract": 3,
       "core_delivery": 18
     },
     "CT": {
@@ -172,6 +172,10 @@
     "LLE": {
       "baseline_contract": 0,
       "core_delivery": 11
+    },
+    "LUNR": {
+      "baseline_contract": 0,
+      "core_delivery": 9
     },
     "MARIK": {
       "baseline_contract": 0,
@@ -3588,6 +3592,30 @@
       "title": "Source Reliability and Claim Handling"
     },
     {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.comp",
+      "id": "COMP-19",
+      "prefix": "COMP",
+      "source_status": "planned",
+      "title": "External Beta-First Usability and Operations Proof"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.comp",
+      "id": "COMP-20",
+      "prefix": "COMP",
+      "source_status": "planned",
+      "title": "Exchange Adapter Certification and Maturity Gate"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.comp",
+      "id": "COMP-21",
+      "prefix": "COMP",
+      "source_status": "planned",
+      "title": "Community and Traction Feedback Loop"
+    },
+    {
       "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.comp",
       "id": "COMP-1",
@@ -6306,12 +6334,85 @@
       "prefix": "OPSJ",
       "source_status": "implemented",
       "title": "Ops Job Retention Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.lunr",
+      "id": "LUNR-1",
+      "prefix": "LUNR",
+      "source_status": "implemented",
+      "title": "Net Edge Decomposition Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.lunr",
+      "id": "LUNR-2",
+      "prefix": "LUNR",
+      "source_status": "implemented",
+      "title": "Base-Rate Prior Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.lunr",
+      "id": "LUNR-3",
+      "prefix": "LUNR",
+      "source_status": "implemented",
+      "title": "Sequential Bayesian Delta Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.lunr",
+      "id": "LUNR-4",
+      "prefix": "LUNR",
+      "source_status": "implemented",
+      "title": "Fractional Kelly Hard-Cap Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.lunr",
+      "id": "LUNR-5",
+      "prefix": "LUNR",
+      "source_status": "implemented",
+      "title": "Repricing-Lag Opportunity Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.lunr",
+      "id": "LUNR-6",
+      "prefix": "LUNR",
+      "source_status": "implemented",
+      "title": "Copy-Trade Adapter Safety Envelope Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.lunr",
+      "id": "LUNR-7",
+      "prefix": "LUNR",
+      "source_status": "implemented",
+      "title": "Cognitive Trap Guardrail Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.lunr",
+      "id": "LUNR-8",
+      "prefix": "LUNR",
+      "source_status": "implemented",
+      "title": "Formula-Only Alpha Falsification Contract"
+    },
+    {
+      "assimilation_tier": "core_delivery",
+      "baseline_hook": "srs_baseline.lunr",
+      "id": "LUNR-9",
+      "prefix": "LUNR",
+      "source_status": "implemented",
+      "title": "Probability/EV Explainability Card Contract"
     }
   ],
   "summary": {
     "tier_counts": {
-      "core_delivery": 744
+      "baseline_contract": 3,
+      "core_delivery": 753
     },
-    "total_requirements": 744
+    "total_requirements": 756
   }
 }

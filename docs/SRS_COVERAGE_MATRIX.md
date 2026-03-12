@@ -4,10 +4,10 @@ This matrix is auto-generated from `docs/SRS.md`, `docs/TODO.md`, and repository
 
 ## Summary
 
-- Total requirements: **744**
-- implemented: **744**
+- Total requirements: **756**
+- implemented: **753**
 - partial: **0**
-- planned: **0**
+- planned: **3**
 - traced: **0**
 - unmapped: **0**
 
@@ -30,7 +30,7 @@ This matrix is auto-generated from `docs/SRS.md`, `docs/TODO.md`, and repository
 | CGPT | 8 | 0 | 0 | 0 | 0 | 8 |
 | CGPTR | 3 | 0 | 0 | 0 | 0 | 3 |
 | COH | 8 | 0 | 0 | 0 | 0 | 8 |
-| COMP | 18 | 0 | 0 | 0 | 0 | 18 |
+| COMP | 18 | 0 | 3 | 0 | 0 | 21 |
 | CT | 8 | 0 | 0 | 0 | 0 | 8 |
 | DK | 4 | 0 | 0 | 0 | 0 | 4 |
 | DLM | 5 | 0 | 0 | 0 | 0 | 5 |
@@ -58,6 +58,7 @@ This matrix is auto-generated from `docs/SRS.md`, `docs/TODO.md`, and repository
 | LCS | 6 | 0 | 0 | 0 | 0 | 6 |
 | LEAN | 6 | 0 | 0 | 0 | 0 | 6 |
 | LLE | 11 | 0 | 0 | 0 | 0 | 11 |
+| LUNR | 9 | 0 | 0 | 0 | 0 | 9 |
 | MARIK | 8 | 0 | 0 | 0 | 0 | 8 |
 | MNC | 5 | 0 | 0 | 0 | 0 | 5 |
 | MOAT | 16 | 0 | 0 | 0 | 0 | 16 |
@@ -238,10 +239,10 @@ This matrix is auto-generated from `docs/SRS.md`, `docs/TODO.md`, and repository
 | AR-6 | Session State, Telemetry, and Control Surface | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
 | AR-7 | Profile/Wallet Context as Optional Signal | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
 | AR-8 | Source Reliability and Claim Handling | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
-| AR-9 | Mid-Probability Entry Band Policy Contract | implemented | done | config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md, docs/TODO.md |
-| AR-10 | Underlier-Focused Market Scope Contract | implemented | done | config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md, docs/TODO.md |
-| AR-11 | External-Reference Assimilation Governance Contract | implemented | done | config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md, docs/TODO.md |
-| AR-12 | Promotional-Claim Quarantine Contract | implemented | done | config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md, docs/TODO.md |
+| AR-9 | Mid-Probability Entry Band Policy Contract | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
+| AR-10 | Underlier-Focused Market Scope Contract | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
+| AR-11 | External-Reference Assimilation Governance Contract | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
+| AR-12 | Promotional-Claim Quarantine Contract | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
 | RK-1 | Model Stack and Probability Calibration | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
 | RK-2 | Explicit Edge Threshold Gate | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
 | RK-3 | Risk Gate Sequence and Latency Budget | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
@@ -291,18 +292,18 @@ This matrix is auto-generated from `docs/SRS.md`, `docs/TODO.md`, and repository
 | WK-8 | External Prediction Source Governance | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
 | WK-9 | Public Profile Reconciliation and Tail-Loss Visibility | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
 | WK-10 | Copytrade Endpoint Hygiene and Claim Handling | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
-| WK-11 | LLM-Assisted Strategy Authoring Provenance Contract | implemented | done | config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md, docs/TODO.md |
-| WK-12 | Stage-Level Sub-Second Pipeline Budget Contract | implemented | done | config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md, docs/TODO.md |
-| WK-13 | Copytrade Endpoint Allowlist and Revocation Contract | implemented | done | config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md, docs/TODO.md |
-| ASH-1 | Geopolitical Claim-Event Extraction Contract | implemented | done | config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md, docs/TODO.md |
-| ASH-2 | Signal-Lead Telemetry Contract | implemented | done | config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md, docs/TODO.md |
-| ASH-3 | Single-Source Emergency Mode Contract | implemented | done | config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md, docs/TODO.md |
-| ASH-4 | Source Reliability and Claim Handling | implemented | done | config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md, docs/TODO.md |
-| OBSC-1 | Live Speech Ingestion and ASR Contract | implemented | done | config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md, docs/TODO.md |
-| OBSC-2 | Mention-Market Trigger Extraction Contract | implemented | done | config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md, docs/TODO.md |
-| OBSC-3 | Transcript-to-Order Latency Budget Contract | implemented | done | config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md, docs/TODO.md |
-| OBSC-4 | Transcript Quality and Revision-Aware Risk Controls | implemented | done | config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md, docs/TODO.md |
-| OBSC-5 | Source Reliability and Claim Handling | implemented | done | config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md, docs/TODO.md |
+| WK-11 | LLM-Assisted Strategy Authoring Provenance Contract | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
+| WK-12 | Stage-Level Sub-Second Pipeline Budget Contract | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
+| WK-13 | Copytrade Endpoint Allowlist and Revocation Contract | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
+| ASH-1 | Geopolitical Claim-Event Extraction Contract | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
+| ASH-2 | Signal-Lead Telemetry Contract | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
+| ASH-3 | Single-Source Emergency Mode Contract | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
+| ASH-4 | Source Reliability and Claim Handling | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
+| OBSC-1 | Live Speech Ingestion and ASR Contract | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
+| OBSC-2 | Mention-Market Trigger Extraction Contract | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
+| OBSC-3 | Transcript-to-Order Latency Budget Contract | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
+| OBSC-4 | Transcript Quality and Revision-Aware Risk Controls | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
+| OBSC-5 | Source Reliability and Claim Handling | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
 | AL-1 | LMSR Cost Function Fidelity | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
 | AL-2 | Marginal Price and Probability Coherence | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
 | AL-3 | Liquidity Parameter (`b`) Governance | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
@@ -512,6 +513,9 @@ This matrix is auto-generated from `docs/SRS.md`, `docs/TODO.md`, and repository
 | TVSRC-7 | Short-Side Exit Logic Invariant Tests | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
 | TVSRC-8 | Coverage Pipeline for Trending/Editor-Pick Script Sources | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
 | TVSRC-9 | Source Reliability and Claim Handling | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
+| COMP-19 | External Beta-First Usability and Operations Proof | planned | open | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
+| COMP-20 | Exchange Adapter Certification and Maturity Gate | planned | open | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
+| COMP-21 | Community and Traction Feedback Loop | planned | open | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
 | COMP-1 | Documentation Availability and Metadata Integrity | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/COMP_ISSUES_DRAFT.md |
 | COMP-2 | Semantic Release and Distribution Credibility | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/COMP_ISSUES_DRAFT.md |
 | COMP-3 | Public Benchmark Quality Gate | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/COMP_ISSUES_DRAFT.md |
@@ -537,22 +541,22 @@ This matrix is auto-generated from `docs/SRS.md`, `docs/TODO.md`, and repository
 | LANG-9 | Engine-Loop and Dashboard Responsiveness SLOs | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
 | LANG-10 | Interop Packaging and Distribution | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
 | LANG-11 | UI Migration Safety | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
-| LANG-12 | Source Reliability and Claim Handling | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
+| LANG-12 | Source Reliability and Claim Handling | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, tools/check_source_reliability.py |
 | PMKT-1 | Official Integration Index | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
 | PMKT-2 | Auth State Segmentation for Venue Clients | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
-| PMKT-3 | Signature-Type and Funder Address Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
-| PMKT-4 | API Credential Lifecycle and Rotation | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
-| PMKT-5 | Allowance and Approval Preflight Controls | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
-| PMKT-6 | Canonical Order Lifecycle and Batch Operations | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
+| PMKT-3 | Signature-Type and Funder Address Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| PMKT-4 | API Credential Lifecycle and Rotation | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| PMKT-5 | Allowance and Approval Preflight Controls | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| PMKT-6 | Canonical Order Lifecycle and Batch Operations | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
 | PMKT-7 | Streaming Coverage and Disconnect Safety | implemented | done | .github/workflows/ci.yml, config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json |
-| PMKT-8 | Remote Signer and Builder-Mode Support | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
+| PMKT-8 | Remote Signer and Builder-Mode Support | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
 | PMKT-9 | CLI Automation Contract | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
 | PMKT-10 | Read-Only First and Guided Setup UX | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
 | PMKT-11 | Wallet-Mode Example Packs and Smoke Tests | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
-| PMKT-12 | Hybrid Matching and Non-Custodial Settlement Invariants | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
-| PMKT-13 | Complementary-Outcome Fee Symmetry | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
-| PMKT-14 | Deployment Registry and Audit Artifact Governance | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
-| PMKT-15 | Source Reliability and Claim Handling | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
+| PMKT-12 | Hybrid Matching and Non-Custodial Settlement Invariants | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| PMKT-13 | Complementary-Outcome Fee Symmetry | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| PMKT-14 | Deployment Registry and Audit Artifact Governance | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| PMKT-15 | Source Reliability and Claim Handling | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, tools/check_source_reliability.py |
 | MOAT-1 | Per-Order Truth Graph | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/DOMINANCE_SRS_HUMAN_SPLIT.md |
 | MOAT-2 | Live Divergence Diagnosis and Prescriptive Actions | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/DOMINANCE_SRS_HUMAN_SPLIT.md |
 | MOAT-3 | Promotion OS State Machine | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/DOMINANCE_SRS_HUMAN_SPLIT.md |
@@ -561,19 +565,19 @@ This matrix is auto-generated from `docs/SRS.md`, `docs/TODO.md`, and repository
 | MOAT-6 | Execution Intelligence Data Model | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/DOMINANCE_SRS_HUMAN_SPLIT.md |
 | MOAT-7 | Adaptive Routing and Throttling from Execution Intelligence | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/DOMINANCE_SRS_HUMAN_SPLIT.md |
 | MOAT-8 | Single Strategy Object Across Casual and Pro Surfaces | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
-| MOAT-9 | Bidirectional Transparency and Parity | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
+| MOAT-9 | Bidirectional Transparency and Parity | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
 | MOAT-10 | Policy-Constrained Autonomous Operator | implemented | done | config/srs/assimilation_registry.json, docs/DOMINANCE_SRS_HUMAN_SPLIT.md, docs/TODO.md |
 | MOAT-11 | Incident Co-Pilot and Safe Rollback Assist | implemented | done | config/srs/assimilation_registry.json, docs/DOMINANCE_SRS_HUMAN_SPLIT.md, docs/TODO.md |
 | MOAT-12 | Proof-as-Product Artifact Pipeline | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/DOMINANCE_SRS_HUMAN_SPLIT.md |
 | MOAT-13 | Public Trust Classifications and Evidence Gates | implemented | done | config/srs/assimilation_registry.json, docs/DOMINANCE_SRS_HUMAN_SPLIT.md, docs/TODO.md |
 | MOAT-14 | Team Governance and Capital Controls | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/DOMINANCE_SRS_HUMAN_SPLIT.md |
-| MOAT-15 | Moat-vs-Parity Roadmap Governance | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
-| MOAT-16 | Source Reliability and Claim Handling | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
+| MOAT-15 | Moat-vs-Parity Roadmap Governance | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, tools/check_roadmap_governance.py |
+| MOAT-16 | Source Reliability and Claim Handling | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
 | NCLI-1 | Authenticated SSE Stream Surface | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
 | NCLI-2 | Skill Package Discovery and Distribution Contract | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
-| NCLI-3 | Nightly Bounded Self-Improvement Review Loop | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
-| NCLI-4 | Deployment Run-Mode Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
-| NCLI-5 | Agent Memory/Journal/Judge Artifact Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
+| NCLI-3 | Nightly Bounded Self-Improvement Review Loop | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| NCLI-4 | Deployment Run-Mode Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| NCLI-5 | Agent Memory/Journal/Judge Artifact Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
 | NCLI-6 | Source Reliability and Claim Handling | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
 | COMP-15 | Distribution and Install-Path Truth Consistency | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/DOMINANCE_SRS_HUMAN_SPLIT.md |
 | COMP-16 | Version and Maturity Posture Consistency Gate | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/DOMINANCE_SRS_HUMAN_SPLIT.md |
@@ -585,11 +589,11 @@ This matrix is auto-generated from `docs/SRS.md`, `docs/TODO.md`, and repository
 | RCG-1 | Time-Bucket Market Discovery and Asset Resolution | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
 | RCG-2 | Live-Market Dry-Run Parity Mode | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
 | RCG-3 | Complementary Bundle Edge Gate with Fee Realism | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
-| RCG-4 | Dynamic Limit-Order Repricing Controller | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
-| RCG-5 | Maker-First Order-Style Policy | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
-| RCG-6 | Resolution-to-Redeem Automation Lifecycle | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
+| RCG-4 | Dynamic Limit-Order Repricing Controller | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| RCG-5 | Maker-First Order-Style Policy | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| RCG-6 | Resolution-to-Redeem Automation Lifecycle | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
 | RCG-7 | Multi-Source Reference Price and Strike Context | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
-| RCG-8 | Progressive Stepwise Beginner Validation Ladder | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
+| RCG-8 | Progressive Stepwise Beginner Validation Ladder | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
 | UI-001 | One Primary Surface Contract | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/DOMINANCE_SRS_HUMAN_SPLIT.md |
 | UI-002 | Unified Product Model Across User Densities | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/DOMINANCE_SRS_HUMAN_SPLIT.md |
 | UI-003 | Global Trust and Runtime Status Bar | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
@@ -598,24 +602,24 @@ This matrix is auto-generated from `docs/SRS.md`, `docs/TODO.md`, and repository
 | UI-006 | GUI-to-Code Transparency Contract | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/DOMINANCE_SRS_HUMAN_SPLIT.md |
 | UI-007 | Primary Navigation Information Architecture | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
 | UI-008 | Command Center Landing Contract | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
-| UI-009 | Empty-State Integrity | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
-| UI-010 | Guided Strategy Lab | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
-| UI-011 | Metric Explainability | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
-| UI-012 | Safe Capital-Affecting Action Patterns | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
+| UI-009 | Empty-State Integrity | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| UI-010 | Guided Strategy Lab | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| UI-011 | Metric Explainability | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| UI-012 | Safe Capital-Affecting Action Patterns | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
 | UI-013 | Portfolio Surface Requirements | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/DOMINANCE_SRS_HUMAN_SPLIT.md |
 | UI-014 | Execution Surface Requirements | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/DOMINANCE_SRS_HUMAN_SPLIT.md |
 | UI-015 | Risk and Incident Surface Requirements | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/DOMINANCE_SRS_HUMAN_SPLIT.md |
 | UI-016 | Promotion Lifecycle Surface Requirements | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
-| UI-017 | Artifact Provenance Visibility | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
-| UI-018 | Benchmarks Above the Fold | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
+| UI-017 | Artifact Provenance Visibility | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| UI-018 | Benchmarks Above the Fold | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
 | UI-019 | WebSocket-First Live UX | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/DOMINANCE_SRS_HUMAN_SPLIT.md |
 | UI-020 | No Silent Demo Data on Production Surfaces | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
 | UI-021 | Graceful Degradation and Loud Failure | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
-| UI-022 | Tokenized Design System Requirement | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
-| UI-023 | Accessibility Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
-| UI-024 | Dense but Controllable Data Presentation | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
-| UI-025 | Global Search and Command Palette | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
-| UI-026 | Auth-Aware Shell and Role Visibility | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
+| UI-022 | Tokenized Design System Requirement | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| UI-023 | Accessibility Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| UI-024 | Dense but Controllable Data Presentation | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| UI-025 | Global Search and Command Palette | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| UI-026 | Auth-Aware Shell and Role Visibility | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
 | UI-027 | Privileged Action Audit Contract | implemented | done | config/srs/assimilation_registry.json, data/reports/roi/top_100_roi_moves.json, docs/TODO.md |
 | UI-028 | Assistant as Additive Surface | implemented | done | config/srs/assimilation_registry.json, docs/DOMINANCE_SRS_HUMAN_SPLIT.md, docs/TODO.md |
 | UI-029 | Constrained Assistant Action Policy | implemented | done | config/srs/assimilation_registry.json, docs/DOMINANCE_SRS_HUMAN_SPLIT.md, docs/TODO.md |
@@ -770,85 +774,94 @@ This matrix is auto-generated from `docs/SRS.md`, `docs/TODO.md`, and repository
 | AEG-4 | Trade-Outcome Feedback Dataset Contract | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
 | AEG-5 | Calibrated-Probability EV Gate Contract | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
 | AEG-6 | Source Reliability and Claim Handling | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
-| PHL-1 | Short-Cadence Spread Scanner Contract | implemented | done | config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md, docs/TODO.md |
-| PHL-2 | Overround-Capped Two-Sided Loop Gate Contract | implemented | done | config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md, docs/TODO.md |
-| PHL-3 | Rapid Fill-State Loop Transition Contract | implemented | done | config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md, docs/TODO.md |
-| PHL-4 | Source Reliability and Claim Handling | implemented | done | config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md, docs/TODO.md |
-| MORP-1 | Daily Tight-Range Weather Candidate Scoring Contract | implemented | done | config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md, docs/TODO.md |
-| MORP-2 | Ultra-Low Entry Band and Quote-Precision Contract | implemented | done | config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md, docs/TODO.md |
-| MORP-3 | Passive Lowball Queueing and Fill-Quality Contract | implemented | done | config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md, docs/TODO.md |
-| MORP-4 | Source Reliability and Claim Handling | implemented | done | config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md, docs/TODO.md |
-| MNC-1 | Count-Market Event Ingestion Contract | implemented | done | config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md, docs/TODO.md |
-| MNC-2 | Velocity Nowcast and Projection Contract | implemented | done | config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md, docs/TODO.md |
-| MNC-3 | Contiguous Range-Strip Arbitrage Contract | implemented | done | config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md, docs/TODO.md |
-| MNC-4 | Uncertainty-Collapse Exit Timing Contract | implemented | done | config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md, docs/TODO.md |
-| MNC-5 | Source Reliability and Claim Handling | implemented | done | config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md, docs/TODO.md |
-| DLM-1 | Next-Step Directional Target Contract | implemented | done | config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md, docs/TODO.md |
-| DLM-2 | Indicator-Fabric Governance Contract | implemented | done | config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md, docs/TODO.md |
-| DLM-3 | Monte-Carlo Dropout Uncertainty Contract | implemented | done | config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md, docs/TODO.md |
-| DLM-4 | Throughput-Aware Multi-Market Classifier Operations | implemented | done | config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md, docs/TODO.md |
-| DLM-5 | Source Reliability and Claim Handling | implemented | done | config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md, docs/TODO.md |
-| CGPTR-1 | Embedded Reference Artifact Trust/Provenance Contract | implemented | done | docs/TODO.md |
-| CGPTR-2 | Package-First Quickstart Contract Enforcement | implemented | done | docs/TODO.md |
-| CGPTR-3 | Backlog Truth Partition Contract | implemented | done | docs/TODO.md |
-| JG-1 | Plaid Brokerage Link Contract | implemented | done | docs/TODO.md |
-| JG-2 | Multi-Account Portfolio Aggregation Contract | implemented | done | docs/TODO.md |
-| JG-3 | Personal Always-On Terminal Contract | implemented | done | docs/TODO.md |
-| JG-4 | Read-Only-First Permission Contract | implemented | done | docs/TODO.md |
-| JG-5 | Sync Health and Fail-Closed Contract | implemented | done | docs/TODO.md |
-| JG-6 | Assistant Action Audit Contract | implemented | done | docs/TODO.md |
-| JG-7 | Onboarding Sequence for Linked Portfolio Terminal | implemented | done | docs/TODO.md |
-| AGP-1 | Canonical Agent Context Contract | implemented | done | docs/TODO.md |
-| AGP-2 | Agent Capability and Budget Policy Contract | implemented | done | docs/TODO.md |
-| AGP-3 | Structured Pilot Intent Contract | implemented | done | docs/TODO.md |
-| AGP-4 | Simulate-Before-Execute Gate Contract | implemented | done | docs/TODO.md |
-| AGP-5 | Operator-Controlled Execute Contract | implemented | done | docs/TODO.md |
-| AGP-6 | Immutable Agent Receipt Contract | implemented | done | docs/TODO.md |
-| AGP-7 | Agent Notification Hook Governance Contract | implemented | done | docs/TODO.md |
-| AGP-8 | First-Party Python Agent SDK Contract | implemented | done | docs/TODO.md |
-| AGP-9 | Fail-Closed Agent Safety Defaults Contract | implemented | done | docs/TODO.md |
-| CBX-1 | Hybrid Visual + Code Strategy Studio Contract | implemented | done | docs/TODO.md |
-| CBX-2 | Embedded Strategy Copilot Contract | implemented | done | docs/TODO.md |
-| CBX-3 | Adaptive Ensemble ML Runtime Contract | implemented | done | docs/TODO.md |
-| CBX-4 | RL + Evolutionary Training Contract | implemented | done | docs/TODO.md |
-| CBX-5 | Mandatory Anti-Leakage Validation Contract | implemented | done | docs/TODO.md |
-| CBX-6 | Unified Web-Primary Studio Control Contract | implemented | done | docs/TODO.md |
-| CBX-7 | Multi-Channel Notification Automation Contract | implemented | done | docs/TODO.md |
-| CBX-8 | Interactive Explainability Charting Contract | implemented | done | docs/TODO.md |
-| CBX-9 | Mandatory Promotion Gate Lifecycle Contract | implemented | done | docs/TODO.md |
-| CBX-10 | Full Order Provenance + Explainability Contract | implemented | done | docs/TODO.md |
-| CBX-11 | Advanced Pre-Trade Risk Engine Contract | implemented | done | docs/TODO.md |
-| CBX-12 | Mandatory Stress + Robustness Suite Contract | implemented | done | docs/TODO.md |
-| CBX-13 | Rust-Native Deterministic Execution Core Contract | implemented | done | docs/TODO.md |
-| CBX-14 | Advanced Order-Type Coverage Contract | implemented | done | docs/TODO.md |
-| CBX-15 | Live-Path Performance SLO Contract | implemented | done | docs/TODO.md |
-| CBX-16 | Research-to-Live Backtest Parity Contract | implemented | done | docs/TODO.md |
-| CBX-17 | Strategy Leaderboard + Promotion Recommendation Contract | implemented | done | docs/TODO.md |
-| CBX-18 | Staged Deployment with Zero-Downtime Rollout Contract | implemented | done | docs/TODO.md |
-| CBX-19 | Multi-Asset Normalized Instrument Contract | implemented | done | docs/TODO.md |
-| CBX-20 | Multi-Venue Connectivity + Failover Contract | implemented | done | docs/TODO.md |
-| CBX-21 | Verified Strategy Marketplace Contract | implemented | done | docs/TODO.md |
-| CBX-22 | Plugin Extensibility Contract | implemented | done | docs/TODO.md |
-| CBX-23 | Contribution Pipeline Quality Gate Contract | implemented | done | docs/TODO.md |
-| CBX-24 | Observability + Incident Telemetry Contract | implemented | done | docs/TODO.md |
-| CBX-25 | Docker-First Operations Contract | implemented | done | docs/TODO.md |
-| CBX-26 | Core Path Coverage and Benchmark Publication Contract | implemented | done | docs/TODO.md |
-| CBX-27 | Open Community Growth Contract | implemented | done | docs/TODO.md |
-| CBX-28 | Research-to-Live Change-Minimization Contract | implemented | done | docs/TODO.md |
-| MON-1 | Open-Core Packaging Contract | implemented | done | docs/TODO.md |
-| MON-2 | Plan and Pricing Catalog Contract | implemented | done | docs/TODO.md |
-| MON-3 | Self-Serve Signup Contract | implemented | done | docs/TODO.md |
-| MON-4 | Billing Subscription Contract | implemented | done | docs/TODO.md |
-| MON-5 | Workspace Campaign Activation Contract | implemented | done | docs/TODO.md |
-| MON-6 | Workspace Ops and Promotion Visibility Contract | implemented | done | docs/TODO.md |
-| MON-7 | Marketplace Revenue Contract | implemented | done | docs/TODO.md |
-| MON-8 | Commercial Documentation Truth Contract | implemented | done | docs/TODO.md |
-| RLG-1 | Unified Release Readiness Gate Contract | implemented | done | docs/TODO.md |
-| RLG-2 | External Beta Cohort Gate Contract | implemented | done | docs/TODO.md |
-| RLG-3 | Certified Integration Maturity Gate Contract | implemented | done | docs/TODO.md |
-| RLG-4 | Benchmark Trust and Provenance Gate Contract | implemented | done | docs/TODO.md |
-| RLG-5 | Backlog Truth Marker Contract | implemented | done | docs/TODO.md |
-| OPSJ-1 | Typed Ops Job Lifecycle Contract | implemented | done | docs/TODO.md |
-| OPSJ-2 | Ops Job API Contract | implemented | done | docs/TODO.md |
-| OPSJ-3 | Ops Job Audit and Result Contract | implemented | done | docs/TODO.md |
-| OPSJ-4 | Ops Job Retention Contract | implemented | done | docs/TODO.md |
+| PHL-1 | Short-Cadence Spread Scanner Contract | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
+| PHL-2 | Overround-Capped Two-Sided Loop Gate Contract | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
+| PHL-3 | Rapid Fill-State Loop Transition Contract | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
+| PHL-4 | Source Reliability and Claim Handling | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
+| MORP-1 | Daily Tight-Range Weather Candidate Scoring Contract | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
+| MORP-2 | Ultra-Low Entry Band and Quote-Precision Contract | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
+| MORP-3 | Passive Lowball Queueing and Fill-Quality Contract | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
+| MORP-4 | Source Reliability and Claim Handling | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
+| MNC-1 | Count-Market Event Ingestion Contract | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
+| MNC-2 | Velocity Nowcast and Projection Contract | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
+| MNC-3 | Contiguous Range-Strip Arbitrage Contract | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
+| MNC-4 | Uncertainty-Collapse Exit Timing Contract | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
+| MNC-5 | Source Reliability and Claim Handling | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
+| DLM-1 | Next-Step Directional Target Contract | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
+| DLM-2 | Indicator-Fabric Governance Contract | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
+| DLM-3 | Monte-Carlo Dropout Uncertainty Contract | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
+| DLM-4 | Throughput-Aware Multi-Market Classifier Operations | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
+| DLM-5 | Source Reliability and Claim Handling | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
+| CGPTR-1 | Embedded Reference Artifact Trust/Provenance Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| CGPTR-2 | Package-First Quickstart Contract Enforcement | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| CGPTR-3 | Backlog Truth Partition Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| JG-1 | Plaid Brokerage Link Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| JG-2 | Multi-Account Portfolio Aggregation Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| JG-3 | Personal Always-On Terminal Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| JG-4 | Read-Only-First Permission Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| JG-5 | Sync Health and Fail-Closed Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| JG-6 | Assistant Action Audit Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| JG-7 | Onboarding Sequence for Linked Portfolio Terminal | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| AGP-1 | Canonical Agent Context Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| AGP-2 | Agent Capability and Budget Policy Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| AGP-3 | Structured Pilot Intent Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| AGP-4 | Simulate-Before-Execute Gate Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| AGP-5 | Operator-Controlled Execute Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| AGP-6 | Immutable Agent Receipt Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| AGP-7 | Agent Notification Hook Governance Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| AGP-8 | First-Party Python Agent SDK Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| AGP-9 | Fail-Closed Agent Safety Defaults Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| CBX-1 | Hybrid Visual + Code Strategy Studio Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| CBX-2 | Embedded Strategy Copilot Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| CBX-3 | Adaptive Ensemble ML Runtime Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| CBX-4 | RL + Evolutionary Training Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| CBX-5 | Mandatory Anti-Leakage Validation Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| CBX-6 | Unified Web-Primary Studio Control Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| CBX-7 | Multi-Channel Notification Automation Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| CBX-8 | Interactive Explainability Charting Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| CBX-9 | Mandatory Promotion Gate Lifecycle Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| CBX-10 | Full Order Provenance + Explainability Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| CBX-11 | Advanced Pre-Trade Risk Engine Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| CBX-12 | Mandatory Stress + Robustness Suite Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| CBX-13 | Rust-Native Deterministic Execution Core Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| CBX-14 | Advanced Order-Type Coverage Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| CBX-15 | Live-Path Performance SLO Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| CBX-16 | Research-to-Live Backtest Parity Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| CBX-17 | Strategy Leaderboard + Promotion Recommendation Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| CBX-18 | Staged Deployment with Zero-Downtime Rollout Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| CBX-19 | Multi-Asset Normalized Instrument Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| CBX-20 | Multi-Venue Connectivity + Failover Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| CBX-21 | Verified Strategy Marketplace Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| CBX-22 | Plugin Extensibility Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| CBX-23 | Contribution Pipeline Quality Gate Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| CBX-24 | Observability + Incident Telemetry Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| CBX-25 | Docker-First Operations Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| CBX-26 | Core Path Coverage and Benchmark Publication Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| CBX-27 | Open Community Growth Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| CBX-28 | Research-to-Live Change-Minimization Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| MON-1 | Open-Core Packaging Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| MON-2 | Plan and Pricing Catalog Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| MON-3 | Self-Serve Signup Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| MON-4 | Billing Subscription Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| MON-5 | Workspace Campaign Activation Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| MON-6 | Workspace Ops and Promotion Visibility Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| MON-7 | Marketplace Revenue Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| MON-8 | Commercial Documentation Truth Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| RLG-1 | Unified Release Readiness Gate Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| RLG-2 | External Beta Cohort Gate Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| RLG-3 | Certified Integration Maturity Gate Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| RLG-4 | Benchmark Trust and Provenance Gate Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| RLG-5 | Backlog Truth Marker Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| OPSJ-1 | Typed Ops Job Lifecycle Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| OPSJ-2 | Ops Job API Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| OPSJ-3 | Ops Job Audit and Result Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| OPSJ-4 | Ops Job Retention Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| LUNR-1 | Net Edge Decomposition Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| LUNR-2 | Base-Rate Prior Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| LUNR-3 | Sequential Bayesian Delta Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| LUNR-4 | Fractional Kelly Hard-Cap Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| LUNR-5 | Repricing-Lag Opportunity Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| LUNR-6 | Copy-Trade Adapter Safety Envelope Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, docs/TODO_SORTED.json |
+| LUNR-7 | Cognitive Trap Guardrail Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| LUNR-8 | Formula-Only Alpha Falsification Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| LUNR-9 | Probability/EV Explainability Card Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
