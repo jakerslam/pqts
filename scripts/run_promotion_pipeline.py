@@ -11,7 +11,17 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List
 
-ROOT = Path(__file__).resolve().parent.parent
+REPO_ROOT = Path(__file__).resolve().parent.parent
+sys.path[:] = [str(REPO_ROOT), *sys.path]
+
+from python_bootstrap import ensure_min_python, ensure_repo_python_path
+
+ROOT = REPO_ROOT
+
+
+def _ensure_runtime() -> None:
+    ensure_min_python()
+    ensure_repo_python_path()
 
 
 def _parse_json_from_output(output: str) -> Dict[str, Any]:
@@ -122,6 +132,8 @@ def _build_campaign_cmd(
         str(float(args.promotion_min_realized_net_alpha_bps)),
         "--promotion-min-ci95-lower-realized-net-alpha-bps",
         str(float(args.promotion_min_ci95_lower_realized_net_alpha_bps)),
+        "--tca-db-path",
+        args.tca_db,
     ]
     symbols = str(args.campaign_symbols or "").strip()
     if symbols:
@@ -253,6 +265,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main() -> int:
+    _ensure_runtime()
     args = build_parser().parse_args()
     out_dir = Path(args.out_dir)
 

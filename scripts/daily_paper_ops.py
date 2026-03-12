@@ -11,8 +11,17 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List
 
-ROOT = Path(__file__).resolve().parent.parent
+REPO_ROOT = Path(__file__).resolve().parent.parent
+sys.path[:] = [str(REPO_ROOT), *sys.path]
 
+from python_bootstrap import ensure_min_python, ensure_repo_python_path
+
+ROOT = REPO_ROOT
+
+
+def _ensure_runtime() -> None:
+    ensure_min_python()
+    ensure_repo_python_path()
 
 def _parse_json_from_output(output: str) -> Dict[str, Any]:
     for line in reversed(output.splitlines()):
@@ -76,6 +85,8 @@ def _build_campaign_cmd(args: argparse.Namespace) -> List[str]:
         str(int(args.promotion_min_days)),
         "--promotion-max-days",
         str(int(args.promotion_max_days)),
+        "--tca-db-path",
+        args.tca_db,
     ]
     risk_profile = str(getattr(args, "risk_profile", "") or "").strip()
     if risk_profile:
@@ -185,6 +196,7 @@ def _write_summary(out_dir: Path, summary: Dict[str, Any]) -> Path:
 
 
 def main() -> int:
+    _ensure_runtime()
     args = build_parser().parse_args()
 
     campaign_payload: Dict[str, Any] = {}
