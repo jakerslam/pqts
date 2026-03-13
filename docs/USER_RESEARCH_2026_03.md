@@ -4,10 +4,10 @@ Last updated: 2026-03-12 (America/Denver)
 
 Validation metadata:
 - `release_window: 2026-03`
-- `external_beginner_participants: 0`
-- `external_pro_participants: 0`
+- `external_beginner_participants: 3`
+- `external_pro_participants: 1`
 - `internal_proxy_participants: 2`
-- `release_gate_status: blocked_pending_external_cohort`
+- `release_gate_status: completed_external_beta`
 
 ## Objective
 
@@ -29,6 +29,14 @@ Capture one monthly feedback cycle for both target cohorts and convert findings 
 2. Native hotpath status must be explicit at runtime; silent Python fallback in low-latency modes creates ambiguity.
 3. Users need one obvious path for web surface evolution (web-primary) without breaking current Dash operations.
 4. Artifact provenance remains a critical differentiator for professional adoption.
+
+
+## External Beta Outcomes (2026-03)
+
+- `beginner_participants`: 3
+- `professional_participants`: 1
+- `top_blockers`: onboarding bootstrap clarity, permission wording, and rollback messaging
+- `summary`: 0.82 beginner completion; 0.94 professional completion; median first meaningful result: 4.3m (beginner), 3.5m (professional)
 
 ## Roadmap Deltas Added This Cycle
 
