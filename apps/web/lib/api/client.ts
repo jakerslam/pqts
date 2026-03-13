@@ -8,6 +8,7 @@ import type {
   ExecutionQualityRow,
   Fill,
   Order,
+  Connector,
   OrderTruthPayload,
   Position,
   ReplayPayload,
@@ -123,6 +124,11 @@ interface BrokerageSyncHealthEnvelope {
 interface AssistantAuditEnvelope {
   events: AssistantAuditEvent[];
   count: number;
+}
+
+interface ConnectorsEnvelope {
+  count: number;
+  connectors: Connector[];
 }
 
 interface DecisionCardsEnvelope {
@@ -261,6 +267,28 @@ export async function getTerminal(): Promise<TerminalPayload> {
 export async function getAssistantAudit(limit = 100): Promise<AssistantAuditEnvelope> {
   const bounded = Math.min(Math.max(Math.floor(limit), 1), 500);
   return apiGet<AssistantAuditEnvelope>(`/v1/assistant/audit?limit=${bounded}`);
+}
+
+export async function getConnectors(params?: { connectorClass?: string; marketClass?: string; status?: string }) {
+  const search = new URLSearchParams();
+  if (params?.connectorClass) {
+    search.set("class", params.connectorClass);
+  }
+  if (params?.marketClass) {
+    search.set("market", params.marketClass);
+  }
+  if (params?.status) {
+    search.set("status", params.status);
+  }
+  const suffix = search.toString();
+  const path = suffix ? `/v1/integrations/connectors?${suffix}` : "/v1/integrations/connectors";
+  const payload = await apiGet<ConnectorsEnvelope>(path);
+  return payload.connectors;
+}
+
+export async function getConnector(connectorIdOrProvider: string): Promise<Connector> {
+  const payload = await apiGet<{ connector: Connector }>(`/v1/integrations/connectors/${encodeURIComponent(connectorIdOrProvider)}`);
+  return payload.connector;
 }
 
 export async function updateTerminalPreferences(profile: Partial<TerminalProfile>): Promise<TerminalProfile> {

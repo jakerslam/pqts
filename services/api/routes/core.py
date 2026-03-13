@@ -119,6 +119,14 @@ _OPS_JOB_TERMINAL_STATUS = {"succeeded", "failed"}
 _OPS_JOB_RETENTION = 300
 _OFFICIAL_INTEGRATIONS_PATH = Path("config/integrations/official_integrations.json")
 _OFFICIAL_INTEGRATION_REQUIREMENTS_PATH = Path("config/integrations/official_integration_requirements.json")
+_CONNECTOR_REGISTRY_PATH = Path("config/integrations/connector_registry.json")
+
+
+def _safe_load_json(path: Path) -> Any:
+    try:
+        return _load_json_file(path)
+    except (FileNotFoundError, json.JSONDecodeError, OSError):
+        return {}
 
 
 def _default_promotion_record(strategy_id: str) -> dict[str, Any]:
@@ -185,6 +193,60 @@ def _resolve_adapter_status(provider: str) -> str:
         elif status == "experimental" and not best_status:
             best_status = status
     return best_status
+
+
+def _load_connector_registry() -> dict[str, Any]:
+    payload = _safe_load_json(_CONNECTOR_REGISTRY_PATH)
+    return payload if isinstance(payload, dict) else {}
+
+
+def _collect_connectors() -> list[dict[str, Any]]:
+    payload = _load_connector_registry()
+    rows = payload.get("connectors", [])
+    if not isinstance(rows, list):
+        return []
+    return [row for row in rows if isinstance(row, dict)]
+
+
+def _find_connector_rows(*, connector_id_or_provider: str) -> list[dict[str, Any]]:
+    target = str(connector_id_or_provider).strip().lower()
+    if not target:
+        return []
+    rows = _collect_connectors()
+    by_id = [row for row in rows if str(row.get("connector_id", "")).strip().lower() == target]
+    if by_id:
+        return by_id
+    return [
+        row
+        for row in rows
+        if str(row.get("provider", "")).strip().lower() == target
+    ]
+
+
+def _filter_connectors(
+    rows: list[dict[str, Any]],
+    *,
+    connector_class: str | None,
+    market_class: str | None,
+    status: str | None,
+) -> list[dict[str, Any]]:
+    filtered = []
+    connector_class = str(connector_class).strip().lower() if connector_class else ""
+    market_class = str(market_class).strip().lower() if market_class else ""
+    status = str(status).strip().lower() if status else ""
+    for row in rows:
+        if connector_class:
+            if str(row.get("connector_class", "")).strip().lower() != connector_class:
+                continue
+        if market_class:
+            classes = [str(token).strip().lower() for token in list(row.get("market_classes") or [])]
+            if market_class not in classes:
+                continue
+        if status:
+            if str(row.get("status", "")).strip().lower() != status:
+                continue
+        filtered.append(row)
+    return filtered
 
 
 def _fingerprint_secret(token: str) -> str:
@@ -2158,6 +2220,39 @@ def get_brokerage_sync_health(
         "degraded_count": len(degraded),
         "all_clear": len(degraded) == 0,
     })
+
+
+@router.get("/integrations/connectors")
+def list_connectors(
+    connector_class: Annotated[Optional[str], Query(alias="class")] = None,
+    market_class: Annotated[Optional[str], Query(alias="market")] = None,
+    status: Annotated[Optional[str], Query()] = None,
+    identity: Annotated[APIIdentity, Depends(require_identity)] = None,
+    request: Request = None,
+    cache: Annotated[APICache, Depends(get_cache)] = None,
+) -> dict[str, Any]:
+    _enforce_read_limit(request, cache, identity)
+    rows = _collect_connectors()
+    filtered = _filter_connectors(rows, connector_class=connector_class, market_class=market_class, status=status)
+    return with_correlation(request, {
+        "count": len(filtered),
+        "connectors": filtered,
+    })
+
+
+@router.get("/integrations/connectors/{connector_id_or_provider}")
+def get_connector(
+    connector_id_or_provider: str,
+    identity: Annotated[APIIdentity, Depends(require_identity)],
+    request: Request,
+    cache: Annotated[APICache, Depends(get_cache)],
+) -> dict[str, Any]:
+    _enforce_read_limit(request, cache, identity)
+    rows = _find_connector_rows(connector_id_or_provider=connector_id_or_provider)
+    if not rows:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="connector not found")
+    primary = rows[0]
+    return with_correlation(request, {"connector": primary, "matches": rows})
 
 
 @router.post("/integrations/brokerage/sync")

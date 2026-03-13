@@ -217,3 +217,29 @@ export interface AssistantAuditEvent {
   timestamp: string;
   suggestion_count: number;
 }
+
+export interface ConnectorReadiness {
+  paper_ok?: boolean;
+  latency_budget?: Record<string, number>;
+  reliability_budget?: Record<string, number>;
+  incident_profile?: Record<string, unknown>;
+}
+
+export interface Connector {
+  connector_id: string;
+  provider: string;
+  display_name?: string;
+  connector_class?: string;
+  market_classes?: string[];
+  order_types?: string[];
+  data_granularity?: string[];
+  auth_modes?: string[];
+  entitlements?: string[];
+  status?: string;
+  readiness?: ConnectorReadiness;
+  fallback_options?: string[];
+  surfaces?: string[];
+  last_reviewed?: string;
+  repo_urls?: string[];
+  notes?: string;
+}

@@ -1,0 +1,277 @@
+{
+  "schema_version": "1",
+  "generated_at": "2026-03-13T00:00:00Z",
+  "source": "config/integrations/official_integrations.json",
+  "connectors": [
+    {
+      "connector_id": "connector:polymarket",
+      "provider": "polymarket",
+      "display_name": "Polymarket",
+      "connector_class": "venue",
+      "market_classes": ["prediction_markets"],
+      "order_types": ["market", "limit", "post_only"],
+      "data_granularity": ["order_book", "trade", "mark_price"],
+      "auth_modes": ["api_key", "wallet_signature", "read_only_fallback"],
+      "entitlements": ["paper", "canary", "live"],
+      "status": "active",
+      "readiness": {
+        "paper_ok": true,
+        "latency_budget": {
+          "paper_p95_ms": 180,
+          "canary_p95_ms": 140,
+          "live_p95_ms": 120
+        },
+        "reliability_budget": {
+          "min_uptime_pct": 99.5,
+          "max_incidents_30d": 1
+        },
+        "incident_profile": {
+          "recent_incidents": 0,
+          "severity": "low"
+        }
+      },
+      "fallback_options": ["demo_safe_mode", "brokerage_paper_path"],
+      "surfaces": ["sdk", "cli", "contracts", "examples"],
+      "last_reviewed": "2026-03-10",
+      "repo_urls": [
+        "https://github.com/Polymarket/py-clob-client",
+        "https://github.com/Polymarket/rs-clob-client",
+        "https://github.com/Polymarket/polymarket-cli",
+        "https://github.com/Polymarket/examples",
+        "https://github.com/Polymarket/ctf-exchange"
+      ],
+      "notes": "Prediction market venue with active readiness and active paper/canary/live support."
+    },
+    {
+      "connector_id": "connector:binance",
+      "provider": "binance",
+      "display_name": "Binance",
+      "connector_class": "venue",
+      "market_classes": ["crypto"],
+      "order_types": ["market", "limit", "post_only"],
+      "data_granularity": ["order_book", "trade", "ticker", "funding"],
+      "auth_modes": ["api_key", "readonly_fallback"],
+      "entitlements": ["paper", "canary", "live"],
+      "status": "beta",
+      "readiness": {
+        "paper_ok": true,
+        "latency_budget": {
+          "paper_p95_ms": 230,
+          "canary_p95_ms": 180,
+          "live_p95_ms": 150
+        },
+        "reliability_budget": {
+          "min_uptime_pct": 99.0,
+          "max_incidents_30d": 2
+        },
+        "incident_profile": {
+          "recent_incidents": 1,
+          "severity": "low"
+        }
+      },
+      "fallback_options": ["safe_demo_snapshot", "other_crypto_venue"],
+      "surfaces": ["sdk", "paper_adapter"],
+      "last_reviewed": "2026-03-12",
+      "repo_urls": ["https://github.com/binance/binance-connector-python"],
+      "notes": "Crypto venue adapter with certified-paper execution evidence."
+    },
+    {
+      "connector_id": "connector:coinbase",
+      "provider": "coinbase",
+      "display_name": "Coinbase",
+      "connector_class": "venue",
+      "market_classes": ["crypto"],
+      "order_types": ["market", "limit", "post_only"],
+      "data_granularity": ["order_book", "trade", "ticker", "funding"],
+      "auth_modes": ["api_key", "readonly_fallback"],
+      "entitlements": ["paper", "canary", "live"],
+      "status": "beta",
+      "readiness": {
+        "paper_ok": true,
+        "latency_budget": {
+          "paper_p95_ms": 230,
+          "canary_p95_ms": 180,
+          "live_p95_ms": 150
+        },
+        "reliability_budget": {
+          "min_uptime_pct": 99.0,
+          "max_incidents_30d": 2
+        },
+        "incident_profile": {
+          "recent_incidents": 1,
+          "severity": "low"
+        }
+      },
+      "fallback_options": ["safe_demo_snapshot", "other_crypto_venue"],
+      "surfaces": ["sdk", "paper_adapter"],
+      "last_reviewed": "2026-03-12",
+      "repo_urls": ["https://github.com/coinbase/coinbase-advanced-py"],
+      "notes": "Crypto venue adapter with certified-paper execution evidence."
+    },
+    {
+      "connector_id": "connector:alpaca",
+      "provider": "alpaca",
+      "display_name": "Alpaca",
+      "connector_class": "venue",
+      "market_classes": ["equities"],
+      "order_types": ["market", "limit", "post_only"],
+      "data_granularity": ["trade", "ticker", "funding", "corporate_actions"],
+      "auth_modes": ["api_key", "oauth", "readonly_fallback"],
+      "entitlements": ["paper", "canary", "live"],
+      "status": "beta",
+      "readiness": {
+        "paper_ok": true,
+        "latency_budget": {
+          "paper_p95_ms": 250,
+          "canary_p95_ms": 190,
+          "live_p95_ms": 160
+        },
+        "reliability_budget": {
+          "min_uptime_pct": 99.0,
+          "max_incidents_30d": 2
+        },
+        "incident_profile": {
+          "recent_incidents": 1,
+          "severity": "low"
+        }
+      },
+      "fallback_options": ["safe_demo_snapshot", "other_equities_feed"],
+      "surfaces": ["sdk", "paper_adapter"],
+      "last_reviewed": "2026-03-12",
+      "repo_urls": ["https://github.com/alpacahq/alpaca-py"],
+      "notes": "Equities venue adapter with certified-paper execution evidence."
+    },
+    {
+      "connector_id": "connector:oanda",
+      "provider": "oanda",
+      "display_name": "Oanda",
+      "connector_class": "venue",
+      "market_classes": ["forex"],
+      "order_types": ["market", "limit", "post_only"],
+      "data_granularity": ["trade", "ticker", "position_snapshot"],
+      "auth_modes": ["api_key", "readonly_fallback"],
+      "entitlements": ["paper", "canary", "live"],
+      "status": "beta",
+      "readiness": {
+        "paper_ok": true,
+        "latency_budget": {
+          "paper_p95_ms": 250,
+          "canary_p95_ms": 190,
+          "live_p95_ms": 160
+        },
+        "reliability_budget": {
+          "min_uptime_pct": 99.0,
+          "max_incidents_30d": 2
+        },
+        "incident_profile": {
+          "recent_incidents": 1,
+          "severity": "low"
+        }
+      },
+      "fallback_options": ["safe_demo_snapshot", "other_forex_feed"],
+      "surfaces": ["sdk", "paper_adapter"],
+      "last_reviewed": "2026-03-12",
+      "repo_urls": ["https://github.com/oanda/v20-python"],
+      "notes": "FX venue adapter with certified-paper execution evidence."
+    },
+    {
+      "connector_id": "connector:plaid",
+      "provider": "plaid",
+      "display_name": "Plaid",
+      "connector_class": "brokerage",
+      "market_classes": ["equities", "forex"],
+      "order_types": ["market", "limit"],
+      "data_granularity": ["account", "position", "balance"],
+      "auth_modes": ["oauth"],
+      "entitlements": ["paper"],
+      "status": "active",
+      "readiness": {
+        "paper_ok": true,
+        "latency_budget": {
+          "paper_p95_ms": 220,
+          "canary_p95_ms": 220,
+          "live_p95_ms": 220
+        },
+        "reliability_budget": {
+          "min_uptime_pct": 99.0,
+          "max_incidents_30d": 2
+        },
+        "incident_profile": {
+          "recent_incidents": 0,
+          "severity": "low"
+        }
+      },
+      "fallback_options": ["paper_only_mode", "read_only_mode"],
+      "surfaces": ["plaid_link", "account_api"],
+      "last_reviewed": "2026-03-13",
+      "repo_urls": [],
+      "notes": "Demo brokerage adapter used for account sync, balances, and account context."
+    },
+    {
+      "connector_id": "connector:sec-filings",
+      "provider": "SEC",
+      "display_name": "SEC Filings",
+      "connector_class": "filings",
+      "market_classes": ["equities", "crypto"],
+      "order_types": ["read"],
+      "data_granularity": ["company_filing", "earnings_release", "insider"],
+      "auth_modes": ["none"],
+      "entitlements": ["paper", "canary", "live"],
+      "status": "experimental",
+      "readiness": {
+        "paper_ok": false,
+        "latency_budget": {
+          "paper_p95_ms": 400,
+          "canary_p95_ms": 450,
+          "live_p95_ms": 500
+        },
+        "reliability_budget": {
+          "min_uptime_pct": 98.0,
+          "max_incidents_30d": 3
+        },
+        "incident_profile": {
+          "recent_incidents": 0,
+          "severity": "low"
+        }
+      },
+      "fallback_options": ["manual_reference_checks"],
+      "surfaces": ["filing_api"],
+      "last_reviewed": "2026-03-01",
+      "repo_urls": ["https://www.sec.gov/edgar"],
+      "notes": "Static filing lookup connector; not yet stage-certified."
+    },
+    {
+      "connector_id": "connector:news-data",
+      "provider": "NewsAPI",
+      "display_name": "News API",
+      "connector_class": "alt_data",
+      "market_classes": ["equities", "crypto", "forex", "prediction_markets"],
+      "order_types": ["read"],
+      "data_granularity": ["headline", "sentiment", "macro_events"],
+      "auth_modes": ["api_key"],
+      "entitlements": ["paper", "canary", "live"],
+      "status": "experimental",
+      "readiness": {
+        "paper_ok": false,
+        "latency_budget": {
+          "paper_p95_ms": 400,
+          "canary_p95_ms": 450,
+          "live_p95_ms": 500
+        },
+        "reliability_budget": {
+          "min_uptime_pct": 98.0,
+          "max_incidents_30d": 4
+        },
+        "incident_profile": {
+          "recent_incidents": 0,
+          "severity": "low"
+        }
+      },
+      "fallback_options": ["market_only_mode"],
+      "surfaces": ["rest_api"],
+      "last_reviewed": "2026-03-01",
+      "repo_urls": ["https://newsapi.org"],
+      "notes": "Optional sentiment and macro feed for non-production research workflows."
+    }
+  ]
+}

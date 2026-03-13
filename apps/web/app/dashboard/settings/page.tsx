@@ -1,70 +1,78 @@
-import fs from "node:fs";
-import path from "node:path";
+import { getConnectors } from "@/lib/api/client";
+import type { Connector } from "@/lib/api/types";
 
-import { resolveRepoRoot } from "@/lib/ops/repo-root";
+export const revalidate = 0;
 
-interface IntegrationRow {
-  id: string;
-  provider: string;
-  market_classes?: string[];
-  surface?: string;
-  status?: string;
-  last_reviewed?: string;
-  repo_url?: string;
-}
-
-function loadIntegrations(): IntegrationRow[] {
-  const filePath = path.join(resolveRepoRoot(), "config", "integrations", "official_integrations.json");
+async function loadConnectorRows(): Promise<Connector[]> {
   try {
-    const rows = JSON.parse(fs.readFileSync(filePath, "utf-8")) as IntegrationRow[];
-    return Array.isArray(rows) ? rows : [];
+    return await getConnectors();
   } catch {
     return [];
   }
 }
 
-export default function SettingsPage() {
-  const integrations = loadIntegrations();
+function renderRepoLinks(repos?: string[]) {
+  if (!repos || repos.length === 0) return "-";
+  return (
+    <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+      {repos.slice(0, 3).map((url) => (
+        <a key={url} href={url} target="_blank" rel="noreferrer">
+          {url}
+        </a>
+      ))}
+      {repos.length > 3 ? <span style={{ color: "var(--muted)" }}>+{repos.length - 3} more</span> : null}
+    </div>
+  );
+}
+
+function renderSurfaces(surfaces?: string[]) {
+  if (!surfaces || surfaces.length === 0) return "-";
+  return surfaces.join(", ");
+}
+
+function renderMarkets(markets?: string[]) {
+  if (!markets || markets.length === 0) return "-";
+  return markets.join(", ");
+}
+
+export default async function SettingsPage() {
+  const connectors = await loadConnectorRows();
+  const sorted = connectors.sort((a, b) => (a.provider || "").localeCompare(b.provider || ""));
+
   return (
     <section style={{ display: "grid", gap: 16 }}>
       <article className="card">
         <h2 style={{ marginTop: 0 }}>Settings and Integrations</h2>
         <p style={{ marginTop: 0, color: "var(--muted)" }}>
-          Canonical integration index and deployment context for Studio/Core parity.
+          Canonical connector registry for venues, brokers, data feeds, filings, and alt-data providers.
         </p>
       </article>
       <article className="card">
-        {integrations.length === 0 ? (
-          <p style={{ margin: 0, color: "var(--muted)" }}>No integration metadata found.</p>
+        {sorted.length === 0 ? (
+          <p style={{ margin: 0, color: "var(--muted)" }}>No connector metadata available.</p>
         ) : (
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
               <tr>
                 <th align="left">Provider</th>
+                <th align="left">Class</th>
                 <th align="left">Markets</th>
-                <th align="left">Surface</th>
                 <th align="left">Status</th>
+                <th align="left">Surfaces</th>
                 <th align="left">Last Reviewed</th>
-                <th align="left">Repo</th>
+                <th align="left">Repos</th>
               </tr>
             </thead>
             <tbody>
-              {integrations.map((row) => (
-                <tr key={row.id}>
-                  <td>{row.provider}</td>
-                  <td>{(row.market_classes ?? []).join(", ") || "-"}</td>
-                  <td>{row.surface || "-"}</td>
+              {sorted.map((row) => (
+                <tr key={row.connector_id}>
+                  <td>{row.display_name || row.provider}</td>
+                  <td>{row.connector_class || "-"}</td>
+                  <td>{renderMarkets(row.market_classes)}</td>
                   <td>{row.status || "-"}</td>
+                  <td>{renderSurfaces(row.surfaces)}</td>
                   <td>{row.last_reviewed || "-"}</td>
-                  <td>
-                    {row.repo_url ? (
-                      <a href={row.repo_url} target="_blank" rel="noreferrer">
-                        {row.repo_url}
-                      </a>
-                    ) : (
-                      "-"
-                    )}
-                  </td>
+                  <td>{renderRepoLinks(row.repo_urls)}</td>
                 </tr>
               ))}
             </tbody>
@@ -74,4 +82,3 @@ export default function SettingsPage() {
     </section>
   );
 }
-

@@ -30,6 +30,31 @@ def test_release_readiness_passes_with_complete_evidence(tmp_path: Path) -> None
         },
     )
 
+    beta_summary = tmp_path / "external_beta_summary.json"
+    _write_json(
+        beta_summary,
+        {
+          "release_window": "2026-03",
+          "schema_version": "1",
+          "cohorts": {
+            "beginner": {
+              "persona": "beginner",
+              "participant_count": 3,
+              "task_completion_rate": 0.82,
+              "median_time_to_first_meaningful_result_minutes": 4.3,
+              "top_blockers": ["one", "two", "three"]
+            },
+            "professional": {
+              "persona": "professional",
+              "participant_count": 2,
+              "task_completion_rate": 0.9,
+              "median_time_to_first_meaningful_result_minutes": 3.4,
+              "top_blockers": ["one", "two"]
+            }
+          }
+        },
+    )
+
     user_research = tmp_path / "user_research.md"
     user_research.write_text("- `release_window: 2026-03`\n", encoding="utf-8")
 
@@ -154,8 +179,12 @@ def test_release_readiness_passes_with_complete_evidence(tmp_path: Path) -> None
                 "registry": str(registry),
                 "user_research": str(user_research),
                 "required_statuses": ["active", "completed"],
+                "summary_artifact": str(beta_summary),
                 "min_external_beginner_participants": 1,
                 "min_external_pro_participants": 1,
+                "min_task_completion_rate": {"beginner": 0.8, "professional": 0.85},
+                "max_time_to_first_meaningful_result_minutes": {"beginner": 5.0, "professional": 5.0},
+                "max_top_blockers": {"beginner": 5, "professional": 5},
             },
             "integrations": {
                 "index": str(integrations),
@@ -204,6 +233,30 @@ def test_release_readiness_fails_when_external_beta_is_not_ready(tmp_path: Path)
             ],
         },
     )
+    beta_summary = tmp_path / "external_beta_summary.json"
+    _write_json(
+        beta_summary,
+        {
+            "release_window": "2026-03",
+            "schema_version": "1",
+            "cohorts": {
+                "beginner": {
+                    "persona": "beginner",
+                    "participant_count": 0,
+                    "task_completion_rate": 0.2,
+                    "median_time_to_first_meaningful_result_minutes": 12.0,
+                    "top_blockers": ["missing docs"]
+                },
+                "professional": {
+                    "persona": "professional",
+                    "participant_count": 0,
+                    "task_completion_rate": 0.3,
+                    "median_time_to_first_meaningful_result_minutes": 8.0,
+                    "top_blockers": ["no access"]
+                }
+            }
+        },
+    )
     user_research = tmp_path / "user_research.md"
     user_research.write_text("- `release_window: 2026-03`\n", encoding="utf-8")
 
@@ -249,8 +302,12 @@ def test_release_readiness_fails_when_external_beta_is_not_ready(tmp_path: Path)
                 "registry": str(registry),
                 "user_research": str(user_research),
                 "required_statuses": ["active", "completed"],
+                "summary_artifact": str(beta_summary),
                 "min_external_beginner_participants": 1,
                 "min_external_pro_participants": 1,
+                "min_task_completion_rate": {"beginner": 0.8, "professional": 0.85},
+                "max_time_to_first_meaningful_result_minutes": {"beginner": 5.0, "professional": 5.0},
+                "max_top_blockers": {"beginner": 5, "professional": 5},
             },
             "integrations": {
                 "index": str(integrations),
@@ -298,6 +355,30 @@ def test_release_readiness_reports_missing_certification_file_without_crash(tmp_
             ],
         },
     )
+    beta_summary = tmp_path / "external_beta_summary.json"
+    _write_json(
+        beta_summary,
+        {
+            "release_window": "2026-03",
+            "schema_version": "1",
+            "cohorts": {
+                "beginner": {
+                    "persona": "beginner",
+                    "participant_count": 1,
+                    "task_completion_rate": 0.85,
+                    "median_time_to_first_meaningful_result_minutes": 4.0,
+                    "top_blockers": ["doc gap"]
+                },
+                "professional": {
+                    "persona": "professional",
+                    "participant_count": 1,
+                    "task_completion_rate": 0.9,
+                    "median_time_to_first_meaningful_result_minutes": 3.0,
+                    "top_blockers": ["none"]
+                }
+            }
+        },
+    )
     user_research = tmp_path / "user_research.md"
     user_research.write_text("- `release_window: 2026-03`\n", encoding="utf-8")
     integrations = tmp_path / "integrations.json"
@@ -342,8 +423,12 @@ def test_release_readiness_reports_missing_certification_file_without_crash(tmp_
                 "registry": str(registry),
                 "user_research": str(user_research),
                 "required_statuses": ["active", "completed"],
+                "summary_artifact": str(beta_summary),
                 "min_external_beginner_participants": 1,
                 "min_external_pro_participants": 1,
+                "min_task_completion_rate": {"beginner": 0.8, "professional": 0.85},
+                "max_time_to_first_meaningful_result_minutes": {"beginner": 5.0, "professional": 5.0},
+                "max_top_blockers": {"beginner": 5, "professional": 5},
             },
             "integrations": {
                 "index": str(integrations),

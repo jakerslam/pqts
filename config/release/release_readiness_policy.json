@@ -3,10 +3,23 @@
   "external_beta": {
     "registry": "data/validation/external_beta/cohort_registry.json",
     "user_research": "docs/USER_RESEARCH_2026_03.md",
+    "summary_artifact": "data/validation/external_beta/reports/2026-03_summary.json",
     "required_statuses": ["active", "completed"],
     "require_current_release_window": true,
     "min_external_beginner_participants": 1,
-    "min_external_pro_participants": 1
+    "min_external_pro_participants": 1,
+    "min_task_completion_rate": {
+      "beginner": 0.8,
+      "professional": 0.85
+    },
+    "max_time_to_first_meaningful_result_minutes": {
+      "beginner": 5.0,
+      "professional": 5.0
+    },
+    "max_top_blockers": {
+      "beginner": 5,
+      "professional": 5
+    }
   },
   "integrations": {
     "index": "config/integrations/official_integrations.json",

@@ -4,6 +4,11 @@ Canonical machine-readable index:
 
 - `config/integrations/official_integrations.json`
 - `config/integrations/official_integration_requirements.json`
+- `config/integrations/connector_registry.json`
+
+API surfaces (FastAPI `/v1`):
+- `GET /v1/integrations/connectors` (optional filters `class`, `market`, `status`)
+- `GET /v1/integrations/connectors/{connector_id_or_provider}`
 
 Validation command:
 

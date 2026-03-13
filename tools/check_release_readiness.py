@@ -45,6 +45,7 @@ def _status_at_least(actual: str, minimum: str) -> bool:
 def _evaluate_external_beta(policy: dict[str, Any], errors: list[str]) -> dict[str, Any]:
     registry_path = Path(str(policy.get("registry", "")))
     user_research_path = Path(str(policy.get("user_research", "")))
+    summary_path = Path(str(policy.get("summary_artifact", "")))
     payload = _load_json(registry_path)
     if not isinstance(payload, dict):
         errors.append(f"external_beta registry must be JSON object: {registry_path}")
@@ -59,10 +60,23 @@ def _evaluate_external_beta(policy: dict[str, Any], errors: list[str]) -> dict[s
         errors.append("external_beta: missing release_window in user research document")
         return {}
 
+    summary_payload: dict[str, Any] = {}
+    if summary_path.exists():
+        loaded = _load_json(summary_path)
+        if isinstance(loaded, dict):
+            summary_payload = loaded
+        else:
+            errors.append(f"external_beta: summary_artifact must be JSON object: {summary_path}")
+    else:
+        errors.append(f"external_beta: summary_artifact missing: {summary_path}")
+
     required_statuses = {str(token).strip().lower() for token in list(policy.get("required_statuses") or []) if str(token).strip()}
     require_current_window = bool(policy.get("require_current_release_window", True))
     min_beginner = int(policy.get("min_external_beginner_participants", 0) or 0)
     min_pro = int(policy.get("min_external_pro_participants", 0) or 0)
+    min_completion = {str(k): float(v) for k, v in dict(policy.get("min_task_completion_rate") or {}).items()}
+    max_time = {str(k): float(v) for k, v in dict(policy.get("max_time_to_first_meaningful_result_minutes") or {}).items()}
+    max_blockers = {str(k): int(v) for k, v in dict(policy.get("max_top_blockers") or {}).items()}
 
     current_row: dict[str, Any] | None = None
     for row in cohorts:
@@ -95,12 +109,55 @@ def _evaluate_external_beta(policy: dict[str, Any], errors: list[str]) -> dict[s
             "external_beta: professional participant gate failed "
             f"(actual={pro}, required={min_pro})"
         )
+
+    summary_release_window = str(summary_payload.get("release_window", "")).strip()
+    if summary_payload and summary_release_window and summary_release_window != release_window:
+        errors.append(
+            "external_beta: summary release_window mismatch "
+            f"(registry={release_window}, summary={summary_release_window})"
+        )
+
+    persona_metrics: dict[str, Any] = {}
+    cohorts_summary = summary_payload.get("cohorts") if isinstance(summary_payload, dict) else {}
+    if not isinstance(cohorts_summary, dict):
+        cohorts_summary = {}
+    for persona in ("beginner", "professional"):
+        row = cohorts_summary.get(persona, {})
+        if not isinstance(row, dict):
+            errors.append(f"external_beta: summary missing cohort data for {persona}")
+            continue
+        tcr = float(row.get("task_completion_rate", 0.0) or 0.0)
+        median_time = float(row.get("median_time_to_first_meaningful_result_minutes", 0.0) or 0.0)
+        blockers = list(row.get("top_blockers") or [])
+        if persona in min_completion and tcr < min_completion[persona]:
+            errors.append(
+                "external_beta: task_completion_rate gate failed "
+                f"(persona={persona}, actual={tcr}, required>={min_completion[persona]})"
+            )
+        if persona in max_time and median_time > max_time[persona]:
+            errors.append(
+                "external_beta: time_to_first_meaningful_result gate failed "
+                f"(persona={persona}, actual={median_time}, required<={max_time[persona]})"
+            )
+        if persona in max_blockers and len(blockers) > max_blockers[persona]:
+            errors.append(
+                "external_beta: top_blockers gate failed "
+                f"(persona={persona}, count={len(blockers)}, max_allowed={max_blockers[persona]})"
+            )
+        persona_metrics[persona] = {
+            "task_completion_rate": tcr,
+            "median_time_to_first_meaningful_result_minutes": median_time,
+            "top_blockers_count": len(blockers),
+        }
+
     return {
         "release_window": release_window,
         "cohort_found": True,
         "status": status,
         "external_beginner_participants": beginner,
         "external_pro_participants": pro,
+        "persona_metrics": persona_metrics,
+        "summary_artifact": str(summary_path),
     }
 
 

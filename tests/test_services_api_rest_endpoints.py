@@ -270,6 +270,29 @@ def test_ops_command_endpoints_execute_via_job_contract() -> None:
         assert any(row["job_id"] == job_id for row in listed.json()["jobs"])
 
 
+def test_connector_registry_endpoints() -> None:
+    client = TestClient(create_app(_settings()))
+
+    listed = client.get("/v1/integrations/connectors", headers=_viewer())
+    assert listed.status_code == 200
+    payload = listed.json()
+    assert payload["count"] >= 1
+    connectors = payload["connectors"]
+    assert isinstance(connectors, list)
+
+    filtered = client.get("/v1/integrations/connectors", params={"class": "venue", "status": "beta"}, headers=_viewer())
+    assert filtered.status_code == 200
+    filtered_rows = filtered.json()["connectors"]
+    assert all(row.get("connector_class") == "venue" for row in filtered_rows)
+    if filtered_rows:
+        assert all(row.get("status") == "beta" for row in filtered_rows)
+
+    detail = client.get("/v1/integrations/connectors/connector:binance", headers=_viewer())
+    assert detail.status_code == 200
+    connector = detail.json()["connector"]
+    assert connector["provider"] == "binance"
+
+
 def test_assistant_turn_returns_constrained_suggestions() -> None:
     client = TestClient(create_app(_settings()))
     response = client.post("/v1/assistant/turn", json={"message": "show risk and reject reasons"}, headers=_viewer())
