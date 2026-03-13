@@ -5431,3 +5431,34 @@ These requirements target the remaining deltas versus QuantConnect, NautilusTrad
 - The system SHALL publish a public trust dashboard showing current release readiness, benchmark freshness, certified venue status, docs freshness, package/docs availability, and latest proof-program timestamps.
 - Public trust dashboard entries SHALL link directly to the underlying evidence artifact for each status tile.
 - Status tiles representing missing or stale proof SHALL fail loud and SHALL not silently degrade to success states.
+
+### DOM-11 Canonical Truth-Surface Contract
+
+- Public truth surfaces (README snapshot, docs landing, PyPI long description, release notes, certification links, external-beta summary) SHALL be auto-generated from canonical artifacts; CI/release SHALL fail on 404s or mismatched metrics.
+- The README performance snapshot SHALL be derived from `results/reference_performance_latest.json` and certification/cohort artifacts, not manually edited.
+- PyPI metadata and docs landing pages SHALL be regenerated on release cut so version posture, quickstart commands, and UI surface match the active release.
+
+### DOM-12 Connector Certification Depth Contract
+
+- The system SHALL publish a connector certification scorecard with stage history, latency/reliability budgets, incident profile, and paper/canary/live eligibility for each connector.
+- Binance and Coinbase SHALL be promoted from `beta` to `active/certified` with public certification artifacts before expanding connector coverage.
+
+### DOM-13 Ops Job Orchestration Contract
+
+- Ops/guardrail flows (nightly review, 6-month harness, secret validation, governance gates, benchmark publishing) SHALL run as first-class jobs with status, artifacts, retries, alerts, and approvals (no ad-hoc subprocess helpers).
+- Studio SHALL expose these jobs as one-click actions with audit trails and role-aware controls.
+
+### DOM-14 Capital Governor Contract
+
+- Strategy cards SHALL expose trust label, promotion stage, venue compatibility, drawdown envelope, reject/fill/slippage score, correlation-aware sizing, and capital budget recommendations.
+- Capital allocation changes SHALL require approval and produce auditable receipts.
+
+### DOM-15 Mobile + Assistant Safety Contract
+
+- The web experience SHALL offer a mobile-friendly approval inbox for promotion/incident/rollback actions with RBAC and audit logging.
+- Assistant actions SHALL remain constrained to policy-gated suggestions; capital-affecting steps require explicit human approval.
+
+### DOM-16 Deployment Scenario Packs Contract
+
+- Crypto-first scenario packs (maker/taker slippage regimes, outage/reconnect bursts, funding spikes, cross-venue skew anomalies) SHALL feed benchmark, replay, certification, and promotion gates.
+- Scenario-pack artifacts SHALL be reproducible and versioned alongside benchmark bundles.
