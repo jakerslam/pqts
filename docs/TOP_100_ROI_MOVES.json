@@ -14,6 +14,19 @@
   },
   {
     "rank": 2,
+    "score": 500.0,
+    "title": "Ship hosted sandbox first-success workspace with browser-only demo, template backtest, and bounded paper-start path",
+    "roi": "very_high",
+    "impact": 10,
+    "track": "parity",
+    "item_type": "engineering",
+    "refs": "DOM-2",
+    "depends": "",
+    "section": "02x. Competitive Leadership Closure Program (Open, Highest Remaining ROI)",
+    "line_no": 372
+  },
+  {
+    "rank": 3,
     "score": 490.0,
     "title": "Run at least one external beginner cohort and one external pro cohort for each release window and archive completed evidence in monthly user research artifacts",
     "roi": "very_high",
@@ -26,7 +39,46 @@
     "line_no": 127
   },
   {
-    "rank": 3,
+    "rank": 4,
+    "score": 490.0,
+    "title": "Build machine-readable competitive scorecard and release review artifacts covering onboarding speed, certified venues, proof density, docs freshness, and latency posture",
+    "roi": "very_high",
+    "impact": 10,
+    "track": "moat",
+    "item_type": "engineering",
+    "refs": "DOM-1",
+    "depends": "",
+    "section": "02x. Competitive Leadership Closure Program (Open, Highest Remaining ROI)",
+    "line_no": 371
+  },
+  {
+    "rank": 5,
+    "score": 490.0,
+    "title": "Certify two tier-1 crypto venues through paper, canary, and live readiness with rolling 30d/90d quality evidence and public stage gating",
+    "roi": "very_high",
+    "impact": 10,
+    "track": "moat",
+    "item_type": "engineering",
+    "refs": "DOM-3",
+    "depends": "",
+    "section": "02x. Competitive Leadership Closure Program (Open, Highest Remaining ROI)",
+    "line_no": 373
+  },
+  {
+    "rank": 6,
+    "score": 490.0,
+    "title": "Extend the public proof program to a rolling 180-day matrix across 3 strategies, 2 certified venues, and 2 regimes with monthly comparative bundles",
+    "roi": "very_high",
+    "impact": 10,
+    "track": "moat",
+    "item_type": "engineering",
+    "refs": "DOM-5",
+    "depends": "",
+    "section": "02x. Competitive Leadership Closure Program (Open, Highest Remaining ROI)",
+    "line_no": 375
+  },
+  {
+    "rank": 7,
     "score": 384.0,
     "title": "Perform legal/compliance review for copy-trade workflows in target jurisdictions before enabling live copy-follow mode",
     "roi": "high",
@@ -39,7 +91,46 @@
     "line_no": 228
   },
   {
-    "rank": 4,
+    "rank": 8,
+    "score": 384.0,
+    "title": "Build unified connector ecosystem registry and capability matrix for venues, brokers, feeds, filings, and alt-data providers, then expose it through API and Studio/docs surfaces",
+    "roi": "high",
+    "impact": 8,
+    "track": "parity",
+    "item_type": "engineering",
+    "refs": "DOM-4",
+    "depends": "",
+    "section": "02x. Competitive Leadership Closure Program (Open, Highest Remaining ROI)",
+    "line_no": 374
+  },
+  {
+    "rank": 9,
+    "score": 384.0,
+    "title": "Ship a versioned searchable docs and troubleshooting surface with hard drift checks across README, PyPI, release notes, and docs metadata",
+    "roi": "high",
+    "impact": 8,
+    "track": "parity",
+    "item_type": "engineering",
+    "refs": "DOM-7",
+    "depends": "",
+    "section": "02x. Competitive Leadership Closure Program (Open, Highest Remaining ROI)",
+    "line_no": 377
+  },
+  {
+    "rank": 10,
+    "score": 384.0,
+    "title": "Publish at least 12 verified example packs with known-good outputs, provenance, and one-click import or command equivalents",
+    "roi": "high",
+    "impact": 8,
+    "track": "parity",
+    "item_type": "engineering",
+    "refs": "DOM-8",
+    "depends": "",
+    "section": "02x. Competitive Leadership Closure Program (Open, Highest Remaining ROI)",
+    "line_no": 378
+  },
+  {
+    "rank": 11,
     "score": 384.0,
     "title": "Own canonical docs-surface migration and update package/release/docs links after cutover",
     "roi": "high",
@@ -49,10 +140,49 @@
     "refs": "COMP-1, CGPT-4, COMP-15",
     "depends": "",
     "section": "03. Human-Only Parallel Lane",
-    "line_no": 377
+    "line_no": 390
   },
   {
-    "rank": 5,
+    "rank": 12,
+    "score": 382.0,
+    "title": "Enforce quantitative external UX release gates for beginner and professional cohorts using machine-readable release-readiness thresholds",
+    "roi": "high",
+    "impact": 9,
+    "track": "moat",
+    "item_type": "engineering",
+    "refs": "DOM-6",
+    "depends": "",
+    "section": "02x. Competitive Leadership Closure Program (Open, Highest Remaining ROI)",
+    "line_no": 376
+  },
+  {
+    "rank": 13,
+    "score": 382.0,
+    "title": "Add funnel analytics and conversion reporting for hosted/local, Guided/Pro, and beginner/pro cohorts, then publish release conversion deltas",
+    "roi": "high",
+    "impact": 9,
+    "track": "moat",
+    "item_type": "engineering",
+    "refs": "DOM-9",
+    "depends": "",
+    "section": "02x. Competitive Leadership Closure Program (Open, Highest Remaining ROI)",
+    "line_no": 379
+  },
+  {
+    "rank": 14,
+    "score": 382.0,
+    "title": "Publish a public trust-operations dashboard for release readiness, benchmark freshness, venue certification, docs freshness, and package/docs availability",
+    "roi": "high",
+    "impact": 9,
+    "track": "moat",
+    "item_type": "engineering",
+    "refs": "DOM-10",
+    "depends": "",
+    "section": "02x. Competitive Leadership Closure Program (Open, Highest Remaining ROI)",
+    "line_no": 380
+  },
+  {
+    "rank": 15,
     "score": 382.0,
     "title": "Run monthly user interviews for casual and professional cohorts and feed roadmap deltas",
     "roi": "high",
@@ -62,10 +192,10 @@
     "refs": "COMP-7, COMP-8, MOAT-8",
     "depends": "",
     "section": "03. Human-Only Parallel Lane",
-    "line_no": 374
+    "line_no": 387
   },
   {
-    "rank": 6,
+    "rank": 16,
     "score": 268.0,
     "title": "Perform third-party bot/operator security due-diligence checklist before adding external signal adapters to production allowlist",
     "roi": "medium",

@@ -77,7 +77,12 @@ def _default_plans() -> Dict[str, TenantEntitlements]:
     payload = {
         "community": {
             "allowed_markets": {"crypto"},
-            "strategy_allowlist": {"trend_following", "mean_reversion", "swing_trend", "hold_carry"},
+            "strategy_allowlist": {
+                "trend_following",
+                "mean_reversion",
+                "swing_trend",
+                "hold_carry",
+            },
             "min_active_strategies": 1,
             "max_active_strategies": 3,
             "allow_live_trading": False,
@@ -115,7 +120,9 @@ def _default_plans() -> Dict[str, TenantEntitlements]:
     return {key: _build_tenant_entitlement(plan=key, row=value) for key, value in payload.items()}
 
 
-def _load_policy_plans(config: Mapping[str, Any]) -> tuple[Dict[str, TenantEntitlements], Dict[str, str], str]:
+def _load_policy_plans(
+    config: Mapping[str, Any],
+) -> tuple[Dict[str, TenantEntitlements], Dict[str, str], str]:
     runtime = config.get("runtime", {}) if isinstance(config, Mapping) else {}
     tenant_cfg = runtime.get("tenant", {}) if isinstance(runtime, Mapping) else {}
     if not isinstance(tenant_cfg, Mapping):
@@ -194,7 +201,9 @@ def resolve_tenant_entitlements(
         raise ValueError(f"Unknown tenant plan '{raw_plan}'. Supported: {supported}")
     base = plans[plan]
 
-    tenant_id = str(tenant_id_override or tenant_cfg.get("tenant_id", "default")).strip() or "default"
+    tenant_id = (
+        str(tenant_id_override or tenant_cfg.get("tenant_id", "default")).strip() or "default"
+    )
     allowed_markets = _as_set(tenant_cfg.get("allowed_markets", base.allowed_markets))
     strategy_allowlist = _as_set(tenant_cfg.get("strategy_allowlist", base.strategy_allowlist))
     min_active = max(int(tenant_cfg.get("min_active_strategies", base.min_active_strategies)), 1)

@@ -19,12 +19,18 @@ def _utc_now_iso() -> str:
 
 def _parse_ts(value: str | datetime | None, *, fallback: datetime) -> datetime:
     if isinstance(value, datetime):
-        return value.astimezone(timezone.utc) if value.tzinfo else value.replace(tzinfo=timezone.utc)
+        return (
+            value.astimezone(timezone.utc) if value.tzinfo else value.replace(tzinfo=timezone.utc)
+        )
     if isinstance(value, str) and value.strip():
         normalized = value.strip().replace("Z", "+00:00")
         try:
             parsed = datetime.fromisoformat(normalized)
-            return parsed.astimezone(timezone.utc) if parsed.tzinfo else parsed.replace(tzinfo=timezone.utc)
+            return (
+                parsed.astimezone(timezone.utc)
+                if parsed.tzinfo
+                else parsed.replace(tzinfo=timezone.utc)
+            )
         except ValueError:
             return fallback
     return fallback
@@ -149,9 +155,7 @@ class OnChainSettlementMonitor:
             quote_enabled = False
             allow_entries = False
             max_multiplier = 0.0
-            reason = (
-                f"Oracle lag {oracle_lag:.1f}s exceeds max {self.config.max_oracle_lag_seconds:.1f}s."
-            )
+            reason = f"Oracle lag {oracle_lag:.1f}s exceeds max {self.config.max_oracle_lag_seconds:.1f}s."
         elif (
             self.config.require_confirmations
             and status in {"resolved", "finalized", "settling", "resolving"}
@@ -167,9 +171,7 @@ class OnChainSettlementMonitor:
             quote_enabled = False
             allow_entries = False
             max_multiplier = 0.0
-            reason = (
-                "Entered hard resolution window; freeze new entries until settlement finality."
-            )
+            reason = "Entered hard resolution window; freeze new entries until settlement finality."
         elif status in {"pending_resolution", "settling", "resolving"}:
             action = "reduce"
             quote_enabled = True
@@ -225,7 +227,9 @@ class OnChainSettlementMonitor:
                 timestamp=decision_ts,
             )
         else:
-            decision = self._decision_for_snapshot(snapshot=snapshot, now=ts_now, timestamp=decision_ts)
+            decision = self._decision_for_snapshot(
+                snapshot=snapshot, now=ts_now, timestamp=decision_ts
+            )
 
         if persist and self._store is not None:
             self._store.append(

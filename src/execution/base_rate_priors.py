@@ -154,7 +154,11 @@ class BaseRatePriorRegistry:
         if now_dt is None or prior_dt is None:
             return False, "invalid_prior_timestamp", prior
 
-        ttl = self.default_max_age_seconds if max_age_seconds is None else max(int(max_age_seconds), 1)
+        ttl = (
+            self.default_max_age_seconds
+            if max_age_seconds is None
+            else max(int(max_age_seconds), 1)
+        )
         age_seconds = int((now_dt - prior_dt).total_seconds())
         if age_seconds > ttl:
             return False, "stale_base_rate_prior", prior

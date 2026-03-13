@@ -5367,3 +5367,67 @@ These requirements capture net-new, applicable deltas from the referenced post c
 
 - The system SHALL publish per-decision explainability cards containing `p_market`, `p_model`, posterior delta, expected value, size recommendation, and gate outcome.
 - Explainability cards SHALL be queryable through API and linked from execution/order-truth surfaces.
+
+## 94. Competitive Leadership Closure Requirements (March 12, 2026)
+
+These requirements target the remaining deltas versus QuantConnect, NautilusTrader, Freqtrade, Hummingbot, and QuantRocket: hosted first success, certified venue depth, ecosystem breadth, sustained public proof, and quantitative usability/release gates.
+
+### DOM-1 Competitive Scorecard Contract
+
+- The system SHALL maintain a machine-readable competitive scorecard comparing PQTS against target leader thresholds for onboarding speed, certified venue count, benchmark cadence, docs freshness, public proof density, and live-path latency.
+- Release reviews SHALL classify each tracked dimension as `red`, `yellow`, or `green` against policy-defined targets.
+- Roadmap prioritization SHALL consume the scorecard so the weakest competitive dimensions are surfaced explicitly before new feature expansion.
+
+### DOM-2 Hosted Sandbox First-Success Contract
+
+- The system SHALL provide a browser-accessible hosted sandbox workspace that supports demo exploration, template backtest, and bounded paper start without local install, secret entry, or manual environment setup.
+- Hosted sandbox workspaces SHALL default to paper-safe credentials, bounded capital, and explicit expiration/reset controls.
+- Median time-to-first-meaningful-result in hosted mode SHALL be less than `3 minutes`, and median time-to-first-paper-campaign SHALL be less than `10 minutes`.
+
+### DOM-3 Tier-1 Crypto Venue Certification Depth Contract
+
+- The system SHALL certify at least two tier-1 crypto venues for each active promotion stage (`paper`, `canary`, `live`) with stage-specific evidence for fills, rejects, slippage, failover behavior, replayability, and incident response.
+- Certified-venue artifacts SHALL publish rolling `30d` and `90d` quality summaries per venue.
+- Any venue missing current certification evidence SHALL be prevented from appearing as production-ready in onboarding, docs, or marketing surfaces.
+
+### DOM-4 Unified Connector Ecosystem Contract
+
+- The system SHALL expose one canonical connector capability model across venues, brokers, market-data feeds, news/filings sources, and alternative-data providers.
+- Each connector entry SHALL declare supported markets, order types, data granularity, auth mode, entitlement requirements, health state, and fallback options.
+- API, CLI, Studio, and docs surfaces SHALL read from the same canonical connector registry.
+
+### DOM-5 Rolling Proof Density Contract
+
+- The system SHALL maintain a rolling public proof program with no fewer than `3` strategies, `2` certified venues, `2` market regimes, and `180 days` of paper/canary evidence under reproducible artifact governance.
+- Monthly proof bundles SHALL include benchmark deltas, TCA drift, reject/fill trends, and promotion-stage summaries.
+- Public proof pages SHALL distinguish current rolling reference evidence from archived diagnostic or historical bundles.
+
+### DOM-6 Quantitative External UX Gate Contract
+
+- Release readiness for user-experience claims SHALL require external-participant metrics, not internal proxy-only evidence.
+- Beginner readiness SHALL require at minimum: task-success rate `>= 80%`, median time-to-first-meaningful-result `<= 5 minutes`, and paper-start completion without operator intervention.
+- Professional readiness SHALL require at minimum: median reject-reason diagnosis within `30 seconds`, promotion-review completion within `5 minutes`, and execution/risk trace retrieval within `3 interactions`.
+
+### DOM-7 Docs and Troubleshooting Product Contract
+
+- The system SHALL provide a live docs product surface with versioned docs, searchable API/CLI references, troubleshooting decision trees, and copy-paste runbooks for first-success, venue setup, and incident recovery.
+- README, PyPI metadata, release notes, and the docs site SHALL reference the same canonical commands, URLs, version posture, and primary UI surface.
+- Docs publication SHALL fail closed when version markers, primary-surface markers, or quickstart commands drift across surfaces.
+
+### DOM-8 Verified Example-Pack Density Contract
+
+- The system SHALL maintain a verified library of no fewer than `12` runnable example packs spanning beginner and pro workflows on the same underlying strategy objects.
+- Every example pack SHALL include expected artifacts, known-good output markers, trust/provenance metadata, and one-click import or command equivalents.
+- Example-pack coverage SHALL span at least onboarding, backtest, paper campaign, promotion review, execution diagnosis, and replay workflows.
+
+### DOM-9 Product Analytics and Conversion Contract
+
+- The system SHALL capture product-level funnel telemetry for install/start, docs visits, template selection, backtest completion, paper-start completion, benchmark view engagement, and promotion-review completion.
+- Funnel telemetry SHALL be segmented by hosted vs local, Guided vs Pro, and beginner vs professional cohorts.
+- Release reviews SHALL include conversion deltas and identify the highest-dropoff step requiring remediation.
+
+### DOM-10 Public Trust Operations Dashboard Contract
+
+- The system SHALL publish a public trust dashboard showing current release readiness, benchmark freshness, certified venue status, docs freshness, package/docs availability, and latest proof-program timestamps.
+- Public trust dashboard entries SHALL link directly to the underlying evidence artifact for each status tile.
+- Status tiles representing missing or stale proof SHALL fail loud and SHALL not silently degrade to success states.

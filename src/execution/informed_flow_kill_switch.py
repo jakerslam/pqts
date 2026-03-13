@@ -201,7 +201,9 @@ class InformedFlowKillSwitch:
             factors.append(max(depth_ratio, self.min_size_multiplier))
 
         if depth_participation > self.max_depth_participation_reduce:
-            participation_ratio = self.max_depth_participation_reduce / max(depth_participation, 1e-9)
+            participation_ratio = self.max_depth_participation_reduce / max(
+                depth_participation, 1e-9
+            )
             factors.append(max(participation_ratio, self.min_size_multiplier))
 
         return float(max(min(factors), self.min_size_multiplier))

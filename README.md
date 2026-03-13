@@ -45,14 +45,14 @@ PQTS is designed as a **deployment trust operating system**:
 
 ### Reference Performance Snapshot
 
-Latest top reference bundle (`2026-03-12_reference_multi_market_making`):
+Latest top reference bundle (`2026-03-13_reference_crypto_trend_following`):
 
 Evidence:
-- [Bundle README](results/2026-03-12_reference_multi_market_making/README.md)
-- [Leaderboard CSV](results/2026-03-12_reference_multi_market_making/simulation_leaderboard_20260312T043826475506Z.csv)
-- [Suite report JSON](results/2026-03-12_reference_multi_market_making/simulation_suite_20260312T043826475506Z.json)
+- [Bundle README](results/2026-03-13_reference_crypto_trend_following/README.md)
+- [Leaderboard CSV](results/2026-03-13_reference_crypto_trend_following/simulation_leaderboard_20260313T014331911337Z.csv)
+- [Suite report JSON](results/2026-03-13_reference_crypto_trend_following/simulation_suite_20260313T014331911337Z.json)
 
-- `avg_quality_score=0.8275`
+- `avg_quality_score=0.8320`
 - `avg_fill_rate=1.0000`
 - `avg_reject_rate=0.0000`
 - `total_filled=90` / `total_submitted=90`
@@ -159,10 +159,10 @@ Dash fallback (operator profile): `http://localhost:8501`
 API metrics (observability profile): `http://localhost:8000/metrics`  
 Prometheus (observability profile): `http://localhost:9090`  
 Grafana (observability profile): `http://localhost:3001` (`admin` / `admin`)
-Docs site (GitHub Pages): [https://jakerslam.github.io/PQTS/](https://jakerslam.github.io/PQTS/)
-Leaderboard fallback in-repo page: [docs/leaderboard/index.html](docs/leaderboard/index.html)
-Workflow fallback artifact when Pages is unavailable: `docs-site-fallback` in `Publish Docs Site` runs.
-Latest release: [v0.1.5](https://github.com/jakerslam/PQTS/releases/tag/v0.1.5)
+Docs site (GitHub Pages): `https://jakerslam.github.io/pqts/`
+Leaderboard in-repo fallback page: [docs/leaderboard/index.html](docs/leaderboard/index.html)
+If GitHub Pages is temporarily unavailable, the workflow publishes a `docs-site-fallback` artifact in `Publish Docs Site` runs.
+Latest release: [v0.1.5](https://github.com/jakerslam/pqts/releases/tag/v0.1.5)
 
 ## 💳 Pricing & Cloud
 
@@ -180,9 +180,6 @@ Details and guardrails: [Pricing And Packaging](docs/PRICING_AND_PACKAGING.md)
 
 Primary public web surface: Next.js (`apps/web`).
 Dash remains the operator fallback during web cutover.
-
-Primary public web surface: **Next.js (`apps/web`)**.  
-Dash remains explicit operator fallback for legacy/internal diagnostics.
 
 - Promotion Control Center (`/dashboard/promotion`)
 - Execution Quality (`/dashboard/execution-quality`)
@@ -420,9 +417,16 @@ Public reproducible result bundles live under `results/`.
   - `results/2026-03-09_crypto_market_making_short/`
   - `results/2026-03-09_crypto_funding_arbitrage_short/`
   - `results/2026-03-09_multi_market_market_making_short/`
+  - `results/2026-03-09_baseline/` (historical)
+  - `results/2026-03-09_crypto_market_making_short/`
+  - `results/2026-03-09_crypto_funding_arbitrage_short/`
+  - `results/2026-03-09_multi_market_market_making_short/`
   - `results/2026-03-12_reference_crypto_trend_following/`
   - `results/2026-03-12_reference_crypto_funding_arbitrage/`
   - `results/2026-03-12_reference_multi_market_making/`
+  - `results/2026-03-13_reference_crypto_trend_following/`
+  - `results/2026-03-13_reference_crypto_funding_arbitrage/`
+  - `results/2026-03-13_reference_multi_market_making/`
 - bundle schema/template: `results/RESULT_TEMPLATE.md`
 - generated latest-reference summary: `results/reference_performance_latest.json`
 
@@ -540,19 +544,19 @@ Fallback access at `http://localhost:8501`
 
 Reference callout from latest `reference` bundle (auto-generated from `results/reference_performance_latest.json`):
 <!-- REFERENCE_PERFORMANCE:START -->
-_Last generated (UTC): 2026-03-12 20:27:08_
+_Last generated (UTC): 2026-03-13 02:03:43_
 
-- `2026-03-12_reference_multi_market_making` ([bundle](results/2026-03-12_reference_multi_market_making/README.md), [csv](results/2026-03-12_reference_multi_market_making/simulation_leaderboard_20260312T202711321403Z.csv), [report](results/2026-03-12_reference_multi_market_making/simulation_suite_20260312T202711321403Z.json))
-  - `avg_quality_score=0.8572`
+- `2026-03-13_reference_crypto_funding_arbitrage` ([bundle](results/2026-03-13_reference_crypto_funding_arbitrage/README.md), [csv](results/2026-03-13_reference_crypto_funding_arbitrage/simulation_leaderboard_20260313T020345468787Z.csv), [report](results/2026-03-13_reference_crypto_funding_arbitrage/simulation_suite_20260313T020345468787Z.json))
+  - `avg_quality_score=0.8574`
   - `avg_fill_rate=1.0000`
   - `avg_reject_rate=0.0000`
-  - `total_filled=90` / `total_submitted=90`
+  - `total_filled=36` / `total_submitted=36`
 
 | Bundle | Markets | Strategy | Quality | Fill | Reject |
 |---|---|---|---:|---:|---:|
-| `2026-03-12_reference_crypto_funding_arbitrage` | `crypto` | `funding_arbitrage` | `0.8553` | `1.0000` | `0.0000` |
-| `2026-03-12_reference_crypto_trend_following` | `crypto` | `trend_following` | `0.8393` | `1.0000` | `0.0000` |
-| `2026-03-12_reference_multi_market_making` | `crypto,equities,forex` | `market_making` | `0.8572` | `1.0000` | `0.0000` |
+| `2026-03-13_reference_crypto_funding_arbitrage` | `crypto` | `funding_arbitrage` | `0.8574` | `1.0000` | `0.0000` |
+| `2026-03-13_reference_crypto_trend_following` | `crypto` | `trend_following` | `0.8303` | `1.0000` | `0.0000` |
+| `2026-03-13_reference_multi_market_making` | `crypto,equities,forex` | `market_making` | `0.8405` | `1.0000` | `0.0000` |
 <!-- REFERENCE_PERFORMANCE:END -->
 
 | Strategy | Timeframe | Edge |
@@ -726,3 +730,4 @@ MIT (see [LICENSE](LICENSE))
 ---
 
 Built by Protheus
+

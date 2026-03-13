@@ -1,10 +1,10 @@
 # Published Benchmark Baselines
 
-Last updated: 2026-03-12 (America/Denver)
+Last updated: 2026-03-13 (America/Denver)
 
 This document publishes the first reproducible PQTS benchmark baselines from committed result bundles.
 
-## Reference Bundle Update (2026-03-12)
+## Reference Bundle Update (2026-03-13)
 
 Reference bundles are now generated with non-zero fill gates enforced by
 `scripts/publish_reference_bundles.py`.
@@ -16,9 +16,9 @@ python3 scripts/render_reference_performance.py
 
 | Bundle | Scenarios | Artifact | Metrics (quality/fill/reject) |
 |---|---:|---|---|
-| `results/2026-03-12_reference_crypto_trend_following` | 1 | `simulation_leaderboard_20260312T043824598336Z.csv` | `0.8273 / 1.0000 / 0.0000` |
-| `results/2026-03-12_reference_crypto_funding_arbitrage` | 1 | `simulation_leaderboard_20260312T043825335246Z.csv` | `0.8248 / 1.0000 / 0.0000` |
-| `results/2026-03-12_reference_multi_market_making` | 3 | `simulation_leaderboard_20260312T043826475506Z.csv` | `0.8275 / 1.0000 / 0.0000` |
+| `results/2026-03-13_reference_crypto_trend_following` | 1 | `simulation_leaderboard_20260313T014331911337Z.csv` | `0.8320 / 1.0000 / 0.0000` |
+| `results/2026-03-13_reference_crypto_funding_arbitrage` | 1 | `simulation_leaderboard_20260313T014332945605Z.csv` | `0.8301 / 1.0000 / 0.0000` |
+| `results/2026-03-13_reference_multi_market_making` | 3 | `simulation_leaderboard_20260313T014333905765Z.csv` | `0.8294 / 1.0000 / 0.0000` |
 
 Machine-readable summary:
 - `results/reference_performance_latest.json`

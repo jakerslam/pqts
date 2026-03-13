@@ -84,7 +84,9 @@ class CrossVenueDislocationPlanner:
         self.slippage_buffer_bps = max(float(slippage_buffer_bps), 0.0)
         self._store = persistence_store
 
-    def _normalize_quote(self, *, venue: str, symbol: str, row: dict[str, Any]) -> VenueQuote | None:
+    def _normalize_quote(
+        self, *, venue: str, symbol: str, row: dict[str, Any]
+    ) -> VenueQuote | None:
         price = _as_float(row.get("price"))
         spread = abs(_as_float(row.get("spread")))
         bid = _as_float(row.get("bid"))
@@ -231,7 +233,9 @@ class CrossVenueDislocationPlanner:
                 for item in opportunities_raw
                 if isinstance(item, dict)
             ]
-            selected = DislocationOpportunity(**selected_raw) if isinstance(selected_raw, dict) else None
+            selected = (
+                DislocationOpportunity(**selected_raw) if isinstance(selected_raw, dict) else None
+            )
             plans.append(
                 HedgedRoutingPlan(
                     symbol=str(payload.get("symbol", "")),

@@ -65,9 +65,11 @@ def resolve_runtime_performance_settings(
     profile_defaults = _PROFILE_DEFAULTS[profile]
     loop_cfg = _mapping(cfg.get("loop"))
 
-    loop_mode = str(
-        loop_cfg.get("mode", cfg.get("loop_mode", profile_defaults["loop_mode"]))
-    ).strip().lower()
+    loop_mode = (
+        str(loop_cfg.get("mode", cfg.get("loop_mode", profile_defaults["loop_mode"])))
+        .strip()
+        .lower()
+    )
     if loop_mode not in {"event_driven", "tick"}:
         loop_mode = "event_driven"
 

@@ -319,10 +319,14 @@ class SmartOrderRouter:
             return [request]
 
         if request.order_type == OrderType.POV:
-            target_participation = min(max(float(self.config.get("pov_participation_rate", 0.15)), 0.01), 0.5)
+            target_participation = min(
+                max(float(self.config.get("pov_participation_rate", 0.15)), 0.01), 0.5
+            )
             observed_volume = max(float(market_data.get("vol_24h", 0.0)) / 86_400.0, 1.0)
             slice_size = max(self.max_single_order_size * target_participation, 1e-8)
-            num_slices = max(1, int(min(request.quantity / slice_size, observed_volume / slice_size)))
+            num_slices = max(
+                1, int(min(request.quantity / slice_size, observed_volume / slice_size))
+            )
         else:
             # TWAP splitting
             num_slices = int(request.quantity / self.max_single_order_size) + 1
@@ -334,7 +338,9 @@ class SmartOrderRouter:
                 symbol=request.symbol,
                 side=request.side,
                 quantity=slice_size,
-                order_type=OrderType.LIMIT if request.order_type != OrderType.POV else OrderType.POV,
+                order_type=(
+                    OrderType.LIMIT if request.order_type != OrderType.POV else OrderType.POV
+                ),
                 price=request.price,
                 time_in_force=request.time_in_force,
                 strategy_id=request.strategy_id,

@@ -8,7 +8,6 @@ from typing import Any
 
 from execution.smart_router import OrderRequest, OrderType
 
-
 CopyTradeSubmitter = Callable[[OrderRequest, dict[str, Any], dict[str, Any]], Awaitable[Any]]
 
 
@@ -116,11 +115,13 @@ class CopyTradeSafetyEnvelope:
         )
         submitter = getattr(router, "submit_order", None)
         if not callable(submitter):
-            raise RuntimeError("router must expose an async submit_order(order, market_data, portfolio) method")
+            raise RuntimeError(
+                "router must expose an async submit_order(order, market_data, portfolio) method"
+            )
         result = await submitter(order=order, market_data=market_data, portfolio=portfolio)
         if bool(getattr(result, "success", False)):
             leader = str(signal.leader_id).strip().lower()
-            self._follow_notional_by_leader[leader] = (
-                float(self._follow_notional_by_leader.get(leader, 0.0)) + float(decision.notional_usd)
-            )
+            self._follow_notional_by_leader[leader] = float(
+                self._follow_notional_by_leader.get(leader, 0.0)
+            ) + float(decision.notional_usd)
         return decision, result

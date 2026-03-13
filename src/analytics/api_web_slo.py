@@ -21,7 +21,11 @@ def _parse_ts(value: str | None, *, fallback: datetime) -> datetime:
     normalized = str(value).replace("Z", "+00:00")
     try:
         parsed = datetime.fromisoformat(normalized)
-        return parsed.astimezone(timezone.utc) if parsed.tzinfo else parsed.replace(tzinfo=timezone.utc)
+        return (
+            parsed.astimezone(timezone.utc)
+            if parsed.tzinfo
+            else parsed.replace(tzinfo=timezone.utc)
+        )
     except ValueError:
         return fallback
 

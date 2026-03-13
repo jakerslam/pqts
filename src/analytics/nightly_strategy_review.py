@@ -123,10 +123,14 @@ def _derive_current_values(config: Dict[str, Any]) -> Dict[str, float]:
             6,
         ),
         "execution.paper_fill_model.stress_slippage_multiplier": _safe_float(
-            _get_nested(config, ["execution", "paper_fill_model", "stress_slippage_multiplier"], 2.5),
+            _get_nested(
+                config, ["execution", "paper_fill_model", "stress_slippage_multiplier"], 2.5
+            ),
             2.5,
         ),
-        "risk.daily_loss_limit": _safe_float(_get_nested(config, ["risk", "daily_loss_limit"], 500.0), 500.0),
+        "risk.daily_loss_limit": _safe_float(
+            _get_nested(config, ["risk", "daily_loss_limit"], 500.0), 500.0
+        ),
     }
 
 
@@ -194,7 +198,8 @@ def build_nightly_review(
 
     if slippage_mape_pct > float(resolved_thresholds.max_slippage_mape_pct):
         proposed["execution.paper_fill_model.stress_slippage_multiplier"] = _bounded(
-            _safe_float(proposed["execution.paper_fill_model.stress_slippage_multiplier"], 2.5) + 0.15,
+            _safe_float(proposed["execution.paper_fill_model.stress_slippage_multiplier"], 2.5)
+            + 0.15,
             minimum=1.0,
             maximum=6.0,
         )

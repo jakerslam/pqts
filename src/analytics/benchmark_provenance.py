@@ -2,16 +2,15 @@
 
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
-from datetime import datetime, timezone
 import hashlib
 import json
-from pathlib import Path
 import platform
 import re
 import subprocess
+from dataclasses import asdict, dataclass
+from datetime import datetime, timezone
+from pathlib import Path
 from typing import Any, Dict, Iterable, List, Mapping
-
 
 _MONTH_PATTERN = re.compile(r"^\d{4}-\d{2}$")
 
@@ -131,7 +130,9 @@ def _resolve_run_timestamp(payload: Mapping[str, Any]) -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
-def _build_artifact_hashes(bundle_dir: Path, payload: Mapping[str, Any], suite_file: Path) -> Dict[str, str]:
+def _build_artifact_hashes(
+    bundle_dir: Path, payload: Mapping[str, Any], suite_file: Path
+) -> Dict[str, str]:
     hashes: Dict[str, str] = {
         suite_file.name: _sha256_file(suite_file),
     }

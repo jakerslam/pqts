@@ -204,22 +204,24 @@ def paper_fill_metrics(
     module = _load_native_module()
     if module is not None and hasattr(module, "paper_fill_metrics"):
         try:
-            fill_ratio, slip_bps, executed_qty, executed_price, queue_turnover = module.paper_fill_metrics(
-                str(side).lower(),
-                req_qty,
-                ref_price,
-                queue,
-                partial,
-                min_fill,
-                max(float(queue_penalty_floor), 0.0),
-                max(float(adverse_selection_bps), 0.0),
-                max(float(min_slippage_bps), 0.0),
-                max(float(queue_slippage_bps_per_turnover), 0.0),
-                bool(reality_stress_mode),
-                max(float(stress_fill_ratio_multiplier), 0.0),
-                max(float(stress_slippage_multiplier), 0.0),
-                float(fill_uniform),
-                float(slippage_uniform),
+            fill_ratio, slip_bps, executed_qty, executed_price, queue_turnover = (
+                module.paper_fill_metrics(
+                    str(side).lower(),
+                    req_qty,
+                    ref_price,
+                    queue,
+                    partial,
+                    min_fill,
+                    max(float(queue_penalty_floor), 0.0),
+                    max(float(adverse_selection_bps), 0.0),
+                    max(float(min_slippage_bps), 0.0),
+                    max(float(queue_slippage_bps_per_turnover), 0.0),
+                    bool(reality_stress_mode),
+                    max(float(stress_fill_ratio_multiplier), 0.0),
+                    max(float(stress_slippage_multiplier), 0.0),
+                    float(fill_uniform),
+                    float(slippage_uniform),
+                )
             )
             return (
                 float(fill_ratio),
@@ -318,10 +320,14 @@ def smart_router_score(
         + fill_token * 0.3
         + (1.0 / (1.0 + latency_token / 500.0)) * 0.2
     )
-    return float(spread_score * 0.30 + volume_score * 0.30 + fee_score * 0.20 + quality_score * 0.20)
+    return float(
+        spread_score * 0.30 + volume_score * 0.30 + fee_score * 0.20 + quality_score * 0.20
+    )
 
 
-def quote_state(*, price: float, age_seconds: float, stale_after_seconds: float) -> tuple[bool, bool]:
+def quote_state(
+    *, price: float, age_seconds: float, stale_after_seconds: float
+) -> tuple[bool, bool]:
     price_token = float(price)
     age_token = float(age_seconds)
     stale_after = max(float(stale_after_seconds), 0.0)

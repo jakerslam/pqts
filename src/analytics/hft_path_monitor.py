@@ -72,7 +72,9 @@ class HFTPathMonitor:
             "samples": float(len(self.submit_to_ack_ms)),
             "p95_submit_to_ack_ms": _percentile(list(self.submit_to_ack_ms), 0.95),
             "p99_submit_to_ack_ms": _percentile(list(self.submit_to_ack_ms), 0.99),
-            "decision_to_submit_max_ms": max(self.decision_to_submit_ms) if self.decision_to_submit_ms else 0.0,
+            "decision_to_submit_max_ms": (
+                max(self.decision_to_submit_ms) if self.decision_to_submit_ms else 0.0
+            ),
             "reject_rate": reject_rate,
             "timeout_rate": timeout_rate,
             "orders_per_minute": float(len(self.order_activity_ts_ms)),

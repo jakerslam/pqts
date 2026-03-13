@@ -4,10 +4,10 @@ This matrix is auto-generated from `docs/SRS.md`, `docs/TODO.md`, and repository
 
 ## Summary
 
-- Total requirements: **756**
+- Total requirements: **766**
 - implemented: **756**
 - partial: **0**
-- planned: **0**
+- planned: **10**
 - traced: **0**
 - unmapped: **0**
 
@@ -35,6 +35,7 @@ This matrix is auto-generated from `docs/SRS.md`, `docs/TODO.md`, and repository
 | DK | 4 | 0 | 0 | 0 | 0 | 4 |
 | DLM | 5 | 0 | 0 | 0 | 0 | 5 |
 | DN | 5 | 0 | 0 | 0 | 0 | 5 |
+| DOM | 0 | 0 | 10 | 0 | 0 | 10 |
 | DUNIK | 8 | 0 | 0 | 0 | 0 | 8 |
 | DV | 7 | 0 | 0 | 0 | 0 | 7 |
 | DXR | 8 | 0 | 0 | 0 | 0 | 8 |
@@ -865,3 +866,13 @@ This matrix is auto-generated from `docs/SRS.md`, `docs/TODO.md`, and repository
 | LUNR-7 | Cognitive Trap Guardrail Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
 | LUNR-8 | Formula-Only Alpha Falsification Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
 | LUNR-9 | Probability/EV Explainability Card Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| DOM-1 | Competitive Scorecard Contract | planned | open | config/srs/assimilation_registry.json, docs/TODO.md |
+| DOM-2 | Hosted Sandbox First-Success Contract | planned | open | config/srs/assimilation_registry.json, docs/TODO.md |
+| DOM-3 | Tier-1 Crypto Venue Certification Depth Contract | planned | open | config/srs/assimilation_registry.json, docs/TODO.md |
+| DOM-4 | Unified Connector Ecosystem Contract | planned | open | config/srs/assimilation_registry.json, docs/TODO.md |
+| DOM-5 | Rolling Proof Density Contract | planned | open | config/srs/assimilation_registry.json, docs/TODO.md |
+| DOM-6 | Quantitative External UX Gate Contract | planned | open | config/srs/assimilation_registry.json, docs/TODO.md |
+| DOM-7 | Docs and Troubleshooting Product Contract | planned | open | config/srs/assimilation_registry.json, docs/TODO.md |
+| DOM-8 | Verified Example-Pack Density Contract | planned | open | config/srs/assimilation_registry.json, docs/TODO.md |
+| DOM-9 | Product Analytics and Conversion Contract | planned | open | config/srs/assimilation_registry.json, docs/TODO.md |
+| DOM-10 | Public Trust Operations Dashboard Contract | planned | open | config/srs/assimilation_registry.json, docs/TODO.md |

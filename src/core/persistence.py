@@ -40,14 +40,16 @@ class EventPersistenceStore:
             self._mode = "postgres"
             self._pg_conn = psycopg.connect(self.dsn)
             with self._pg_conn.cursor() as cur:
-                cur.execute("""
+                cur.execute(
+                    """
                     CREATE TABLE IF NOT EXISTS events (
                         id SERIAL PRIMARY KEY,
                         timestamp TEXT NOT NULL,
                         category TEXT NOT NULL,
                         payload JSONB NOT NULL
                     )
-                    """)
+                    """
+                )
             self._pg_conn.commit()
             return
 
@@ -58,14 +60,16 @@ class EventPersistenceStore:
         db_path = Path(path)
         db_path.parent.mkdir(parents=True, exist_ok=True)
         self._sqlite_conn = sqlite3.connect(str(db_path))
-        self._sqlite_conn.execute("""
+        self._sqlite_conn.execute(
+            """
             CREATE TABLE IF NOT EXISTS events (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 timestamp TEXT NOT NULL,
                 category TEXT NOT NULL,
                 payload TEXT NOT NULL
             )
-            """)
+            """
+        )
         self._sqlite_conn.commit()
 
     def append(

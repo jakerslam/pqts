@@ -2,17 +2,16 @@
 
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
-from datetime import datetime, timezone
 import json
 import math
-from pathlib import Path
 import re
 import statistics
+from dataclasses import asdict, dataclass
+from datetime import datetime, timezone
+from pathlib import Path
 from typing import Any, Dict, List, Mapping, Sequence, Tuple
 
 from analytics.benchmark_quality_gate import evaluate_benchmark_quality
-
 
 _MONTH_PATTERN = re.compile(r"^\d{4}-\d{2}$")
 
@@ -590,9 +589,13 @@ def generate_monthly_report_artifacts(
     pdf_path = target_dir / f"{base}.pdf"
     svg_path = target_dir / f"{base}_equity_curve.svg"
 
-    json_path.write_text(json.dumps(report.to_dict(), indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    json_path.write_text(
+        json.dumps(report.to_dict(), indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
     render_equity_curve_svg(report=report, output_path=svg_path)
-    render_monthly_report_html(report=report, output_path=html_path, equity_curve_svg_name=svg_path.name)
+    render_monthly_report_html(
+        report=report, output_path=html_path, equity_curve_svg_name=svg_path.name
+    )
     render_monthly_report_pdf(report=report, output_path=pdf_path)
 
     return MonthlyReportArtifacts(

@@ -79,8 +79,6 @@ from risk.kill_switches import (
     RiskDecision,
     RiskLimits,
     RiskState,
-)
-from risk.kill_switches import (
     TradingEngine as RiskEngine,
 )
 from risk.regime_overlay import RegimeExposureOverlay
@@ -334,9 +332,7 @@ class RiskAwareRouter:
         raw_campaign_strategy_ids = profitability_cfg.get("campaign_strategy_ids", ("campaign",))
         if isinstance(raw_campaign_strategy_ids, (list, tuple, set)):
             campaign_strategy_ids = {
-                str(item).strip().lower()
-                for item in raw_campaign_strategy_ids
-                if str(item).strip()
+                str(item).strip().lower() for item in raw_campaign_strategy_ids if str(item).strip()
             }
         else:
             token = str(raw_campaign_strategy_ids).strip().lower()
@@ -353,9 +349,7 @@ class RiskAwareRouter:
         self.lunar_edge_gate_max_repricing_lag_ms = int(
             lunar_edge_cfg.get("max_repricing_lag_ms", 20_000)
         )
-        self.lunar_edge_gate_max_data_age_ms = int(
-            lunar_edge_cfg.get("max_data_age_ms", 15_000)
-        )
+        self.lunar_edge_gate_max_data_age_ms = int(lunar_edge_cfg.get("max_data_age_ms", 15_000))
         self.require_live_client_order_id = bool(
             broker_config.get("require_live_client_order_id", True)
         )
@@ -1597,9 +1591,7 @@ class RiskAwareRouter:
                 self.reject_count += 1
                 audit_entry["rejected"] = True
                 audit_entry["profitability_gate"]["passed"] = False
-                audit_entry["reject_reason"] = (
-                    "PROFITABILITY_GATE: expected_alpha_bps <= 0"
-                )
+                audit_entry["reject_reason"] = "PROFITABILITY_GATE: expected_alpha_bps <= 0"
                 self.audit_log.append(audit_entry)
                 return _result(
                     success=False,
@@ -1666,8 +1658,8 @@ class RiskAwareRouter:
             if not lunar_gate.passed:
                 self.reject_count += 1
                 audit_entry["rejected"] = True
-                audit_entry["reject_reason"] = (
-                    "LUNAR_NET_EDGE_GATE: " + ",".join(lunar_gate.reason_codes)
+                audit_entry["reject_reason"] = "LUNAR_NET_EDGE_GATE: " + ",".join(
+                    lunar_gate.reason_codes
                 )
                 self.audit_log.append(audit_entry)
                 return _result(

@@ -37,4 +37,3 @@ def build_profitability_preview(
         predicted_net_alpha_bps=float(predicted_net_bps),
         required_alpha_bps=float(required_alpha_bps),
     )
-

@@ -33,8 +33,7 @@ from core.strategy_contracts import validate_strategy_contract
 from core.toggle_manager import MarketStrategyToggleManager, ToggleValidationError
 from execution.paper_fill_model import MicrostructurePaperFillProvider, PaperFillModelConfig
 from execution.risk_aware_router import OrderResult, RiskAwareRouter
-from execution.smart_router import OrderRequest as RouterOrderRequest
-from execution.smart_router import OrderType as RouterOrderType
+from execution.smart_router import OrderRequest as RouterOrderRequest, OrderType as RouterOrderType
 from risk.kill_switches import RiskLimits as KillSwitchLimits
 from risk.risk_tolerance import (
     RiskToleranceProfile,

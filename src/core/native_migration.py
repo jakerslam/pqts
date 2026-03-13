@@ -42,7 +42,9 @@ class NativeReleaseArtifact:
     native_module: str
 
 
-def load_migration_policy(path: str | Path = "config/native/migration_policy.json") -> MigrationPolicy:
+def load_migration_policy(
+    path: str | Path = "config/native/migration_policy.json",
+) -> MigrationPolicy:
     policy_path = Path(path)
     if not policy_path.exists():
         return MigrationPolicy(thresholds=MigrationThresholds())
@@ -60,7 +62,9 @@ def load_migration_policy(path: str | Path = "config/native/migration_policy.jso
         ),
         numeric_vectorizable_mode=str(kernel_classes.get("numeric_vectorizable", "jit_first")),
         stateful_streaming_mode=str(kernel_classes.get("stateful_streaming", "native_priority")),
-        priority_modules=tuple(str(token) for token in payload.get("priority_modules", []) if str(token).strip()),
+        priority_modules=tuple(
+            str(token) for token in payload.get("priority_modules", []) if str(token).strip()
+        ),
     )
 
 
@@ -88,7 +92,9 @@ def decide_native_migration(
         should_migrate = bottleneck and (not jit_sufficient)
     else:
         native_priority = str(resolved.stateful_streaming_mode).strip().lower() == "native_priority"
-        should_migrate = bottleneck and ((not jit_sufficient) or (native_priority and is_priority_module))
+        should_migrate = bottleneck and (
+            (not jit_sufficient) or (native_priority and is_priority_module)
+        )
 
     return {
         "module": evidence.module,

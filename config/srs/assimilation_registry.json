@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-03-12T20:20:34.549875+00:00",
+  "generated_at": "2026-03-13T01:50:01.803277+00:00",
   "prefix_summary": {
     "AC": {
       "baseline_contract": 0,
@@ -62,8 +62,8 @@
       "core_delivery": 8
     },
     "COMP": {
-      "baseline_contract": 3,
-      "core_delivery": 18
+      "baseline_contract": 0,
+      "core_delivery": 21
     },
     "CT": {
       "baseline_contract": 0,
@@ -80,6 +80,10 @@
     "DN": {
       "baseline_contract": 0,
       "core_delivery": 5
+    },
+    "DOM": {
+      "baseline_contract": 10,
+      "core_delivery": 0
     },
     "DUNIK": {
       "baseline_contract": 0,
@@ -3592,27 +3596,27 @@
       "title": "Source Reliability and Claim Handling"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.comp",
       "id": "COMP-19",
       "prefix": "COMP",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "External Beta-First Usability and Operations Proof"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.comp",
       "id": "COMP-20",
       "prefix": "COMP",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "Exchange Adapter Certification and Maturity Gate"
     },
     {
-      "assimilation_tier": "baseline_contract",
+      "assimilation_tier": "core_delivery",
       "baseline_hook": "srs_baseline.comp",
       "id": "COMP-21",
       "prefix": "COMP",
-      "source_status": "planned",
+      "source_status": "implemented",
       "title": "Community and Traction Feedback Loop"
     },
     {
@@ -6406,13 +6410,93 @@
       "prefix": "LUNR",
       "source_status": "implemented",
       "title": "Probability/EV Explainability Card Contract"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.dom",
+      "id": "DOM-1",
+      "prefix": "DOM",
+      "source_status": "unmapped",
+      "title": "Competitive Scorecard Contract"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.dom",
+      "id": "DOM-2",
+      "prefix": "DOM",
+      "source_status": "unmapped",
+      "title": "Hosted Sandbox First-Success Contract"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.dom",
+      "id": "DOM-3",
+      "prefix": "DOM",
+      "source_status": "unmapped",
+      "title": "Tier-1 Crypto Venue Certification Depth Contract"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.dom",
+      "id": "DOM-4",
+      "prefix": "DOM",
+      "source_status": "unmapped",
+      "title": "Unified Connector Ecosystem Contract"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.dom",
+      "id": "DOM-5",
+      "prefix": "DOM",
+      "source_status": "unmapped",
+      "title": "Rolling Proof Density Contract"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.dom",
+      "id": "DOM-6",
+      "prefix": "DOM",
+      "source_status": "unmapped",
+      "title": "Quantitative External UX Gate Contract"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.dom",
+      "id": "DOM-7",
+      "prefix": "DOM",
+      "source_status": "unmapped",
+      "title": "Docs and Troubleshooting Product Contract"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.dom",
+      "id": "DOM-8",
+      "prefix": "DOM",
+      "source_status": "unmapped",
+      "title": "Verified Example-Pack Density Contract"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.dom",
+      "id": "DOM-9",
+      "prefix": "DOM",
+      "source_status": "unmapped",
+      "title": "Product Analytics and Conversion Contract"
+    },
+    {
+      "assimilation_tier": "baseline_contract",
+      "baseline_hook": "srs_baseline.dom",
+      "id": "DOM-10",
+      "prefix": "DOM",
+      "source_status": "unmapped",
+      "title": "Public Trust Operations Dashboard Contract"
     }
   ],
   "summary": {
     "tier_counts": {
-      "baseline_contract": 3,
-      "core_delivery": 753
+      "baseline_contract": 10,
+      "core_delivery": 756
     },
-    "total_requirements": 756
+    "total_requirements": 766
   }
 }

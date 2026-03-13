@@ -88,7 +88,9 @@ def evaluate_market_scope_request(
             "reconciliation_accuracy": reconciliation_accuracy,
             "open_p1_incidents": open_p1_incidents,
             "min_execution_quality": float(policy.readiness_gates.min_execution_quality),
-            "min_reconciliation_accuracy": float(policy.readiness_gates.min_reconciliation_accuracy),
+            "min_reconciliation_accuracy": float(
+                policy.readiness_gates.min_reconciliation_accuracy
+            ),
             "max_open_p1_incidents": int(policy.readiness_gates.max_open_p1_incidents),
         },
         "reasons": reasons,

@@ -272,11 +272,13 @@ class ResearchDashboardAPI:
             "control": _empty_arm_metrics(),
             "treatment": _empty_arm_metrics(),
         }
-        frame = self._read_sql("""
+        frame = self._read_sql(
+            """
             SELECT experiment_id, from_stage, to_stage, reason, timestamp
             FROM promotion_audit
             ORDER BY timestamp ASC
-            """)
+            """
+        )
         if frame.empty:
             return outcomes
 
@@ -334,11 +336,13 @@ class ResearchDashboardAPI:
         lookback_days: int = 90,
         stage: Optional[str] = None,
     ) -> Dict[str, Any]:
-        frame = self._read_sql("""
+        frame = self._read_sql(
+            """
             SELECT experiment_id, stage, timestamp, pnl, sharpe, drawdown,
                    slippage_mape, kill_switch_triggers, notes
             FROM stage_metrics
-            """)
+            """
+        )
 
         cutoff = datetime.now(timezone.utc) - timedelta(days=int(lookback_days))
         window_end = datetime.now(timezone.utc)

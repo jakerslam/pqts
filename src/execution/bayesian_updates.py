@@ -151,7 +151,9 @@ class BayesianProbabilityEngine:
 
         return update_record
 
-    def replay_persisted_updates(self, *, market_id: str | None = None) -> list[BayesianUpdateRecord]:
+    def replay_persisted_updates(
+        self, *, market_id: str | None = None
+    ) -> list[BayesianUpdateRecord]:
         if self._store is None:
             return []
         records = self._store.read(category="bayesian_probability_updates", limit=100000)

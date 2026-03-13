@@ -65,12 +65,7 @@ def format_kill_switch_message(payload: Mapping[str, Any]) -> str:
     state = str(payload.get("state", "unknown"))
     reason = str(payload.get("reason", "unspecified"))
     detail = str(payload.get("detail", "")).strip()
-    return (
-        "[PQTS KILL SWITCH]\n"
-        f"state={state}\n"
-        f"reason={reason}\n"
-        f"detail={detail}"
-    )
+    return "[PQTS KILL SWITCH]\n" f"state={state}\n" f"reason={reason}\n" f"detail={detail}"
 
 
 class NotificationDispatcher:
@@ -252,6 +247,10 @@ class NotificationDispatcher:
             "attempts": attempts,
             "sent_count": int(sent_count),
             "channels_configured": int(
-                sum(1 for c in ("discord", "telegram", "slack", "email", "sms") if self._channel_enabled(c))
+                sum(
+                    1
+                    for c in ("discord", "telegram", "slack", "email", "sms")
+                    if self._channel_enabled(c)
+                )
             ),
         }

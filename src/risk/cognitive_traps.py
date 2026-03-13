@@ -52,7 +52,10 @@ def evaluate_cognitive_guardrails(inputs: CognitiveGuardrailInputs) -> Cognitive
         reduce_reasons.append("overconfidence_sizing")
         approved_fraction = min(approved_fraction, float(inputs.max_fraction_soft))
 
-    if float(inputs.confidence_score) > 0.95 and approved_fraction > float(inputs.max_fraction_soft) * 0.8:
+    if (
+        float(inputs.confidence_score) > 0.95
+        and approved_fraction > float(inputs.max_fraction_soft) * 0.8
+    ):
         reduce_reasons.append("confidence_extreme_clamp")
         approved_fraction = min(approved_fraction, float(inputs.max_fraction_soft) * 0.8)
 

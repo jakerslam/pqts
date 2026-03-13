@@ -1,6 +1,6 @@
 # GitHub Pages Setup
 
-Last updated: 2026-03-10 (America/Denver)
+Last updated: 2026-03-13 (America/Denver)
 
 ## Current Status
 
@@ -19,7 +19,7 @@ creation when repository settings permit GitHub Actions Pages deployments.
 
 1. Re-run workflow: `Publish Docs Site` (workflow dispatch), or push any docs change.
 2. Verify deployment URL appears in workflow summary.
-3. Confirm URL resolves: `https://jakerslam.github.io/PQTS/`.
+3. Confirm URL resolves: `https://jakerslam.github.io/pqts/`.
 
 If repository permissions still block Pages creation, the workflow now uploads
 `docs-site-fallback` as a run artifact so docs builds remain accessible while

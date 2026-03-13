@@ -22,4 +22,3 @@ def ensure_trace_fields(payload: dict[str, Any], *, trace_id: str | None = None)
     payload["trace_id"] = resolved
     payload.setdefault("trace_timestamp", datetime.now(timezone.utc).isoformat())
     return resolved
-

@@ -54,7 +54,7 @@ Paper-start also emits template artifacts/diffs for transparent GUI->code handof
 ## 5) Primary Web Surface + Runtime Paths
 
 Primary public web surface: Next.js (`apps/web`).
-Dash fallback (operator/internal): `python src/dashboard/start.py`.
+Dash fallback (operator/internal) - remains the operator fallback during web cutover: `python src/dashboard/start.py`.
 
 ```bash
 cd apps/web

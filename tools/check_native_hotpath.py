@@ -17,8 +17,34 @@ def build_arg_parser() -> argparse.ArgumentParser:
     return parser
 
 
+import importlib.util
+import sys
+from pathlib import Path as _Path
+
+def _load_native_migration_module() -> object:
+    candidates = [
+        _Path(__file__).resolve().parent.parent / "src/core/native_migration.py",
+        _Path("src/core/native_migration.py"),
+    ]
+    for candidate in candidates:
+        if candidate.exists():
+            spec = importlib.util.spec_from_file_location("pqts_native_migration", candidate)
+            if spec and spec.loader:
+                module = importlib.util.module_from_spec(spec)
+                sys.modules[spec.name] = module
+                spec.loader.exec_module(module)
+                return module
+    from core.native_migration import build_native_release_matrix, load_migration_policy  # noqa: F401
+    return None
+
+
 def main() -> int:
-    from core.native_migration import build_native_release_matrix, load_migration_policy
+    _mod = _load_native_migration_module()
+    if _mod is not None:
+        build_native_release_matrix = getattr(_mod, "build_native_release_matrix")
+        load_migration_policy = getattr(_mod, "load_migration_policy")
+    else:
+        from core.native_migration import build_native_release_matrix, load_migration_policy
 
     args = build_arg_parser().parse_args()
     cargo = Path(args.cargo)

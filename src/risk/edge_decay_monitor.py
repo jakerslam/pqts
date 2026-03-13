@@ -33,10 +33,19 @@ class EdgeDecayMonitor:
         )
 
     def decision(self) -> dict[str, Any]:
-        baseline = [x.realized_edge_bps for x in self.observations if x.concurrent_load <= self.low_load_max]
-        stressed = [x.realized_edge_bps for x in self.observations if x.concurrent_load >= self.high_load_min]
+        baseline = [
+            x.realized_edge_bps for x in self.observations if x.concurrent_load <= self.low_load_max
+        ]
+        stressed = [
+            x.realized_edge_bps
+            for x in self.observations
+            if x.concurrent_load >= self.high_load_min
+        ]
 
-        if len(baseline) < self.min_samples_per_bucket or len(stressed) < self.min_samples_per_bucket:
+        if (
+            len(baseline) < self.min_samples_per_bucket
+            or len(stressed) < self.min_samples_per_bucket
+        ):
             return {
                 "action": "hold",
                 "reason": "insufficient_samples",

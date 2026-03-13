@@ -107,9 +107,7 @@ class VarDrawdownGuardrail:
             if proposed_delta <= 0.0:
                 allowed = True
                 max_delta = 0.0
-                reason = (
-                    "Hard VaR/drawdown breach; new risk blocked but de-risking trades remain allowed."
-                )
+                reason = "Hard VaR/drawdown breach; new risk blocked but de-risking trades remain allowed."
             else:
                 allowed = False
                 max_delta = 0.0
@@ -121,9 +119,7 @@ class VarDrawdownGuardrail:
                 allowed = True
             else:
                 allowed = proposed_delta <= max_delta
-            reason = (
-                "Soft VaR/drawdown breach; cap incremental risk until metrics recover."
-            )
+            reason = "Soft VaR/drawdown breach; cap incremental risk until metrics recover."
         else:
             action = "allow_new_risk"
             max_delta = budget

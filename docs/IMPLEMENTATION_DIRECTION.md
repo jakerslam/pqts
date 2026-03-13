@@ -1,6 +1,6 @@
 # Implementation Direction
 
-Last updated: 2026-03-09 (America/Denver)
+Last updated: 2026-03-13 (America/Denver)
 
 ## North-Star Objectives
 
@@ -45,7 +45,7 @@ Last updated: 2026-03-09 (America/Denver)
 
 - Incremental migration only; no destabilizing rewrites.
 - Preserve CLI/script compatibility while moving logic into canonical layers.
-- Keep one primary runtime path per release phase (no mixed Streamlit/Dash runtime ambiguity).
+- Keep one primary runtime path per release phase (no mixed Streamlit/Dash runtime ambiguity), and maintain all public proof/docs claims from canonical artifact feeds (`results/reference_performance_latest.json`, release-readiness outputs, and `docs/REFERENCE_PERFORMANCE.md`).
 - Enforce typed boundaries (Pydantic models) for runtime config, API payloads, and strategy manifests.
 - Every structural change should include:
   - boundary validation (`tools/check_architecture_boundaries.py`)
