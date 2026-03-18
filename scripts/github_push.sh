@@ -18,7 +18,7 @@ if command -v gh &> /dev/null; then
         cd "$(dirname "$0")"
         gh repo create protheuslabs/pqts \
             --public \
-            --description "Protheus Quant Trading System - Multi-market algorithmic trading platform with ML" \
+            --description "PQTS - governed system for monetizing future predictions" \
             --source=. \
             --remote=origin \
             --push

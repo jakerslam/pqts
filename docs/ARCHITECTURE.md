@@ -1,5 +1,11 @@
 # PQTS Architecture
 
+## Product Purpose
+
+- Tagline: `PQTS monetizes future predictions under explicit EV, risk, provenance, and promotion gates.`
+- Scope sentence: `Prediction markets are the primary trading surface; adjacent tradable forecasting venues use the same control plane when they satisfy the same safety and eligibility contracts.`
+- Architectural implication: the runtime exists to turn forecasts and scenarios into governed capital decisions, not to create a separate speculative sidecar path outside the canonical control plane.
+
 ## Goals
 
 - Fast runtime execution (single-process modular monolith).
@@ -7,6 +13,7 @@
 - Easy to understand and traverse.
 - Easy to add modules.
 - AI-friendly structure with deterministic entrypoints.
+- Preserve one governed forecast -> decision -> risk -> execution -> settlement path across supported venues.
 
 ## Canonical References
 
@@ -52,6 +59,8 @@ Canonical layer rules enforced by `tools/check_architecture_boundaries.py`:
   - `strategies`
   - `execution`
   - `analytics`
+
+Prediction-market and adjacent forecast-trading venues must plug into this same composed runtime path. No venue-specific shortcut may bypass canonical risk, router, provenance, or reconciliation contracts.
 
 ## R Analytics Boundary
 

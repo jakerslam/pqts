@@ -1,10 +1,14 @@
 # PQTS Documentation
 
-PQTS is a production-oriented quant research and execution platform focused on:
+> A governed system for monetizing future predictions.
+
+Prediction markets are the primary trading surface; adjacent tradable forecasting venues use the same control plane when they satisfy the same safety and eligibility contracts.
+
+PQTS is a governed forecast-to-capital system focused on:
 
 - deterministic simulation and promotion gates
-- strict risk controls and kill-switches
-- operational telemetry and reconciliation reliability
+- strict EV, risk, and venue-eligibility controls
+- operational telemetry, reconciliation, and settlement reliability
 
 ## 5-Minute Path
 

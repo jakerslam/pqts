@@ -1,18 +1,26 @@
 # Implementation Direction
 
-Last updated: 2026-03-13 (America/Denver)
+Last updated: 2026-03-17 (America/Denver)
+
+## Product Framing
+
+- Tagline: `PQTS monetizes future predictions under explicit EV, risk, provenance, and promotion gates.`
+- Scope sentence: `Prediction markets are the primary trading surface; adjacent tradable forecasting venues use the same control plane when they satisfy the same safety and eligibility contracts.`
+- Product wedge: prediction-market-first and forecast-monetization-first, not generic brokerage breadth for its own sake.
 
 ## North-Star Objectives
 
-1. Fast to run
-2. Maintainable
-3. Easy to understand
-4. Easy to add new modules
-5. Easy for AI coders to traverse and modify safely
+1. Make monetizing future predictions trustworthy and repeatable
+2. Fast to run
+3. Maintainable
+4. Easy to understand
+5. Easy to add new modules
+6. Easy for AI coders to traverse and modify safely
 
 ## Architecture Direction
 
 - Primary architecture: modular monolith.
+- Primary product posture: governed forecast-to-capital decisions on prediction markets first.
 - Canonical layers:
   - `src/app/` composition and runtime entrypoints
   - `src/contracts/` typed interfaces and event/context contracts
@@ -45,6 +53,7 @@ Last updated: 2026-03-13 (America/Denver)
 
 - Incremental migration only; no destabilizing rewrites.
 - Preserve CLI/script compatibility while moving logic into canonical layers.
+- Prefer prediction-market and forecast-monetization implementations when choosing between equally valuable expansion paths.
 - Keep one primary runtime path per release phase (no mixed Streamlit/Dash runtime ambiguity), and maintain all public proof/docs claims from canonical artifact feeds (`results/reference_performance_latest.json`, release-readiness outputs, and `docs/REFERENCE_PERFORMANCE.md`).
 - Enforce typed boundaries (Pydantic models) for runtime config, API payloads, and strategy manifests.
 - Every structural change should include:

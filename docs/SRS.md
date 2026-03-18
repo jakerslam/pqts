@@ -2,37 +2,43 @@
 
 ## 1. Purpose
 
-Define requirements for integrating a prediction-market strategy into PQTS based on a transferable core idea:
+Define requirements for PQTS as a governed system for monetizing future predictions across prediction markets and adjacent tradable forecasting surfaces.
 
-- Buy underdogs only when the market is likely mispriced and expected value (EV) is positive after costs.
+Core purpose:
 
-This captures usable signal logic from a public strategy discussion while avoiding blind copy-trading.
+- Turn forecasts, probability estimates, and scenario analysis into auditable capital decisions.
+- Monetize prediction edge only when expected value (EV) remains positive after costs, risk limits, and venue-eligibility controls.
+- Preserve provenance, staged validation, and hard safety rules rather than treating prediction markets as unconstrained speculation.
 
 ## 2. Scope
 
 In scope:
 
-- Underdog mispricing signal generation.
+- Binary, threshold, range, count, and related prediction-market workflows.
+- Forecast/scenario ingestion and fair-probability estimation.
 - EV-based entry gating.
 - Position sizing and portfolio limits.
+- Venue auth, approval, settlement, and lifecycle controls for forecast-trading venues.
 - Risk and observability controls.
-- Backtest and paper-trading validation.
+- Backtest, paper, canary, and live validation/certification.
 
 Out of scope:
 
 - Wallet-copying as a primary source of alpha.
 - Any strategy that depends on private/non-public information.
+- Trading enablement on venues where terms, jurisdiction, entitlement, or account-eligibility requirements are not satisfied.
 
-## 3. Strategy Summary
+## 3. Core Monetization Loop
 
-The strategy targets binary/event markets where crowd behavior overprices favorites.
+PQTS monetizes future predictions by comparing market-implied probabilities against model-estimated or scenario-weighted fair probabilities, then acting only when the edge survives costs, risk controls, and venue-eligibility gates.
 
 Core concept:
 
 - Let `p_market` be implied market probability for an outcome.
 - Let `p_model` be model-estimated fair probability.
 - Let `edge = p_model - p_market`.
-- Enter only when `edge` and net EV exceed configured thresholds, with an underdog constraint (`p_market < 0.50` by default).
+- Enter only when `edge` and net EV exceed configured thresholds and the venue/workspace is eligible for the intended trading mode.
+- Strategy families may include underdog mispricing, threshold translation, weather/range/count forecasting, short-horizon discrepancy capture, and other forecast-monetization workflows covered elsewhere in this SRS.
 
 ## 4. Functional Requirements
 
@@ -89,6 +95,30 @@ Core concept:
   - `p_market`, `p_model`, `edge`, expected EV, fees/slippage estimate, decision outcome.
 - System shall emit realized-vs-expected EV diagnostics.
 - System shall support per-league/per-market attribution rollups.
+
+### FR-9 Venue Eligibility and Trading-Mode Controls
+
+- System shall enforce venue-eligibility policy checks before enabling authenticated prediction-market trading on any venue.
+- Eligibility checks shall include current account mode, credential/auth state, required approvals/allowances, workspace entitlement, and venue/jurisdiction policy status where applicable.
+- If venue eligibility cannot be proven current and valid, the system SHALL remain in read-only, research, or dry-run mode and SHALL block order submission.
+
+### FR-10 Forecast Artifact Lifecycle
+
+- Every capital-affecting candidate SHALL originate from a versioned forecast artifact that records at minimum `forecast_id`, target market/outcome scope, horizon, issuance timestamp, producer identity, workflow/model version, estimated probability or value range, and linked evidence references.
+- Forecast artifacts SHALL be immutable once used for a capital-affecting decision; later changes SHALL produce a new version or successor artifact rather than mutating the prior record.
+- Order-truth, replay, and promotion surfaces SHALL be able to reconstruct exactly which forecast artifact version was active at the time of each decision.
+
+### FR-11 Forecast Revision and Supersession Controls
+
+- When new evidence materially changes a live forecast, the system SHALL classify the update as `strengthen`, `weaken`, `invalidate`, or `supersede` and record the reason code and revision timestamp.
+- Strategy policy SHALL define deterministic actions for material forecast revisions on open positions, including `hold`, `reduce`, `exit`, `reprice`, or `no_trade`.
+- Forecast revisions SHALL preserve lineage links so operators can audit how a thesis evolved from initial issuance through final settlement or exit.
+
+### FR-12 Resolution Ambiguity and Dispute-Risk Gate
+
+- Before entering a prediction-market position, the system SHALL score market-resolution ambiguity and dispute risk using machine-readable rule clarity, source finality, historical dispute context where available, and any venue-specific resolution caveats.
+- Markets exceeding configured ambiguity/dispute thresholds SHALL be blocked, shadow-only, or size-downweighted by policy rather than treated as ordinary opportunities.
+- If resolution rules, source availability, or settlement conditions deteriorate after entry, the system SHALL raise a typed risk event and execute policy-defined protective actions.
 
 ## 5. Non-Functional Requirements
 
@@ -4525,6 +4555,12 @@ Observed source links:
 - If edge decays beyond configured thresholds under higher load, strategy size and concurrency limits shall auto-tighten.
 - Decay breaches and mitigation actions shall be emitted as typed risk/incidence events.
 
+### HKO-9 Multilingual Source Normalization Contract
+
+- Event-intel ingestion pipelines that consume multilingual public sources SHALL preserve original language, translation/normalization method, translation timestamp, and confidence metadata for every translated record.
+- If translated content is used for entity/event extraction, the resulting event record SHALL link both the translated representation and the original-source reference so downstream review can audit semantic drift.
+- Low-confidence or materially ambiguous translations SHALL down-rank or block capital-affecting triggers until corroborated by higher-confidence sources or language-capable review paths.
+
 ## 74. Additional Delta Requirements from External Post Chain (Shelpid_WI3M multi-agent execution, March 10, 2026)
 
 These requirements capture net-new, applicable workflow mechanics from the referenced X post and linked surfaces while excluding unverified promotional performance claims.
@@ -5546,6 +5582,368 @@ These requirements capture the net-new, applicable deltas from the referenced po
 - Any campaign with entry pricing below policy thresholds SHALL require explicit success criteria and auto-expiry, then auto-disable when post-campaign cohort quality fails policy minimums.
 - Campaign telemetry SHALL be linked to canonical monetization and ops artifacts so pricing experiments remain traceable to retention, support load, and promotion outcomes.
 
+## 93H. Additional Delta Requirements from External Post (0xMovez quant-formula workflow, Sep 2026)
+
+These requirements capture the net-new, applicable deltas from the referenced post thread emphasizing formula-first, short-horizon decision discipline in prediction markets. They intentionally avoid duplicating existing Bayesian/Kelly/edge controls already covered in `LUNR-*` and related families.
+
+### MVZ-1 Formula-Declared Strategy Manifest Contract
+
+- Any strategy promoted as formula-driven SHALL declare its active decision formulas in machine-readable manifest fields (for example Bayesian update, divergence metric, EV gate).
+- Runtime and replay receipts SHALL persist the concrete input/output values for each declared formula on every tradable decision.
+- Promotion review SHALL fail closed when declared formulas are missing, disabled, or not evidenced in decision receipts.
+
+### MVZ-2 Correlated-Market Divergence Sentinel Contract
+
+- The system SHALL compute configurable divergence metrics across correlated markets (including KL-style distance metrics where applicable) and attach them to candidate-trade artifacts.
+- Divergence-triggered trades SHALL require explicit corroboration that observed divergence exceeds fees, spread, and slippage-adjusted thresholds before order eligibility.
+- Divergence sentinel telemetry SHALL expose false-positive and decay behavior to paper/canary gate reports.
+
+### MVZ-3 Short-Horizon Freshness and Time-Left Contract
+
+- For short-cycle markets, the system SHALL enforce minimum time-left and maximum signal-age constraints before allowing execution.
+- Candidate decisions SHALL include lookback window, event time remaining, and freshness metadata in order-truth artifacts.
+- Promotion evidence SHALL include sensitivity analysis showing strategy performance degradation under realistic data-lag scenarios.
+
+## 93I. Additional Delta Requirements from External Post (Gustafsson formula+terminal workflow, Sep 2026)
+
+These requirements capture the net-new, applicable deltas from the referenced post describing AI-assisted formula authoring, copy-trade logic declaration, and tight terminal/tool integration. They intentionally avoid bypassing existing router, promotion, and hard-risk controls.
+
+### GKT-1 Formula-to-Policy Compile Contract
+
+- The system SHALL support a structured formula specification surface for strategy logic (conditions, signals, position weights, and risk bounds) that compiles into canonical PQTS policy/strategy config.
+- Compile outputs SHALL include explicit validation errors, normalized parameter values, and deterministic versioned artifacts for replay.
+- Formula compilation SHALL fail closed when required risk fields or stage constraints are missing.
+
+### GKT-2 Assistant-Terminal Context Sync Contract
+
+- The system SHALL provide a bounded context-sync layer between assistant/coplan surfaces and terminal/operator workflows so both surfaces operate on the same active strategy state.
+- Sync receipts SHALL record originating surface, requested action, resolved config version, and execution eligibility state.
+- Any cross-surface conflict SHALL resolve to non-execute defaults (`hold`/`propose`) until operator confirmation.
+
+### GKT-3 Copy-Logic Stage-Bounded Execution Contract
+
+- Formula-driven copy or follow logic SHALL remain stage-bounded (`backtest -> paper -> shadow -> canary -> live`) and SHALL never bypass existing gate evaluators.
+- Execute eligibility for copy logic SHALL require explicit leader/source allowlisting, per-source risk caps, and canonical router-path enforcement.
+- Evidence bundles for copy-logic promotions SHALL include source dependency, latency/freshness diagnostics, and counterparty concentration metrics.
+
+## 93J. Additional Delta Requirements from External Post (zostaff multi-agent crowd simulation workflow, Mar 15, 2026)
+
+These requirements capture the net-new, applicable deltas from the referenced post describing large-population agent simulation and crowd-dynamics interpretation. They intentionally exclude unverifiable ROI claims and preserve PQTS evidence-first promotion controls.
+
+### ZOS-1 Heterogeneous Agent-Population Scenario Contract
+
+- The system SHALL support configurable heterogeneous agent populations for scenario simulation (for example distinct behavior archetypes, memory states, and risk policies) instead of single-representative-agent assumptions.
+- Scenario runs SHALL persist per-archetype participation counts, decision distributions, and confidence ranges as machine-readable artifacts.
+- Promotion and risk-policy workflows SHALL treat population-simulation outputs as challenger evidence only unless corroborated by canonical backtest/paper/canary artifacts.
+
+### ZOS-2 Consensus, Polarization, and Cascade Telemetry Contract
+
+- Scenario-lab outputs SHALL include consensus concentration, subgroup polarization, and cascade-trigger metrics so operator reviews can distinguish stable convergence from panic herding.
+- Trade candidates derived from crowd-simulation outputs SHALL include an explicit instability flag when cascade metrics exceed configured thresholds.
+- Gate reviews SHALL expose whether accepted decisions came from robust multi-cluster agreement or single-cluster dominance.
+
+### ZOS-3 Extraordinary Claim Provenance Contract
+
+- Any imported performance claim from external social/repo sources (for example rapid account growth or “live equity curve” statements) SHALL be tagged `unverified_external_claim` by default.
+- Unverified external claims SHALL be excluded from promotion readiness and strategy ranking until linked to reproducible PQTS-native evidence artifacts.
+- Claim-ingestion surfaces SHALL require source URL, capture timestamp, and verification status fields for auditability.
+
+## 93K. Additional Delta Requirements from External Post (Lunar LMSR liquidity-parameter workflow, Mar 15, 2026)
+
+These requirements capture the net-new, applicable deltas from the referenced post emphasizing explicit LMSR liquidity-parameter awareness in execution decisions. They intentionally avoid duplicating existing EV, Kelly, and cognitive-trap controls in `LUNR-*`.
+
+### LLR-1 LMSR Liquidity-Parameter Sensitivity Contract
+
+- For LMSR-style markets, the system SHALL compute and persist local price-impact sensitivity to order size as a function of the active liquidity parameter (`b`) and current outcome inventory state.
+- Candidate trades SHALL include estimated post-trade probability shift and expected slippage under small/medium/large size scenarios.
+- Execution eligibility SHALL fail closed when projected price impact exceeds configured thresholds for the target stage (`paper`, `canary`, `live`).
+
+### LLR-2 Thin-Pool Adverse-Fill Guard Contract
+
+- The system SHALL classify pools/markets by depth and impact regime (for example `thin`, `normal`, `deep`) using policy-defined thresholds and recent fill telemetry.
+- Thin-pool classifications SHALL automatically tighten size caps, repricing limits, and minimum net-edge thresholds before order submission.
+- Promotion evidence SHALL report realized-vs-projected impact error by depth regime so thin-pool assumptions are continuously falsified.
+
+## 93L. Additional Delta Requirements from External Post (AshenSoul copy-trade claim workflow, Mar 15, 2026)
+
+These requirements capture the net-new, applicable deltas from the referenced post describing high-volume wallet-copy narratives and probability-band targeting. They intentionally preserve existing copy-trade and promotion safety controls and treat social claims as untrusted by default.
+
+### ASHC-1 Sponsored-Claim Ingestion and Trust Label Contract
+
+- Any external trading claim marked as sponsored/paid-partnership content SHALL be ingested with a mandatory `sponsored_claim` trust label and default `unverified` status.
+- Sponsored claims SHALL be excluded from strategy ranking, promotion readiness, and auto-follow recommendations until independently corroborated by PQTS-native evidence artifacts.
+- Claim records SHALL persist source URL, capture timestamp, sponsorship flag, and verification outcome for audit and replay.
+
+### ASHC-2 Probability-Band Specialization Attribution Contract
+
+- Strategies claiming edge in specific implied-probability bands (for example `30%-40%`) SHALL declare those bands explicitly in strategy metadata.
+- Backtest, paper, and canary reports SHALL publish per-band sample count, net expectancy, drawdown, and slippage so band-specific edge is testable and falsifiable.
+- Promotion gates SHALL fail closed when claimed band edge is unsupported by minimum-sample and cost-adjusted performance thresholds.
+
+### ASHC-3 Trade-Count and Volume Illusion Guard Contract
+
+- Evaluation surfaces SHALL normalize performance by capital efficiency and risk-adjusted outcomes, not raw execution count or gross volume alone.
+- High-trade-count strategies SHALL include turnover-adjusted net alpha and concentration metrics before any recommendation is surfaced.
+- Any copy/follow recommendation driven by wallet observations SHALL include a warning when observed performance is concentrated in a small number of outsized outcomes.
+
+## 93M. Additional Delta Requirements from External Post (Roundtable private-data simulation workflow, Mar 14, 2026)
+
+These requirements capture the narrow net-new delta from the referenced post describing simulated strategies derived from private BTC trading data. They intentionally avoid duplicating existing scenario-lab and crowd-simulation requirements in `MRF-*` and `ZOS-*`.
+
+### RTSP-1 Private-Data Simulation Provenance Contract
+
+- Any simulation or synthesized strategy derived from non-public, licensed, or proprietary market data SHALL persist source provenance, entitlement/license scope, permitted-use restrictions, and retention policy metadata.
+- Strategy generation SHALL fail closed when required entitlement or permitted-use metadata for private inputs is missing, expired, or inconsistent with the target workflow.
+- Promotion and benchmark artifacts SHALL distinguish outcomes derived from private-data simulations from public-data results so claims remain auditably scoped.
+
+### RTSP-2 Scenario-Winner Selection Bias Contract
+
+- When multiple simulated scenarios or candidate strategies are generated and ranked, the system SHALL persist the full candidate set, ranking objective, out-of-sample evaluation window, and chosen winner receipt.
+- Selection logic SHALL fail closed when the chosen scenario depends on in-sample-only performance, post-event information, or unverifiable private labels.
+- Replay and promotion reviews SHALL expose whether the selected strategy remained superior under walk-forward and paper validation after the original simulation run.
+
+## 93N. Additional Delta Requirements from External Post (Philanthrop forecast-only weather workflow, Mar 15, 2026)
+
+These requirements capture the narrow net-new delta from the referenced post describing forecast-only weather-market trading. They intentionally avoid duplicating existing weather latency, calibration, and copy-trade controls in `AX-*`, `PL-*`, and `AEG-*`.
+
+### PWX-1 Forecast-Only Signal Purity Contract
+
+- Weather-strategy manifests SHALL be able to declare a `forecast_only` signal policy that restricts decision inputs to approved forecast/model feeds and explicitly excludes discretionary chart, news, and social-signal overlays.
+- If a `forecast_only` strategy receives disallowed input classes without an explicit policy override, candidate trades SHALL fail closed with structured reason codes.
+- Replay and promotion artifacts SHALL expose the active signal-policy class so operators can distinguish pure forecast systems from hybrid discretionary stacks.
+
+### PWX-2 Forecast Source-Tiering Contract
+
+- Weather/meteorology inputs SHALL be classified by source tier (for example direct model/agency feed, normalized forecast API, consumer weather-app summary) with provenance and freshness metadata.
+- Strategies configured for direct-model edge SHALL prefer higher-tier authoritative forecast sources over lower-tier consumer summaries when conflicts or latency differences exist.
+- Lower-tier forecast summaries SHALL not be used as sole decision inputs for strategies requiring model-release latency edge unless policy explicitly allows it and the choice is auditable.
+
+## 93O. Additional Delta Requirements from External Post (k1rallik market-domain specialization workflow, Mar 15, 2026)
+
+These requirements capture the narrow net-new delta from the referenced post describing a trader whose edge appears concentrated in research-heavy market domains. They intentionally exclude the wallet-profit claims and focus only on market-class fit governance.
+
+### KRL-1 Strategy Market-Class Fit Manifest Contract
+
+- Strategy manifests SHALL declare their intended market classes and domain assumptions (for example `sports`, `gaming`, `politics`, `macro`) as first-class eligibility metadata.
+- Promotion and deployment flows SHALL block expansion into undeclared market classes until class-specific priors, calibration, and execution-quality evidence are available.
+- Strategy cards and operator surfaces SHALL display the declared market-class fit anywhere a strategy is ranked, promoted, or copied.
+
+### KRL-2 Market-Class Edge Concentration Attribution Contract
+
+- Performance and promotion reviews SHALL report net alpha, win rate, sample count, and capital efficiency segmented by market class for each strategy.
+- If a strategy's realized edge is materially concentrated in one market class, leaderboard labels, copyability labels, and deployment recommendations SHALL remain scoped to that class until cross-class evidence is demonstrated.
+- Public or internal claims of broad market coverage SHALL fail closed when supporting evidence is dominated by a narrow subset of market classes.
+
+## 93P. Additional Delta Requirements from External Post (bored2boar wallet-scanner workflow, Mar 15, 2026)
+
+These requirements capture the narrow net-new delta from the referenced post describing a wallet scanner that ranks copy-trading opportunities. They intentionally exclude the PnL and accuracy claims themselves and focus on measurable scanner quality and leader-stability controls.
+
+### B2B-1 Wallet-Scanner Quality Contract
+
+- Any wallet-scanner or leader-ranking subsystem that labels copy-trading opportunities SHALL publish reproducible evaluation metrics including precision, recall, false-positive rate, and realized post-delay net expectancy over explicit evaluation windows.
+- Scanner outputs SHALL persist the ranking snapshot, underlying wallet features, evaluation window, and labeling method used for each recommended wallet or opportunity.
+- Public or internal claims about wallet-scanner accuracy SHALL be labeled `unverified` unless backed by reproducible benchmark artifacts using the same follow-delay and cost assumptions as runtime.
+
+### B2B-2 Leader Behavior Drift Contract
+
+- Copy/follow subsystems SHALL monitor leader wallets for behavior drift, including market-class changes, holding-period shifts, turnover spikes, and concentration changes relative to the validated follow profile.
+- Material leader drift SHALL automatically down-rank, shadow-only, or disable follow recommendations until replay/paper validation re-establishes fit.
+- Drift receipts SHALL be visible in copy/follow explainability surfaces so operators can distinguish stale leader reputations from current validated behavior.
+
+## 93Q. Additional Delta Requirements from External Post (ZenomTrader correlation-first portfolio workflow, Mar 15, 2026)
+
+These requirements capture the narrow net-new delta from the referenced post describing portfolio construction that prioritizes low cross-strategy correlation over attachment to individual strategies. They intentionally avoid importing unverifiable performance claims and focus on measurable diversification controls.
+
+### ZNM-1 Marginal Diversification Admission Contract
+
+- Strategy admission, promotion, and capital-allocation workflows SHALL compute each candidate strategy's marginal diversification contribution to the active portfolio in addition to its standalone expectancy and risk metrics.
+- Candidate strategies whose expected portfolio contribution is dominated by high correlation to already-active strategies SHALL be down-ranked, budget-capped, or blocked unless an explicit exception is approved.
+- Admission and promotion artifacts SHALL persist the candidate's standalone metrics, marginal correlation profile, and resulting portfolio-level impact estimate.
+
+### ZNM-2 Redundant Strategy Compression Contract
+
+- Portfolio governance SHALL detect clusters of active strategies with persistently redundant behavior across returns, exposures, and market-class participation.
+- When multiple strategies are effectively substitutes, capital-governor logic SHALL recommend compression actions such as size reduction, staging only one representative strategy, or requiring stronger incremental evidence for the others.
+- Strategy cards and promotion reviews SHALL expose redundancy class and portfolio-uniqueness diagnostics so operators can distinguish genuine diversification from strategy-count vanity.
+
+## 93R. Additional Delta Requirements from External Post (Roundtable role-segregated agent workflow, Mar 16, 2026)
+
+These requirements capture the narrow net-new delta from the referenced post describing multiple AI agents that scan markets, generate signals, filter risk, and execute trades automatically. They intentionally avoid duplicating existing agent-policy and verifier-agent requirements in `SWI-*` and `AGP-*`.
+
+### RTSA-1 Role-Segregated Agent Pipeline Contract
+
+- Autonomous agent workflows SHALL support explicit role segregation across at least market scanning, signal synthesis, risk filtering, and execution-intent submission stages.
+- In autonomous mode, no single agent role SHALL be allowed to originate a candidate and self-approve its capital-affecting execution path without an independent downstream gate.
+- Agent-policy documents SHALL declare which roles may read, propose, simulate, or request execution at each stage of the pipeline.
+
+### RTSA-2 Agent Handoff Receipt Contract
+
+- Every transition between agent pipeline stages SHALL emit a handoff receipt containing candidate ID, upstream receipt references, role transition, timestamp, and summarized deltas introduced by the downstream stage.
+- Handoff receipts SHALL preserve latency and queueing diagnostics so operators can measure where multi-agent pipelines add delay or fail closed.
+- Replay and incident surfaces SHALL reconstruct the full stage chain from scan through execution request using these receipts.
+
+## 93S. Additional Delta Requirements from External Post (self.dll rapid-feedback short-cycle workflow, Mar 14, 2026)
+
+These requirements capture the narrow net-new delta from the referenced post describing how short-cycle markets compress training feedback loops for adaptive agents. They intentionally avoid duplicating existing RL, short-horizon, and leakage-control requirements.
+
+### SFD-1 Feedback-Velocity-Aware Experiment Prioritization Contract
+
+- Research orchestration SHALL compute feedback velocity metrics by market class, including time-to-label, episodes-per-day, and wall-clock training-cycle duration.
+- Experiment schedulers and optimization surfaces SHALL be able to prioritize market classes that provide materially faster validated feedback loops, while preserving identical evidence and promotion standards.
+- Research reports SHALL distinguish sample-count advantage from wall-clock feedback-speed advantage so rapid iteration is not mistaken for stronger live edge.
+
+### SFD-2 Adaptive-vs-Static Short-Cycle Baseline Contract
+
+- Adaptive or RL-driven strategies targeting short-cycle markets SHALL be benchmarked against strong static/rule-based baselines using the same feature set, cost assumptions, and latency constraints.
+- Promotion eligibility SHALL require evidence that the adaptive policy adds net value beyond the static baseline after realistic execution assumptions.
+- Comparison artifacts SHALL persist training duration, evaluation duration, feature manifest, and parity assumptions for auditability.
+
+## 93T. Additional Delta Requirements from External Post (DeFiMinty institutional-flow refinement workflow, Mar 15, 2026)
+
+These requirements capture the narrow net-new delta from the referenced post describing liquidation-pressure mapping, options-position context, and multi-venue confirmation to reduce noise in flow detection. They intentionally avoid duplicating the earlier `HM-*` squeeze-monitor baseline.
+
+### DFMI-1 Liquidation-Pressure Surface Contract
+
+- Market-structure context engines SHALL support a liquidation-pressure surface that estimates clustered forced-exit pressure by price level and direction.
+- Candidate signals derived from liquidation pressure SHALL persist the contributing price bands, estimated pressure magnitude, timestamp, and source methodology version.
+- Execution and replay surfaces SHALL distinguish realized moves driven by liquidation-pressure release from generic momentum or volume-spike signals.
+
+### DFMI-2 Multi-Venue Flow Confirmation and Noise Suppression Contract
+
+- Flow-detection pipelines SHALL cross-reference candidate activity across multiple venues and context sources before labeling a move as informed or institutional flow.
+- The confirmation logic SHALL persist supporting venue set, agreement/disagreement state, and the noise-suppression filters that rejected weaker false-positive patterns.
+- If cross-venue confirmation is missing, stale, or contradictory, downstream strategies SHALL down-rank or block the candidate rather than treating single-venue anomalies as validated flow.
+
+## 93U. Additional Delta Requirements from Warren Buffett Primary Sources (Berkshire owner manual and shareholder letters)
+
+These requirements capture the narrow net-new delta from Buffett's primary sources that maps cleanly into PQTS: conservative valuation discipline, opportunity-cost-aware capital allocation, and permanent liquidity reserve policy. They intentionally avoid importing equity-specific management-analysis concepts that do not translate well to systematic trading.
+
+### BUF-1 Conservative Value-Range Contract
+
+- Strategies that rely on fair-value, probability-value, or expected-value estimates SHALL persist conservative value ranges and key sensitivity drivers rather than only single-point estimates.
+- Capital-affecting decisions SHALL be blocked or down-sized when the conservative value range no longer provides sufficient margin versus market price after cost, slippage, and uncertainty adjustments.
+- Decision artifacts SHALL identify which assumptions most materially change estimated value so operators can distinguish robust edge from fragile model precision.
+
+### BUF-2 Opportunity-Cost Capital Allocation Contract
+
+- Capital-governor workflows SHALL rank allocation decisions against the current alternative opportunity set; positive standalone expectancy SHALL be insufficient when superior risk-adjusted and liquidity-aware alternatives exist.
+- Allocation and promotion reviews SHALL persist the chosen-versus-rejected alternatives and the rationale for concentration, deferral, or capital retention.
+- Strategies consuming capital without maintaining competitive incremental value contribution SHALL trigger shrink, redeploy, or hold-review actions even if recent performance is not outright negative.
+
+### BUF-3 Permanent Liquidity Reserve Contract
+
+- Portfolio policy SHALL maintain a minimum reserve of unencumbered liquidity that is excluded from normal strategy deployment and preserved for stress, collateral, and incident demands.
+- Breach of the required reserve SHALL automatically halt non-essential capital expansion and require explicit review before additional commitments are approved.
+- Stress, promotion, and capital-allocation artifacts SHALL report projected post-shock liquidity after margin, collateral, settlement, and rollback demands so the system avoids becoming a forced seller under stress.
+
+## 93V. Additional Delta Requirements from Capital-Aware Utility and Bankroll Routing (March 17, 2026)
+
+These requirements capture the need to tailor strategy/risk policy to bankroll size and declared utility mode without weakening hard safety rules, execution routing constraints, or kill-switch behavior. They intentionally distinguish disposable speculative capital from preservation or compounding mandates so the system does not confuse "small bankroll" with permission for uneconomic or structurally reckless behavior.
+
+### CAPU-1 Bankroll-Aware Policy Compilation Contract
+
+- Before any capital-affecting workflow is enabled, the system SHALL compile an effective trading policy from declared bankroll, utility mode, time horizon, maximum acceptable loss, and venue/strategy cost model.
+- Compiled policy artifacts SHALL persist the resulting strategy-class allowlist, position-size bounds, concurrent-position limit, cadence budget, drawdown/loss envelope, and any additional acknowledgements required by the selected utility mode.
+- Raw bankroll size alone SHALL be insufficient to increase aggressiveness; any move toward a more speculative posture SHALL require explicit user-declared utility and loss-budget consent.
+
+### CAPU-2 Minimum Efficient Capital Gating Contract
+
+- The system SHALL maintain minimum efficient capital thresholds by strategy family and venue based on ticket-size feasibility, fee floors, slippage, diversification needs, and operational minimums.
+- If declared bankroll is below the efficient-capital threshold for a candidate strategy class, the system SHALL fail closed by blocking the class, downgrading to a more suitable class, or marking the account as research-only/speculative-only under a narrower policy envelope.
+- Strategy cards, onboarding flows, and capital-allocation surfaces SHALL explain the specific drivers of capital insufficiency and identify the threshold at which the blocked strategy class becomes economically viable.
+
+### CAPU-3 Utility-Declared Speculative Bankroll Mode Contract
+
+- The system SHALL support an explicit speculative/asymmetric-payoff utility mode for disposable-capital accounts where the user accepts high drawdown or total-loss outcomes in pursuit of high-convexity returns.
+- Speculative mode SHALL only admit strategy classes whose payoff shape, cadence, and fee structure are compatible with that mandate; it SHALL NOT enable martingale behavior, unbounded averaging down, hidden leverage expansion, or negative-expected-value churn.
+- Entering speculative mode SHALL require explicit acknowledgement of the maximum-loss budget and SHALL suppress product language that would otherwise imply preservation, income, or steady-compounding expectations.
+
+### CAPU-4 Fee-Dominance Auto-Disable Contract
+
+- Before submitting any order for a micro or small account, the system SHALL compute expected after-cost edge using current ticket size, venue fee model, slippage estimate, and expected edge for the candidate strategy.
+- If fee/slippage burden makes expected after-cost edge non-positive, or exceeds policy-defined burden thresholds relative to ticket size or forecast edge, the strategy SHALL be auto-blocked, cadence-capped, or size-adjusted regardless of the user's selected risk appetite.
+- Wallet, strategy, and approval surfaces SHALL expose current fee-dominance state and recommend larger efficient ticket sizes, lower-cadence deployment, alternative strategy classes, or no-trade behavior when account size makes activity uneconomic.
+
+## 93W. Additional Delta Requirements from External Post (SolSt1ne proxy-market advisory terminal, March 17, 2026)
+
+These requirements capture the narrow net-new delta from the referenced post describing a Polymarket decision-support terminal driven by Binance order flow, Polymarket prices, and multi-timeframe technical context. They intentionally avoid duplicating existing underlying-to-threshold translation, lead-lag provenance, and indicator-fabric requirements already present in `ANTP-*`, `HL-*`, and `DLM-*`.
+
+### SOLS-1 Proxy-to-Contract Advisory Decomposition Contract
+
+- Human decision-support surfaces that combine proxy-market microstructure with target-contract prices SHALL decompose the final advisory output by source family, including proxy-venue flow, target-market state, and technical/context overlays, instead of emitting an opaque directional label alone.
+- Advisory artifacts SHALL persist per-family contribution weights or reason codes, freshness state, and the target contract / proxy venue mapping used to produce each advisory view.
+- Advisory-only terminals SHALL remain read-only with respect to execution; any downstream order path SHALL still require explicit strategy policy, router-only execution, and existing promotion/risk gates.
+
+### SOLS-2 Multi-Timeframe Conflict Visibility Contract
+
+- Multi-timeframe advisory outputs SHALL publish directional bias, probability/confidence estimate, and freshness by timeframe rather than collapsing all horizons into one composite status.
+- When materially different timeframes disagree beyond policy thresholds, the system SHALL surface an explicit conflict state and reduce or suppress any unified-confidence recommendation rather than implying false consensus.
+- Replay and review surfaces SHALL preserve the timeframe-by-timeframe advisory stack so operators can diagnose whether a decision relied on short-horizon flow, higher-timeframe confirmation, or unresolved cross-horizon conflict.
+
+## 93X. Additional Delta Requirements from External Post (old_samster probabilistic-forecast provider workflow, March 17, 2026)
+
+These requirements capture the narrow net-new delta from the referenced post describing a workflow that incentivizes outside quants to produce probabilistic price predictions and then consumes those predictions in downstream trading logic. They intentionally exclude the attached performance screenshots and avoid duplicating existing generic calibration, marketplace, and external-signal-provider controls.
+
+### SAMS-1 External Forecaster Quality Scoring Contract
+
+- If PQTS ingests probabilistic forecasts from external forecasters, miners, or signal contributors, it SHALL score each contributor as a forecaster using explicit metrics such as calibration error, Brier/log-loss, coverage, sample count, and regime/market segmentation.
+- Contributor-quality artifacts SHALL persist forecast timestamp, target definition, horizon, realized label, evaluation delay assumptions, and score version so provider rankings are reproducible.
+- Provider leaderboards, weighting, and monetization/reward surfaces SHALL use these quality artifacts rather than raw popularity, volume, or unverified PnL claims.
+
+### SAMS-2 Delay-Adjusted Provider Consumption Contract
+
+- Any strategy consuming external probabilistic forecast feeds SHALL evaluate those feeds under realistic ingestion delay, routing delay, fee/slippage, and execution-latency assumptions before using them for capital-affecting decisions.
+- Provider-derived edge SHALL be measured both pre-delay and post-delay; downstream strategies SHALL fail closed, down-weight, or shadow-only providers whose apparent value disappears after realistic timing and cost adjustments.
+- Replay and promotion artifacts SHALL expose the mapping from provider forecast to resulting trade candidate so operators can distinguish genuine forecast utility from stale-information mirage.
+
+## 93Y. Additional Delta Requirements from External Post (Quant Science market-data MCP workflow, March 17, 2026)
+
+These requirements capture the narrow net-new delta from the referenced post describing an MCP server for stock market data consumed by an assistant. They intentionally avoid treating generic "AI financial analyst" framing as a requirement and focus only on the governed data-surface contract.
+
+### QSCI-1 Read-Only Market-Data Tool Surface Contract
+
+- PQTS SHALL be able to expose approved market-data and fundamentals providers through a read-only assistant/tool protocol surface (for example MCP-style tools) backed by the same canonical adapter contracts used by API, CLI, and Studio surfaces.
+- Assistant-facing data tools SHALL declare capability metadata including asset classes, fields, granularity, entitlement requirements, freshness posture, and any known coverage gaps.
+- Tool surfaces that expose market data SHALL remain strictly read-only unless separately promoted through privileged execution/control-plane contracts.
+
+### QSCI-2 Tool-Surface Provenance and Entitlement Parity Contract
+
+- Responses returned through assistant-facing market-data tools SHALL carry provenance and entitlement metadata equivalent to direct adapter/API access, including provider identity, as-of timestamp, schema/version marker, and permission scope.
+- If a provider is stale, degraded, unauthorized, or outside declared coverage, the tool surface SHALL fail closed with typed reason codes rather than silently returning partial or misleading analysis inputs.
+- Capability registry, docs, and assistant/tool surfaces SHALL derive from the same canonical connector metadata so coverage claims stay consistent across human and agent interfaces.
+
+## 93Z. Additional Delta Requirements from External Repository (TauricResearch/TradingAgents, March 17, 2026)
+
+These requirements capture the narrow net-new delta from the referenced repository's committee-style multi-agent trading workflow. They intentionally avoid duplicating existing graph-composition, role-segregation, verifier-agent, and promotion-gate controls already present in `AHF-*`, `SWI-*`, `AGP-*`, and `RTSA-*`.
+
+### TAGR-1 Structured Bull-vs-Bear Research Debate Contract
+
+- Multi-agent research workflows SHALL support an explicit bull-vs-bear debate stage where opposing researcher roles challenge analyst outputs before any trade proposal is advanced.
+- Debate artifacts SHALL preserve the affirmative case, counter-case, evidence references, unresolved disagreements, and the number of debate rounds actually run.
+- If the debate concludes without sufficient evidence dominance or leaves material unresolved contradictions above policy thresholds, downstream stages SHALL default to `hold`/`block` rather than silently collapsing to a confident trade narrative.
+
+### TAGR-2 Committee Decision Lineage Contract
+
+- For committee-style agent workflows, the system SHALL preserve one linked decision chain spanning analyst summaries, research-debate outputs, trader proposal, risk assessment, and final portfolio-manager verdict.
+- Each stage in the chain SHALL emit a structured artifact with actor role, input references, output thesis/recommendation, timestamp, and disposition (`advance`, `revise`, `hold`, `reject`).
+- Replay, explainability, and promotion surfaces SHALL be able to reconstruct the full committee lineage so operators can see exactly which stage introduced or rejected the final trade thesis.
+
+## 93AA. Additional Delta Requirements from External Repository (TrendTechVista/polymarket-copy-trading-bot, March 17, 2026)
+
+These requirements capture the narrow net-new delta from the referenced repository's implementation details for public-activity copy-follow workflows. They intentionally exclude the repository's blind mirroring posture, promoted leader wallets, and any performance implications because those are already constrained by existing `CT-*`, `LUNR-*`, `ASHC-*`, and `B2B-*` families.
+
+### TTV-1 Profile-Handle to Execution-Identity Resolution Contract
+
+- If a copy/follow workflow allows a human-facing profile handle or username as target input, the system SHALL resolve that input to a stable execution identity (for example proxy wallet, signer, or equivalent venue account) before live polling or follow actions begin.
+- Resolution artifacts SHALL persist the original handle, resolved execution identity, evidence source, resolution timestamp, confidence/ambiguity state, and validity window.
+- If profile-to-identity resolution is ambiguous, stale, or changes unexpectedly during an active follow session, the system SHALL fail closed or require explicit operator re-approval instead of silently following the newly resolved identity.
+
+### TTV-2 Restart-Safe Copy-Event Watermark Contract
+
+- Copy/follow subsystems SHALL persist durable event-watermark state across restarts using source event identifiers sufficient to prevent duplicate follow actions after process restart, replay, or poll-window overlap.
+- Watermark/dedupe state SHALL include the source venue/account identity, event identifier components (for example transaction hash, asset, side, timestamp), and retention policy so replay behavior is reproducible.
+- If dedupe state cannot be recovered or its integrity cannot be proven current, the system SHALL resume in shadow/read-only mode or require bounded replay review before capital-affecting follow actions continue.
+
 ## 94. Competitive Leadership Closure Requirements (March 12, 2026)
 
 These requirements target the remaining deltas versus QuantConnect, NautilusTrader, Freqtrade, Hummingbot, and QuantRocket: hosted first success, certified venue depth, ecosystem breadth, sustained public proof, and quantitative usability/release gates.
@@ -5562,9 +5960,9 @@ These requirements target the remaining deltas versus QuantConnect, NautilusTrad
 - Hosted sandbox workspaces SHALL default to paper-safe credentials, bounded capital, and explicit expiration/reset controls.
 - Median time-to-first-meaningful-result in hosted mode SHALL be less than `3 minutes`, and median time-to-first-paper-campaign SHALL be less than `10 minutes`.
 
-### DOM-3 Tier-1 Crypto Venue Certification Depth Contract
+### DOM-3 Tier-1 Forecast-Trading Venue Certification Depth Contract
 
-- The system SHALL certify at least two tier-1 crypto venues for each active promotion stage (`paper`, `canary`, `live`) with stage-specific evidence for fills, rejects, slippage, failover behavior, replayability, and incident response.
+- The system SHALL certify at least two tier-1 prediction-market or adjacent forecast-trading venues for each active promotion stage (`paper`, `canary`, `live`) with stage-specific evidence for fills, rejects, slippage, failover behavior, replayability, and incident response.
 - Certified-venue artifacts SHALL publish rolling `30d` and `90d` quality summaries per venue.
 - Any venue missing current certification evidence SHALL be prevented from appearing as production-ready in onboarding, docs, or marketing surfaces.
 
@@ -5638,7 +6036,7 @@ These requirements target the remaining deltas versus QuantConnect, NautilusTrad
 
 ### DOM-16 Deployment Scenario Packs Contract
 
-- Crypto-first scenario packs (maker/taker slippage regimes, outage/reconnect bursts, funding spikes, cross-venue skew anomalies) SHALL feed benchmark, replay, certification, and promotion gates.
+- Prediction-market-first scenario packs (maker/taker fee regimes, outage/reconnect bursts, settlement/oracle lag, and cross-market skew anomalies) SHALL feed benchmark, replay, certification, and promotion gates.
 - Scenario-pack artifacts SHALL be reproducible and versioned alongside benchmark bundles.
 
 ### DOM-17 Release Maturity Graduation Contract
@@ -5657,10 +6055,10 @@ These requirements target the remaining deltas versus QuantConnect, NautilusTrad
 - The assistant layer SHALL explain rejects, draft promotion memos, generate rollback plans, summarize blockers, and propose risk changes using the same evidence and provenance objects available to operators.
 - Assistant actions SHALL be read, explain, draft, or recommend by default; any capital-affecting or privileged operation SHALL require policy gates, role checks, and explicit approval.
 
-### DOM-20 Certified Crypto Deployment Dominance Contract
+### DOM-20 Certified Prediction-Market Deployment Dominance Contract
 
-- The system SHALL establish `crypto_first` dominance before broadening scope by certifying live/canary/paper operational maturity on at least two tier-1 crypto venues with rolling quality, reliability, and incident evidence.
-- Marketing and onboarding surfaces SHALL not imply broader production readiness than the certified crypto wedge currently supports.
+- The system SHALL establish `prediction_market_first` dominance before broadening scope by certifying live/canary/paper operational maturity on at least two tier-1 prediction-market or adjacent forecast-trading venues with rolling quality, reliability, and incident evidence.
+- Marketing and onboarding surfaces SHALL not imply broader production readiness than the certified prediction-market wedge currently supports.
 
 ### DOM-21 Product Truth Availability Contract
 
@@ -5684,9 +6082,9 @@ These requirements target the remaining deltas versus QuantConnect, NautilusTrad
 - Release and docs pipelines SHALL run broken-link validation, cross-surface command parity checks, and content-drift checks before publication.
 - Docs-surface health SHALL be continuously monitored, and any public docs property outage or 404 SHALL surface as a failing trust status rather than an implicit success state.
 
-### DOM-25 Tier-1 Venue Drill and Certification Contract
+### DOM-25 Tier-1 Forecast-Trading Venue Drill and Certification Contract
 
-- The system SHALL run recurring certification drills for tier-1 crypto venues covering paper, canary, and live-readiness paths, including reconnect, stale-feed, reject-spike, and manual rollback scenarios.
+- The system SHALL run recurring certification drills for tier-1 prediction-market and adjacent forecast-trading venues covering paper, canary, and live-readiness paths, including reconnect, stale-feed, reject-spike, and manual rollback scenarios.
 - Drill artifacts SHALL include latency, reject/fill, slippage, incident response timing, and replay fidelity receipts.
 - Connectors SHALL not advance to `active` or `certified` without passing the current drill policy for their declared stage.
 

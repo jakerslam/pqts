@@ -64,6 +64,8 @@ def evaluate_truth_surface(
     policy_path: Path,
     pyproject_path: Path,
     readme_path: Path,
+    docs_index_path: Path,
+    overview_path: Path,
     quickstart_path: Path,
     development_summary_path: Path,
     dashboard_app_path: Path,
@@ -84,12 +86,40 @@ def evaluate_truth_surface(
         )
 
     readme = _read_text(readme_path)
+    docs_index = _read_text(docs_index_path)
+    overview = _read_text(overview_path)
     quickstart = _read_text(quickstart_path)
     development_summary = _read_text(development_summary_path)
+
+    product_message = dict(policy.get("product_message") or {})
+    product_surfaces = {
+        "README": readme,
+        "DOCS_INDEX": docs_index,
+        "OVERVIEW": overview,
+    }
+    required_markers_by_surface = {
+        str(label).strip().upper(): [str(item).strip() for item in list(markers or []) if str(item).strip()]
+        for label, markers in dict(product_message.get("required_markers_by_surface") or {}).items()
+        if str(label).strip()
+    }
+    for label, markers in required_markers_by_surface.items():
+        surface_text = product_surfaces.get(label, "")
+        for marker in markers:
+            if marker not in surface_text:
+                errors.append(f"{label} missing required product marker: {marker}")
+    forbidden_markers = [
+        str(item).strip() for item in list(product_message.get("forbidden_markers") or []) if str(item).strip()
+    ]
+    for label, surface_text in product_surfaces.items():
+        for marker in forbidden_markers:
+            if marker in surface_text:
+                errors.append(f"{label} contains forbidden legacy marker: {marker}")
 
     if maturity == "alpha":
         for label, text in (
             ("README", readme),
+            ("DOCS_INDEX", docs_index),
+            ("OVERVIEW", overview),
             ("QUICKSTART_5_MIN", quickstart),
             ("DEVELOPMENT_SUMMARY", development_summary),
         ):
@@ -169,6 +199,8 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--policy", default="config/release/truth_surface_policy.json")
     parser.add_argument("--pyproject", default="pyproject.toml")
     parser.add_argument("--readme", default="README.md")
+    parser.add_argument("--docs-index", default="docs/index.md")
+    parser.add_argument("--overview", default="docs/OVERVIEW.md")
     parser.add_argument("--quickstart", default="docs/QUICKSTART_5_MIN.md")
     parser.add_argument("--development-summary", default="docs/DEVELOPMENT_SUMMARY.md")
     parser.add_argument("--dashboard-app", default="src/dashboard/app.py")
@@ -182,6 +214,8 @@ def main() -> int:
         policy_path=Path(args.policy),
         pyproject_path=Path(args.pyproject),
         readme_path=Path(args.readme),
+        docs_index_path=Path(args.docs_index),
+        overview_path=Path(args.overview),
         quickstart_path=Path(args.quickstart),
         development_summary_path=Path(args.development_summary),
         dashboard_app_path=Path(args.dashboard_app),

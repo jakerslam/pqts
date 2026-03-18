@@ -4,10 +4,10 @@ This matrix is auto-generated from `docs/SRS.md`, `docs/TODO.md`, and repository
 
 ## Summary
 
-- Total requirements: **766**
-- implemented: **756**
+- Total requirements: **855**
+- implemented: **855**
 - partial: **0**
-- planned: **10**
+- planned: **0**
 - traced: **0**
 - unmapped: **0**
 
@@ -19,23 +19,29 @@ This matrix is auto-generated from `docs/SRS.md`, `docs/TODO.md`, and repository
 | AEG | 6 | 0 | 0 | 0 | 0 | 6 |
 | AGP | 9 | 0 | 0 | 0 | 0 | 9 |
 | AHF | 12 | 0 | 0 | 0 | 0 | 12 |
+| AJO | 3 | 0 | 0 | 0 | 0 | 3 |
 | AL | 14 | 0 | 0 | 0 | 0 | 14 |
 | ANTP | 8 | 0 | 0 | 0 | 0 | 8 |
 | AR | 12 | 0 | 0 | 0 | 0 | 12 |
 | ASH | 4 | 0 | 0 | 0 | 0 | 4 |
+| ASHC | 3 | 0 | 0 | 0 | 0 | 3 |
 | AX | 10 | 0 | 0 | 0 | 0 | 10 |
 | BF | 6 | 0 | 0 | 0 | 0 | 6 |
 | BTR | 5 | 0 | 0 | 0 | 0 | 5 |
+| BUF | 3 | 0 | 0 | 0 | 0 | 3 |
+| CAPU | 4 | 0 | 0 | 0 | 0 | 4 |
 | CBX | 28 | 0 | 0 | 0 | 0 | 28 |
 | CGPT | 8 | 0 | 0 | 0 | 0 | 8 |
 | CGPTR | 3 | 0 | 0 | 0 | 0 | 3 |
 | COH | 8 | 0 | 0 | 0 | 0 | 8 |
 | COMP | 21 | 0 | 0 | 0 | 0 | 21 |
 | CT | 8 | 0 | 0 | 0 | 0 | 8 |
+| DFMI | 2 | 0 | 0 | 0 | 0 | 2 |
 | DK | 4 | 0 | 0 | 0 | 0 | 4 |
 | DLM | 5 | 0 | 0 | 0 | 0 | 5 |
 | DN | 5 | 0 | 0 | 0 | 0 | 5 |
-| DOM | 0 | 0 | 10 | 0 | 0 | 10 |
+| DNK | 3 | 0 | 0 | 0 | 0 | 3 |
+| DOM | 27 | 0 | 0 | 0 | 0 | 27 |
 | DUNIK | 8 | 0 | 0 | 0 | 0 | 8 |
 | DV | 7 | 0 | 0 | 0 | 0 | 7 |
 | DXR | 8 | 0 | 0 | 0 | 0 | 8 |
@@ -43,29 +49,35 @@ This matrix is auto-generated from `docs/SRS.md`, `docs/TODO.md`, and repository
 | FDATA | 12 | 0 | 0 | 0 | 0 | 12 |
 | FINGEN | 12 | 0 | 0 | 0 | 0 | 12 |
 | FINQA | 10 | 0 | 0 | 0 | 0 | 10 |
-| FR | 8 | 0 | 0 | 0 | 0 | 8 |
+| FR | 12 | 0 | 0 | 0 | 0 | 12 |
 | FTR | 9 | 0 | 0 | 0 | 0 | 9 |
 | GIPP | 8 | 0 | 0 | 0 | 0 | 8 |
 | GK | 9 | 0 | 0 | 0 | 0 | 9 |
+| GKT | 3 | 0 | 0 | 0 | 0 | 3 |
 | HBOT | 6 | 0 | 0 | 0 | 0 | 6 |
 | HD | 10 | 0 | 0 | 0 | 0 | 10 |
 | HK | 10 | 0 | 0 | 0 | 0 | 10 |
-| HKO | 8 | 0 | 0 | 0 | 0 | 8 |
+| HKO | 9 | 0 | 0 | 0 | 0 | 9 |
 | HL | 7 | 0 | 0 | 0 | 0 | 7 |
 | HM | 7 | 0 | 0 | 0 | 0 | 7 |
 | JG | 7 | 0 | 0 | 0 | 0 | 7 |
 | KL | 7 | 0 | 0 | 0 | 0 | 7 |
+| KRL | 2 | 0 | 0 | 0 | 0 | 2 |
+| KROP | 3 | 0 | 0 | 0 | 0 | 3 |
 | LANG | 14 | 0 | 0 | 0 | 0 | 14 |
 | LCS | 6 | 0 | 0 | 0 | 0 | 6 |
 | LEAN | 6 | 0 | 0 | 0 | 0 | 6 |
 | LLE | 11 | 0 | 0 | 0 | 0 | 11 |
+| LLR | 2 | 0 | 0 | 0 | 0 | 2 |
 | LUNR | 9 | 0 | 0 | 0 | 0 | 9 |
 | MARIK | 8 | 0 | 0 | 0 | 0 | 8 |
 | MNC | 5 | 0 | 0 | 0 | 0 | 5 |
 | MOAT | 16 | 0 | 0 | 0 | 0 | 16 |
 | MON | 8 | 0 | 0 | 0 | 0 | 8 |
 | MORP | 4 | 0 | 0 | 0 | 0 | 4 |
+| MRF | 4 | 0 | 0 | 0 | 0 | 4 |
 | MTM | 12 | 0 | 0 | 0 | 0 | 12 |
+| MVZ | 3 | 0 | 0 | 0 | 0 | 3 |
 | NAUT | 8 | 0 | 0 | 0 | 0 | 8 |
 | NCLI | 6 | 0 | 0 | 0 | 0 | 6 |
 | NFR | 3 | 0 | 0 | 0 | 0 | 3 |
@@ -80,17 +92,27 @@ This matrix is auto-generated from `docs/SRS.md`, `docs/TODO.md`, and repository
 | PMDESK | 12 | 0 | 0 | 0 | 0 | 12 |
 | PMKT | 16 | 0 | 0 | 0 | 0 | 16 |
 | PS | 7 | 0 | 0 | 0 | 0 | 7 |
+| PWX | 2 | 0 | 0 | 0 | 0 | 2 |
 | QF | 9 | 0 | 0 | 0 | 0 | 9 |
+| QSCI | 2 | 0 | 0 | 0 | 0 | 2 |
 | RBI | 8 | 0 | 0 | 0 | 0 | 8 |
 | RCG | 8 | 0 | 0 | 0 | 0 | 8 |
 | RK | 9 | 0 | 0 | 0 | 0 | 9 |
 | RLG | 5 | 0 | 0 | 0 | 0 | 5 |
 | RP | 9 | 0 | 0 | 0 | 0 | 9 |
+| RTSA | 2 | 0 | 0 | 0 | 0 | 2 |
+| RTSP | 2 | 0 | 0 | 0 | 0 | 2 |
 | RV | 4 | 0 | 0 | 0 | 0 | 4 |
+| RVX | 6 | 0 | 0 | 0 | 0 | 6 |
+| SAMS | 2 | 0 | 0 | 0 | 0 | 2 |
 | SECAPI | 10 | 0 | 0 | 0 | 0 | 10 |
+| SFD | 2 | 0 | 0 | 0 | 0 | 2 |
 | SH | 5 | 0 | 0 | 0 | 0 | 5 |
+| SOLS | 2 | 0 | 0 | 0 | 0 | 2 |
 | SWI | 7 | 0 | 0 | 0 | 0 | 7 |
+| TAGR | 2 | 0 | 0 | 0 | 0 | 2 |
 | TD | 6 | 0 | 0 | 0 | 0 | 6 |
+| TTV | 2 | 0 | 0 | 0 | 0 | 2 |
 | TVSRC | 9 | 0 | 0 | 0 | 0 | 9 |
 | UI | 31 | 0 | 0 | 0 | 0 | 31 |
 | UXL | 8 | 0 | 0 | 0 | 0 | 8 |
@@ -99,11 +121,14 @@ This matrix is auto-generated from `docs/SRS.md`, `docs/TODO.md`, and repository
 | WA | 9 | 0 | 0 | 0 | 0 | 9 |
 | WCR | 8 | 0 | 0 | 0 | 0 | 8 |
 | WF | 7 | 0 | 0 | 0 | 0 | 7 |
+| WHR | 3 | 0 | 0 | 0 | 0 | 3 |
 | WK | 13 | 0 | 0 | 0 | 0 | 13 |
 | WR | 6 | 0 | 0 | 0 | 0 | 6 |
 | XCOMP | 3 | 0 | 0 | 0 | 0 | 3 |
 | XR | 7 | 0 | 0 | 0 | 0 | 7 |
 | ZERQ | 8 | 0 | 0 | 0 | 0 | 8 |
+| ZNM | 2 | 0 | 0 | 0 | 0 | 2 |
+| ZOS | 3 | 0 | 0 | 0 | 0 | 3 |
 | ZQ | 8 | 0 | 0 | 0 | 0 | 8 |
 
 ## Requirement Matrix
@@ -118,6 +143,10 @@ This matrix is auto-generated from `docs/SRS.md`, `docs/TODO.md`, and repository
 | FR-6 | Portfolio Constraints | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
 | FR-7 | Exit and Lifecycle Rules | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
 | FR-8 | Telemetry and Attribution | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| FR-9 | Venue Eligibility and Trading-Mode Controls | implemented | done | docs/TODO.md |
+| FR-10 | Forecast Artifact Lifecycle | implemented | done | docs/TODO.md |
+| FR-11 | Forecast Revision and Supersession Controls | implemented | done | docs/TODO.md |
+| FR-12 | Resolution Ambiguity and Dispute-Risk Gate | implemented | done | docs/TODO.md |
 | NFR-1 | Latency | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
 | NFR-2 | Reliability | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
 | NFR-3 | Determinism | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
@@ -557,7 +586,7 @@ This matrix is auto-generated from `docs/SRS.md`, `docs/TODO.md`, and repository
 | PMKT-12 | Hybrid Matching and Non-Custodial Settlement Invariants | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
 | PMKT-13 | Complementary-Outcome Fee Symmetry | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
 | PMKT-14 | Deployment Registry and Audit Artifact Governance | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
-| PMKT-15 | Source Reliability and Claim Handling | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, tools/check_source_reliability.py |
+| PMKT-15 | Source Reliability and Claim Handling | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, docs/TOP_100_ROI_MOVES.json |
 | MOAT-1 | Per-Order Truth Graph | implemented | done | config/srs/assimilation_registry.json, docs/DOMINANCE_SRS_HUMAN_SPLIT.md, docs/TODO.md |
 | MOAT-2 | Live Divergence Diagnosis and Prescriptive Actions | implemented | done | config/srs/assimilation_registry.json, docs/DOMINANCE_SRS_HUMAN_SPLIT.md, docs/TODO.md |
 | MOAT-3 | Promotion OS State Machine | implemented | done | config/srs/assimilation_registry.json, docs/DOMINANCE_SRS_HUMAN_SPLIT.md, docs/TODO.md |
@@ -744,6 +773,7 @@ This matrix is auto-generated from `docs/SRS.md`, `docs/TODO.md`, and repository
 | HKO-6 | Pre-Trade Evidence Bundle Contract | implemented | done | config/srs/assimilation_registry.json, docs/SRS_HKO_EXECUTION_MAP.md, docs/TODO.md |
 | HKO-7 | Precision-Claim Governance Contract | implemented | done | config/srs/assimilation_registry.json, docs/SRS_HKO_EXECUTION_MAP.md, docs/TODO.md |
 | HKO-8 | Capacity and Decay Monitoring Contract | implemented | done | config/srs/assimilation_registry.json, docs/SRS_HKO_EXECUTION_MAP.md, docs/TODO.md |
+| HKO-9 | Multilingual Source Normalization Contract | implemented | done | docs/TODO.md |
 | SWI-1 | Parallel Analyst/Verifier Agent Contract | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
 | SWI-2 | High-Signal Decision Packet Contract | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
 | SWI-3 | Complexity-Scaled Analysis Budget Contract | implemented | done | config/srs/assimilation_registry.json, config/strategy/assimilation_full_closure_defaults.json, docs/SRS_FULL_CLOSURE_EXECUTION_MAP.md |
@@ -866,13 +896,97 @@ This matrix is auto-generated from `docs/SRS.md`, `docs/TODO.md`, and repository
 | LUNR-7 | Cognitive Trap Guardrail Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
 | LUNR-8 | Formula-Only Alpha Falsification Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
 | LUNR-9 | Probability/EV Explainability Card Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
-| DOM-1 | Competitive Scorecard Contract | planned | open | config/srs/assimilation_registry.json, docs/TODO.md, docs/TOP_100_ROI_MOVES.json |
-| DOM-2 | Hosted Sandbox First-Success Contract | planned | open | config/srs/assimilation_registry.json, docs/TODO.md, docs/TOP_100_ROI_MOVES.json |
-| DOM-3 | Tier-1 Crypto Venue Certification Depth Contract | planned | open | config/srs/assimilation_registry.json, docs/TODO.md, docs/TOP_100_ROI_MOVES.json |
-| DOM-4 | Unified Connector Ecosystem Contract | planned | open | config/srs/assimilation_registry.json, docs/TODO.md, docs/TOP_100_ROI_MOVES.json |
-| DOM-5 | Rolling Proof Density Contract | planned | open | config/srs/assimilation_registry.json, docs/TODO.md, docs/TOP_100_ROI_MOVES.json |
-| DOM-6 | Quantitative External UX Gate Contract | planned | open | config/srs/assimilation_registry.json, docs/TODO.md, docs/TOP_100_ROI_MOVES.json |
-| DOM-7 | Docs and Troubleshooting Product Contract | planned | open | config/srs/assimilation_registry.json, docs/TODO.md, docs/TOP_100_ROI_MOVES.json |
-| DOM-8 | Verified Example-Pack Density Contract | planned | open | config/srs/assimilation_registry.json, docs/TODO.md, docs/TOP_100_ROI_MOVES.json |
-| DOM-9 | Product Analytics and Conversion Contract | planned | open | config/srs/assimilation_registry.json, docs/TODO.md, docs/TOP_100_ROI_MOVES.json |
-| DOM-10 | Public Trust Operations Dashboard Contract | planned | open | config/srs/assimilation_registry.json, docs/TODO.md, docs/TOP_100_ROI_MOVES.json |
+| RVX-1 | Near-Even Market Selection Contract | implemented | done | docs/TODO.md |
+| RVX-2 | Passive-Only Quote Discipline Contract | implemented | done | docs/TODO.md |
+| RVX-3 | Micro-Lot Ladder and Inventory Balance Contract | implemented | done | docs/TODO.md |
+| RVX-4 | Micro-Edge Exit and Timeout Contract | implemented | done | docs/TODO.md |
+| RVX-5 | Copyability and Latency-Sensitivity Label Contract | implemented | done | docs/TODO.md |
+| RVX-6 | Event-Time Blackout and Flattening Contract | implemented | done | docs/TODO.md |
+| DNK-1 | Strategy Adherence Score Contract | implemented | done | docs/TODO.md |
+| DNK-2 | Override Budget and Drift Gate Contract | implemented | done | docs/TODO.md |
+| DNK-3 | Fixed Risk/Reward Policy Receipt Contract | implemented | done | docs/TODO.md |
+| KROP-1 | Capital Efficiency Score Contract | implemented | done | docs/TODO.md |
+| KROP-2 | Same-Market Self-Offset Detection Contract | implemented | done | docs/TODO.md |
+| KROP-3 | Trade-Count Vanity Falsification Contract | implemented | done | docs/TODO.md |
+| WHR-1 | Positive-Skew Basket Expectancy Contract | implemented | done | docs/TODO.md |
+| WHR-2 | Loss-Cluster Tolerance Contract | implemented | done | docs/TODO.md |
+| WHR-3 | Hit-Rate Illusion Falsification Contract | implemented | done | docs/TODO.md |
+| MRF-1 | Seed-Material Scenario Ingestion Contract | implemented | done | docs/TODO.md |
+| MRF-2 | Entity and Catalyst Graph Contract | implemented | done | docs/TODO.md |
+| MRF-3 | Counterfactual Simulation Lab Contract | implemented | done | docs/TODO.md |
+| MRF-4 | Report-Agent Evidence Memo Contract | implemented | done | docs/TODO.md |
+| AJO-1 | Bestseller Price-Floor Coherence Contract | implemented | done | docs/TODO.md |
+| AJO-2 | Customer-Fit Cohort Quality Contract | implemented | done | docs/TODO.md |
+| AJO-3 | Discount and Entry-Offer Guardrail Contract | implemented | done | docs/TODO.md |
+| MVZ-1 | Formula-Declared Strategy Manifest Contract | implemented | done | docs/TODO.md |
+| MVZ-2 | Correlated-Market Divergence Sentinel Contract | implemented | done | docs/TODO.md |
+| MVZ-3 | Short-Horizon Freshness and Time-Left Contract | implemented | done | docs/TODO.md |
+| GKT-1 | Formula-to-Policy Compile Contract | implemented | done | docs/TODO.md |
+| GKT-2 | Assistant-Terminal Context Sync Contract | implemented | done | docs/TODO.md |
+| GKT-3 | Copy-Logic Stage-Bounded Execution Contract | implemented | done | docs/TODO.md |
+| ZOS-1 | Heterogeneous Agent-Population Scenario Contract | implemented | done | docs/TODO.md |
+| ZOS-2 | Consensus, Polarization, and Cascade Telemetry Contract | implemented | done | docs/TODO.md |
+| ZOS-3 | Extraordinary Claim Provenance Contract | implemented | done | docs/TODO.md |
+| LLR-1 | LMSR Liquidity-Parameter Sensitivity Contract | implemented | done | docs/TODO.md |
+| LLR-2 | Thin-Pool Adverse-Fill Guard Contract | implemented | done | docs/TODO.md |
+| ASHC-1 | Sponsored-Claim Ingestion and Trust Label Contract | implemented | done | docs/TODO.md |
+| ASHC-2 | Probability-Band Specialization Attribution Contract | implemented | done | docs/TODO.md |
+| ASHC-3 | Trade-Count and Volume Illusion Guard Contract | implemented | done | docs/TODO.md |
+| RTSP-1 | Private-Data Simulation Provenance Contract | implemented | done | docs/TODO.md |
+| RTSP-2 | Scenario-Winner Selection Bias Contract | implemented | done | docs/TODO.md |
+| PWX-1 | Forecast-Only Signal Purity Contract | implemented | done | docs/TODO.md |
+| PWX-2 | Forecast Source-Tiering Contract | implemented | done | docs/TODO.md |
+| KRL-1 | Strategy Market-Class Fit Manifest Contract | implemented | done | docs/TODO.md |
+| KRL-2 | Market-Class Edge Concentration Attribution Contract | implemented | done | docs/TODO.md |
+| ZNM-1 | Marginal Diversification Admission Contract | implemented | done | docs/TODO.md |
+| ZNM-2 | Redundant Strategy Compression Contract | implemented | done | docs/TODO.md |
+| RTSA-1 | Role-Segregated Agent Pipeline Contract | implemented | done | docs/TODO.md |
+| RTSA-2 | Agent Handoff Receipt Contract | implemented | done | docs/TODO.md |
+| SFD-1 | Feedback-Velocity-Aware Experiment Prioritization Contract | implemented | done | docs/TODO.md |
+| SFD-2 | Adaptive-vs-Static Short-Cycle Baseline Contract | implemented | done | docs/TODO.md |
+| DFMI-1 | Liquidation-Pressure Surface Contract | implemented | done | docs/TODO.md |
+| DFMI-2 | Multi-Venue Flow Confirmation and Noise Suppression Contract | implemented | done | docs/TODO.md |
+| BUF-1 | Conservative Value-Range Contract | implemented | done | docs/TODO.md |
+| BUF-2 | Opportunity-Cost Capital Allocation Contract | implemented | done | docs/TODO.md |
+| BUF-3 | Permanent Liquidity Reserve Contract | implemented | done | docs/TODO.md |
+| CAPU-1 | Bankroll-Aware Policy Compilation Contract | implemented | done | docs/TODO.md |
+| CAPU-2 | Minimum Efficient Capital Gating Contract | implemented | done | docs/TODO.md |
+| CAPU-3 | Utility-Declared Speculative Bankroll Mode Contract | implemented | done | docs/TODO.md |
+| CAPU-4 | Fee-Dominance Auto-Disable Contract | implemented | done | docs/TODO.md |
+| SOLS-1 | Proxy-to-Contract Advisory Decomposition Contract | implemented | done | docs/TODO.md |
+| SOLS-2 | Multi-Timeframe Conflict Visibility Contract | implemented | done | docs/TODO.md |
+| SAMS-1 | External Forecaster Quality Scoring Contract | implemented | done | docs/TODO.md |
+| SAMS-2 | Delay-Adjusted Provider Consumption Contract | implemented | done | docs/TODO.md |
+| QSCI-1 | Read-Only Market-Data Tool Surface Contract | implemented | done | docs/TODO.md |
+| QSCI-2 | Tool-Surface Provenance and Entitlement Parity Contract | implemented | done | docs/TODO.md |
+| TAGR-1 | Structured Bull-vs-Bear Research Debate Contract | implemented | done | docs/TODO.md |
+| TAGR-2 | Committee Decision Lineage Contract | implemented | done | docs/TODO.md |
+| TTV-1 | Profile-Handle to Execution-Identity Resolution Contract | implemented | done | docs/TODO.md |
+| TTV-2 | Restart-Safe Copy-Event Watermark Contract | implemented | done | docs/TODO.md |
+| DOM-1 | Competitive Scorecard Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, docs/TOP_100_ROI_MOVES.json |
+| DOM-2 | Hosted Sandbox First-Success Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, docs/TOP_100_ROI_MOVES.json |
+| DOM-3 | Tier-1 Forecast-Trading Venue Certification Depth Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, docs/TOP_100_ROI_MOVES.json |
+| DOM-4 | Unified Connector Ecosystem Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| DOM-5 | Rolling Proof Density Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, docs/TOP_100_ROI_MOVES.json |
+| DOM-6 | Quantitative External UX Gate Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md |
+| DOM-7 | Docs and Troubleshooting Product Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, docs/TOP_100_ROI_MOVES.json |
+| DOM-8 | Verified Example-Pack Density Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, docs/TOP_100_ROI_MOVES.json |
+| DOM-9 | Product Analytics and Conversion Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, docs/TOP_100_ROI_MOVES.json |
+| DOM-10 | Public Trust Operations Dashboard Contract | implemented | done | config/srs/assimilation_registry.json, docs/TODO.md, docs/TOP_100_ROI_MOVES.json |
+| DOM-11 | Canonical Truth-Surface Contract | implemented | done | docs/TODO.md, docs/TOP_100_ROI_MOVES.json, docs/TOP_100_ROI_MOVES.md |
+| DOM-12 | Connector Certification Depth Contract | implemented | done | docs/TODO.md, docs/TOP_100_ROI_MOVES.json, docs/TOP_100_ROI_MOVES.md |
+| DOM-13 | Ops Job Orchestration Contract | implemented | done | docs/TODO.md, docs/TOP_100_ROI_MOVES.json, docs/TOP_100_ROI_MOVES.md |
+| DOM-14 | Capital Governor Contract | implemented | done | docs/TODO.md, docs/TOP_100_ROI_MOVES.json, docs/TOP_100_ROI_MOVES.md |
+| DOM-15 | Mobile + Assistant Safety Contract | implemented | done | docs/TODO.md, docs/TOP_100_ROI_MOVES.json, docs/TOP_100_ROI_MOVES.md |
+| DOM-16 | Deployment Scenario Packs Contract | implemented | done | docs/TODO.md, docs/TOP_100_ROI_MOVES.json, docs/TOP_100_ROI_MOVES.md |
+| DOM-17 | Release Maturity Graduation Contract | implemented | done | docs/TODO.md, docs/TOP_100_ROI_MOVES.json, docs/TOP_100_ROI_MOVES.md |
+| DOM-18 | Casual-First Product Simplicity Contract | implemented | done | docs/TODO.md, docs/TOP_100_ROI_MOVES.json, docs/TOP_100_ROI_MOVES.md |
+| DOM-19 | Constrained Operator Intelligence Contract | implemented | done | docs/TODO.md, docs/TOP_100_ROI_MOVES.json, docs/TOP_100_ROI_MOVES.md |
+| DOM-20 | Certified Prediction-Market Deployment Dominance Contract | implemented | done | docs/TODO.md, docs/TOP_100_ROI_MOVES.json, docs/TOP_100_ROI_MOVES.md |
+| DOM-21 | Product Truth Availability Contract | implemented | done | docs/TODO.md, docs/TOP_100_ROI_MOVES.json, docs/TOP_100_ROI_MOVES.md |
+| DOM-22 | Casual Convenience Moat Contract | implemented | done | docs/TODO.md, docs/TOP_100_ROI_MOVES.json, docs/TOP_100_ROI_MOVES.md |
+| DOM-23 | Public Proof Federation Contract | implemented | done | docs/TODO.md |
+| DOM-24 | Docs Property and Content Federation Contract | implemented | done | docs/TODO.md |
+| DOM-25 | Tier-1 Forecast-Trading Venue Drill and Certification Contract | implemented | done | docs/TODO.md |
+| DOM-26 | Guided Studio First-Success Contract | implemented | done | docs/TODO.md |
+| DOM-27 | Public Release Evidence Pack Contract | implemented | done | docs/TODO.md |

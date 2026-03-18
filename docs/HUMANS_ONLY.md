@@ -1,6 +1,6 @@
 # PQTS Humans-Only Work
 
-Last updated: 2026-03-10 (America/Denver)
+Last updated: 2026-03-17 (America/Denver)
 
 This file tracks tasks that cannot be reliably automated and require direct human ownership.
 
@@ -20,14 +20,14 @@ This file tracks tasks that cannot be reliably automated and require direct huma
 - PyPI trusted publisher setup completed for `pqts` (`owner=jakerslam`, `repo=PQTS`, `workflow=.github/workflows/release.yml`, `environment=pypi`); first successful trusted publish shipped in `v0.1.4`.
 - Approve and enforce one canonical maturity message for the active release (`alpha`/`beta`/`stable`) and remove contradictory claims from legacy docs.
 - Decide and sign off the single primary public web surface for this release phase (Next.js vs legacy dashboard exposure) and publish transition messaging.
-- Approve whether broad multi-market marketing claims stay live or are narrowed to only currently verified integrations in the canonical index.
+- Approve whether broad market-scope marketing claims stay live or are narrowed to only currently verified integrations in the canonical index.
 - Review and sign off benchmark narrative language so historical diagnostic bundles are contextualized correctly and not framed as reference proof.
 - Ensure Docker CLI is installed and runnable on maintainer workstations used for release validation (`docker --version`, `docker compose version`).
 - Ensure maintainer token/permissions can dispatch Actions workflows and manage Pages settings (`workflow` + repo admin scope as needed).
 
 ## P1 Growth
 
-- Run and publicly report 3+ month paper campaigns across crypto/equities/forex with monthly report commentary.
+- Run and publicly report 3+ month paper campaigns across prediction-market strategies and certified adjacent forecast-trading venues with monthly report commentary.
 - Publish a weekly short-horizon trading journal (paper/live clearly labeled) with provenance-linked metrics, execution caveats, and postmortem notes.
 - Publish comparison table and long-form X thread series using `docs/X_THREAD_TEMPLATE.md`.
 - Submit project to discovery channels (awesome lists, communities, Show HN, etc.) and handle responses.
@@ -43,7 +43,7 @@ This file tracks tasks that cannot be reliably automated and require direct huma
 ## P0 Comparative Positioning + Product Decisions
 
 - Own and maintain the public competitor comparison narrative (PQTS vs QuantConnect/NautilusTrader/QuantRocket/Freqtrade/Hummingbot/vectorbt/Backtrader) with dated evidence notes.
-- Make and document the wedge-market decision (for example crypto-first) and approve the market-expansion gate criteria before broadening scope.
+- Make and document the primary venue wedge decision (prediction-market-first) and approve the market-expansion gate criteria before broadening scope.
 - Review and sign off benchmark-report commentary before publication so public claims match reproducible evidence.
 - Define the external trust posture: what metrics are labeled `reference`, `diagnostic_only`, or `unverified` in public-facing copy.
 - Record decision outcomes and sign-off in `docs/HUMAN_DECISIONS_LOG.md`.
@@ -82,14 +82,14 @@ This file tracks tasks that cannot be reliably automated and require direct huma
 - Decide and publicly announce objective graduation criteria for `alpha`, `beta`, and `stable`, then sign off each transition only when external proof, certification, and docs truth gates are satisfied.
 - Enable and maintain the public docs property, release landing pages, and PyPI narrative so no public evidence surface 404s or lags the active release.
 - Run recurring external beginner and professional cohorts large enough to claim category-leading usability, then publish the results with dated evidence.
-- Own the crypto-first wedge narrative and refuse broader production claims until at least two tier-1 crypto venues are clearly active/certified.
+- Own the prediction-market-first wedge narrative and refuse broader production claims until at least two tier-1 prediction-market or adjacent forecast-trading venues are clearly active/certified.
 - Execute the convenience/adoption layer: mobile demos, operator walkthroughs, community response discipline, and distribution campaigns that turn engineering quality into visible traction.
 
 ## P0 Remaining Gap Closure
 
 - Publish a recurring public proof cadence (monthly benchmark bundle, cohort summary, venue-certification summary, and release evidence page) and keep the narrative synchronized across README, docs, PyPI, and release notes.
 - Own the live docs property end-to-end: DNS/hosting/settings, broken-link triage, content review before each release, and immediate remediation when any public docs surface drifts or 404s.
-- Operate the tier-1 crypto certification program in practice: maintain exchange accounts/credentials, run scheduled drill campaigns, review incident receipts, and sign off connector promotion from `beta` to `active/certified`.
+- Operate the tier-1 prediction-market and adjacent forecast-trading certification program in practice: maintain venue accounts/credentials, run scheduled drill campaigns, review incident receipts, and sign off connector promotion from `beta` to `active/certified`.
 - Conduct true beginner usability reviews focused on first-success simplicity, then approve or reject UX claims based on observed time-to-result and confusion points rather than internal intuition.
 - Maintain the external trust posture: publish known limitations, respond visibly to proof gaps or incidents, and refuse marketing claims that outpace current evidence.
 - Maintain a public interactive demo/sandbox and scripted walkthrough that show the guided web flow, scenario lab, and trust/provenance surfaces using current release artifacts.

@@ -7,6 +7,26 @@
       "package": "pqts"
     }
   },
+  "product_message": {
+    "required_markers_by_surface": {
+      "README": [
+        "A governed system for monetizing future predictions.",
+        "Prediction markets are the primary trading surface; adjacent tradable forecasting venues use the same control plane when they satisfy the same safety and eligibility contracts."
+      ],
+      "DOCS_INDEX": [
+        "A governed system for monetizing future predictions.",
+        "Prediction markets are the primary trading surface; adjacent tradable forecasting venues use the same control plane when they satisfy the same safety and eligibility contracts."
+      ],
+      "OVERVIEW": [
+        "A governed system for monetizing future predictions.",
+        "Prediction markets are the primary trading surface; adjacent tradable forecasting venues use the same control plane when they satisfy the same safety and eligibility contracts."
+      ]
+    },
+    "forbidden_markers": [
+      "A crypto-first algorithmic trading platform",
+      "A professional-grade algorithmic trading platform designed for multi-market trading (crypto, equities, forex)"
+    ]
+  },
   "ui_surface": {
     "primary": "nextjs_web",
     "dashboard_port": 8501,

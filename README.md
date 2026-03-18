@@ -12,11 +12,16 @@
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![Status](https://img.shields.io/badge/status-Paper%20Trading-yellow.svg)]()
 
-> A crypto-first algorithmic trading platform with staged expansion to equities and forex.
+> A governed system for monetizing future predictions.
+
+Canonical product message:
+
+- Tagline: `PQTS monetizes future predictions under explicit EV, risk, provenance, and promotion gates.`
+- Scope: `Prediction markets are the primary trading surface; adjacent tradable forecasting venues use the same control plane when they satisfy the same safety and eligibility contracts.`
 
 ## Why This Repo Is Different
 
-PQTS is designed as a **deployment trust operating system**:
+PQTS is designed as a **deployment-trust operating system for forecast monetization**:
 
 - **One engine, two user densities**: beginner-friendly guided workflows and pro-grade drilldowns on the same object model
 - **Promotion gates built in**: explicit `backtest -> paper -> shadow -> canary -> live` lifecycle
@@ -41,7 +46,7 @@ PQTS is designed as a **deployment trust operating system**:
 | Reconciliation + incident telemetry | ✅ Native | ⚠️ Limited | ⚠️ Depends on setup | ⚠️ Limited |
 | Promotion/canary controls | ✅ Native | ❌ No first-class flow | ⚠️ Custom | ❌ No first-class flow |
 | Simulation leaderboard + reporting | ✅ Native | ⚠️ Backtesting focus | ✅ Strong backtesting | ⚠️ Bot metrics focus |
-| Multi-market scope (crypto/equities/forex) | ✅ (crypto-first, staged expansion) | ⚠️ Primarily crypto | ✅ | ⚠️ Primarily crypto/market-making |
+| Multi-market scope (prediction markets + adjacent forecast venues) | ✅ (prediction-market-first, governed expansion) | ⚠️ Primarily crypto | ✅ | ⚠️ Primarily crypto/market-making |
 
 ### Reference Performance Snapshot
 
@@ -98,7 +103,7 @@ pip install -U pqts
 # 2) Launch guided first-success flow
 pqts quickstart --execute
 
-# 3) Validate strategy and start bounded paper run
+# 3) Validate strategy and start bounded paper forecast-trading run
 pqts backtest momentum
 pqts paper start --risk-profile conservative
 ```
@@ -124,7 +129,7 @@ npm run dev
 cd ..
 python src/dashboard/start.py
 
-# Run paper trading
+# Run bounded paper forecast-trading loop
 python main.py config/paper.yaml
 # or enforce a specific user risk tolerance profile:
 python main.py config/paper.yaml --risk-profile conservative
@@ -730,4 +735,3 @@ MIT (see [LICENSE](LICENSE))
 ---
 
 Built by Protheus
-

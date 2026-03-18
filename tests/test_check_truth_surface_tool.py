@@ -16,6 +16,8 @@ def test_truth_surface_passes_repo_defaults() -> None:
         policy_path=Path("config/release/truth_surface_policy.json"),
         pyproject_path=Path("pyproject.toml"),
         readme_path=Path("README.md"),
+        docs_index_path=Path("docs/index.md"),
+        overview_path=Path("docs/OVERVIEW.md"),
         quickstart_path=Path("docs/QUICKSTART_5_MIN.md"),
         development_summary_path=Path("docs/DEVELOPMENT_SUMMARY.md"),
         dashboard_app_path=Path("src/dashboard/app.py"),
@@ -29,6 +31,10 @@ def test_truth_surface_flags_unqualified_install_when_pypi_unavailable(tmp_path:
         "canonical_release_version": "0.1.0",
         "maturity": "alpha",
         "distribution": {"pypi": {"available": False, "package": "pqts"}},
+        "product_message": {
+            "required_markers_by_surface": {},
+            "forbidden_markers": [],
+        },
         "ui_surface": {
             "dashboard_port": 8501,
             "required_markers": [],
@@ -43,6 +49,10 @@ def test_truth_surface_flags_unqualified_install_when_pypi_unavailable(tmp_path:
     _write(pyproject, "[project]\nname='pqts'\nversion='0.1.0'\n")
     readme = tmp_path / "README.md"
     _write(readme, "pip install pqts\n")
+    docs_index = tmp_path / "index.md"
+    _write(docs_index, "")
+    overview = tmp_path / "OVERVIEW.md"
+    _write(overview, "")
     quickstart = tmp_path / "QUICKSTART.md"
     _write(quickstart, "")
     dev_summary = tmp_path / "DEVELOPMENT_SUMMARY.md"
@@ -56,6 +66,8 @@ def test_truth_surface_flags_unqualified_install_when_pypi_unavailable(tmp_path:
         policy_path=policy_path,
         pyproject_path=pyproject,
         readme_path=readme,
+        docs_index_path=docs_index,
+        overview_path=overview,
         quickstart_path=quickstart,
         development_summary_path=dev_summary,
         dashboard_app_path=dash_app,
@@ -69,6 +81,10 @@ def test_truth_surface_flags_missing_package_first_markers_when_pypi_available(t
         "canonical_release_version": "0.1.0",
         "maturity": "alpha",
         "distribution": {"pypi": {"available": True, "package": "pqts"}},
+        "product_message": {
+            "required_markers_by_surface": {},
+            "forbidden_markers": [],
+        },
         "ui_surface": {
             "dashboard_port": 8501,
             "required_markers": [],
@@ -84,6 +100,10 @@ def test_truth_surface_flags_missing_package_first_markers_when_pypi_available(t
     _write(pyproject, "[project]\nname='pqts'\nversion='0.1.0'\n")
     readme = tmp_path / "README.md"
     _write(readme, "")
+    docs_index = tmp_path / "index.md"
+    _write(docs_index, "")
+    overview = tmp_path / "OVERVIEW.md"
+    _write(overview, "")
     quickstart = tmp_path / "QUICKSTART.md"
     _write(quickstart, "git clone https://github.com/jakerslam/pqts.git\n")
     dev_summary = tmp_path / "DEVELOPMENT_SUMMARY.md"
@@ -97,9 +117,72 @@ def test_truth_surface_flags_missing_package_first_markers_when_pypi_available(t
         policy_path=policy_path,
         pyproject_path=pyproject,
         readme_path=readme,
+        docs_index_path=docs_index,
+        overview_path=overview,
         quickstart_path=quickstart,
         development_summary_path=dev_summary,
         dashboard_app_path=dash_app,
         dashboard_start_path=dash_start,
     )
     assert any("missing required package-first marker" in item for item in errors)
+
+
+def test_truth_surface_flags_product_message_drift(tmp_path: Path) -> None:
+    policy = {
+        "canonical_release_version": "0.1.0",
+        "maturity": "alpha",
+        "distribution": {"pypi": {"available": True, "package": "pqts"}},
+        "product_message": {
+            "required_markers_by_surface": {
+                "README": ["A governed system for monetizing future predictions."],
+                "DOCS_INDEX": ["Prediction markets are the primary trading surface; adjacent tradable forecasting venues use the same control plane when they satisfy the same safety and eligibility contracts."],
+                "OVERVIEW": ["A governed system for monetizing future predictions."],
+            },
+            "forbidden_markers": [
+                "A professional-grade algorithmic trading platform designed for multi-market trading (crypto, equities, forex)",
+            ],
+        },
+        "ui_surface": {
+            "dashboard_port": 8501,
+            "required_markers": [],
+            "quickstart_required_markers": [],
+            "quickstart_package_markers": [],
+            "forbid_external_codepen": False,
+        },
+    }
+    policy_path = tmp_path / "policy.json"
+    policy_path.write_text(json.dumps(policy), encoding="utf-8")
+
+    pyproject = tmp_path / "pyproject.toml"
+    _write(pyproject, "[project]\nname='pqts'\nversion='0.1.0'\n")
+    readme = tmp_path / "README.md"
+    _write(readme, "A governed system for monetizing future predictions.\n")
+    docs_index = tmp_path / "index.md"
+    _write(docs_index, "short docs landing without the canonical scope\n")
+    overview = tmp_path / "OVERVIEW.md"
+    _write(
+        overview,
+        "A professional-grade algorithmic trading platform designed for multi-market trading (crypto, equities, forex)\n",
+    )
+    quickstart = tmp_path / "QUICKSTART.md"
+    _write(quickstart, "pip install -U pqts\npqts quickstart --execute\n")
+    dev_summary = tmp_path / "DEVELOPMENT_SUMMARY.md"
+    _write(dev_summary, "")
+    dash_app = tmp_path / "app.py"
+    _write(dash_app, 'if __name__ == "__main__":\n    app.run(port=8501, debug=False)\n')
+    dash_start = tmp_path / "start.py"
+    _write(dash_start, "app.run(port=8501, debug=False)\n")
+
+    errors = evaluate_truth_surface(
+        policy_path=policy_path,
+        pyproject_path=pyproject,
+        readme_path=readme,
+        docs_index_path=docs_index,
+        overview_path=overview,
+        quickstart_path=quickstart,
+        development_summary_path=dev_summary,
+        dashboard_app_path=dash_app,
+        dashboard_start_path=dash_start,
+    )
+    assert any("DOCS_INDEX missing required product marker" in item for item in errors)
+    assert any("OVERVIEW contains forbidden legacy marker" in item for item in errors)
