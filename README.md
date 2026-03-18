@@ -48,19 +48,18 @@ PQTS is designed as a **deployment-trust operating system for forecast monetizat
 | Simulation leaderboard + reporting | ✅ Native | ⚠️ Backtesting focus | ✅ Strong backtesting | ⚠️ Bot metrics focus |
 | Multi-market scope (prediction markets + adjacent forecast venues) | ✅ (prediction-market-first, governed expansion) | ⚠️ Primarily crypto | ✅ | ⚠️ Primarily crypto/market-making |
 
+## Current System State (2026-03-18)
+
+- Requirements closure: `855/855` implemented ([SRS Coverage Matrix](docs/SRS_COVERAGE_MATRIX.md))
+- Gap backlog: `0` open at `P0/P1/P2` ([SRS Gap Backlog](docs/SRS_GAP_BACKLOG.md))
+- Completion evidence and implementation traceability: [Engineering TODO](docs/TODO.md)
+- Public strategy and execution priorities: [Top 100 ROI Moves](docs/TOP_100_ROI_MOVES.md)
+- Core implemented contract families now include forecast lifecycle, multilingual event intelligence, stage-bounded copy/follow, formula-policy controls, LMSR/liquidity contracts, scenario governance, value-allocation policy, and dominance/public-surface federation modules under `src/`.
+
 ### Reference Performance Snapshot
 
-Latest top reference bundle (`2026-03-13_reference_crypto_trend_following`):
-
-Evidence:
-- [Bundle README](results/2026-03-13_reference_crypto_trend_following/README.md)
-- [Leaderboard CSV](results/2026-03-13_reference_crypto_trend_following/simulation_leaderboard_20260313T014331911337Z.csv)
-- [Suite report JSON](results/2026-03-13_reference_crypto_trend_following/simulation_suite_20260313T014331911337Z.json)
-
-- `avg_quality_score=0.8320`
-- `avg_fill_rate=1.0000`
-- `avg_reject_rate=0.0000`
-- `total_filled=90` / `total_submitted=90`
+Reference performance artifacts are auto-generated from [results/reference_performance_latest.json](results/reference_performance_latest.json).
+The current bundle-level metrics are shown in the [Strategy Performance](#-strategy-performance) section.
 
 ## 🖼️ Visual Tour
 
@@ -167,7 +166,7 @@ Grafana (observability profile): `http://localhost:3001` (`admin` / `admin`)
 Docs site (GitHub Pages): `https://jakerslam.github.io/pqts/`
 Leaderboard in-repo fallback page: [docs/leaderboard/index.html](docs/leaderboard/index.html)
 If GitHub Pages is temporarily unavailable, the workflow publishes a `docs-site-fallback` artifact in `Publish Docs Site` runs.
-Latest release: [v0.1.5](https://github.com/jakerslam/pqts/releases/tag/v0.1.5)
+Latest releases: [GitHub Releases](https://github.com/jakerslam/pqts/releases)
 
 ## 💳 Pricing & Cloud
 
@@ -423,9 +422,6 @@ Public reproducible result bundles live under `results/`.
   - `results/2026-03-09_crypto_funding_arbitrage_short/`
   - `results/2026-03-09_multi_market_market_making_short/`
   - `results/2026-03-09_baseline/` (historical)
-  - `results/2026-03-09_crypto_market_making_short/`
-  - `results/2026-03-09_crypto_funding_arbitrage_short/`
-  - `results/2026-03-09_multi_market_market_making_short/`
   - `results/2026-03-12_reference_crypto_trend_following/`
   - `results/2026-03-12_reference_crypto_funding_arbitrage/`
   - `results/2026-03-12_reference_multi_market_making/`
