@@ -6545,3 +6545,41 @@ Observed source links:
 - For high-count, low-notional workflows, runtime SHALL track per-order overhead metrics (latency, reject causes, effective fee burden) and require minimum efficiency thresholds.
 - Workflows that are profitable in gross terms but negative in net operational efficiency SHALL be blocked from promotion.
 - Efficiency diagnostics SHALL be available in the web terminal execution/risk views for operator review.
+
+## 106. Additional Delta Requirements from External Post (noisyb0y1 no-code polymarket bot workflow, March 21, 2026)
+
+These requirements capture applicable product-surface deltas from the referenced post pattern emphasizing no-code bot construction, fast strategy customization, real-time dashboard visibility, and EV/Kelly framing for prediction-market workflows.
+
+Observed source links:
+- Primary target link from request: `https://x.com/noisyb0y1/status/2035247407869350000?s=46`
+- Accessible mirror context used for extraction: `https://w.twstalker.com/noisyb0y1`
+
+### NOISY-1 Guided No-Code Strategy Constructor Contract
+
+- The product SHALL expose a guided strategy constructor that lets operators configure market scope, direction policy (`YES`, `NO`, or dual), and strategy template without direct code edits.
+- Constructor outputs SHALL compile to explicit, versioned strategy manifests consumable by canonical runtime paths (no sidecar execution path).
+- Manifest generation SHALL preserve reproducibility metadata and an equivalent CLI/JSON representation for audit and advanced users.
+
+### NOISY-2 Arbitrage/Dislocation Scanner Product Contract
+
+- The web surface SHALL provide a first-class scanner view for short-horizon dislocation candidates with explicit source timestamps, comparison baselines, and stale-data guards.
+- Scanner eligibility SHALL be bound to existing EV/risk/router gates before any order can be submitted.
+- Candidate rows SHALL show actionable diagnostics (edge, post-cost EV, liquidity, and gate outcome) rather than only rank/score.
+
+### NOISY-3 Real-Time Bot Operations Dashboard Contract
+
+- The operator dashboard SHALL provide live bot telemetry at minimum across PnL, trades, markets covered, and strategy/bot performance state.
+- Telemetry panels SHALL reflect authoritative runtime data or explicit degraded/empty states and SHALL avoid synthetic “healthy-looking” placeholders.
+- Bot-level controls (start/pause/stop/reconfigure) SHALL be role-gated and fully auditable.
+
+### NOISY-4 Non-Custodial and Wallet-Boundary Safety Contract
+
+- Any non-custodial wallet integration SHALL remain outside privileged server-side key custody unless explicitly configured in a hardened key-management profile.
+- Wallet operations SHALL be constrained by policy-based spend/exposure limits and explicit confirmation semantics for capital-affecting actions.
+- If custody/approval state cannot be verified in real time, runtime SHALL downgrade to read-only or paper mode and block live submission.
+
+### NOISY-5 EV/Kelly Claim Governance Contract
+
+- EV and Kelly-based sizing shown in product UX SHALL include parameter transparency (win-probability input, payout assumptions, fee/slippage model, fractional cap).
+- Kelly-derived suggestions SHALL be bounded by account-size-aware risk envelopes and shall never bypass hard portfolio/risk limits.
+- Public claims of rapid profit outcomes from this source chain SHALL remain `unverified` unless reproducible from audited trade-level evidence and controlled reruns.
