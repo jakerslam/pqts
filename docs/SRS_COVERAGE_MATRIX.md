@@ -5,11 +5,11 @@ This matrix is auto-generated from `docs/SRS.md`, `docs/TODO.md`, and repository
 ## Summary
 
 - Total requirements: **926**
-- implemented: **895**
+- implemented: **925**
 - partial: **0**
-- planned: **20**
-- traced: **2**
-- unmapped: **9**
+- planned: **0**
+- traced: **1**
+- unmapped: **0**
 
 ## Prefix Summary
 
@@ -72,7 +72,7 @@ This matrix is auto-generated from `docs/SRS.md`, `docs/TODO.md`, and repository
 | LLR | 2 | 0 | 0 | 0 | 0 | 2 |
 | LUNR | 9 | 0 | 0 | 0 | 0 | 9 |
 | MARIK | 8 | 0 | 0 | 0 | 0 | 8 |
-| MCP | 0 | 0 | 14 | 0 | 0 | 14 |
+| MCP | 14 | 0 | 0 | 0 | 0 | 14 |
 | MNC | 5 | 0 | 0 | 0 | 0 | 5 |
 | MOAT | 16 | 0 | 0 | 0 | 0 | 16 |
 | MON | 8 | 0 | 0 | 0 | 0 | 8 |
@@ -84,7 +84,7 @@ This matrix is auto-generated from `docs/SRS.md`, `docs/TODO.md`, and repository
 | NAUT | 8 | 0 | 0 | 0 | 0 | 8 |
 | NCLI | 6 | 0 | 0 | 0 | 0 | 6 |
 | NFR | 3 | 0 | 0 | 0 | 0 | 3 |
-| NOISY | 0 | 0 | 0 | 0 | 5 | 5 |
+| NOISY | 5 | 0 | 0 | 0 | 0 | 5 |
 | NS | 6 | 0 | 0 | 0 | 0 | 6 |
 | OBBFD | 9 | 0 | 0 | 0 | 0 | 9 |
 | OBSC | 5 | 0 | 0 | 0 | 0 | 5 |
@@ -94,11 +94,11 @@ This matrix is auto-generated from `docs/SRS.md`, `docs/TODO.md`, and repository
 | PHL | 4 | 0 | 0 | 0 | 0 | 4 |
 | PKG | 8 | 0 | 0 | 0 | 0 | 8 |
 | PL | 7 | 0 | 0 | 0 | 0 | 7 |
-| PMAT | 0 | 0 | 6 | 0 | 0 | 6 |
+| PMAT | 6 | 0 | 0 | 0 | 0 | 6 |
 | PMDESK | 12 | 0 | 0 | 0 | 0 | 12 |
 | PMKT | 16 | 0 | 0 | 0 | 0 | 16 |
 | PNSH | 4 | 0 | 0 | 0 | 0 | 4 |
-| POLY | 0 | 0 | 0 | 1 | 4 | 5 |
+| POLY | 5 | 0 | 0 | 0 | 0 | 5 |
 | PRDY | 7 | 0 | 0 | 1 | 0 | 8 |
 | PS | 7 | 0 | 0 | 0 | 0 | 7 |
 | PWX | 2 | 0 | 0 | 0 | 0 | 2 |
@@ -1043,33 +1043,33 @@ This matrix is auto-generated from `docs/SRS.md`, `docs/TODO.md`, and repository
 | ZSTF-3 | VPIN-Coupled Microstructure Circuit Breaker Contract | implemented | done | docs/TODO.md |
 | ZSTF-4 | Microstructure Simulation Evidence Contract | implemented | done | docs/TODO.md |
 | ZSTF-5 | Source Reliability and Claim Handling | implemented | done | docs/TODO.md |
-| POLY-1 | Micro-Price Edge Integrity Contract | traced | none | tests/test_informed_flow_kill_switch.py |
-| POLY-2 | Position-Fanout Capacity Governor Contract | unmapped | none | - |
-| POLY-3 | Crowding and Edge-Decay Monitoring Contract | unmapped | none | - |
-| POLY-4 | Long-Tail Inventory and Settlement Risk Contract | unmapped | none | - |
-| POLY-5 | Micro-Execution Efficiency Contract | unmapped | none | - |
-| NOISY-1 | Guided No-Code Strategy Constructor Contract | unmapped | none | - |
-| NOISY-2 | Arbitrage/Dislocation Scanner Product Contract | unmapped | none | - |
-| NOISY-3 | Real-Time Bot Operations Dashboard Contract | unmapped | none | - |
-| NOISY-4 | Non-Custodial and Wallet-Boundary Safety Contract | unmapped | none | - |
-| NOISY-5 | EV/Kelly Claim Governance Contract | unmapped | none | - |
-| MCP-1 | Polymarket Tool Inventory Contract | planned | open | docs/TODO.md |
-| MCP-2 | Market Discovery Tooling Contract | planned | open | docs/TODO.md |
-| MCP-3 | Market Analysis Tooling Contract | planned | open | docs/TODO.md |
-| MCP-4 | Opportunity Analysis and Comparison Contract | planned | open | docs/TODO.md |
-| MCP-5 | Trading Tooling Contract | planned | open | docs/TODO.md |
-| MCP-6 | Portfolio Telemetry Contract | planned | open | docs/TODO.md |
-| MCP-7 | Real-Time WebSocket Monitoring Contract | planned | open | docs/TODO.md |
-| MCP-8 | Safety Limits and Pre-Trade Validation Contract | planned | open | docs/TODO.md |
-| MCP-9 | Rate Limit and Backoff Contract | planned | open | docs/TODO.md |
-| MCP-10 | Auth and Signing Contract | planned | open | docs/TODO.md |
-| MCP-11 | Error Schema Contract | planned | open | docs/TODO.md |
-| MCP-12 | Web Dashboard Control Plane Contract | planned | open | docs/TODO.md |
-| MCP-13 | Web Dashboard API Contract | planned | open | docs/TODO.md |
-| MCP-14 | Production Hardening Guidance Contract | planned | open | docs/TODO.md |
-| PMAT-1 | Order-Flow + Prediction-Market Fusion Contract | planned | open | docs/TODO.md |
-| PMAT-2 | Real-Time Terminal Dashboard Contract | planned | open | docs/TODO.md |
-| PMAT-3 | Multi-Indicator Signal Stack Contract | planned | open | docs/TODO.md |
-| PMAT-4 | Trend-Change Notification Contract | planned | open | docs/TODO.md |
-| PMAT-5 | Supported Market Matrix Contract | planned | open | docs/TODO.md |
-| PMAT-6 | Packaged No-Python Launch Contract | planned | open | docs/TODO.md |
+| POLY-1 | Micro-Price Edge Integrity Contract | implemented | done | docs/TODO.md, tests/test_informed_flow_kill_switch.py |
+| POLY-2 | Position-Fanout Capacity Governor Contract | implemented | done | docs/TODO.md |
+| POLY-3 | Crowding and Edge-Decay Monitoring Contract | implemented | done | docs/TODO.md |
+| POLY-4 | Long-Tail Inventory and Settlement Risk Contract | implemented | done | docs/TODO.md |
+| POLY-5 | Micro-Execution Efficiency Contract | implemented | done | docs/TODO.md |
+| NOISY-1 | Guided No-Code Strategy Constructor Contract | implemented | done | docs/TODO.md |
+| NOISY-2 | Arbitrage/Dislocation Scanner Product Contract | implemented | done | docs/TODO.md |
+| NOISY-3 | Real-Time Bot Operations Dashboard Contract | implemented | done | docs/TODO.md |
+| NOISY-4 | Non-Custodial and Wallet-Boundary Safety Contract | implemented | done | docs/TODO.md |
+| NOISY-5 | EV/Kelly Claim Governance Contract | implemented | done | docs/TODO.md |
+| MCP-1 | Polymarket Tool Inventory Contract | implemented | done | docs/TODO.md |
+| MCP-2 | Market Discovery Tooling Contract | implemented | done | docs/TODO.md |
+| MCP-3 | Market Analysis Tooling Contract | implemented | done | docs/TODO.md |
+| MCP-4 | Opportunity Analysis and Comparison Contract | implemented | done | docs/TODO.md |
+| MCP-5 | Trading Tooling Contract | implemented | done | docs/TODO.md |
+| MCP-6 | Portfolio Telemetry Contract | implemented | done | docs/TODO.md |
+| MCP-7 | Real-Time WebSocket Monitoring Contract | implemented | done | docs/TODO.md |
+| MCP-8 | Safety Limits and Pre-Trade Validation Contract | implemented | done | docs/TODO.md |
+| MCP-9 | Rate Limit and Backoff Contract | implemented | done | docs/TODO.md |
+| MCP-10 | Auth and Signing Contract | implemented | done | docs/TODO.md |
+| MCP-11 | Error Schema Contract | implemented | done | docs/TODO.md |
+| MCP-12 | Web Dashboard Control Plane Contract | implemented | done | docs/TODO.md |
+| MCP-13 | Web Dashboard API Contract | implemented | done | docs/TODO.md |
+| MCP-14 | Production Hardening Guidance Contract | implemented | done | docs/TODO.md |
+| PMAT-1 | Order-Flow + Prediction-Market Fusion Contract | implemented | done | docs/TODO.md |
+| PMAT-2 | Real-Time Terminal Dashboard Contract | implemented | done | docs/TODO.md |
+| PMAT-3 | Multi-Indicator Signal Stack Contract | implemented | done | docs/TODO.md |
+| PMAT-4 | Trend-Change Notification Contract | implemented | done | docs/TODO.md |
+| PMAT-5 | Supported Market Matrix Contract | implemented | done | docs/TODO.md |
+| PMAT-6 | Packaged No-Python Launch Contract | implemented | done | docs/TODO.md |
