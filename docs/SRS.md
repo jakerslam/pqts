@@ -6583,3 +6583,182 @@ Observed source links:
 - EV and Kelly-based sizing shown in product UX SHALL include parameter transparency (win-probability input, payout assumptions, fee/slippage model, fractional cap).
 - Kelly-derived suggestions SHALL be bounded by account-size-aware risk envelopes and shall never bypass hard portfolio/risk limits.
 - Public claims of rapid profit outcomes from this source chain SHALL remain `unverified` unless reproducible from audited trade-level evidence and controlled reruns.
+
+## 107. External Skill Assimilation Requirements (last30days-skill, March 23, 2026)
+
+These requirements capture applicable workflows from the referenced skill repository for recency-bounded, multi-source research and briefing automation.
+
+Observed source links:
+- `https://github.com/mvanhorn/last30days-skill`
+- `https://raw.githubusercontent.com/mvanhorn/last30days-skill/main/README.md`
+- `https://raw.githubusercontent.com/mvanhorn/last30days-skill/main/SKILL.md`
+
+### L30D-1 Recency-Window Research Contract
+
+- PQTS SHALL support a recency-bounded research mode that defaults to the last 30 days and enforces time window filters per source.
+- Recency bounds SHALL be explicit in briefing metadata and query artifacts.
+
+### L30D-2 Intent Parsing and Query-Type Contract
+
+- PQTS SHALL parse research intent into topic, target, and query type (news, recommendations, comparison, prompts, or general) before execution.
+- Parsed intent SHALL be shown in the output and persisted for replay/debug.
+
+### L30D-3 X Handle Resolution Contract
+
+- For entity topics sourced from X, PQTS SHALL attempt handle resolution and use the resolved handle for search when available.
+- Handle resolution failures SHALL degrade to safe keyword search with explicit diagnostics.
+
+### L30D-4 Comparison Mode Contract
+
+- PQTS SHALL support comparison mode for "A vs B" queries with parallel research passes for each side plus a combined comparison and verdict section.
+- Comparison outputs SHALL include side-by-side evidence tables and source-attributed citations.
+
+### L30D-5 Source Scoring and Convergence Contract
+
+- PQTS SHALL compute composite relevance scores per item using text similarity, token overlap, authority weighting, engagement/velocity normalization, and recency decay.
+- PQTS SHALL detect cross-source convergence (matching claims across platforms) and elevate convergent items in ranking.
+- Top-comment signals, when available, SHALL contribute a bounded weight to the composite score.
+
+### L30D-6 Polymarket-Specific Ranking Contract
+
+- PQTS SHALL rank Polymarket markets using a composite of relevance, volume, liquidity depth, price movement velocity, and outcome competitiveness.
+- For outcome-specific research, the ranking SHALL incorporate outcome/side alignment signals rather than market-level relevance alone.
+
+### L30D-7 Config and Credential Governance Contract
+
+- PQTS SHALL support per-project configuration overrides for research credentials and source toggles, with a session-start validation report.
+- Missing/invalid credentials SHALL degrade to allowed fallback search modes with explicit warnings (no silent failure).
+
+### L30D-8 Briefing Archive Contract
+
+- PQTS SHALL auto-save research briefings to a local library with deterministic filenames and include source links, timestamps, and query metadata.
+- Briefing artifacts SHALL be retrievable for audit and follow-up workflows.
+
+### L30D-9 Watchlist and History Contract
+
+- PQTS SHALL support watchlist-style recurring research targets with manual run triggers and archived history in a queryable store.
+- Scheduling metadata SHALL be tracked without enabling automatic execution unless explicitly configured.
+
+### L30D-10 Parallel Source Runtime Contract
+
+- PQTS SHALL support parallel multi-source retrieval with bounded concurrency and clear progress/timeout diagnostics.
+- Each briefing SHALL include source-level coverage summaries and explicit citation lists.
+
+## 108. External Assimilation Requirements (polymarket-mcp-server, March 23, 2026)
+
+These requirements capture applicable product-surface and integration deltas from the referenced Polymarket MCP server repository.
+
+Observed source links:
+- `https://github.com/caiovicentino/polymarket-mcp-server`
+- `https://raw.githubusercontent.com/caiovicentino/polymarket-mcp-server/main/README.md`
+- `https://raw.githubusercontent.com/caiovicentino/polymarket-mcp-server/main/TOOLS_REFERENCE.md`
+- `https://raw.githubusercontent.com/caiovicentino/polymarket-mcp-server/main/WEBSOCKET_INTEGRATION.md`
+- `https://raw.githubusercontent.com/caiovicentino/polymarket-mcp-server/main/WEB_DASHBOARD.md`
+- `https://raw.githubusercontent.com/caiovicentino/polymarket-mcp-server/main/AGENT_INTEGRATION_GUIDE.md`
+
+### MCP-1 Polymarket Tool Inventory Contract
+
+- PQTS SHALL expose a structured MCP tool catalog covering market discovery, analysis, trading, portfolio, and real-time monitoring classes.
+- Tool inventory SHALL publish machine-readable schemas and required parameters and be discoverable via MCP `list_tools` calls.
+
+### MCP-2 Market Discovery Tooling Contract
+
+- PQTS SHALL provide discovery tools for keyword search, trending volume windows (24h/7d/30d), category filtering, event markets, featured markets, closing-soon alerts, sports markets, and crypto markets.
+- Discovery tools SHALL return normalized `Market` records with active/close metadata and tags.
+
+### MCP-3 Market Analysis Tooling Contract
+
+- PQTS SHALL provide analysis tools for market details, current bid/ask/mid prices, orderbook depth, spread metrics, liquidity, volume (24h/7d/30d/all-time), and historical price data where available.
+- Analysis tool outputs SHALL include timestamps and enforce freshness checks for streaming or cached data.
+
+### MCP-4 Opportunity Analysis and Comparison Contract
+
+- PQTS SHALL expose AI-assisted opportunity analysis that returns recommendation class (`BUY/SELL/HOLD/AVOID`), confidence, risk assessment, and reasoning.
+- PQTS SHALL support multi-market comparison outputs with side-by-side liquidity/volume/end-date and tag metadata.
+
+### MCP-5 Trading Tooling Contract
+
+- PQTS SHALL support limit and market orders, batch submission, open-order management, order history, and bulk cancellation.
+- PQTS SHALL provide smart-trade execution helpers and position rebalancing helpers with slippage-aware guardrails.
+
+### MCP-6 Portfolio Telemetry Contract
+
+- PQTS SHALL expose real-time portfolio state (positions, realized/unrealized PnL, portfolio value) and risk analysis (concentration, liquidity, diversification) in MCP or API surfaces.
+- Portfolio telemetry SHALL include trade history and on-chain activity provenance where applicable.
+
+### MCP-7 Real-Time WebSocket Monitoring Contract
+
+- PQTS SHALL provide real-time subscriptions for market price changes, orderbook updates, user order updates, user trade updates, and market resolution events.
+- WebSocket connections SHALL auto-reconnect with exponential backoff and expose a status resource endpoint for monitoring.
+
+### MCP-8 Safety Limits and Pre-Trade Validation Contract
+
+- PQTS SHALL enforce safety limits: max order size, max total exposure, per-market position limits, minimum liquidity, and max spread tolerance before execution.
+- PQTS SHALL provide configurable confirmation thresholds for large orders and fail closed when validation fails.
+
+### MCP-9 Rate Limit and Backoff Contract
+
+- PQTS SHALL enforce endpoint-category rate limits with token-bucket style behavior and standardized 429 backoff handling.
+- Rate-limit policy metadata SHALL be visible in operator diagnostics and testable via instrumentation.
+
+### MCP-10 Auth and Signing Contract
+
+- PQTS SHALL support Polymarket L1/L2 authentication modes (wallet + API credentials) and EIP-712 signing for order submissions.
+- Credentials SHALL remain server-side only and SHALL not be exposed via client-facing web surfaces.
+
+### MCP-11 Error Schema Contract
+
+- MCP tool responses SHALL return a consistent error envelope with tool name, message, and arguments context for debugging.
+
+### MCP-12 Web Dashboard Control Plane Contract
+
+- PQTS SHALL provide a web dashboard with real-time MCP status, WebSocket health, quick statistics, and trending markets.
+- The dashboard SHALL include configuration management for safety limits and trading controls, with live preview and test-configuration checks.
+
+### MCP-13 Web Dashboard API Contract
+
+- The dashboard backend SHALL expose API endpoints for status, connection tests, stats, market discovery/search, market detail/analysis, and configuration updates.
+- The dashboard SHALL expose a WebSocket feed for status, stats updates, market updates, and notifications.
+
+### MCP-14 Production Hardening Guidance Contract
+
+- PQTS SHALL document production recommendations for dashboard security (auth, CORS, HTTPS) and rate limiting.
+- Documentation SHALL explicitly state when the dashboard is intended for local-only use and what is required for production deployment.
+
+## 109. External Assimilation Requirements (polymarket-assistant-tool, March 23, 2026)
+
+These requirements capture applicable deltas from the Polymarket Assistant Tool repository focused on real-time terminal dashboards that blend order-flow and prediction-market signals.
+
+Observed source links:
+- `https://github.com/FiatFiorino/polymarket-assistant-tool`
+- `https://raw.githubusercontent.com/FiatFiorino/polymarket-assistant-tool/main/README.md`
+
+### PMAT-1 Order-Flow + Prediction-Market Fusion Contract
+
+- PQTS SHALL support a fused signal path that combines live order-flow metrics from a spot/derivatives venue with Polymarket prices for short-horizon directional inference.
+- The fusion output SHALL include explicit confirmation/contradiction flags between order-flow pressure and prediction-market odds.
+
+### PMAT-2 Real-Time Terminal Dashboard Contract
+
+- PQTS SHALL provide a terminal-first dashboard mode with live refresh and operator-visible trend scoring derived from the fused signal path.
+- Dashboard views SHALL remain functional in low-bandwidth, CLI-only environments.
+
+### PMAT-3 Multi-Indicator Signal Stack Contract
+
+- PQTS SHALL expose a fixed indicator stack spanning order-book imbalance, buy/sell wall detection, liquidity depth bands, CVD, delta, volume profile (POC), RSI, MACD, VWAP, EMA crossovers, and Heikin-Ashi streak state.
+- Indicator outputs SHALL be aggregated into a bounded trend score with at least three states (`bullish`, `bearish`, `neutral`).
+
+### PMAT-4 Trend-Change Notification Contract
+
+- PQTS SHALL support alerting when the trend score changes state and when extreme `bullish`/`bearish` states persist beyond a configured threshold.
+- Alert surfaces SHALL include at least one push-capable channel (for example Telegram) with auditable send receipts.
+
+### PMAT-5 Supported Market Matrix Contract
+
+- PQTS SHALL publish an explicit supported-asset/timeframe matrix for short-horizon Polymarket directional contracts (example set: BTC/ETH/SOL/XRP across 5m/15m/1h/4h/daily).
+- The matrix SHALL be machine-readable and used to validate candidate market selection.
+
+### PMAT-6 Packaged No-Python Launch Contract
+
+- PQTS SHALL support a packaged desktop launch option that runs without a local Python toolchain, with clear first-run unpacking diagnostics and security warnings handling guidance.
+- Packaged launch SHALL still enforce canonical risk/router gates and record provenance artifacts.

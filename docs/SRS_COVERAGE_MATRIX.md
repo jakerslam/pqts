@@ -4,12 +4,12 @@ This matrix is auto-generated from `docs/SRS.md`, `docs/TODO.md`, and repository
 
 ## Summary
 
-- Total requirements: **896**
+- Total requirements: **926**
 - implemented: **895**
 - partial: **0**
-- planned: **0**
-- traced: **1**
-- unmapped: **0**
+- planned: **20**
+- traced: **2**
+- unmapped: **9**
 
 ## Prefix Summary
 
@@ -72,6 +72,7 @@ This matrix is auto-generated from `docs/SRS.md`, `docs/TODO.md`, and repository
 | LLR | 2 | 0 | 0 | 0 | 0 | 2 |
 | LUNR | 9 | 0 | 0 | 0 | 0 | 9 |
 | MARIK | 8 | 0 | 0 | 0 | 0 | 8 |
+| MCP | 0 | 0 | 14 | 0 | 0 | 14 |
 | MNC | 5 | 0 | 0 | 0 | 0 | 5 |
 | MOAT | 16 | 0 | 0 | 0 | 0 | 16 |
 | MON | 8 | 0 | 0 | 0 | 0 | 8 |
@@ -83,6 +84,7 @@ This matrix is auto-generated from `docs/SRS.md`, `docs/TODO.md`, and repository
 | NAUT | 8 | 0 | 0 | 0 | 0 | 8 |
 | NCLI | 6 | 0 | 0 | 0 | 0 | 6 |
 | NFR | 3 | 0 | 0 | 0 | 0 | 3 |
+| NOISY | 0 | 0 | 0 | 0 | 5 | 5 |
 | NS | 6 | 0 | 0 | 0 | 0 | 6 |
 | OBBFD | 9 | 0 | 0 | 0 | 0 | 9 |
 | OBSC | 5 | 0 | 0 | 0 | 0 | 5 |
@@ -92,9 +94,11 @@ This matrix is auto-generated from `docs/SRS.md`, `docs/TODO.md`, and repository
 | PHL | 4 | 0 | 0 | 0 | 0 | 4 |
 | PKG | 8 | 0 | 0 | 0 | 0 | 8 |
 | PL | 7 | 0 | 0 | 0 | 0 | 7 |
+| PMAT | 0 | 0 | 6 | 0 | 0 | 6 |
 | PMDESK | 12 | 0 | 0 | 0 | 0 | 12 |
 | PMKT | 16 | 0 | 0 | 0 | 0 | 16 |
 | PNSH | 4 | 0 | 0 | 0 | 0 | 4 |
+| POLY | 0 | 0 | 0 | 1 | 4 | 5 |
 | PRDY | 7 | 0 | 0 | 1 | 0 | 8 |
 | PS | 7 | 0 | 0 | 0 | 0 | 7 |
 | PWX | 2 | 0 | 0 | 0 | 0 | 2 |
@@ -998,29 +1002,29 @@ This matrix is auto-generated from `docs/SRS.md`, `docs/TODO.md`, and repository
 | DOM-25 | Tier-1 Forecast-Trading Venue Drill and Certification Contract | implemented | done | docs/TODO.md |
 | DOM-26 | Guided Studio First-Success Contract | implemented | done | docs/TODO.md |
 | DOM-27 | Public Release Evidence Pack Contract | implemented | done | docs/TODO.md |
-| PKG-1 | One-Command Localhost Launch Contract | implemented | done | docs/TODO.md, docs/TOP_100_ROI_MOVES.json, docs/TOP_100_ROI_MOVES.md |
-| PKG-2 | First-Run Setup Wizard Contract | implemented | done | docs/TODO.md, docs/TOP_100_ROI_MOVES.json, docs/TOP_100_ROI_MOVES.md |
-| PKG-3 | Local Service Health Orchestration Contract | implemented | done | docs/TODO.md, docs/TOP_100_ROI_MOVES.json, docs/TOP_100_ROI_MOVES.md |
-| PKG-4 | No-Toolchain Runtime Bundle Contract | implemented | done | docs/TODO.md, docs/TOP_100_ROI_MOVES.json, docs/TOP_100_ROI_MOVES.md |
-| PKG-5 | Desktop Shell Localhost Integration Contract | implemented | done | docs/TODO.md, docs/TOP_100_ROI_MOVES.json, docs/TOP_100_ROI_MOVES.md |
-| PKG-6 | Installer, Signing, and Trust Distribution Contract | implemented | done | docs/TODO.md, docs/TOP_100_ROI_MOVES.json, docs/TOP_100_ROI_MOVES.md |
-| PKG-7 | Auto-Update Channel Safety Contract | implemented | done | docs/TODO.md, docs/TOP_100_ROI_MOVES.json, docs/TOP_100_ROI_MOVES.md |
-| PKG-8 | Crash Recovery and Support Bundle Contract | implemented | done | docs/TODO.md, docs/TOP_100_ROI_MOVES.json, docs/TOP_100_ROI_MOVES.md |
-| SOPR-1 | Edge-Sign Hard Block Contract | implemented | done | docs/TODO.md, docs/TOP_100_ROI_MOVES.json, docs/TOP_100_ROI_MOVES.md |
-| SOPR-2 | Narrative-Override Immunity Contract | implemented | done | docs/TODO.md, docs/TOP_100_ROI_MOVES.json, docs/TOP_100_ROI_MOVES.md |
-| SOPR-3 | Skip-Discipline and Overtrading Guard Contract | implemented | done | docs/TODO.md, docs/TOP_100_ROI_MOVES.json, docs/TOP_100_ROI_MOVES.md |
-| AET-1 | Guarded Fast-Action Terminal Contract | implemented | done | docs/TODO.md, docs/TOP_100_ROI_MOVES.json, docs/TOP_100_ROI_MOVES.md |
-| AET-2 | Cross-Venue Synchronized Recorder Contract | implemented | done | docs/TODO.md, docs/TOP_100_ROI_MOVES.json, docs/TOP_100_ROI_MOVES.md |
-| AET-3 | Near-Close Favorite Strategy Guard Contract | implemented | done | docs/TODO.md, docs/TOP_100_ROI_MOVES.json, docs/TOP_100_ROI_MOVES.md |
-| AET-4 | Wallet-History Segmentation and Accumulation Contract | implemented | done | docs/TODO.md, docs/TOP_100_ROI_MOVES.json, docs/TOP_100_ROI_MOVES.md |
-| AET-5 | External Indicator-Feed Governance Contract | implemented | done | docs/TODO.md, docs/TOP_100_ROI_MOVES.json, docs/TOP_100_ROI_MOVES.md |
-| PNSH-1 | Multi-Seed Swarm Stability Gate Contract | implemented | done | docs/TODO.md, docs/TOP_100_ROI_MOVES.json, docs/TOP_100_ROI_MOVES.md |
-| PNSH-2 | News-Shock Re-Simulation Reactivity Contract | implemented | done | docs/TODO.md, docs/TOP_100_ROI_MOVES.json, docs/TOP_100_ROI_MOVES.md |
-| PNSH-3 | Attention-Tier Market Regime Contract | implemented | done | docs/TODO.md, docs/TOP_100_ROI_MOVES.json, docs/TOP_100_ROI_MOVES.md |
-| PNSH-4 | Mismatch-Decay and Time-to-Execution Contract | implemented | done | docs/TODO.md, docs/TOP_100_ROI_MOVES.json, docs/TOP_100_ROI_MOVES.md |
-| SLS-1 | Multi-Repo Stack Compatibility Contract | implemented | done | docs/TODO.md, docs/TOP_100_ROI_MOVES.json, docs/TOP_100_ROI_MOVES.md |
-| SLS-2 | Source-to-Simulation Dataset Verification Contract | implemented | done | docs/TODO.md, docs/TOP_100_ROI_MOVES.json, docs/TOP_100_ROI_MOVES.md |
-| SLS-3 | Underlying-to-Contract Bridge Integrity Contract | implemented | done | docs/TODO.md, docs/TOP_100_ROI_MOVES.json, docs/TOP_100_ROI_MOVES.md |
+| PKG-1 | One-Command Localhost Launch Contract | implemented | done | docs/TODO.md |
+| PKG-2 | First-Run Setup Wizard Contract | implemented | done | docs/TODO.md |
+| PKG-3 | Local Service Health Orchestration Contract | implemented | done | docs/TODO.md |
+| PKG-4 | No-Toolchain Runtime Bundle Contract | implemented | done | docs/TODO.md |
+| PKG-5 | Desktop Shell Localhost Integration Contract | implemented | done | docs/TODO.md |
+| PKG-6 | Installer, Signing, and Trust Distribution Contract | implemented | done | docs/TODO.md |
+| PKG-7 | Auto-Update Channel Safety Contract | implemented | done | docs/TODO.md |
+| PKG-8 | Crash Recovery and Support Bundle Contract | implemented | done | docs/TODO.md |
+| SOPR-1 | Edge-Sign Hard Block Contract | implemented | done | docs/TODO.md |
+| SOPR-2 | Narrative-Override Immunity Contract | implemented | done | docs/TODO.md |
+| SOPR-3 | Skip-Discipline and Overtrading Guard Contract | implemented | done | docs/TODO.md |
+| AET-1 | Guarded Fast-Action Terminal Contract | implemented | done | docs/TODO.md |
+| AET-2 | Cross-Venue Synchronized Recorder Contract | implemented | done | docs/TODO.md |
+| AET-3 | Near-Close Favorite Strategy Guard Contract | implemented | done | docs/TODO.md |
+| AET-4 | Wallet-History Segmentation and Accumulation Contract | implemented | done | docs/TODO.md |
+| AET-5 | External Indicator-Feed Governance Contract | implemented | done | docs/TODO.md |
+| PNSH-1 | Multi-Seed Swarm Stability Gate Contract | implemented | done | docs/TODO.md |
+| PNSH-2 | News-Shock Re-Simulation Reactivity Contract | implemented | done | docs/TODO.md |
+| PNSH-3 | Attention-Tier Market Regime Contract | implemented | done | docs/TODO.md |
+| PNSH-4 | Mismatch-Decay and Time-to-Execution Contract | implemented | done | docs/TODO.md |
+| SLS-1 | Multi-Repo Stack Compatibility Contract | implemented | done | docs/TODO.md |
+| SLS-2 | Source-to-Simulation Dataset Verification Contract | implemented | done | docs/TODO.md |
+| SLS-3 | Underlying-to-Contract Bridge Integrity Contract | implemented | done | docs/TODO.md |
 | PRDY-1 | Disaster Recovery Objective Contract | implemented | done | docs/TODO.md |
 | PRDY-2 | Backup and Restore Drill Contract | implemented | done | docs/TODO.md |
 | PRDY-3 | Release Artifact Integrity and SBOM Contract | implemented | done | docs/TODO.md |
@@ -1028,7 +1032,7 @@ This matrix is auto-generated from `docs/SRS.md`, `docs/TODO.md`, and repository
 | PRDY-5 | Platform Error-Budget and SLO Gating Contract | implemented | done | docs/TODO.md |
 | PRDY-6 | Dependency Failure and Chaos Validation Contract | implemented | done | docs/TODO.md |
 | PRDY-7 | Key and Secret Emergency Response Contract | implemented | done | docs/TODO.md |
-| PRDY-8 | Operational Readiness and Escalation Contract | traced | none | docs/TODO.md |
+| PRDY-8 | Operational Readiness and Escalation Contract | traced | none | docs/TODO.md, docs/TOP_100_ROI_MOVES.json, docs/TOP_100_ROI_MOVES.md |
 | MRPH-1 | Iterative Correction-Cycle Model Contract | implemented | done | docs/TODO.md |
 | MRPH-2 | Early-Stop and Latency-Safe Fallback Contract | implemented | done | docs/TODO.md |
 | MRPH-3 | Cycle-Level Diagnostics and Promotion Evidence Contract | implemented | done | docs/TODO.md |
@@ -1039,3 +1043,33 @@ This matrix is auto-generated from `docs/SRS.md`, `docs/TODO.md`, and repository
 | ZSTF-3 | VPIN-Coupled Microstructure Circuit Breaker Contract | implemented | done | docs/TODO.md |
 | ZSTF-4 | Microstructure Simulation Evidence Contract | implemented | done | docs/TODO.md |
 | ZSTF-5 | Source Reliability and Claim Handling | implemented | done | docs/TODO.md |
+| POLY-1 | Micro-Price Edge Integrity Contract | traced | none | tests/test_informed_flow_kill_switch.py |
+| POLY-2 | Position-Fanout Capacity Governor Contract | unmapped | none | - |
+| POLY-3 | Crowding and Edge-Decay Monitoring Contract | unmapped | none | - |
+| POLY-4 | Long-Tail Inventory and Settlement Risk Contract | unmapped | none | - |
+| POLY-5 | Micro-Execution Efficiency Contract | unmapped | none | - |
+| NOISY-1 | Guided No-Code Strategy Constructor Contract | unmapped | none | - |
+| NOISY-2 | Arbitrage/Dislocation Scanner Product Contract | unmapped | none | - |
+| NOISY-3 | Real-Time Bot Operations Dashboard Contract | unmapped | none | - |
+| NOISY-4 | Non-Custodial and Wallet-Boundary Safety Contract | unmapped | none | - |
+| NOISY-5 | EV/Kelly Claim Governance Contract | unmapped | none | - |
+| MCP-1 | Polymarket Tool Inventory Contract | planned | open | docs/TODO.md |
+| MCP-2 | Market Discovery Tooling Contract | planned | open | docs/TODO.md |
+| MCP-3 | Market Analysis Tooling Contract | planned | open | docs/TODO.md |
+| MCP-4 | Opportunity Analysis and Comparison Contract | planned | open | docs/TODO.md |
+| MCP-5 | Trading Tooling Contract | planned | open | docs/TODO.md |
+| MCP-6 | Portfolio Telemetry Contract | planned | open | docs/TODO.md |
+| MCP-7 | Real-Time WebSocket Monitoring Contract | planned | open | docs/TODO.md |
+| MCP-8 | Safety Limits and Pre-Trade Validation Contract | planned | open | docs/TODO.md |
+| MCP-9 | Rate Limit and Backoff Contract | planned | open | docs/TODO.md |
+| MCP-10 | Auth and Signing Contract | planned | open | docs/TODO.md |
+| MCP-11 | Error Schema Contract | planned | open | docs/TODO.md |
+| MCP-12 | Web Dashboard Control Plane Contract | planned | open | docs/TODO.md |
+| MCP-13 | Web Dashboard API Contract | planned | open | docs/TODO.md |
+| MCP-14 | Production Hardening Guidance Contract | planned | open | docs/TODO.md |
+| PMAT-1 | Order-Flow + Prediction-Market Fusion Contract | planned | open | docs/TODO.md |
+| PMAT-2 | Real-Time Terminal Dashboard Contract | planned | open | docs/TODO.md |
+| PMAT-3 | Multi-Indicator Signal Stack Contract | planned | open | docs/TODO.md |
+| PMAT-4 | Trend-Change Notification Contract | planned | open | docs/TODO.md |
+| PMAT-5 | Supported Market Matrix Contract | planned | open | docs/TODO.md |
+| PMAT-6 | Packaged No-Python Launch Contract | planned | open | docs/TODO.md |
