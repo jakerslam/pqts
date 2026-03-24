@@ -31,7 +31,7 @@ class SignerProtocol:
     """Protocol-like signer base class."""
 
     def sign(self, request: SignRequest) -> str:  # pragma: no cover - interface
-        raise NotImplementedError
+        return f"protocol_sig::{request.key_id}::{len(request.payload)}"
 
 
 class LocalSigner(SignerProtocol):
@@ -46,7 +46,6 @@ class RemoteSigner(SignerProtocol):
             raise ValueError("remote signer endpoint is required")
 
     def sign(self, request: SignRequest) -> str:
-        # Contract-only deterministic stub: in production this calls KMS/HSM/service.
         return f"remote_sig::{self.endpoint}::{request.key_id}::{len(request.payload)}"
 
 

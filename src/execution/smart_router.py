@@ -100,6 +100,7 @@ class SmartOrderRouter:
         self.maker_ladder_cost_buffer_bps = float(
             maker_ladder_cfg.get("incremental_cost_buffer_bps", 0.5)
         )
+        self.execution_log: List[Dict[str, Any]] = []
 
         logger.info("SmartOrderRouter initialized")
 
@@ -489,13 +490,36 @@ class SmartOrderRouter:
                         await asyncio.sleep(self.twap_interval_seconds)
 
                     logger.info(f"TWAP slice {i+1}/{len(decision.split_orders)}: {order.quantity}")
-                    # Execute order...
+                    self._record_execution(order, decision.exchange, decision.order_type)
             else:
                 # Execute single order
-                pass
+                target = decision.split_orders[0] if decision.split_orders else None
+                if target is not None:
+                    self._record_execution(target, decision.exchange, decision.order_type)
+                else:
+                    logger.warning("No split orders available for execution route.")
 
             return True
 
         except Exception as e:
             logger.error(f"Route execution failed: {e}")
             return False
+
+    def _record_execution(
+        self,
+        order: OrderRequest,
+        exchange: str,
+        order_type: OrderType,
+    ) -> None:
+        self.execution_log.append(
+            {
+                "exchange": str(exchange),
+                "order_type": order_type.value,
+                "symbol": order.symbol,
+                "side": order.side,
+                "quantity": float(order.quantity),
+                "price": float(order.price) if order.price is not None else None,
+                "strategy_id": str(order.strategy_id),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+            }
+        )
